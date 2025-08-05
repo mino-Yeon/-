@@ -1,0 +1,133 @@
+/* 1. 전체 요소에 box-sizing 설정 */
+* {
+  box-sizing: border-box;
+}
+
+/* 2. h2 제목 요소에 글자 색 지정 */
+h2 {
+  color: blue;
+}
+
+/* 3. id가 main-header인 요소에 배경 및 글자 색 지정 */
+#main-header {
+  background-color: #333;
+  color: white;
+}
+
+/* 4. desc 클래스를 가진 요소에 스타일 설정 */
+.desc {
+  font-size: 14px;
+  color: #666;
+}
+
+/* 5. h2 요소 바로 뒤에 오는(인접형제) p요소의 배경 배경 지정 */
+h2 + p {
+  background-color: #fffacd;
+}
+
+/* 6. h2 요소 이후에 나오는 같은 레벨(형제)의 p요소 글자 두께 지정 */
+h2 ~ p {
+  font-weight: bold;
+}
+
+/* 7. 글로벌 네비게이션의 ul 기호 제거 */
+.global-nav > ul {
+  list-style-type: none;
+}
+
+/* 8. 글로벌 네비게이션 링크 요소 기본 스타일 설정 */
+.global-nav a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 9. 글로벌 네비게이션 링크에 마우스를 올렸을 때 밑줄 표시 */
+.global-nav a:hover {
+  text-decoration: underline;
+}
+
+/* 10. 네비게이션에서 active한 링크에 글자색 지정 */
+nav a.active {
+  color: red;
+}
+
+/* 11. 프로필과 연락처 구역에 스타일 지정 */
+.profile,
+.contact {
+  background-color: rgb(157, 188, 245);
+  padding: 16px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+}
+
+/* 12. 기술 스택에서 모든 항목의 글자색 지정 */
+.skills li {
+  color: green;
+}
+
+/* 13. 기술 스택에서 세번째 항목의 글자 두께 강조 */
+.skills li:nth-of-type(3) {
+  font-weight: bold;
+}
+
+/* 14. 입력 필드 기본 스타일 지정 */
+input {
+  display: block;
+  margin-top: 12px;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* 15. 이메일 입력 필드의 테두리 스타일 조정 */
+.email-input {
+  border-radius: 6px;
+}
+
+/* 16. 이메일 입력 필드에 포커스 시 테두리 강조 */
+.email-input:focus {
+  border: 2px solid blue;
+  border-radius: 6px;
+  outline: none;
+}
+
+/* 17. 버튼의 기본 스타일 설정 */
+button {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* 18. 비활성화된 버튼 스타일 지정 */
+button[disabled] {
+  background-color: gray;
+  cursor: not-allowed;
+}
+
+/* 19. 마우스를 올렸을 때 비활성 버튼 제외한 버튼 스타일 변경 */
+button:hover:not([disabled]) {
+  background-color: #27ae60;
+}
+
+/* 20. 하단 네비게이션의 ul 기본 스타일 제거 및 배치 설정 */
+.footer-nav > ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 12px;
+}
+
+/* 21. 하단 네비게이션 링크의 기본 스타일 지정 */
+.footer-nav a {
+  text-decoration: none;
+  color: #555;
+}
+
+/* 21. 하단 네비게이션에 마우스를 올리면 두껍게 표시 */
+.footer-nav a:hover {
+  font-weight: bold;
+}
