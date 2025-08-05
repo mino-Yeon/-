@@ -1,0 +1,99 @@
+* {
+  box-sizing: border-box;
+  margin: 0px;
+  padding: 0px;
+}
+body {
+  background-color: aqua;
+}
+
+/* 첫번째 섹션 시작 */
+.first-section {
+  background-color: blueviolet;
+  display: flex;
+  height: 300px;
+  position: relative;
+}
+
+.first-section > article {
+  background-color: red;
+  border: 1px solid black;
+  width: 100px;
+  height: 100px;
+  padding: 20px;
+  text-align: center;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.first-section > .second-article {
+  /* 작성 */
+  position: relative;
+  top: 50px;
+  left: 50px;
+}
+
+.first-section > .third-article {
+  /* 작성 (부모요소에도 뭔가 스타일을 줘야겠는데??)*/
+  position: absolute;
+  right: 0;
+  bottom: 0px;
+}
+
+.first-section > .fourth-article {
+  /* 작성 */
+  z-index: 10;
+}
+/* 첫번째 섹션 끝 */
+
+/* Top 버튼 시작 */
+.go-top-btn {
+  background-color: #333;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 50%; /* 테두리 원형 만들기*/
+  text-decoration: none;
+  font-size: 20px;
+  font-weight: bold;
+  opacity: 0.7; /* 투명도 */
+  transition: opacity 0.3s; /* 0.7 => 1.0으로 투명도 변할 때, 0.3초간 변함(애니메이션 효과) */
+  /* 작성 */
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+}
+
+.go-top-btn:hover {
+  opacity: 1;
+}
+/* Top 버튼 끝 */
+
+/* 두번째 섹션 시작 */
+.second-section {
+  margin-top: 100px;
+  background-color: green;
+}
+
+.post-nav {
+  background-color: white;
+  /* 작성 */
+  position: sticky;
+  top: 30px;
+}
+.post-nav > ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  padding: 0;
+}
+
+.post-nav a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+}
+
+.post-nav a:hover {
+  color: #007bff;
+}
+/* 두번째 섹션 끝 */
