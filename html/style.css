@@ -1,0 +1,126 @@
+/* 전체 레이아웃 정리 */
+body {
+  background-color: #f8f8f8;
+  margin: 0; /* 기본 마진 제거 */
+  padding: 0; /* 기본 패딩 제거 */
+}
+
+header,
+footer {
+  background-color: #333;
+  color: white;
+  padding: 16px;
+}
+
+nav ul {
+  display: flex; /* flex로 바꾸면 기본 flex-directon이 row이므로 가로 배치 */
+  gap: 12px; /* flex의 item 사이의 공간 */
+  list-style: none; /* li의 앞에 기호 제거 */
+  padding: 0; /* 기본 패딩 삭제 */
+}
+
+nav a {
+  color: white;
+  text-decoration: none; /*a태그 밑줄 제거*/
+}
+
+/* 🆕 main과 aside를 감싸는 전체 레이아웃 */
+.content-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* 🆕 aside 스타일 */
+aside {
+  flex: 1;
+  background-color: #f0f0f0;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+aside h2 {
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+}
+
+aside ul {
+  list-style: none;
+  padding: 0;
+}
+
+aside li {
+  margin-bottom: 8px;
+}
+
+aside a {
+  color: #333;
+  text-decoration: none;
+}
+
+aside a:hover {
+  text-decoration: underline;
+}
+
+main {
+  flex: 2;
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 상품 이미지 */
+figure {
+  text-align: center;
+}
+
+img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+/* 가격 강조 */
+.price {
+  color: red;
+  font-size: 1.5rem;
+}
+
+/* 상품 정보 테이블 */
+table {
+  width: 100%;
+  border-collapse: collapse; /* 경계선 2줄을 1줄로 합치기 */
+  margin-top: 12px;
+}
+
+th,
+td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+/* 장바구니 버튼 */
+.product-actions {
+  margin-top: 24px;
+  text-align: center;
+}
+
+button {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #27ae60;
+}

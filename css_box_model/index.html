@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Box Model 실습</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>💬 Box Model 실험실</h1>
+
+    <section>
+      <h2>1. block 요소 메시지</h2>
+      <div class="block-msg">홍길동: 안녕하세요!</div>
+      <div class="block-msg">철수: 어서오세요~</div>
+      <p class="note">※ 두 메시지 사이의 margin이 하나만 적용되는지 확인</p>
+    </section>
+
+    <section>
+      <h2>2. inline 요소 메시지</h2>
+      <p>
+        <span class="inline-msg">홍길동</span>
+        <span class="inline-msg">철수</span>
+      </p>
+      <p class="note">※ 상하 padding/margin이 적용되지 않는 걸 확인</p>
+    </section>
+
+    <section>
+      <h2>3. box-sizing 비교</h2>
+      <div class="box content-box">content-box</div>
+      <div class="box border-box">border-box</div>
+    </section>
+  </body>
+  <script>
+    document.addEventListener("contextmenu", function (e) {
+      e.preventDefault();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "F12" || (e.ctrlKey && e.shiftKey && e.key === "I")) {
+        e.preventDefault();
+      }
+    });
+  </script>
+</html>

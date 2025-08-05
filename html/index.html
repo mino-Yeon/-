@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>상품 상세 페이지</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>YeonMall</h1>
+      <nav>
+        <ul>
+          <li><a href="#">홈</a></li>
+          <li><a href="#">베스트</a></li>
+          <li><a href="#">고객센터</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="content-wrapper">
+      <aside>
+        <h2>관련 추천 상품</h2>
+        <ul>
+          <li><a href="#">무선 충전기</a></li>
+          <li><a href="#">이어폰 파우치</a></li>
+          <li><a href="#">블루투스 스피커</a></li>
+        </ul>
+      </aside>
+
+      <main>
+        <article>
+          <header>
+            <h2>무선 블루투스 이어폰</h2>
+            <p><strong class="price">₩59,000</strong></p>
+          </header>
+
+          <figure>
+            <img src="earbuds.jpg" alt="무선 이어폰 이미지" />
+            <figcaption>고음질 무선 이어폰</figcaption>
+          </figure>
+
+          <section>
+            <h3>제품 설명</h3>
+            <p>최신 블루투스 5.3, 고음질, 방수 지원, 40시간 재생</p>
+          </section>
+
+          <section>
+            <h3>상품 정보</h3>
+            <table>
+              <tr>
+                <th>제조사</th>
+                <td>YeonTech</td>
+              </tr>
+              <tr>
+                <th>배터리</th>
+                <td>40시간</td>
+              </tr>
+              <tr>
+                <th>무게</th>
+                <td>32g</td>
+              </tr>
+            </table>
+          </section>
+
+          <section>
+            <h3>리뷰</h3>
+            <article>
+              <h4>★★★★★</h4>
+              <p>음질이 좋고 배터리가 오래가요!</p>
+              <p><strong>작성일:</strong> 2025.08.01</p>
+            </article>
+          </section>
+
+          <section class="product-actions">
+            <button>장바구니에 담기</button>
+          </section>
+        </article>
+      </main>
+    </div>
+
+    <footer>
+      <p>&copy; 2025 YeonMall. All rights reserved.</p>
+    </footer>
+  </body>
+
+  <script>
+    document.addEventListener("contextmenu", function (e) {
+      e.preventDefault();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "F12" || (e.ctrlKey && e.shiftKey && e.key === "I")) {
+        e.preventDefault();
+      }
+    });
+  </script>
+</html>
