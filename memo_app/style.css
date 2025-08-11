@@ -1,0 +1,113 @@
+body {
+  padding: 0 15px;
+  background: #f9f9f9;
+  color: #333;
+}
+
+/* 제목 */
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* 폼 스타일 */
+#memo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+/* 제목 input */
+#memo-title {
+  padding: 8px 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* 내용 textarea */
+#memo-content {
+  padding: 8px 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+/* 메모 추가 버튼 */
+#memo-form button {
+  width: 120px;
+  padding: 8px 0;
+  font-size: 1rem;
+  font-weight: bold;
+  color: white;
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background-color 0.3s ease;
+}
+
+#memo-form button:hover {
+  background-color: #0056b3;
+}
+
+/* 메모 목록 ul */
+#memo-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* 각 메모 li */
+.memo-item {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px 15px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+  position: relative;
+}
+
+/* 메모 제목 */
+.memo-title {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+}
+
+/* 메모 내용 */
+.memo-content {
+  margin: 0 0 10px 0;
+  white-space: pre-wrap; /* 줄바꿈 유지 */
+  color: #555;
+}
+
+/* 작성 시간 */
+.memo-time {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+/* 삭제 버튼 */
+.memo-del-btn {
+  position: absolute;
+  top: 12px;
+  right: 15px;
+  background: #dc3545;
+  border: none;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.3s ease;
+}
+
+.memo-del-btn:hover {
+  background-color: #a71d2a;
+}

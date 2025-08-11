@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>메모 앱</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h2>메모장</h2>
+
+    <div id="memo-app">
+      <form id="memo-form">
+        <input type="text" id="memo-title" placeholder="제목 입력" />
+        <textarea id="memo-content" placeholder="메모를 작성하세요" rows="4" cols="30"></textarea>
+        <button type="submit">메모 추가</button>
+      </form>
+      <ul id="memo-list"></ul>
+    </div>
+    <script src="memo.js"></script>
+  </body>
+</html>
