@@ -1,0 +1,73 @@
+{
+    "id": 0,
+    "title": "챕터 0-1: AI를 위한 Python",
+    "icon": "🐍",
+    "questions": [
+        {
+            "difficulty": "하",
+            "time": "1분",
+            "question": "파이썬에서 리스트 컴프리헨션을 활용하여 짝수의 제곱만 골라내려면 다음 중 올바른 코드는 무엇인가?",
+            "options": [
+                "[x*x for x in range(1, 11) if x % 2 = 0]",
+                "[x**2 for x in range(1, 11) if x % 2 == 0]",
+                "list(map(lambda x: x**2, filter(lambda x: x % 2, range(1, 11))))",
+                "[x**2 for x in range(1, 11) if x % 2 != 0]"
+            ],
+            "correct": 1,
+            "explanation": "① 리스트 컴프리헨션에서 조건식을 쓸 때 == 연산자를 사용해야 한다. 대입 연산자(=)를 써서 문법 오류가 발생합니다.\n③ 짝수가 아니라 홀수를 걸러내는 filter(lambda x: x % 2, …)를 사용했습니다.\n④ 조건을 반대로 써서 홀수의 제곱을 뽑아냅니다."
+        },
+        {
+            "difficulty": "중",
+            "time": "1분",
+            "question": "다음 NumPy 코드를 실행했을 때 result 변수에 저장되는 값은 무엇인가?\n\nimport numpy as np\narr = np.array([[ 2,  4,  6],\n                [ 8, 10, 12],\n                [14, 16, 18]])\nresult = np.mean(arr[arr % 4 == 2])",
+            "options": [
+                "8.0",
+                "10.0",
+                "9.0",
+                "오류 발생"
+            ],
+            "correct": 1,
+            "explanation": "arr % 4 == 2로 4로 나눈 나머지가 2인 원소만 골라내면 [2, 6, 10, 14, 18]이 됩니다. result는 이들의 평균인 (2+6+10+14+18)/5=10.0이 됩니다."
+        },
+        {
+            "difficulty": "상",
+            "time": "3분",
+            "question": "seaborn의 tips 데이터프레임에서 day별·time별 total_bill과 tip의 합계를 구하고, 이를 Pandas의 pivot_table로 'day'를 행(index), 'time'을 열(columns)으로 가지는 형태로 만드는 올바른 코드는 무엇인가?",
+            "options": [
+                "pd.pivot_table(tips, index='day', columns='time', values=['total_bill','tip'], aggfunc='sum')",
+                "pd.pivot_table(tips, index='day', columns='time', values='total_bill', aggfunc='sum')",
+                "pd.pivot_table(tips, index='day', columns='time', values=['total_bill','tip'], aggfunc='mean')",
+                "pd.pivot_table(tips, index='time', columns='day', values=['total_bill','tip'], aggfunc='sum')",
+                "pd.pivot_table(tips, index='day', columns='time', aggfunc='sum')"
+            ],
+            "correct": 0,
+            "explanation": "① total_bill과 tip 두 개의 컬럼을 선택해 sum으로 집계하므로 정확히 의도한 형태와 값을 반환합니다.\n② values에 'total_bill'만 지정해 tip 컬럼은 집계 대상에서 빠집니다.\n③ aggfunc='mean'으로 평균값을 계산해 집계 함수가 잘못되었습니다.\n④ index와 columns를 바꿔 설정해 반환된 테이블이 세로·가로 축이 역전되어 의도와 어긋납니다.\n⑤ values를 명시하지 않아 모든 수치형 컬럼을 합계로 계산해, categorical 칼럼에 의해 오류가 발생합니다."
+        },
+        {
+            "difficulty": "하",
+            "time": "1분",
+            "question": "딕셔너리 d = {'a': 1}가 있을 때, 키 'b'에 대응하는 값을 안전하게 조회하려면 어떤 메서드를 사용해야 하나요?",
+            "options": [
+                "d['b']",
+                "d.get('b')",
+                "d.pop('b')",
+                "d.keys('b')"
+            ],
+            "correct": 1,
+            "explanation": "d.get('b')는 키가 없으면 None을 반환하며 KeyError를 발생시키지 않습니다.\n① d['b']는 키가 없으면 예외를 일으킵니다.\n③ pop은 요소를 제거하며\n④ keys는 키 목록을 반환하며 인자를 받지 않아 에러를 발생시킵니다."
+        },
+        {
+            "difficulty": "중",
+            "time": "3분",
+            "question": "다음 코드를 실행했을 때 출력 결과로 올바른 것은 무엇인가요?\n\ndef func(x, y=[]):\n    y.append(x)\n    return y\n\nprint(func(1))\nprint(func(2))",
+            "options": [
+                "[1]\n[2]",
+                "[1]\n[1, 2]",
+                "[1]\n[2, 1]",
+                "[1, 2]\n[1, 2]"
+            ],
+            "correct": 1,
+            "explanation": "함수의 기본 인수로 사용된 리스트 y는 호출 간에 재사용됩니다. 첫 번째 호출로 y = [1]이 되고, 두 번째 호출에서 같은 리스트에 2가 추가되어 [1, 2]가 반환됩니다. 만약 ①과 같은 출력을 원한다면 함수를 다음과 같이 수정하여야 합니다:\ndef func(x, y=None):\n    if y is None:\n        y = []\n    y.append(x)\n    return y"
+        }
+    ]
+}

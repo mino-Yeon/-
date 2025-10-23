@@ -1,0 +1,72 @@
+{
+    "id": 1,
+    "title": "챕터 0-2: AI를 위한 Math",
+    "icon": "🧮",
+    "questions": [
+        {
+            "difficulty": "상",
+            "time": "5분",
+            "question": "Normal Equation(θ = (XᵀX)⁻¹Xᵀy)과 SVD 기반 pseudoinverse(θ = V Σ⁺ Uᵀ y)의 차이로 틀린 것은 무엇인가요?",
+            "options": [
+                "Normal Equation은 (XᵀX)가 singular일 때 역행렬이 존재하지 않는다.",
+                "SVD는 작은 특이값을 제거해 안정성을 높일 수 있다.",
+                "Normal Equation이 항상 SVD보다 빠르게 동작한다.",
+                "둘 다 선형 최소제곱 해를 구하지만, SVD는 수치 안정성이 더 좋다."
+            ],
+            "correct": 2,
+            "explanation": "Normal Equation과 SVD 기반 pseudoinverse는 둘 다 선형 최소제곱 문제의 해를 구하지만 내부 연산 방식과 수치적 특성이 다릅니다.\n⓵, ⓶\n● Normal Equation은 θ = (XᵀX)⁻¹Xᵀy 공식을 쓰기 때문에 XᵀX가 singular(행렬식 0)에 가까워지거나 정확히 0이 되면 역행렬 계산이 불가능하거나 극도로 불안정해집니다.\n● 반면 SVD 기반 해법은 특이값 분해를 통해 작은 특이값을 필터링(제거 또는 역수에서 0처리)함으로써 singular 문제를 우회할 수 있습니다. (⓶)\n⓸\n● SVD는 X를 U·Σ·Vᵀ로 분해한 뒤 Σ⁺(역특이값 행렬)을 사용하기 때문에, 원본 행렬의 조건수(condition number)가 그대로 반영되고 직접적인 제곱(cond²) 연산을 피합니다.\n● Normal Equation은 XᵀX를 먼저 계산하므로, 원래 행렬 X의 조건수가 κ일 때 XᵀX의 조건수는 κ²가 되어 오차가 크게 증폭될 수 있습니다.\n● 따라서 \"둘 다 최소제곱 해를 구하지만, SVD가 수치 안정성이 더 좋다(⓸)\"는 옳은 설명입니다.\n⓷\n● Normal Equation: (XᵀX) 계산 O(n²m), 역행렬 O(n³)\n● SVD 분해: O(mn² + n³) (m ≥ n 가정)\n● 문제 크기(m, n)나 라이브러리 구현에 따라 실제 속도는 달라집니다.\n● 즉, \"항상 Normal Equation이 SVD보다 빠르다\"는 일반화할 수 없습니다. 작은 n·m에서는 XᵀX 방식이 단순해 더 빠를 수 있지만, 특잇값 개수가 많거나 고차원 희소행렬인 경우 SVD가 더 효율적이거나 안정적일 수 있습니다.\n● 따라서 ⓷은 틀린 설명입니다."
+        },
+        {
+            "difficulty": "중",
+            "time": "1분",
+            "question": "(X_raw - mu) / sigma 방식의 Z-score 표준화와 (X_raw - min)/(max-min) 방식의 Min–Max 정규화의 차이에 대한 설명으로 옳은 것은?",
+            "options": [
+                "Z-score는 평균 0·표준편차 1로 분포를 변경하고, Min–Max는 [0,1] 구간에 매핑한다.",
+                "두 방식 모두 분포를 [0,1] 구간에 매핑한다.",
+                "Z-score는 이상치에 민감하지만 Min–Max는 이상치에 둔감하다.",
+                "Min–Max는 평균이 0이 되도록 변환한다."
+            ],
+            "correct": 0,
+            "explanation": "Z-score 표준화는 각 feature를 평균 0, 표준편차 1인 정규분포에 가깝게 바꿉니다. Min–Max 정규화는 최소값을 0, 최대값을 1로 선형 변환해 [0,1] 구간에 매핑합니다. ⓷, ⓸는 설명이 뒤바뀌었거나 잘못되었습니다."
+        },
+        {
+            "difficulty": "하",
+            "time": "1분",
+            "question": "2차원 NumPy 배열 X_raw에 대해 각 컬럼을 평균 0, 표준편차 1로 표준화하여 X_norm에 저장하는 올바른 코드 조각은?",
+            "options": [
+                "mu = X_raw.mean(axis=0)\nsigma = X_raw.std(axis=0)\nX_norm = (X_raw - mu) / sigma",
+                "mu = np.mean(X_raw, axis=1)\nsigma = np.std(X_raw, axis=0)\nX_norm = (X_raw - mu) / sigma",
+                "mu = np.mean(X_raw)\nsigma = np.std(X_raw)\nX_norm = X_raw - mu / sigma",
+                "X_norm = (X_raw - X_raw.mean()) / X_raw.std()"
+            ],
+            "correct": 0,
+            "explanation": "⓵ 각 열(axis=0)의 평균과 표준편차를 구해 broadcasting으로 빼고 나누어 올바른 표준화를 수행합니다.\n⓶ 평균을 axis=1로 계산해 행 길이만큼 벡터가 만들어져 broadcasting 오류가 생기거나 잘못된 값이 나옵니다.\n⓷ 분모 전체에만 나누고 있어 식이 잘못되어 있습니다.\n⓸ 전체 배열의 단일 평균·표준편차를 사용해 각 열별로 표준화되지 않습니다."
+        },
+        {
+            "difficulty": "중",
+            "time": "3분",
+            "question": "다음은 과제에서 구현한 로지스틱 회귀 학습 코드 train_logistic_regression() 함수에 대한 질문입니다. 아래 중, 로지스틱 손실이 점차 감소하지 않고 진동하거나 증가하는 상황에서 가장 먼저 시도해볼 개선 방법으로 적절한 것은?",
+            "options": [
+                "학습률 lr을 작게 설정해 반복 횟수를 늘린다.",
+                "sigmoid 함수 내부를 log로 바꾸어 손실을 안정화한다.",
+                "손실함수 대신 MSE를 사용해 이진 분류에 적용한다.",
+                "표준화(normalization) 없이 원본 X_train을 사용하는 것이 더 안정적이다."
+            ],
+            "correct": 0,
+            "explanation": "로지스틱 회귀에서 손실이 진동하거나 증가하는 현상은 대부분 학습률이 너무 큰 경우에 발생합니다. 이 경우 손실 지형을 한 번에 많이 뛰어넘으며 최적값에 수렴하지 못합니다. 학습률을 줄이면 더 작은 스텝으로 움직이며 손실 감소 경향을 안정적으로 확보할 수 있습니다.\n⓶ 시그모이드 함수를 수정하는 것은 로지스틱 회귀 문제를 수행할 수 없게 됩니다.\n⓷ 분류 문제에서 MSE를 사용하는 것은 부적합합니다.\n⓸ 대부분의 경우 표준화를 진행하는 것이 학습에 더 안정적입니다."
+        },
+        {
+            "difficulty": "상",
+            "time": "1분",
+            "question": "다음 중, 로지스틱 회귀 모델에 대해 L2 정규화를 적용했을 때 파라미터의 크기 제어 외에 추가적으로 기대되는 효과로 가장 적절한 것은 무엇인가요?",
+            "options": [
+                "훈련 데이터에 대한 정확도를 높이고, 손실 곡선의 기울기를 증가시킨다.",
+                "결정경계의 경사도를 고정하고, 파라미터의 방향을 보존한다.",
+                "모델의 복잡도를 줄여 과적합 가능성을 낮추고, 일반화 성능을 향상시킨다.",
+                "모든 입력 값이 0이 되도록 스케일링하여 예측 확률을 균등화한다."
+            ],
+            "correct": 2,
+            "explanation": "L2 정규화는 파라미터 벡터의 L2-norm 크기를 최소화하는 항을 손실 함수에 추가해, 지나치게 큰 계수가 학습되는 것을 억제합니다. 이는 모델의 복잡도(variance)를 낮추어 과적합(overfitting)을 방지하고, 일반화 성능을 높이는 데 기여합니다. ⓵은 훈련 성능은 높일 수 있지만 일반화에는 불리할 수 있으며, ⓸는 정규화가 아닌 표준화에 해당하는 설명입니다."
+        }
+    ]
+}

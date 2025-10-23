@@ -1,0 +1,72 @@
+{
+    "id": 4,
+    "title": "챕터 2-1: 토큰화/임베딩 실습",
+    "icon": "🔤",
+    "questions": [
+        {
+            "difficulty": "하",
+            "time": "1분",
+            "question": "다음 중 \"토큰화(tokenization)를 왜 하는가?\"에 대한 설명으로 가장 적절한 것은?",
+            "options": [
+                "공백 단위로 단어를 고정해 모델 파라미터 수를 늘리기 위해서이다.",
+                "텍스트를 정수 시퀀스로 매핑해 모델이 처리 가능하게 하고, OOV를 줄이기 위해 서브워드 단위를 활용하기 위함이다.",
+                "토큰화를 하면 문맥 정보를 보존하지 않게 되어 정규화가 쉬워진다.",
+                "토큰화 방식에 따라 번역 품질에 영향을 줄 수 있으며, 적절한 단위 선택이 중요하다."
+            ],
+            "correct": 1,
+            "explanation": "⓵ 목적이 파라미터 \"증가\"가 아닙니다. 오히려 서브워드는 어휘를 줄여 효율을 높입니다.\n⓶ 모델은 텍스트를 직접 처리하지 못하므로 정수 ID 시퀀스로 바꾸는 과정이 필요합니다. 또한 BPE/WordPiece 같은 서브워드 방식은 희귀한 단어를 분해해 OOV 문제를 완화합니다.\n⓷ 서브워드는 일정 수준의 형태/의미 단서(접두/접미 등)를 보존해 문맥 학습에 도움을 줍니다.\n⓸ 토큰화 방식이 번역 품질에 영향을 줄 수 있는 것은 사실이지만, \"토큰화의 목적\"을 설명하는 것은 아닙니다. 따라서 적절한 답변이 아닙니다."
+        },
+        {
+            "difficulty": "중",
+            "time": "2분",
+            "question": "다음 중 BPE(Byte Pair Encoding) 토크나이저에 대한 설명으로 옳은 것은?",
+            "options": [
+                "말뭉치에서 가장 드문 문자쌍을 반복 병합한다.",
+                "문맥에 따라 같은 문자열을 다른 토큰으로 바꾸는 문맥의존 토큰화이다.",
+                "말뭉치에서 자주 함께 나타나는 문자/서브워드 쌍을 점진적으로 병합해 어휘를 학습한다.",
+                "공백을 기준으로만 분할하는 규칙 기반 토크나이저다."
+            ],
+            "correct": 2,
+            "explanation": "⓵ \"드문\" 것이 아니라 \"빈번한\" 쌍을 병합합니다.\n⓶ BPE는 일반적으로 문맥 비의존(같은 문자열은 동일 규칙으로 토큰화)입니다.\n⓷ 정답. BPE는 빈번한 쌍을 병합해 더 긴 서브워드를 형성, 어휘를 데이터 기반으로 학습합니다.\n⓸ BPE는 공백 기반 규칙 토크나이저가 아닙니다."
+        },
+        {
+            "difficulty": "상",
+            "time": "2분",
+            "question": "다음 중 \"프리-LN(Pre-LayerNorm) 구조\"의 GPT 디코더 블록 순서로 가장 적절한 것은?",
+            "options": [
+                "Self-Attention → Residual Add → LayerNorm → MLP → Residual Add → LayerNorm",
+                "Self-Attention → MLP → LayerNorm → Residual Add → Residual Add",
+                "LayerNorm → MLP → Residual Add → Self-Attention → Residual Add → LayerNorm",
+                "LayerNorm → Self-Attention → Residual Add → LayerNorm → MLP → Residual Add"
+            ],
+            "correct": 3,
+            "explanation": "프리-LN은 각 서브레이어(어텐션/MLP) \"앞\"에 LayerNorm을 두고, 서브레이어 출력을 입력과 더해(residual) 안정적으로 학습되게 합니다.\n⓵는 포스트-LN에 가까운 순서입니다.\n⓶/⓷은 일반적 구조와 맞지 않습니다."
+        },
+        {
+            "difficulty": "하",
+            "time": "1분",
+            "question": "어휘 크기 V=50,000, 임베딩 차원 d=768일 때, 입력 임베딩 행렬의 일반적 모양은?",
+            "options": [
+                "(768, 50,000)",
+                "(50,000, 768)",
+                "(50,000, 50,000)",
+                "(768, 768)"
+            ],
+            "correct": 1,
+            "explanation": "대부분의 프레임워크에서 임베딩 가중치는 (V, d) 형태입니다. 각 토큰 ID가 해당 행의 768차원 벡터를 조회합니다."
+        },
+        {
+            "difficulty": "중",
+            "time": "3분",
+            "question": "다음은 Scaled Dot-Product Attention에서 어텐션 스코어를 계산하는 과정이다.\n\nQuery 행렬 Q ∈ R^{n×d_k}, Key 행렬 K ∈ R^{n×d_k}, Value 행렬 V ∈ R^{n×d_v}가 주어졌을 때, 어텐션 스코어 행렬 A를 계산하는 수식으로 옳은 것은?",
+            "options": [
+                "A = softmax(QK^T / √d_k)",
+                "A = softmax(QK^T)",
+                "A = softmax(Q^T K / √d_v)",
+                "A = QK^T V"
+            ],
+            "correct": 0,
+            "explanation": "⓵ Scaled Dot-Product Attention의 핵심은 Q와 K의 내적을 구한 뒤, √d_k로 나누어 분산을 안정화하는 것입니다. 그 후 softmax를 취해 확률 분포 형태의 어텐션 스코어를 얻습니다.\n⓶ 스케일링(√d_k로 나누기)이 빠져 있어, 차원이 커질수록 값이 커져 gradient vanishing/exploding 문제가 생깁니다.\n⓷ Q^T K는 잘못된 연산 차원을 가지며, √d_v로 나누는 것도 틀립니다.\n⓸ QK^T V는 어텐션 전체 과정의 일부(출력 계산)에 Value를 섞은 형태와 혼동한 것으로 스코어 정의로는 잘못되었습니다."
+        }
+    ]
+}

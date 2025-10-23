@@ -1,0 +1,72 @@
+{
+    "id": 8,
+    "title": "챕터 4-1: RAG 실습",
+    "icon": "🔍",
+    "questions": [
+        {
+            "difficulty": "하",
+            "time": "1분",
+            "question": "RAG(Retrieval-Augmented Generation) 기술을 사용하는 주된 목적이 아닌 것은 무엇입니까?",
+            "options": [
+                "LLM의 정보 한계 극복",
+                "특정 도메인 지식 활용",
+                "LLM의 환각(Hallucination) 문제 감소",
+                "LLM의 학습 데이터 최신화 (실시간 반영)"
+            ],
+            "correct": 3,
+            "explanation": "⓵ LLM의 정보 한계 극복: RAG는 외부 지식 기반을 활용하여 LLM이 학습하지 못한 최신 정보나 특정 도메인 지식을 활용하게 함으로써 정보 한계를 극복합니다.\n⓶ 특정 도메인 지식 활용: RAG는 특정 분야의 전문 문서들을 Vector Store에 저장하고 검색하여 LLM이 해당 도메인 지식을 활용할 수 있게 합니다.\n⓷ LLM의 환각(Hallucination) 문제 감소: RAG는 답변의 근거가 되는 신뢰할 수 있는 외부 문서를 제공하여 LLM이 사실에 기반한 답변을 생성하도록 유도하고 환각을 줄입니다.\n⓸ LLM의 학습 데이터 최신화 (실시간 반영): RAG는 외부 지식 기반을 활용하는 것이지, LLM 자체의 학습 데이터를 실시간으로 업데이트하는 기술이 아닙니다. RAG는 검색된 최신 정보를 LLM에게 제공하여 답변에 반영하는 방식입니다."
+        },
+        {
+            "difficulty": "중",
+            "time": "1분",
+            "question": "텍스트 데이터를 LLM이 이해하고 활용하기 위해 필요한 두 가지 주요 전처리 과정은 무엇입니까?",
+            "options": [
+                "인코딩 및 디코딩",
+                "암호화 및 복호화",
+                "청킹 및 파싱",
+                "압축 및 해제"
+            ],
+            "correct": 2,
+            "explanation": "⓵ 인코딩 및 디코딩: 데이터 표현 방식의 변환을 의미하며, 텍스트 전처리 과정의 일부일 수는 있으나 LLM이 이해하고 활용하기 위한 주요 과정 두 가지를 직접적으로 설명하지는 않습니다.\n⓶ 암호화 및 복호화: 데이터 보안과 관련된 과정으로, LLM의 텍스트 이해 및 활용과는 직접적인 관련이 없습니다.\n⓷ 청킹 및 파싱:\n● 파싱(Parsing): 다양한 형식의 문서에서 LLM이 이해할 수 있는 '순수한 텍스트'와 필요한 정보를 추출하는 과정입니다.\n● 청킹(Chunking): 긴 텍스트를 LLM의 컨텍스트 창 크기에 맞는 작은 '청크'로 나누는 과정입니다. 이 두 과정은 LLM이 문서를 효율적으로 처리하고 RAG 시스템에서 검색 가능한 단위로 만들기 위해 필수적입니다.\n⓸ 압축 및 해제: 데이터 용량 감소와 관련된 과정으로, 텍스트의 의미 이해 및 활용과는 직접적인 관련이 없습니다."
+        },
+        {
+            "difficulty": "하",
+            "time": "1분",
+            "question": "LangChain 프레임워크의 주요 구성 요소 중, 개발자가 애플리케이션을 디버그하고 테스트하며 모니터링할 수 있도록 도와주는 플랫폼은 무엇입니까??",
+            "options": [
+                "LangGraph",
+                "Langchain Library",
+                "LangServe",
+                "LangSmith"
+            ],
+            "correct": 3,
+            "explanation": "● LangGraph: LLM이 가지는 여러 상태들을 관리하여 Agent를 구조화하여 구현할 수 있는 프레임워크입니다.\n● Langchain Library: LangChain의 다양한 기능을 사용할 수 있게 구현해둔 패키지 모음입니다.\n● Langchain Templates: 다양한 작업에 맞춘 애플리케이션 템플릿을 제공합니다.\n● LangServe: LangChain 애플리케이션을 REST API로 쉽게 배포할 수 있게 해주는 도구입니다.\n● LangSmith: 개발자가 LangChain 애플리케이션을 디버그하고 테스트하며 모니터링할 수 있도록 도와주는 플랫폼입니다. (맞음)"
+        },
+        {
+            "difficulty": "하",
+            "time": "1분",
+            "question": "RAG 시스템에서 사용자의 질문과 관련된 정보를 외부 지식 기반(Vector Store)에서 찾아오는 과정을 무엇이라고 합니까?",
+            "options": [
+                "Generation",
+                "Augmentation",
+                "Retrieval",
+                "Indexing"
+            ],
+            "correct": 2,
+            "explanation": "● Generation: LLM이 검색된 정보와 질문을 바탕으로 자연어 답변을 만들어내는 과정입니다.\n● Augmentation: 검색된 정보를 LLM에게 추가로 제공하여 답변 생성을 '증강'시키는 것을 의미합니다.\n● Retrieval: 사용자의 질문과 관련된 정보를 외부 지식 기반(Vector Store)에서 '검색'하여 찾아오는 과정입니다. (맞음)\n● Parsing: 다양한 형식의 문서에서 텍스트와 필요한 정보를 추출하는 과정입니다.\n● Indexing: 텍스트 청크를 벡터로 변환하고 Vector Store에 저장하여 검색 가능한 상태로 만드는 과정입니다."
+        },
+        {
+            "difficulty": "하",
+            "time": "1분",
+            "question": "AI 에이전트가 다른 AI 시스템이나 에이전트와 효율적으로 통신하고 정보를 교환하기 위해 사용하는 '약속' 또는 '규칙'으로, 데이터 형식과 내용을 미리 정해두는 것을 무엇이라고 합니까?",
+            "options": [
+                "API Key",
+                "Tokenizing",
+                "Embedding",
+                "Model Context Protocol (MCP)"
+            ],
+            "correct": 3,
+            "explanation": "● API Key: 외부 서비스나 API에 접근하기 위한 인증 키입니다.\n● Tokenizing: 텍스트를 LLM이 이해하는 작은 단위(토큰)로 쪼개는 과정입니다.\n● Embedding: 텍스트의 의미를 벡터(숫자 배열)로 변환하는 과정입니다.\n● Multi-Agent System: 여러 AI 에이전트가 협력하여 작업을 처리하는 시스템 구조를 의미합니다.\n● Model Context Protocol (MCP): AI 모델 또는 에이전트들이 서로 효율적으로 통신하고 정보를 교환하기 위해 사용하는 '약속' 또는 '규칙'으로, 데이터 형식과 내용을 미리 정해두는 것을 의미합니다. (맞음)"
+        }
+    ]
+}

@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSAFY AI II - 퀴즈</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .chapter-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chapter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .chapter-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .chapter-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .chapter-info {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .quiz-container {
+            display: none;
+        }
+
+        .quiz-header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            color: #4f46e5;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            padding: 5px 0;
+        }
+
+        .back-button:hover {
+            color: #3730a3;
+            text-decoration: underline;
+        }
+
+        .quiz-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .quiz-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .score-display {
+            text-align: right;
+        }
+
+        .score-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4f46e5;
+        }
+
+        .score-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #4f46e5;
+            transition: width 0.3s ease;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+
+        .question-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .difficulty-badge, .time-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .difficulty-하 { background: #dcfce7; color: #166534; }
+        .difficulty-중 { background: #fef3c7; color: #a16207; }
+        .difficulty-상 { background: #fecaca; color: #dc2626; }
+        .difficulty-중상 { background: #fde68a; color: #d97706; }
+
+        .time-badge {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: #1f2937;
+            white-space: pre-wrap;
+        }
+
+        .options-container {
+            margin-bottom: 20px;
+        }
+
+        .option {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            font-size: 1rem;
+            white-space: pre-wrap;
+        }
+
+        .option-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .option-number {
+            flex-shrink: 0;
+            font-weight: bold;
+            color: #4f46e5;
+            font-size: 1.1rem;
+            min-width: 25px;
+        }
+
+        .option-content {
+            flex: 1;
+            line-height: 1.5;
+        }
+
+        .option:hover {
+            border-color: #4f46e5;
+            background: #f8fafc;
+        }
+
+        .option.selected {
+            border-color: #4f46e5;
+            background: #eef2ff;
+            color: #3730a3;
+        }
+
+        .option.correct {
+            border-color: #10b981;
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .option.incorrect {
+            border-color: #ef4444;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .explanation {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            color: #475569;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .nav-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .prev-button {
+            background: #6b7280;
+            color: white;
+        }
+
+        .prev-button:hover:not(:disabled) {
+            background: #4b5563;
+        }
+
+        .next-button, .submit-button {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .next-button:hover:not(:disabled), .submit-button:hover:not(:disabled) {
+            background: #3730a3;
+        }
+
+        .question-number {
+            color: #6b7280;
+            font-weight: bold;
+        }
+
+        .final-score {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .final-score h2 {
+            font-size: 2rem;
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+
+        .final-score-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #4f46e5;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #ef4444;
+            background: white;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1>🤖 SSAFY AI II 퀴즈</h1>
+            <p>AI 과정의 핵심 내용을 점검해보세요!</p>
+        </div>
+
+        <div id="loading" class="loading">
+            <h2>퀴즈 데이터를 불러오는 중...</h2>
+        </div>
+
+        <div id="error" class="error" style="display: none;">
+            <h2>오류가 발생했습니다</h2>
+            <p id="error-message"></p>
+        </div>
+
+        <div id="chapters-view" style="display: none;">
+            <div id="chapters-grid" class="chapters-grid">
+                <!-- 챕터 카드들이 동적으로 생성됩니다 -->
+            </div>
+        </div>
+
+        <div id="quiz-view" class="quiz-container">
+            <div class="quiz-header">
+                <button class="back-button" onclick="showChapters()">← 챕터 목록으로 돌아가기</button>
+                <div class="quiz-info">
+                    <div>
+                        <div class="quiz-title" id="quiz-title"></div>
+                    </div>
+                    <div class="score-display">
+                        <div class="score-number" id="score">0/0</div>
+                        <div class="score-label">정답률</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress"></div>
+                </div>
+            </div>
+
+            <div class="question-card">
+                <div class="question-meta">
+                    <span class="difficulty-badge" id="difficulty"></span>
+                    <span class="time-badge" id="time"></span>
+                </div>
+                <div class="question-text" id="question"></div>
+                <div class="options-container" id="options"></div>
+                <div class="explanation" id="explanation" style="display: none;"></div>
+                <div class="navigation">
+                    <button class="nav-button prev-button" id="prev-button" onclick="previousQuestion()">이전 문제</button>
+                    <span class="question-number" id="question-number"></span>
+                    <button class="nav-button next-button" id="next-button" onclick="nextQuestion()">다음 문제</button>
+                </div>
+            </div>
+
+            <div class="final-score" id="final-score" style="display: none;">
+                <h2>퀴즈 완료! 🎉</h2>
+                <div class="final-score-number" id="final-score-number"></div>
+                <p>수고하셨습니다!</p>
+                <button class="nav-button next-button" onclick="showChapters()" style="margin-top: 20px;">다른 챕터 도전하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chapters = [];
+        let currentChapter = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let score = 0;
+
+        // 퀴즈 데이터 로드
+        async function loadQuizData() {
+            try {
+                // 1. 먼저 설정 파일을 로드하여 챕터 목록을 가져옴
+                let chapterFiles = [];
+                try {
+                    const configResponse = await fetch('quiz_data/quiz_config.json');
+                    if (configResponse.ok) {
+                        const config = await configResponse.json();
+                        chapterFiles = config.chapters;
+                        console.log(`✅ Quiz configuration loaded: ${config.title} (v${config.version})`);
+                    }
+                } catch (e) {
+                    console.warn('Could not load quiz config, using fallback list:', e);
+                    // 설정 파일 로드 실패시 기본 목록 사용
+                    chapterFiles = [
+                        'chapter_0-1.json', 'chapter_0-2.json',
+                        'chapter_1-1.json', 'chapter_1-2.json', 
+                        'chapter_2-1.json', 'chapter_2-2.json',
+                        'chapter_3-1.json', 'chapter_3-2.json',
+                        'chapter_4-1.json', 'chapter_4-2-1.json', 'chapter_4-2-2.json',
+                        'chapter_5-1.json', 'chapter_5-2-1.json', 'chapter_5-2-2.json'
+                    ];
+                }
+
+                // 2. 챕터 파일들을 quiz_data 폴더에서 순서대로 로드
+                for (const file of chapterFiles) {
+                    try {
+                        const response = await fetch(`quiz_data/${file}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            chapters.push(data);
+                            console.log(`✅ Loaded: ${data.title}`);
+                        }
+                    } catch (e) {
+                        console.warn(`Could not load quiz_data/${file}:`, e);
+                    }
+                }
+
+                if (chapters.length === 0) {
+                    throw new Error('퀴즈 데이터를 불러올 수 없습니다.');
+                }
+
+                hideLoading();
+                showChapters();
+                
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function showChapters() {
+            document.getElementById('chapters-view').style.display = 'block';
+            document.getElementById('quiz-view').style.display = 'none';
+            
+            renderChapters();
+        }
+
+        function renderChapters() {
+            const grid = document.getElementById('chapters-grid');
+            grid.innerHTML = '';
+
+            chapters.forEach(chapter => {
+                const card = document.createElement('div');
+                card.className = 'chapter-card';
+                card.onclick = () => startQuiz(chapter);
+                
+                card.innerHTML = `
+                    <div class="chapter-icon">${chapter.icon}</div>
+                    <div class="chapter-title">${chapter.title}</div>
+                    <div class="chapter-info">${chapter.questions.length}개 문제</div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function startQuiz(chapter) {
+            currentChapter = chapter;
+            currentQuestionIndex = 0;
+            userAnswers = new Array(chapter.questions.length).fill(null);
+            score = 0;
+            
+            document.getElementById('quiz-title').textContent = chapter.title;
+            document.getElementById('chapters-view').style.display = 'none';
+            document.getElementById('quiz-view').style.display = 'block';
+            document.getElementById('final-score').style.display = 'none';
+            
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = currentChapter.questions[currentQuestionIndex];
+            
+            // 난이도 표시
+            const difficultyEl = document.getElementById('difficulty');
+            difficultyEl.textContent = question.difficulty;
+            difficultyEl.className = `difficulty-badge difficulty-${question.difficulty}`;
+            
+            // 시간 표시
+            document.getElementById('time').textContent = question.time;
+            
+            // 문제 텍스트
+            document.getElementById('question').innerHTML = question.question;
+            
+            // 선택지
+            const optionsEl = document.getElementById('options');
+            optionsEl.innerHTML = '';
+            
+            // 옵션 번호 심볼 배열
+            const optionNumbers = ['①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧'];
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option';
+                
+                // HTML 구조 생성
+                const optionContainer = document.createElement('div');
+                optionContainer.className = 'option-container';
+                
+                const optionNumber = document.createElement('div');
+                optionNumber.className = 'option-number';
+                optionNumber.textContent = optionNumbers[index] || (index + 1);
+                
+                const optionContent = document.createElement('div');
+                optionContent.className = 'option-content';
+                optionContent.innerHTML = option.replace(/\n/g, '<br>');
+                
+                optionContainer.appendChild(optionNumber);
+                optionContainer.appendChild(optionContent);
+                button.appendChild(optionContainer);
+                
+                button.onclick = () => selectOption(index);
+                
+                // 이미 선택된 답이 있으면 표시
+                if (userAnswers[currentQuestionIndex] === index) {
+                    button.classList.add('selected');
+                }
+                
+                optionsEl.appendChild(button);
+            });
+            
+            // 설명 숨기기
+            document.getElementById('explanation').style.display = 'none';
+            
+            updateNavigation();
+            updateProgress();
+        }
+
+        function selectOption(optionIndex) {
+            userAnswers[currentQuestionIndex] = optionIndex;
+            
+            // 모든 선택지에서 selected 클래스 제거
+            document.querySelectorAll('.option').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // 선택된 옵션에 selected 클래스 추가
+            document.querySelectorAll('.option')[optionIndex].classList.add('selected');
+            
+            // 정답 표시
+            showAnswer();
+        }
+
+        function showAnswer() {
+            const question = currentChapter.questions[currentQuestionIndex];
+            const userAnswer = userAnswers[currentQuestionIndex];
+            
+            document.querySelectorAll('.option').forEach((btn, index) => {
+                btn.onclick = null; // 클릭 비활성화
+                
+                if (index === question.correct) {
+                    btn.classList.add('correct');
+                } else if (index === userAnswer && index !== question.correct) {
+                    btn.classList.add('incorrect');
+                }
+            });
+            
+            // 설명 표시
+            document.getElementById('explanation').innerHTML = question.explanation;
+            document.getElementById('explanation').style.display = 'block';
+            
+            // 점수 계산
+            calculateScore();
+        }
+
+        function calculateScore() {
+            score = 0;
+            for (let i = 0; i <= currentQuestionIndex; i++) {
+                if (userAnswers[i] === currentChapter.questions[i].correct) {
+                    score++;
+                }
+            }
+            
+            document.getElementById('score').textContent = `${score}/${currentQuestionIndex + 1}`;
+        }
+
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prev-button');
+            const nextBtn = document.getElementById('next-button');
+            const questionNum = document.getElementById('question-number');
+            
+            prevBtn.disabled = currentQuestionIndex === 0;
+            
+            questionNum.textContent = `${currentQuestionIndex + 1} / ${currentChapter.questions.length}`;
+            
+            if (currentQuestionIndex === currentChapter.questions.length - 1) {
+                nextBtn.textContent = '결과 보기';
+                nextBtn.onclick = showFinalScore;
+            } else {
+                nextBtn.textContent = '다음 문제';
+                nextBtn.onclick = nextQuestion;
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / currentChapter.questions.length) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < currentChapter.questions.length - 1) {
+                currentQuestionIndex++;
+                showQuestion();
+            }
+        }
+
+        function showFinalScore() {
+            // 최종 점수 계산
+            score = 0;
+            userAnswers.forEach((answer, index) => {
+                if (answer === currentChapter.questions[index].correct) {
+                    score++;
+                }
+            });
+            
+            const percentage = Math.round((score / currentChapter.questions.length) * 100);
+            
+            document.querySelector('.question-card').style.display = 'none';
+            document.getElementById('final-score').style.display = 'block';
+            document.getElementById('final-score-number').textContent = `${score}/${currentChapter.questions.length} (${percentage}%)`;
+        }
+
+        // 페이지 로드시 실행
+        window.addEventListener('load', loadQuizData);
+    </script>
+</body>
+</html>

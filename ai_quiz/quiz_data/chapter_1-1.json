@@ -1,0 +1,67 @@
+{
+    "id": 2,
+    "title": "챕터 1-1: 데이터 EDA 및 모델 학습",
+    "icon": "📊",
+    "questions": [
+        {
+            "difficulty": "하",
+            "time": "1분",
+            "question": "아래 중 sklearn.model_selection.train_test_split 함수의 기본 목적이 아닌 것은?",
+            "options": [
+                "훈련 세트와 테스트 세트로 데이터를 무작위로 분할한다.",
+                "데이터의 클래스 비율(stratify)을 유지하면서 분할할 수 있다.",
+                "분할된 데이터를 파이프라인에 자동으로 연결해준다.",
+                "분할 비율(test_size, train_size)을 직접 지정할 수 있다."
+            ],
+            "correct": 2,
+            "explanation": "① train_test_split은 데이터를 훈련 세트와 테스트 세트로 무작위로 나누는 기본 동작입니다.\n② stratify 인자를 사용하면 클래스 비율을 유지하면서 분할할 수 있습니다.\n③ 데이터를 분할만 해주며, 파이프라인 연결 기능은 제공하지 않습니다.\n④ test_size 혹은 train_size 인자를 통해 분할 비율을 지정할 수 있습니다. 이 함수는 모델 평가 시 과적합 여부를 빠르게 자가진단할 수 있는 첫 단계로, 모듈 3 실습에서도 train/test 분할 이후 파이프라인과 그리드 서치를 적용해 성능을 확인했습니다."
+        },
+        {
+            "difficulty": "중",
+            "time": "1분",
+            "question": "한 특성의 Q1=10, Q3=20일 때 IQR = Q3 – Q1이다. 이 특성의 이상치 경계(lower bound, upper bound)는 각각 얼마인가?",
+            "options": [
+                "(–5, 35)",
+                "(5, 25)",
+                "(–10, 30)",
+                "(0, 40)"
+            ],
+            "correct": 0,
+            "explanation": "IQR = Q3–Q1 = 20–10 = 10\n이상치 경계:\n• lower = Q1 – 1.5 × IQR = 10 – 15 = –5\n• upper = Q3 + 1.5 × IQR = 20 + 15 = 35\n따라서 (–5, 35)가 올바른 경계입니다."
+        },
+        {
+            "difficulty": "상",
+            "time": "3분",
+            "question": "이진 분류에서 50개의 True Positive, 10개의 False Positive, 5개의 False Negative, 100개의 True Negative가 나왔다. 이때 재현율(recall)은?",
+            "options": ["0.833", "0.909", "0.500", "0.929"],
+            "correct": 1,
+            "explanation": "재현율(Recall) = TP / (TP + FN) = 50 / (50 + 5) = 50 / 55 ≈ 0.909\n\n참고로 Precision(정밀도)은 50 / (50 + 10) ≈ 0.833 (①)이고, Accuracy(정확도)는 (50 + 100) / (50+10+5+100) ≈ 0.929 (④)입니다."
+        },
+        {
+            "difficulty": "중",
+            "time": "3분",
+            "question": "SimpleImputer(strategy='mean')를 사용해 학습 데이터의 결측치를 채운 뒤, 동일한 imputer 객체로 테스트 데이터에 transform()만 적용할 때 올바른 설명은 무엇인가요?",
+            "options": [
+                "테스트 데이터에도 fit()을 호출해 평균치를 새로 계산해야 한다.",
+                "학습 시 계산된 평균치를 그대로 사용하므로 테스트 분포 변화에 상관없이 동일하게 채워진다.",
+                "fit_transform()과 transform()은 내부 구현상 완전히 동일하다.",
+                "테스트 데이터에 학습 시 존재하지 않던 새로운 결측치가 나타나면 오류가 발생한다."
+            ],
+            "correct": 1,
+            "explanation": "transform()은 학습 단계에서 fit()으로 계산한 통계량(여기서는 평균)만을 사용해 결측치를 대체한다. 따라서 테스트 데이터의 분포가 달라도 다시 평균을 계산하지 않고 학습 때 구한 값으로만 채워집니다."
+        },
+        {
+            "difficulty": "상",
+            "time": "3분",
+            "question": "PCA로 n_components=0.95로 설정했을 때와 n_components=2로 설정했을 때 차이는 무엇인가요?",
+            "options": [
+                "둘 다 결과 주성분 개수가 2개로 고정됨",
+                "0.95는 설명 분산 비율 95%를 채우는 최소 개수로, 2는 항상 2개로 주성분을 선택함",
+                "0.95는 원본 특성(feature)의 95% 개수를 유지하도록 주성분을 선택함",
+                "n_components가 float일 때 svd_solver='auto'로 동작 안 함"
+            ],
+            "correct": 1,
+            "explanation": "n_components=0.95는 입력 데이터의 전체 분산 중 95%를 설명할 수 있는 최소한의 주성분 개수를 자동 선택합니다 (①). n_components=2는 무조건 두 개의 축으로 차원을 축소합니다. 0.95는 분산 비율을 기준으로 개수를 정하는 것이지 원본 특성의 개수 비율을 유지하는 것이 아닙니다 (③). n_components가 float인 것은 solver 선택과 무관합니다 (④)."
+        }
+    ]
+}

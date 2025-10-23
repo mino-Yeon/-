@@ -1,0 +1,22 @@
+{
+    "title": "SSAFY AI II 온라인 퀴즈",
+    "description": "총 70개 문제로 구성된 AI 전문가 과정 퀴즈",
+    "chapters": [
+        "chapter_0-1.json",
+        "chapter_0-2.json",
+        "chapter_1-1.json", 
+        "chapter_1-2.json",
+        "chapter_2-1.json",
+        "chapter_2-2.json",
+        "chapter_3-1.json",
+        "chapter_3-2.json",
+        "chapter_4-1.json",
+        "chapter_4-2-1.json",
+        "chapter_4-2-2.json",
+        "chapter_5-1.json",
+        "chapter_5-2-1.json",
+        "chapter_5-2-2.json"
+    ],
+    "version": "1.0.0",
+    "lastUpdated": "2025-10-10"
+}
