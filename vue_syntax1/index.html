@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <body>
+    <div id="app">
+      <h2>미니 프로필 카드 만들기</h2>
+
+      <div>
+        <label>이름: </label>
+        <input v-model="name" placeholder="이름 입력" />
+      </div>
+
+      <div>
+        <label>소개글(HTML 허용): </label>
+        <input v-model="intro" placeholder="<b>안녕하세요</b> 처럼 입력" />
+      </div>
+
+      <div>
+        <label>프로필 이미지 URL: </label>
+        <input v-model="imgUrl" placeholder="https://mino-yeon.github.io/-/html/earbuds.jpg 와 같이 이미지 주소 입력" />
+      </div>
+
+      <button @click="changeColor">테두리 색 변경</button>
+
+      <hr />
+
+      <!-- 프로필 카드 -->
+      <div class="card" v-bind:style="{ borderColor: color }">
+        <h3 v-text="name"></h3>
+        <p v-html="intro"></p>
+        <img v-bind:src="imgUrl" width="150" />
+        <p>이름은 {{ name }} 입니다.</p>
+      </div>
+    </div>
+
+    <style>
+      input {
+        width: 450px;
+      }
+      .card {
+        width: 200px;
+        padding: 10px;
+        border: 3px solid #999;
+        border-radius: 10px;
+      }
+    </style>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script>
+      const { createApp, ref } = Vue;
+
+      createApp({
+        setup() {
+          const name = ref("");
+          const intro = ref("");
+          const imgUrl = ref("");
+          const color = ref("#999");
+
+          const changeColor = () => {
+            // 임의로 랜덤 색상 적용
+            color.value = "#" + Math.floor(Math.random() * 16777215).toString(16);
+          };
+
+          return { name, intro, imgUrl, color, changeColor };
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>
