@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>알고리즘 시뮬레이션</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  background: #1a1e25;
+  color: #e2e8f0;
+  min-height: 100vh;
+}
+
+/* 헤더 */
+.header {
+  background: #2c3e50;
+  padding: 28px 40px;
+  border-bottom: 3px solid #3498db;
+}
+.header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+.header p {
+  font-size: 14px;
+  color: #94a3b8;
+  margin-top: 6px;
+}
+
+/* 컨테이너 */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+/* 카테고리 섹션 */
+.category {
+  margin-bottom: 40px;
+}
+.category-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #3498db;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #2a3444;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.category-title .icon {
+  font-size: 20px;
+}
+
+/* 카드 그리드 */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+/* 카드 */
+.card {
+  background: #2c3e50;
+  border-radius: 8px;
+  padding: 20px 24px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  border: 1px solid #34495e;
+  display: block;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  border-color: #3498db;
+}
+.card-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.card-desc {
+  font-size: 13px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+.card-tag {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 3px 10px;
+  background: #1a1e25;
+  border-radius: 12px;
+  font-size: 11px;
+  color: #64748b;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>알고리즘 시뮬레이션</h1>
+  <p>단계별 코드 실행 과정을 시각적으로 확인할 수 있습니다</p>
+</div>
+
+<div class="container">
+
+  <!-- 중복순열 -->
+  <section class="category">
+    <h2 class="category-title"><span class="icon">&#128256;</span> 중복순열 (Duplicate Permutation)</h2>
+    <div class="card-grid">
+      <a class="card" href="dupPerm/dupPerm_for_list.html">
+        <div class="card-name">반복문 + List</div>
+        <div class="card-desc">반복문(for)을 사용하여 중복순열을 생성하고, List에 결과를 저장하는 방식</div>
+        <span class="card-tag">iterative</span>
+      </a>
+      <a class="card" href="dupPerm/dupPerm_recursive_list.html">
+        <div class="card-name">재귀 + List</div>
+        <div class="card-desc">재귀 호출을 사용하여 중복순열을 생성하고, List에 결과를 저장하는 방식</div>
+        <span class="card-tag">recursive</span>
+      </a>
+      <a class="card" href="dupPerm/dupPerm_recursive_arr.html">
+        <div class="card-name">재귀 + 배열</div>
+        <div class="card-desc">재귀 호출을 사용하여 중복순열을 생성하고, 배열(Array)에 결과를 저장하는 방식</div>
+        <span class="card-tag">recursive</span>
+      </a>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>
