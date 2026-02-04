@@ -2,11 +2,12 @@
 참조할 폴더는 3.combination 이고 만들어지는 html파일 목적지도 3.combination폴더야
 
 시뮬레이션 파일 순서는 이래
-1. Combination_for_arr.java
-2. Combination_recursive.java
+1. Combination_for_arr.java  => combination_for_arr.html
+2. Combination_recursive.java => combination_recursive.html
 
 내 목적은 Combination_for.java 라는 단순 반복문 조합 코드에서 재귀로 변하는 과정을 이해시키고 싶은 거야 
 
-혹시 필요한 정보가 있을까?
+그리고 combination_recursive.html 의 경우 일단 중복순열 형태의 상태공간 트리를 미세하게 그려놓은 채로 시뮬레이션을 시작하고 
+combination( cnt+1, i+1) 의 두번째 인자인 i+1이 start 매개변수로 전달돼서 재귀 내부의 for문이 start부터 시작하기에 트리의 일부는 못가는 느낌으로 시뮬레이션을 보여주고 싶어 
 
 그리고 필요하다면 1.permutation의 문서들을 참고해도 좋아
