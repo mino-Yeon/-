@@ -1,0 +1,12 @@
+자 다음 내가 할 것은 조합 코드에 대한 시뮬레이션들을 만들고 싶어
+참조할 폴더는 3.combination 이고 만들어지는 html파일 목적지도 3.combination폴더야
+
+시뮬레이션 파일 순서는 이래
+1. Combination_for_arr.java
+2. Combination_recursive.java
+
+내 목적은 Combination_for.java 라는 단순 반복문 조합 코드에서 재귀로 변하는 과정을 이해시키고 싶은 거야 
+
+혹시 필요한 정보가 있을까?
+
+그리고 필요하다면 1.permutation의 문서들을 참고해도 좋아

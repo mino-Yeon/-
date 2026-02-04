@@ -33,3 +33,5 @@ perm_for_arr.html 작성 (인덱스 비교로 중복 제거) - 완료
 perm_for_arr_boolean.html 작성 (boolean 배열로 중복 제거) - 완료
 perm_recursive.html 작성 (재귀 + R 선택 가능) - 해야함
 index.html에 순열 섹션 추가 - 해야 함
+
+참고로 1.dupPerm 폴더에 dupPerm_recursive_arr.html 참고해도 좋아
