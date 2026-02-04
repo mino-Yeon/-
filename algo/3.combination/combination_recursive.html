@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>조합 시뮬레이션 - 재귀 (최종)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0f2f5;color:#333;height:100vh;display:flex;flex-direction:column;}
+.header{background:#2c3e50;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:16px;}
+.header h1{font-size:18px;} .header .sub{font-size:13px;color:#94a3b8;}
+.controls{background:#34495e;padding:10px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.controls button{background:#3498db;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:13px;font-family:inherit;}
+.controls button:hover{background:#2980b9;}
+.controls button.playing{background:#e74c3c;}
+.controls select{padding:4px 8px;border-radius:4px;font-size:13px;font-family:inherit;}
+.sep{width:1px;height:24px;background:#4a6278;margin:0 4px;}
+.controls label{color:#cbd5e1;font-size:13px;}
+.controls input[type=range]{width:80px;vertical-align:middle;}
+.step-info{color:#94a3b8;font-size:13px;margin-left:auto;}
+.main{display:flex;flex:1;overflow:hidden;}
+.code-panel{width:38%;min-width:320px;background:#1e1e1e;display:flex;flex-direction:column;border-right:2px solid #34495e;}
+.panel-hd{background:#2d2d2d;color:#94a3b8;padding:8px 16px;font-size:12px;font-weight:600;border-bottom:1px solid #3d3d3d;}
+.code-body{flex:1;overflow-y:auto;padding:8px 0;}
+.cl{display:flex;padding:1px 0;font-family:'Consolas','D2Coding',monospace;font-size:13px;line-height:1.6;transition:background .15s;}
+.cl.active{background:#264f78;}
+.cl.active .ln{color:#fff;}
+.ln{width:36px;text-align:right;padding-right:10px;color:#555;user-select:none;flex-shrink:0;}
+.lc{color:#d4d4d4;white-space:pre;}
+.kw{color:#569cd6;}.tp{color:#4ec9b0;}.nm{color:#b5cea8;}.st{color:#ce9178;}.cm{color:#6a9955;}
+.viz-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.vs{border-bottom:1px solid #ddd;}
+.vs .sh{background:#e8ecf0;padding:5px 16px;font-size:12px;font-weight:600;color:#64748b;}
+.vs .sb{padding:10px 16px;background:#fff;}
+.var-c{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.vb{display:inline-flex;padding:5px 12px;border-radius:6px;font-size:14px;font-weight:600;font-family:'Consolas','D2Coding',monospace;}
+.v-cnt{background:#fef3c7;color:#92400e;} .v-i{background:#dbeafe;color:#1d4ed8;} .v-start{background:#e9d5ff;color:#6b21a8;}
+.cs-label{font-size:12px;color:#64748b;margin-left:12px;}
+.cs-val{font-size:13px;font-family:'Consolas','D2Coding',monospace;color:#7c3aed;font-weight:600;}
+.rc{display:flex;align-items:flex-start;gap:6px;min-height:70px;flex-wrap:wrap;padding:4px 0;}
+.rb{width:52px;text-align:center;}
+.rb .box{width:52px;height:48px;display:flex;align-items:center;justify-content:center;border:2px solid #94a3b8;border-radius:8px;font-size:18px;font-weight:700;font-family:'Consolas','D2Coding',monospace;background:#f8fafc;transition:all .2s;}
+.rb .idx{font-size:11px;color:#64748b;margin-top:2px;font-weight:600;font-family:'Consolas','D2Coding',monospace;}
+.rb.written .box{border-color:#8b5cf6;background:#ede9fe;color:#6d28d9;transform:scale(1.1);box-shadow:0 0 8px rgba(139,92,246,.4);}
+.rb.active-slot .box{border-color:#3b82f6;background:#dbeafe;color:#1d4ed8;}
+.rb.stale .box{border-color:#d1d5db;background:#f3f4f6;color:#9ca3af;}
+.rb.printed .box{border-color:#22c55e;background:#dcfce7;color:#15803d;}
+.arr-note{font-size:12px;color:#94a3b8;margin-left:12px;line-height:70px;}
+.tree-sec{flex:1;display:flex;flex-direction:column;min-height:0;}
+.tree-sec .sb{flex:1;overflow:auto;padding:8px;position:relative;}
+.tree-node{transition:fill .2s,stroke .2s;}
+.tn-unvisited{fill:#f0f0f0;stroke:#ccc;stroke-width:1.5;}
+.tn-active{fill:#fbbf24;stroke:#f59e0b;stroke-width:2.5;}
+.tn-onpath{fill:#93c5fd;stroke:#3b82f6;stroke-width:2;}
+.tn-completed{fill:#86efac;stroke:#22c55e;stroke-width:2;}
+.tn-back{fill:#e2e8f0;stroke:#94a3b8;stroke-width:1;}
+.tn-outofrange{fill:#f3f4f6;stroke:#d1d5db;stroke-width:1;opacity:0.4;}
+.te-unvisited{stroke:#e5e7eb;stroke-width:1;}
+.te-active{stroke:#f59e0b;stroke-width:2;}
+.te-onpath{stroke:#3b82f6;stroke-width:2;}
+.te-completed{stroke:#22c55e;stroke-width:1.5;}
+.te-back{stroke:#cbd5e1;stroke-width:1;}
+.te-outofrange{stroke:#e5e7eb;stroke-width:1;stroke-dasharray:2,2;opacity:0.3;}
+.edge-lbl{font-size:11px;fill:#64748b;font-family:'Consolas','D2Coding',monospace;font-weight:600;text-anchor:middle;}
+.node-lbl{font-size:11px;fill:#333;font-family:'Consolas','D2Coding',monospace;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none;}
+.desc{font-size:14px;line-height:1.5;min-height:38px;display:flex;align-items:center;}
+.ac-add{color:#16a34a;font-weight:600;}.ac-rm{color:#dc2626;font-weight:600;}.ac-pr{color:#2563eb;font-weight:600;}.ac-lp{color:#7c3aed;font-weight:600;}.ac-call{color:#ea580c;font-weight:600;}.ac-set{color:#7c3aed;font-weight:600;}.ac-range{color:#9333ea;font-weight:600;}
+.out-sec{max-height:140px;}
+.out-sec .sb{display:flex;flex-direction:column;}
+.ob{flex:1;overflow-y:auto;font-family:'Consolas','D2Coding',monospace;font-size:12px;line-height:1.5;max-height:100px;background:#1a1a2e;color:#a5f3fc;padding:8px 12px;border-radius:4px;}
+.ob .new{color:#fbbf24;font-weight:600;}
+.kbd-help{color:#64748b;font-size:11px;margin-left:8px;}
+.highlight-box{display:inline-block;background:#fef3c7;border:1px solid #f59e0b;border-radius:4px;padding:0 6px;font-weight:700;color:#92400e;}
+.tree-note{text-align:center;color:#94a3b8;font-size:13px;padding:20px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>2. 조합 - 재귀 (최종 형태)</h1>
+  <span class="sub">Combination_recursive.java &nbsp;|&nbsp; arr = {3, 5, 7, 9}, N=4 &nbsp;|&nbsp; <b>start 매개변수로 범위 제한! (회색 점선 = 범위 밖)</b></span>
+</div>
+<div class="controls">
+  <button onclick="doReset()">⏮ 처음</button>
+  <button onclick="prev()">◀ 이전</button>
+  <button id="playBtn" onclick="togglePlay()">▶ 재생</button>
+  <button onclick="next()">다음 ▶</button>
+  <div class="sep"></div>
+  <button onclick="skipOut()">⏩ 다음 출력</button>
+  <div class="sep"></div>
+  <label>R = <select id="rSel" onchange="changeR()"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option></select></label>
+  <div class="sep"></div>
+  <label>속도: <input type="range" id="spd" min="1" max="10" value="5" oninput="spVal=+this.value"></label>
+  <span class="step-info" id="si">준비</span>
+  <span class="kbd-help">키보드: ←→ 이전/다음 · Space 재생 · S 다음출력 · R 처음</span>
+</div>
+<div class="main">
+  <div class="code-panel">
+    <div class="panel-hd">Java Code</div>
+    <div class="code-body" id="cb"></div>
+  </div>
+  <div class="viz-panel">
+    <div class="vs"><div class="sh">변수 상태 / 콜스택</div><div class="sb"><div class="var-c" id="vc"></div></div></div>
+    <div class="vs"><div class="sh">result (int[] 배열)</div><div class="sb"><div class="rc" id="rc"></div></div></div>
+    <div class="vs"><div class="sh">실행 설명</div><div class="sb"><div class="desc" id="dc">R을 선택하고 ▶ 재생 또는 다음 버튼으로 시작하세요.</div></div></div>
+    <div class="vs tree-sec"><div class="sh">재귀 트리 (combination 호출 구조) - 중복순열 구조에서 start로 범위 제한</div><div class="sb" id="tc"></div></div>
+    <div class="vs out-sec"><div class="sh">콘솔 출력 <span id="oc">(0개)</span></div><div class="sb"><div class="ob" id="ob"></div></div></div>
+  </div>
+</div>
+<script>
+const SRC=[
+'package day0204;',
+'import java.util.Arrays;',
+'import java.util.Scanner;',
+'',
+'public class Combination_recursive {',
+'    static int N = 4;    //전체 요소의 개수',
+'    static int[] arr = {3, 5, 7, 9};',
+'    static int R;    //뽑을 개수',
+'',
+'    static int[] result;',
+'',
+'    public static void main(String[] args) {',
+'        Scanner sc = new Scanner(System.in);',
+'        R = sc.nextInt();',
+'',
+'        result = new int[R];',
+'        combination(0, 0);',
+'    }',
+'',
+'    /**',
+'     * cnt인덱스에 담을 요소를 하나뽑고, cnt+1인덱스에 담을 요소뽑기는 재귀로 넘김',
+'     * @param cnt 현재까지 뽑은 요소의 개수 or 뽑은 요소를 결과배열에 담을 인덱스',
+'     * @param start 현재 뽑아볼 요소 후보군들의 시작인덱스',
+'     */',
+'    static void combination(int cnt, int start) {',
+'        //기저조건(종료조건)',
+'        if(cnt==R) {    //R개를 뽑는 순간',
+'            System.out.println(Arrays.toString(result));',
+'            return;',
+'        }',
+'',
+'        //반복파트(유도파트)',
+'        for(int i=start; i<N; i++) {',
+'            result[cnt] = arr[i];    //cnt에 담을 요소 뽑기',
+'',
+'            combination(cnt+1, i+1);    //cnt+1에 담을 요소 뽑기는 재귀로 넘김',
+'        }',
+'    }',
+'}'
+];
+function hl(t){t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');let cm='';t=t.replace(/(\/\/.*)$/gm,function(m){cm=m;return '\x00CM';});let ss=[];t=t.replace(/"([^"]*)"/g,function(m){ss.push(m);return '\x00S'+(ss.length-1);});t=t.replace(/\b(package|import|public|class|static|void|new|for|int|if|return)\b/g,'<span class="kw">$1</span>');t=t.replace(/\b(String|Arrays|Integer|System|Scanner)\b/g,'<span class="tp">$1</span>');t=t.replace(/\b(\d+)\b/g,'<span class="nm">$1</span>');ss.forEach((s,i)=>{t=t.replace('\x00S'+i,'<span class="st">'+s+'</span>');});if(cm)t=t.replace('\x00CM','<span class="cm">'+cm+'</span>');return t;}
+function initCode(){document.getElementById('cb').innerHTML=SRC.map((l,i)=>`<div class="cl" id="L${i+1}"><span class="ln">${i+1}</span><span class="lc">${hl(l)}</span></div>`).join('');}
+
+const A=[3,5,7,9],N=4;
+let R=3;
+
+// Build full dupPerm tree (all N children per node) with minIdx tracking
+function buildTree(){
+  let nid=0;const all=[];
+  function b(d,path){
+    const n={id:nid++,d:d,path:[...path],ch:[],x:0,y:0};
+    all.push(n);
+    if(d<R){
+      for(let i=0;i<N;i++){
+        const c=b(d+1,[...path,i]);
+        c.pi=n.id;c.ci=i;
+        n.ch.push(c);
+      }
+    }
+    return n;
+  }
+  const root=b(0,[]);
+
+  const lsp=R===2?55:R===3?38:26;
+  const lh=R===2?75:R===3?65:55;
+
+  let li=0;
+  function pos(n){
+    if(!n.ch.length){n.x=li*lsp+30;li++;}
+    else{n.ch.forEach(pos);n.x=(n.ch[0].x+n.ch[n.ch.length-1].x)/2;}
+    n.y=n.d*lh+30;
+  }
+  pos(root);
+  return{root,all,w:li*lsp+60,h:(R+1)*lh+20,r:R===2?18:R===3?14:10};
+}
+
+function initTree(td){
+  const{root,w,h,r}=td;let s='';
+  function draw(n){
+    n.ch.forEach((c,idx)=>{
+      s+=`<line id="E${c.id}" x1="${n.x}" y1="${n.y}" x2="${c.x}" y2="${c.y}" class="te-unvisited"/>`;
+      const mx=(n.x+c.x)/2,my=(n.y+c.y)/2-4;
+      s+=`<text id="EL${c.id}" x="${mx}" y="${my}" class="edge-lbl" style="opacity:0.3">${A[c.ci]}</text>`;
+      draw(c);
+    });
+    s+=`<circle id="N${n.id}" cx="${n.x}" cy="${n.y}" r="${r}" class="tree-node tn-unvisited"/>`;
+    s+=`<text id="NL${n.id}" x="${n.x}" y="${n.y}" class="node-lbl">${n.d}</text>`;
+  }
+  draw(root);
+  document.getElementById('tc').innerHTML=`<svg width="${w}" height="${h}">${s}</svg>`;
+}
+
+function genSteps(){
+  const S=[];let res=new Array(R).fill(0),out=[],stk=[];
+  const td=buildTree();initTree(td);
+  const ns={};td.all.forEach(n=>ns[n.id]='unvisited');
+
+  // Track which edges are out of range for each step
+  const edgeRange={};
+
+  // Track node labels: visited nodes show (cnt,start), unvisited show cnt only
+  const nodeLabels={};
+
+  function findNode(path){
+    for(const n of td.all){
+      if(n.path.length===path.length && n.path.every((v,i)=>v===path[i]))return n;
+    }
+    return td.root;
+  }
+
+  let curPath=[];
+
+  function combination(cnt,start){
+    const node=findNode(curPath);
+    ns[node.id]='active';
+    nodeLabels[node.id]=`(${cnt},${start})`;
+
+    S.push({l:25,v:{cnt,start,i:'-'},r:[...res],o:[...out],sk:[...stk],nid:node.id,ns:{...ns},er:{...edgeRange},nl:{...nodeLabels},a:'call',cnt:cnt,
+      d:`<span class="ac-call">combination(${cnt}, ${start})</span> 호출 ${cnt===0?'(시작)':''} &nbsp; <span class="ac-range">start=${start} → for문 범위: [${start}, ${N-1}]</span>`});
+
+    if(cnt===R){
+      const ol='['+res.join(', ')+']';out.push(ol);
+      ns[node.id]='completed';
+      S.push({l:27,v:{cnt,start,i:'-'},r:[...res],o:[...out],sk:[...stk],nid:node.id,ns:{...ns},er:{...edgeRange},nl:{...nodeLabels},a:'base',cnt:cnt,
+        d:`cnt(${cnt}) == R(${R}) → <span class="ac-pr">기저조건! 출력: [${res.join(', ')}]</span>`});
+      return;
+    }
+
+    // Mark edges outside range as out-of-range
+    for(let i=0;i<N;i++){
+      if(i<start){
+        const childPath=[...curPath,i];
+        const childNode=findNode(childPath);
+        edgeRange[childNode.id]=true;
+        ns[childNode.id]='outofrange';
+      }
+    }
+
+    for(let i=start;i<N;i++){
+      ns[node.id]='active';
+      S.push({l:33,v:{cnt,start,i},r:[...res],o:[...out],sk:[...stk],nid:node.id,ns:{...ns},er:{...edgeRange},nl:{...nodeLabels},a:'loop',cnt:cnt,
+        d:`<span class="ac-lp">for문</span>: i=${i} (arr[${i}]=${A[i]}) &nbsp; <b>i는 start(=${start})부터 시작!</b>`});
+
+      res[cnt]=A[i];
+      S.push({l:34,v:{cnt,start,i},r:[...res],o:[...out],sk:[...stk],nid:node.id,ns:{...ns},er:{...edgeRange},nl:{...nodeLabels},a:'set',cnt:cnt,si:cnt,
+        d:`<span class="ac-set">result[${cnt}] = arr[${i}]</span> → <b>result[${cnt}] = ${A[i]}</b>`});
+
+      S.push({l:36,v:{cnt,start,i},r:[...res],o:[...out],sk:[...stk],nid:node.id,ns:{...ns},er:{...edgeRange},nl:{...nodeLabels},a:'recurse',cnt:cnt,
+        d:`<span class="ac-call">combination(${cnt+1}, ${i+1})</span> 재귀 호출 &nbsp; <b>다음 start = i+1 = ${i+1}</b>`});
+
+      stk.push({cnt,start,i});
+      curPath.push(i);
+      combination(cnt+1,i+1);
+      curPath.pop();
+      stk.pop();
+
+      ns[node.id]='active';
+    }
+    ns[node.id]='back';
+  }
+
+  combination(0,0);
+  return{steps:S,tree:td};
+}
+
+let steps=[],ci=-1,playing=false,timer=null,spVal=5,treeData=null;
+
+function render(){
+  document.querySelectorAll('.cl.active').forEach(e=>e.classList.remove('active'));
+  if(ci>=0){
+    const s=steps[ci];
+    const el=document.getElementById('L'+s.l);
+    if(el){
+      el.classList.add('active');
+      el.scrollIntoView({block:'nearest',behavior:'smooth'});
+    }
+  }
+  if(ci<0){
+    document.getElementById('vc').innerHTML='<span class="vb v-cnt">cnt = -</span><span class="vb v-start">start = -</span><span class="vb v-i">i = -</span><span class="cs-label">콜스택:</span><span class="cs-val">[]</span>';
+    let h='';for(let i=0;i<R;i++)h+=`<div class="rb stale"><div class="box">0</div><div class="idx">result[${i}]</div></div>`;
+    h+='<span class="arr-note">← int['+R+'] 초기값 0</span>';
+    document.getElementById('rc').innerHTML=h;
+    document.getElementById('dc').innerHTML='R을 선택하고 ▶ 재생 또는 다음 버튼으로 시작하세요.';
+    document.getElementById('ob').innerHTML='';
+    document.getElementById('oc').textContent='(0개)';
+    document.getElementById('si').textContent=`0 / ${steps.length}`;
+    if(treeData){
+      if(R===4){
+        document.getElementById('tc').innerHTML='<div class="tree-note">R=4일 때는 트리가 너무 커서(256개 노드) 표시하지 않습니다.<br>대신 변수 상태와 실행 설명을 참고하세요.</div>';
+      }else{
+        treeData.all.forEach(n=>{
+          const c=document.getElementById('N'+n.id);if(c)c.className.baseVal='tree-node tn-unvisited';
+          const e=document.getElementById('E'+n.id);if(e)e.className.baseVal='te-unvisited';
+          const el=document.getElementById('EL'+n.id);if(el)el.style.opacity='0.3';
+          const lbl=document.getElementById('NL'+n.id);if(lbl)lbl.textContent=n.d;
+        });
+      }
+    }
+    return;
+  }
+  const s=steps[ci];
+  const skStr=[...s.sk.map(x=>`comb(${x.cnt},${x.start})`),`comb(${s.v.cnt},${s.v.start})`].join(' → ');
+  document.getElementById('vc').innerHTML=`<span class="vb v-cnt">cnt = ${s.v.cnt}</span><span class="vb v-start">start = ${s.v.start}</span><span class="vb v-i">i = ${s.v.i}</span><span class="cs-label">콜스택:</span><span class="cs-val">${skStr||'(비어있음)'}</span>`;
+
+  const activeCnt=s.cnt;
+  let h='';
+  for(let idx=0;idx<R;idx++){
+    let cls='rb';
+    if(s.a==='set'&&idx===s.si) cls+=' written';
+    else if(s.a==='base') cls+=' printed';
+    else if(idx<activeCnt) cls+=' active-slot';
+    else cls+=' stale';
+    h+=`<div class="${cls}"><div class="box">${s.r[idx]}</div><div class="idx">result[${idx}]</div></div>`;
+  }
+  document.getElementById('rc').innerHTML=h;
+
+  document.getElementById('dc').innerHTML=s.d;
+
+  if(treeData && R!==4){
+    const nst=s.ns;
+    const er=s.er||{};
+    const nl=s.nl||{};
+    treeData.all.forEach(n=>{
+      const st=nst[n.id]||'unvisited';
+      const c=document.getElementById('N'+n.id);if(c)c.className.baseVal='tree-node tn-'+st;
+      const e=document.getElementById('E'+n.id);if(e)e.className.baseVal='te-'+st;
+      const el=document.getElementById('EL'+n.id);
+      if(el){
+        if(st==='outofrange')el.style.opacity='0.2';
+        else if(st==='unvisited')el.style.opacity='0.3';
+        else el.style.opacity='1';
+      }
+      // Update node label: visited nodes show (cnt,start), unvisited show cnt only
+      const lbl=document.getElementById('NL'+n.id);
+      if(lbl){
+        lbl.textContent=nl[n.id]||n.d;
+      }
+    });
+    const ac=document.getElementById('N'+s.nid);
+    if(ac)ac.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+  }
+
+  const ob=document.getElementById('ob');
+  ob.innerHTML=s.o.map((l,i)=>`<div${i===s.o.length-1&&s.a==='base'?' class="new"':''}>${i+1}. ${l}</div>`).join('');
+  ob.scrollTop=ob.scrollHeight;
+  document.getElementById('oc').textContent=`(${s.o.length}개)`;
+  document.getElementById('si').textContent=`${ci+1} / ${steps.length}`;
+}
+
+function changeR(){stop();R=+document.getElementById('rSel').value;rebuild();}
+function rebuild(){
+  ci=-1;
+  if(R===4){
+    const g=genSteps();
+    steps=g.steps;
+    treeData=null;
+    document.getElementById('tc').innerHTML='<div class="tree-note">R=4일 때는 트리가 너무 커서(256개 노드) 표시하지 않습니다.<br>대신 변수 상태와 실행 설명을 참고하세요.</div>';
+  }else{
+    const g=genSteps();
+    steps=g.steps;
+    treeData=g.tree;
+  }
+  render();
+}
+function doReset(){stop();ci=-1;render();}
+function prev(){stop();if(ci>-1){ci--;render();}}
+function next(){if(ci<steps.length-1){ci++;render();}else stop();}
+function togglePlay(){playing?stop():start();}
+function start(){if(ci>=steps.length-1)ci=-1;playing=true;document.getElementById('playBtn').textContent='⏸ 정지';document.getElementById('playBtn').classList.add('playing');tick();}
+function stop(){playing=false;clearTimeout(timer);timer=null;document.getElementById('playBtn').textContent='▶ 재생';document.getElementById('playBtn').classList.remove('playing');}
+function tick(){if(!playing)return;const d=1100-spVal*100;timer=setTimeout(()=>{next();if(playing&&ci<steps.length-1)tick();else stop();},d);}
+function skipOut(){stop();for(let i=ci+1;i<steps.length;i++){if(steps[i].a==='base'){ci=i;render();return;}}ci=steps.length-1;render();}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();next();}
+  else if(e.key==='ArrowLeft'){e.preventDefault();prev();}
+  else if(e.key==='Enter'){e.preventDefault();togglePlay();}
+  else if(e.key==='r'||e.key==='R'){if(document.activeElement.tagName!=='SELECT')doReset();}
+  else if(e.key==='s'||e.key==='S')skipOut();
+});
+
+initCode();rebuild();
+</script>
+</body>
+</html>
