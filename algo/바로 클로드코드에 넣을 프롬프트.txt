@@ -1,0 +1,35 @@
+===마지막으로 했던 질문 ===
+참조할 폴더는 2.permutation 이야
+
+시뮬레이션 파일 순서는 이래
+1. Perm_for_arr.java
+2. Perm_for_arr_boolean.java
+3. Perm_recursive.java
+
+내 목적은 Perm_for.java 라는 단순 반복문 순열 코드에서 재귀로 변하는 과정을 이해시키고 싶은 거야 혹시 필요한 정보가 있을까?
+===질문 끝===
+
+여기까지가 내가 마지막으로 했던 질문이었고 너가 나한테 몇 가지 정보를 물어보고 작업을 했었어. 그리고 너의 작업 내용은 아래와 같았어
+
+Read c:\SSAFY_test\github 자료\algo\2.permutation\Perm_for.java
+Read c:\SSAFY_test\github 자료\algo\2.permutation\Perm_for_arr.java
+Read c:\SSAFY_test\github 자료\algo\2.permutation\Perm_for_arr_boolean.java
+Read c:\SSAFY_test\github 자료\algo\2.permutation\Perm_recursive.java
+코드를 모두 확인했습니다. 진행 의도가 명확하게 보입니다:
+
+코드 변화 흐름:
+
+Perm_for_arr.java — 인덱스 비교로 중복 제거 (if(i==j) continue)
+Perm_for_arr_boolean.java — boolean 배열로 중복 제거 (isSelected[i])
+Perm_recursive.java — boolean 패턴을 재귀로 전환 (permutation(cnt))
+
+이후 아래와 같은 작업을 했지.
+완료는 말그대로 너가 해준 것, 해야함은 다시 너가 이어서 해줄 일들이야. 참고로 너가 만들어준 파일은 permutation 폴더에 있어
+
+Update Todos
+
+permutation 폴더 생성 - 완료
+perm_for_arr.html 작성 (인덱스 비교로 중복 제거) - 완료
+perm_for_arr_boolean.html 작성 (boolean 배열로 중복 제거) - 완료
+perm_recursive.html 작성 (재귀 + R 선택 가능) - 해야함
+index.html에 순열 섹션 추가 - 해야 함
