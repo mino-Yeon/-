@@ -163,7 +163,7 @@ const SRC=[
 ];
 function hl(t){t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');let cm='';t=t.replace(/(\/\/.*)$/gm,function(m){cm=m;return '\x00CM';});let ss=[];t=t.replace(/"([^"]*)"/g,function(m){ss.push(m);return '\x00S'+(ss.length-1);});t=t.replace(/\b(package|import|public|class|static|void|new|for|int|if|return)\b/g,'<span class="kw">$1</span>');t=t.replace(/\b(String|Arrays|Integer|System|Scanner)\b/g,'<span class="tp">$1</span>');t=t.replace(/\b(\d+)\b/g,'<span class="nm">$1</span>');ss.forEach((s,i)=>{t=t.replace('\x00S'+i,'<span class="st">'+s+'</span>');});if(cm)t=t.replace('\x00CM','<span class="cm">'+cm+'</span>');return t;}
 function initCode(){document.getElementById('cb').innerHTML=SRC.map((l,i)=>`<div class="cl" id="L${i+1}"><span class="ln">${i+1}</span><span class="lc">${hl(l)}</span></div>`).join('');}
-function toggleCode(){document.getElementById('codePanel').classList.toggle('collapsed');}
+function toggleCode(){const panel=document.getElementById('codePanel');panel.classList.toggle('collapsed');if(panel.classList.contains('collapsed')){panel.style.width='';panel.style.minWidth='';}}
 
 const A=[3,5,7,9],N=4;
 let R=3;

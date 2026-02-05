@@ -229,7 +229,12 @@ function initCode(){
 }
 
 function toggleCode(){
-  document.getElementById('codePanel').classList.toggle('collapsed');
+  const panel=document.getElementById('codePanel');
+  panel.classList.toggle('collapsed');
+  if(panel.classList.contains('collapsed')){
+    panel.style.width='';
+    panel.style.minWidth='';
+  }
 }
 
 // ===== Tree building =====
