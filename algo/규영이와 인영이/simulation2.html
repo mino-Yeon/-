@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>규영이와 인영이 - 트리 시뮬레이션</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0f2f5;color:#333;height:100vh;display:flex;flex-direction:column;}
+.header{background:#1a237e;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:16px;}
+.header h1{font-size:18px;} .header .sub{font-size:13px;color:#94a3b8;}
+.controls{background:#283593;padding:10px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.controls button{background:#3498db;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:13px;font-family:inherit;}
+.controls button:hover{background:#2980b9;}
+.controls button.playing{background:#e74c3c;}
+.sep{width:1px;height:24px;background:#4a5ea8;margin:0 4px;}
+.tab-btn{background:#4a5ea8!important;color:#cbd5e1!important;border:2px solid transparent!important;transition:all .15s;}
+.tab-btn.tab-active{background:#3498db!important;color:#fff!important;border-color:#2980b9!important;}
+.controls label{color:#cbd5e1;font-size:13px;}
+.controls input[type=range]{width:80px;vertical-align:middle;}
+.step-info{color:#94a3b8;font-size:13px;margin-left:auto;}
+.kbd-help{color:#64748b;font-size:11px;margin-left:8px;}
+.main{display:flex;flex:1;overflow:hidden;}
+.code-panel{width:38%;min-width:320px;background:#1e1e1e;display:flex;flex-direction:column;border-right:2px solid #283593;}
+.panel-hd{background:#2d2d2d;color:#94a3b8;padding:8px 16px;font-size:12px;font-weight:600;border-bottom:1px solid #3d3d3d;}
+.code-body{flex:1;overflow-y:auto;padding:8px 0;}
+.cl{display:flex;padding:1px 0;font-family:'Consolas','D2Coding',monospace;font-size:13px;line-height:1.6;transition:background .15s;}
+.cl.active{background:#264f78;}
+.cl.skip-line{background:#4a2020;}
+.cl.calc-line{background:#4a3520;}
+.cl.active .ln{color:#fff;} .cl.skip-line .ln{color:#f87171;} .cl.calc-line .ln{color:#fb923c;}
+.ln{width:36px;text-align:right;padding-right:10px;color:#555;user-select:none;flex-shrink:0;}
+.lc{color:#d4d4d4;white-space:pre;}
+.kw{color:#569cd6;}.tp{color:#4ec9b0;}.nm{color:#b5cea8;}.st{color:#ce9178;}.cm{color:#6a9955;}.fn{color:#dcdcaa;}
+.viz-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.vs{border-bottom:1px solid #ddd;}
+.vs .sh{background:#e8ecf0;padding:5px 16px;font-size:12px;font-weight:600;color:#64748b;}
+.vs .sb{padding:10px 16px;background:#fff;}
+.var-c{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.vb{display:inline-flex;padding:5px 12px;border-radius:6px;font-size:14px;font-weight:600;font-family:'Consolas','D2Coding',monospace;}
+.v-cnt{background:#fef3c7;color:#92400e;} .v-i{background:#dbeafe;color:#1d4ed8;}
+.v-sg{background:#e0f2fe;color:#0c4a6e;} .v-si{background:#ffedd5;color:#9a3412;}
+.cs-label{font-size:12px;color:#64748b;margin-left:12px;}
+.cs-val{font-size:13px;font-family:'Consolas','D2Coding',monospace;color:#7c3aed;font-weight:600;}
+.round-c{display:flex;gap:12px;flex-wrap:wrap;padding:4px 0;align-items:flex-start;}
+.rslot{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.rslot .rlabel{font-size:11px;color:#888;font-weight:600;}
+.card{width:42px;height:54px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;border:2px solid;transition:all .15s;}
+.card-g{border-color:#1565c0;color:#1565c0;background:#e3f2fd;}
+.card-i{border-color:#e65100;color:#e65100;background:#fff3e0;}
+.card-empty{border:2px dashed #ccc;color:#ccc;background:#fafafa;}
+.card-win{font-size:10px;font-weight:600;margin-top:1px;min-height:14px;}
+.card-win.gw{color:#1565c0;} .card-win.iw{color:#e65100;}
+@keyframes calcPulse{0%{box-shadow:0 0 0 rgba(249,168,37,0);transform:scale(1)}50%{box-shadow:0 0 14px rgba(249,168,37,.7);transform:scale(1.08)}100%{box-shadow:0 0 0 rgba(249,168,37,0);transform:scale(1)}}
+.card.flash-calc{animation:calcPulse .3s;border-color:#f9a825!important;background:#fff8e1!important;color:#f57f17!important;}
+.bool-c{display:flex;gap:6px;flex-wrap:wrap;padding:4px 0;}
+.bb{width:56px;text-align:center;}
+.bb .box{width:56px;height:36px;display:flex;align-items:center;justify-content:center;border:2px solid #cbd5e1;border-radius:6px;font-size:13px;font-weight:700;font-family:'Consolas','D2Coding',monospace;background:#f8fafc;color:#94a3b8;transition:all .2s;}
+.bb .idx{font-size:10px;color:#94a3b8;margin-top:2px;}
+.bb.btrue .box{border-color:#22c55e;background:#dcfce7;color:#15803d;}
+.bb.bsel .box{border-color:#22c55e;background:#bbf7d0;color:#15803d;transform:scale(1.08);box-shadow:0 0 8px rgba(34,197,94,.4);}
+.bb.bdesel .box{border-color:#ef4444;background:#fee2e2;color:#dc2626;transform:scale(0.95);box-shadow:0 0 8px rgba(239,68,68,.3);}
+.desc{font-size:14px;line-height:1.5;min-height:38px;display:flex;align-items:center;}
+.ac-call{color:#ea580c;font-weight:600;}.ac-lp{color:#7c3aed;font-weight:600;}.ac-set{color:#7c3aed;font-weight:600;}
+.ac-sel{color:#16a34a;font-weight:600;}.ac-desel{color:#dc2626;font-weight:600;}.ac-skip{color:#ef4444;font-weight:600;}
+.ac-pr{color:#2563eb;font-weight:600;}.ac-calc{color:#d97706;font-weight:600;}.ac-res{color:#059669;font-weight:600;}
+.tree-sec{flex:1;display:flex;flex-direction:column;min-height:0;}
+.tree-sec .sb{flex:1;overflow:auto;padding:8px;position:relative;}
+.tree-node{transition:fill .2s,stroke .2s;}
+.tn-unvisited{fill:#f0f0f0;stroke:#ccc;stroke-width:1.5;}
+.tn-active{fill:#fbbf24;stroke:#f59e0b;stroke-width:2.5;}
+.tn-onpath{fill:#93c5fd;stroke:#3b82f6;stroke-width:2;}
+.tn-completed{fill:#86efac;stroke:#22c55e;stroke-width:2;}
+.tn-back{fill:#e2e8f0;stroke:#94a3b8;stroke-width:1;}
+.tn-skipped{fill:#fecaca;stroke:#ef4444;stroke-width:2;stroke-dasharray:3,2;}
+.tn-calc{fill:#fdba74;stroke:#f97316;stroke-width:2.5;}
+.te-unvisited{stroke:#e5e7eb;stroke-width:1;}
+.te-active{stroke:#f59e0b;stroke-width:2;}
+.te-onpath{stroke:#3b82f6;stroke-width:2;}
+.te-completed{stroke:#22c55e;stroke-width:1.5;}
+.te-back{stroke:#cbd5e1;stroke-width:1;}
+.te-skipped{stroke:#ef4444;stroke-width:2;stroke-dasharray:4,3;}
+.te-calc{stroke:#f97316;stroke-width:2.5;}
+.edge-lbl{font-size:11px;fill:#64748b;font-family:'Consolas','D2Coding',monospace;font-weight:600;text-anchor:middle;}
+.node-lbl{font-size:11px;fill:#333;font-family:'Consolas','D2Coding',monospace;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none;}
+.score-lbl{font-size:9px;fill:#6366f1;font-family:'Consolas','D2Coding',monospace;font-weight:600;text-anchor:middle;pointer-events:none;}
+.ops-sec .sb{padding:10px 16px;}
+.ops-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;}
+.ops-label{width:140px;text-align:right;font-weight:600;font-size:12px;}
+.ops-track{flex:1;height:22px;background:#f0f0f0;border-radius:4px;overflow:hidden;position:relative;}
+.ops-fill{height:100%;border-radius:4px;transition:width .2s;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:11px;font-weight:bold;color:#fff;min-width:0;}
+.ops-fill.m1{background:linear-gradient(90deg,#7c3aed,#6d28d9);}
+.ops-fill.m2{background:linear-gradient(90deg,#0891b2,#0e7490);}
+.ops-fill.inactive{opacity:.35;}
+.ops-num{width:60px;font-weight:bold;font-size:13px;font-family:'Consolas','D2Coding',monospace;}
+.ops-max{font-size:11px;color:#94a3b8;width:30px;}
+.out-sec{max-height:120px;}
+.out-sec .sb{display:flex;flex-direction:column;}
+.ob{flex:1;overflow-y:auto;font-family:'Consolas','D2Coding',monospace;font-size:12px;line-height:1.5;max-height:80px;background:#1a1a2e;color:#a5f3fc;padding:8px 12px;border-radius:4px;}
+.ob .new{color:#fbbf24;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>SWEA 6808: 규영이와 인영이 - 트리 시뮬레이션</h1>
+  <span class="sub">규영 카드: [1,3,5,7] &nbsp;|&nbsp; 인영 카드: [2,4,6,8] &nbsp;|&nbsp; 4장 축소 버전 (4! = 24 순열)</span>
+</div>
+<div class="controls">
+  <button onclick="doReset()">⏮ 처음</button>
+  <button onclick="prev()">◀ 이전</button>
+  <button id="playBtn" onclick="togglePlay()">▶ 재생</button>
+  <button onclick="next()">다음 ▶</button>
+  <div class="sep"></div>
+  <button onclick="skipOut()">⏩ 다음 결과</button>
+  <div class="sep"></div>
+  <button id="tab1" class="tab-btn tab-active" onclick="switchMethod(1)">방법 1: 매개변수 X</button>
+  <button id="tab2" class="tab-btn" onclick="switchMethod(2)">방법 2: 매개변수 O</button>
+  <div class="sep"></div>
+  <label>속도: <input type="range" id="spd" min="1" max="10" value="5" oninput="spVal=+this.value"></label>
+  <span class="step-info" id="si">준비</span>
+  <span class="kbd-help">키보드: ←→ 이전/다음 · Space 재생 · S 다음결과 · R 처음 · 1/2 방법전환</span>
+</div>
+<div class="main">
+  <div class="code-panel">
+    <div class="panel-hd" id="codeTitle">Java Code - 방법 1</div>
+    <div class="code-body" id="cb"></div>
+  </div>
+  <div class="viz-panel">
+    <div class="vs"><div class="sh">변수 상태 / 콜스택</div><div class="sb"><div class="var-c" id="vc"></div></div></div>
+    <div class="vs"><div class="sh">카드 라운드</div><div class="sb"><div class="round-c" id="rc"></div></div></div>
+    <div class="vs"><div class="sh">isSelected (boolean[4])</div><div class="sb"><div class="bool-c" id="bc"></div></div></div>
+    <div class="vs"><div class="sh">실행 설명</div><div class="sb"><div class="desc" id="dc">방법을 선택하고 ▶ 재생 또는 다음 버튼으로 시작하세요.</div></div></div>
+    <div class="vs tree-sec"><div class="sh">상태공간 트리 (순열 트리 - 65개 노드, 24개 리프)</div><div class="sb" id="tc"></div></div>
+    <div class="vs ops-sec"><div class="sh">연산 횟수 비교 (라운드 비교 연산)</div><div class="sb">
+      <div class="ops-row"><span class="ops-label" style="color:#6d28d9">방법 1 (완성 후 계산)</span><div class="ops-track"><div class="ops-fill m1" id="opsFill1"></div></div><span class="ops-num" id="opsNum1">0</span><span class="ops-max">/96</span></div>
+      <div class="ops-row"><span class="ops-label" style="color:#0e7490">방법 2 (과정 중 계산)</span><div class="ops-track"><div class="ops-fill m2" id="opsFill2"></div></div><span class="ops-num" id="opsNum2">0</span><span class="ops-max">/64</span></div>
+    </div></div>
+    <div class="vs out-sec"><div class="sh">콘솔 출력 <span id="oc">(0개)</span></div><div class="sb"><div class="ob" id="ob"></div></div></div>
+  </div>
+</div>
+<script>
+const GYU=[1,3,5,7], IN=[2,4,6,8], N=4;
+
+// ===== Java source code =====
+const SRC1=[
+'static int[] roundGyu = {1, 3, 5, 7};',
+'static int[] in = {2, 4, 6, 8};',
+'static int N = 4;',
+'static int[] roundIn = new int[4];',
+'static boolean[] isSelected = new boolean[4];',
+'static int win, lose;',
+'',
+'static void permutation(int cnt) {',
+'    if(cnt == 4) {',
+'        calcTotal();',
+'        return;',
+'    }',
+'    for(int i = 0; i < 4; i++) {',
+'        if(isSelected[i]) continue;',
+'        roundIn[cnt] = in[i];',
+'        isSelected[i] = true;',
+'        permutation(cnt + 1);',
+'        isSelected[i] = false;',
+'    }',
+'}',
+'',
+'static void calcTotal() {',
+'    int sumGyu = 0, sumIn = 0;',
+'    for(int i = 0; i < 4; i++) {',
+'        if(roundGyu[i] > roundIn[i])',
+'            sumGyu += roundGyu[i] + roundIn[i];',
+'        else',
+'            sumIn += roundGyu[i] + roundIn[i];',
+'    }',
+'    if(sumGyu > sumIn) win++;',
+'    else if(sumGyu < sumIn) lose++;',
+'}'
+];
+
+const SRC2=[
+'static int[] roundGyu = {1, 3, 5, 7};',
+'static int[] in = {2, 4, 6, 8};',
+'static int N = 4;',
+'static boolean[] isSelected = new boolean[4];',
+'static int win, lose;',
+'',
+'static void permutation(int cnt, int sumGyu, int sumIn) {',
+'    if(cnt == 4) {',
+'        if(sumGyu > sumIn) win++;',
+'        else if(sumGyu < sumIn) lose++;',
+'        return;',
+'    }',
+'    for(int i = 0; i < 4; i++) {',
+'        if(isSelected[i]) continue;',
+'        isSelected[i] = true;',
+'        if(roundGyu[cnt] > in[i])',
+'            permutation(cnt+1, sumGyu+roundGyu[cnt]+in[i], sumIn);',
+'        else',
+'            permutation(cnt+1, sumGyu, sumIn+roundGyu[cnt]+in[i]);',
+'        isSelected[i] = false;',
+'    }',
+'}'
+];
+
+function hl(t){
+  t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let cm='';t=t.replace(/(\\/\\/.*)$/gm,function(m){cm=m;return '\x00CM';});
+  let ss=[];t=t.replace(/"([^"]*)"/g,function(m){ss.push(m);return '\x00S'+(ss.length-1);});
+  t=t.replace(/\b(static|void|new|for|int|if|else|return|boolean|continue)\b/g,'<span class="kw">$1</span>');
+  t=t.replace(/\b(String|Arrays)\b/g,'<span class="tp">$1</span>');
+  t=t.replace(/\b(permutation|calcTotal)\b/g,'<span class="fn">$1</span>');
+  t=t.replace(/\b(\d+)\b/g,'<span class="nm">$1</span>');
+  ss.forEach((s,i)=>{t=t.replace('\x00S'+i,'<span class="st">'+s+'</span>');});
+  if(cm)t=t.replace('\x00CM','<span class="cm">'+cm+'</span>');
+  return t;
+}
+
+function initCode(){
+  const src=curMethod===1?SRC1:SRC2;
+  document.getElementById('cb').innerHTML=src.map((l,i)=>
+    `<div class="cl" id="L${i+1}"><span class="ln">${i+1}</span><span class="lc">${hl(l)}</span></div>`).join('');
+  document.getElementById('codeTitle').textContent=curMethod===1?'Java Code - 방법 1 (매개변수 X)':'Java Code - 방법 2 (매개변수 O)';
+}
+
+// ===== Tree building =====
+function buildTree(){
+  let nid=0;const all=[];
+  function build(depth,used,path){
+    const node={id:nid++,d:depth,path:[...path],ch:[],x:0,y:0};
+    all.push(node);
+    if(depth<N){
+      for(let i=0;i<N;i++){
+        if(used[i])continue;
+        used[i]=true;
+        const c=build(depth+1,used,[...path,i]);
+        c.pi=node.id;c.ci=i;
+        node.ch.push(c);
+        used[i]=false;
+      }
+    }
+    return node;
+  }
+  const root=build(0,[false,false,false,false],[]);
+  const lsp=40,lh=70;
+  let li=0;
+  function pos(n){
+    if(!n.ch.length){n.x=li*lsp+30;li++;}
+    else{n.ch.forEach(pos);n.x=(n.ch[0].x+n.ch[n.ch.length-1].x)/2;}
+    n.y=n.d*lh+30;
+  }
+  pos(root);
+  return{root,all,w:li*lsp+60,h:(N+1)*lh+20,r:14};
+}
+
+function initTree(td){
+  const{root,w,h,r}=td;let s='';
+  function draw(n){
+    n.ch.forEach(c=>{
+      s+=`<line id="E${c.id}" x1="${n.x}" y1="${n.y}" x2="${c.x}" y2="${c.y}" class="te-unvisited"/>`;
+      const mx=(n.x+c.x)/2,my=(n.y+c.y)/2-4;
+      s+=`<text id="EL${c.id}" x="${mx}" y="${my}" class="edge-lbl" style="opacity:0.3">${IN[c.ci]}</text>`;
+      draw(c);
+    });
+    s+=`<circle id="N${n.id}" cx="${n.x}" cy="${n.y}" r="${r}" class="tree-node tn-unvisited"/>`;
+    s+=`<text id="NL${n.id}" x="${n.x}" y="${n.y}" class="node-lbl">${n.d}</text>`;
+    s+=`<text id="SL${n.id}" x="${n.x}" y="${n.y+20}" class="score-lbl" style="display:none"></text>`;
+  }
+  draw(root);
+  document.getElementById('tc').innerHTML=`<svg width="${w}" height="${h}">${s}</svg>`;
+}
+
+// ===== Find node by path =====
+function findNode(td,path){
+  for(const n of td.all){
+    if(n.path.length===path.length&&n.path.every((v,i)=>v===path[i]))return n;
+  }
+  return td.root;
+}
+
+// ===== Get ancestor path (nodes from depth 1 to leaf) =====
+function getAncestors(td,leafNode){
+  const ancs=[];
+  for(let d=1;d<=leafNode.path.length;d++){
+    ancs.push(findNode(td,leafNode.path.slice(0,d)));
+  }
+  return ancs;
+}
+
+// ===== genSteps1: Method 1 (no parameters) =====
+function genSteps1(){
+  const S=[];
+  const td=buildTree();initTree(td);
+  let roundIn=new Array(N).fill(0),isSel=[false,false,false,false],out=[],stk=[];
+  let ops1=0,win=0,lose=0,draw=0,permCount=0;
+  const ns={};td.all.forEach(n=>ns[n.id]='unvisited');
+  let curPath=[];
+
+  function perm(cnt){
+    const node=findNode(td,curPath);
+    ns[node.id]='active';
+    // Mark ancestors as onpath
+    for(let d=1;d<curPath.length;d++){
+      const anc=findNode(td,curPath.slice(0,d));
+      if(ns[anc.id]==='active'||ns[anc.id]==='back')ns[anc.id]='onpath';
+    }
+
+    S.push({l:8,v:{cnt,i:'-'},ri:[...roundIn],is:[...isSel],o:[...out],sk:[...stk],
+      nid:node.id,ns:{...ns},a:'call',ops1,win,lose,draw,permCount,
+      d:`<span class="ac-call">permutation(${cnt})</span> 호출${cnt===0?' (시작)':''}`});
+
+    if(cnt===N){
+      S.push({l:9,v:{cnt,i:'-'},ri:[...roundIn],is:[...isSel],o:[...out],sk:[...stk],
+        nid:node.id,ns:{...ns},a:'base',ops1,win,lose,draw,permCount,
+        d:`cnt(${cnt}) == 4 → <span class="ac-calc">기저조건! calcTotal() 호출</span>`});
+
+      // calcTotal recalculation animation
+      const ancestors=getAncestors(td,node);
+      let sg=0,si=0;
+      for(let round=0;round<N;round++){
+        ops1++;
+        const g=GYU[round],c=roundIn[round];
+        const gw=g>c;
+        if(gw)sg+=g+c; else si+=g+c;
+        // Temporarily mark ancestor as calc
+        const calcNs={...ns};
+        if(ancestors[round])calcNs[ancestors[round].id]='calc';
+        S.push({l:gw?26:28,v:{cnt,i:round},ri:[...roundIn],is:[...isSel],o:[...out],sk:[...stk],
+          nid:node.id,ns:calcNs,a:'calcRound',ops1,win,lose,draw,permCount,calcRound:round,
+          d:`<span class="ac-calc">calcTotal 라운드${round+1}</span>: 규영(${g}) vs 인영(${c}) → ${gw?'규영':'인영'} +${g+c} (G:${sg} I:${si})`});
+      }
+      // Result
+      permCount++;
+      const resultText=sg>si?'규영 승!':sg<si?'인영 승!':'무승부';
+      if(sg>si)win++; else if(sg<si)lose++; else draw++;
+      const ol=`[${roundIn.join(',')}] G:${sg} I:${si} → ${resultText}`;
+      out.push(ol);
+      ns[node.id]='completed';
+      S.push({l:sg>si?30:31,v:{cnt,i:'-'},ri:[...roundIn],is:[...isSel],o:[...out],sk:[...stk],
+        nid:node.id,ns:{...ns},a:'result',ops1,win,lose,draw,permCount,
+        d:`<span class="ac-res">결과: ${resultText}</span> (규영 ${sg}점 vs 인영 ${si}점)`});
+      return;
+    }
+
+    for(let i=0;i<N;i++){
+      ns[node.id]='active';
+      S.push({l:13,v:{cnt,i},ri:[...roundIn],is:[...isSel],o:[...out],sk:[...stk],
+        nid:node.id,ns:{...ns},a:'loop',ops1,win,lose,draw,permCount,
+        d:`<span class="ac-lp">for문</span>: i=${i} (in[${i}]=${IN[i]})`});
+
+      if(isSel[i]){
+        S.push({l:14,v:{cnt,i},ri:[...roundIn],is:[...isSel],o:[...out],sk:[...stk],
+          nid:node.id,ns:{...ns},a:'skip',ops1,win,lose,draw,permCount,
+          d:`<span class="ac-skip">continue</span>: isSelected[${i}]==true → 이미 선택됨`});
+        continue;
+      }
+
+      roundIn[cnt]=IN[i];
+      S.push({l:15,v:{cnt,i},ri:[...roundIn],is:[...isSel],o:[...out],sk:[...stk],
+        nid:node.id,ns:{...ns},a:'set',ops1,win,lose,draw,permCount,si_idx:cnt,
+        d:`<span class="ac-set">roundIn[${cnt}] = in[${i}]</span> → roundIn[${cnt}] = ${IN[i]}`});
+
+      isSel[i]=true;
+      S.push({l:16,v:{cnt,i},ri:[...roundIn],is:[...isSel],o:[...out],sk:[...stk],
+        nid:node.id,ns:{...ns},a:'sel',ops1,win,lose,draw,permCount,bi:i,
+        d:`<span class="ac-sel">isSelected[${i}] = true</span> → in[${i}](=${IN[i]}) 선택됨`});
+
+      S.push({l:17,v:{cnt,i},ri:[...roundIn],is:[...isSel],o:[...out],sk:[...stk],
+        nid:node.id,ns:{...ns},a:'recurse',ops1,win,lose,draw,permCount,
+        d:`<span class="ac-call">permutation(${cnt+1})</span> 재귀 호출`});
+
+      stk.push({cnt,i});
+      curPath.push(i);
+      perm(cnt+1);
+      curPath.pop();
+      stk.pop();
+
+      ns[node.id]='active';
+      isSel[i]=false;
+      S.push({l:18,v:{cnt,i},ri:[...roundIn],is:[...isSel],o:[...out],sk:[...stk],
+        nid:node.id,ns:{...ns},a:'desel',ops1,win,lose,draw,permCount,bi:i,
+        d:`<span class="ac-desel">isSelected[${i}] = false</span> → 되돌리기 (backtrack)`});
+    }
+    ns[node.id]='back';
+  }
+
+  perm(0);
+  return{steps:S,tree:td};
+}
+
+// ===== genSteps2: Method 2 (with parameters) =====
+function genSteps2(){
+  const S=[];
+  const td=buildTree();initTree(td);
+  let isSel=[false,false,false,false],out=[],stk=[];
+  let ops2=0,win=0,lose=0,draw=0,permCount=0;
+  const ns={};td.all.forEach(n=>ns[n.id]='unvisited');
+  const nl={};// node labels: id -> "G:x I:y"
+  let curPath=[];
+
+  function perm(cnt,sumGyu,sumIn){
+    const node=findNode(td,curPath);
+    ns[node.id]='active';
+    nl[node.id]=`G:${sumGyu} I:${sumIn}`;
+    // Mark ancestors as onpath
+    for(let d=1;d<curPath.length;d++){
+      const anc=findNode(td,curPath.slice(0,d));
+      if(ns[anc.id]==='active'||ns[anc.id]==='back')ns[anc.id]='onpath';
+    }
+
+    S.push({l:7,v:{cnt,i:'-',sumGyu,sumIn},is:[...isSel],o:[...out],sk:[...stk],
+      nid:node.id,ns:{...ns},nl:{...nl},a:'call',ops2,win,lose,draw,permCount,
+      d:`<span class="ac-call">permutation(${cnt}, ${sumGyu}, ${sumIn})</span> 호출${cnt===0?' (시작)':''}`});
+
+    if(cnt===N){
+      S.push({l:8,v:{cnt,i:'-',sumGyu,sumIn},is:[...isSel],o:[...out],sk:[...stk],
+        nid:node.id,ns:{...ns},nl:{...nl},a:'base',ops2,win,lose,draw,permCount,
+        d:`cnt(${cnt}) == 4 → <span class="ac-pr">기저조건! 비교만 수행 (연산 증가 없음!)</span>`});
+
+      permCount++;
+      const resultText=sumGyu>sumIn?'규영 승!':sumGyu<sumIn?'인영 승!':'무승부';
+      if(sumGyu>sumIn)win++; else if(sumGyu<sumIn)lose++; else draw++;
+      const ol=`G:${sumGyu} I:${sumIn} → ${resultText}`;
+      out.push(ol);
+      ns[node.id]='completed';
+      S.push({l:sumGyu>sumIn?9:10,v:{cnt,i:'-',sumGyu,sumIn},is:[...isSel],o:[...out],sk:[...stk],
+        nid:node.id,ns:{...ns},nl:{...nl},a:'result',ops2,win,lose,draw,permCount,
+        d:`<span class="ac-res">결과: ${resultText}</span> (규영 ${sumGyu}점 vs 인영 ${sumIn}점) — 연산 없음!`});
+      return;
+    }
+
+    for(let i=0;i<N;i++){
+      ns[node.id]='active';
+      S.push({l:13,v:{cnt,i,sumGyu,sumIn},is:[...isSel],o:[...out],sk:[...stk],
+        nid:node.id,ns:{...ns},nl:{...nl},a:'loop',ops2,win,lose,draw,permCount,
+        d:`<span class="ac-lp">for문</span>: i=${i} (in[${i}]=${IN[i]})`});
+
+      if(isSel[i]){
+        S.push({l:14,v:{cnt,i,sumGyu,sumIn},is:[...isSel],o:[...out],sk:[...stk],
+          nid:node.id,ns:{...ns},nl:{...nl},a:'skip',ops2,win,lose,draw,permCount,
+          d:`<span class="ac-skip">continue</span>: isSelected[${i}]==true → 이미 선택됨`});
+        continue;
+      }
+
+      isSel[i]=true;
+      S.push({l:15,v:{cnt,i,sumGyu,sumIn},is:[...isSel],o:[...out],sk:[...stk],
+        nid:node.id,ns:{...ns},nl:{...nl},a:'sel',ops2,win,lose,draw,permCount,bi:i,
+        d:`<span class="ac-sel">isSelected[${i}] = true</span> → in[${i}](=${IN[i]}) 선택됨`});
+
+      const g=GYU[cnt],c=IN[i];
+      const gw=g>c;
+      ops2++;
+      let nsg=sumGyu,nsi=sumIn;
+      if(gw)nsg+=g+c; else nsi+=g+c;
+
+      S.push({l:gw?17:19,v:{cnt,i,sumGyu:nsg,sumIn:nsi},is:[...isSel],o:[...out],sk:[...stk],
+        nid:node.id,ns:{...ns},nl:{...nl},a:'calcAndRecurse',ops2,win,lose,draw,permCount,
+        d:`<span class="ac-calc">라운드${cnt+1}</span>: 규영(${g}) vs 인영(${c}) → ${gw?'규영':'인영'} +${g+c} → <span class="ac-call">permutation(${cnt+1}, ${nsg}, ${nsi})</span>`});
+
+      stk.push({cnt,i,sumGyu,sumIn});
+      curPath.push(i);
+      perm(cnt+1,nsg,nsi);
+      curPath.pop();
+      stk.pop();
+
+      ns[node.id]='active';
+      isSel[i]=false;
+      S.push({l:20,v:{cnt,i,sumGyu,sumIn},is:[...isSel],o:[...out],sk:[...stk],
+        nid:node.id,ns:{...ns},nl:{...nl},a:'desel',ops2,win,lose,draw,permCount,bi:i,
+        d:`<span class="ac-desel">isSelected[${i}] = false</span> → 되돌리기 (backtrack)`});
+    }
+    ns[node.id]='back';
+  }
+
+  perm(0,0,0);
+  return{steps:S,tree:td};
+}
+
+// ===== State =====
+let curMethod=1;
+let steps=[],ci=-1,playing=false,timer=null,spVal=5,treeData=null;
+let cache1=null,cache2=null;
+
+function switchMethod(m){
+  if(m===curMethod)return;
+  stop();
+  curMethod=m;
+  document.getElementById('tab1').classList.toggle('tab-active',m===1);
+  document.getElementById('tab2').classList.toggle('tab-active',m===2);
+  initCode();
+  rebuild();
+}
+
+function rebuild(){
+  ci=-1;
+  if(curMethod===1){
+    if(!cache1)cache1=genSteps1();
+    else{initTree(cache1.tree);}
+    steps=cache1.steps;treeData=cache1.tree;
+  }else{
+    if(!cache2)cache2=genSteps2();
+    else{initTree(cache2.tree);}
+    steps=cache2.steps;treeData=cache2.tree;
+  }
+  render();
+}
+
+// ===== Render =====
+function render(){
+  // Clear code highlights
+  document.querySelectorAll('.cl.active,.cl.skip-line,.cl.calc-line').forEach(e=>{
+    e.classList.remove('active','skip-line','calc-line');
+  });
+
+  if(ci<0){
+    // Initial state
+    renderInitial();
+    return;
+  }
+
+  const s=steps[ci];
+
+  // Code highlight
+  const el=document.getElementById('L'+s.l);
+  if(el){
+    if(s.a==='skip')el.classList.add('skip-line');
+    else if(s.a==='calcRound')el.classList.add('calc-line');
+    else el.classList.add('active');
+    el.scrollIntoView({block:'nearest',behavior:'smooth'});
+  }
+
+  // Variables
+  renderVars(s);
+  // Cards
+  renderCards(s);
+  // Boolean array
+  renderBool(s);
+  // Description
+  document.getElementById('dc').innerHTML=s.d;
+  // Tree
+  renderTree(s);
+  // Ops bars
+  renderOps(s);
+  // Console
+  renderConsole(s);
+  // Step info
+  document.getElementById('si').textContent=`${ci+1} / ${steps.length}`;
+}
+
+function renderInitial(){
+  // Variables
+  if(curMethod===1){
+    document.getElementById('vc').innerHTML='<span class="vb v-cnt">cnt = -</span><span class="vb v-i">i = -</span><span class="cs-label">콜스택:</span><span class="cs-val">[]</span>';
+  }else{
+    document.getElementById('vc').innerHTML='<span class="vb v-cnt">cnt = -</span><span class="vb v-i">i = -</span><span class="vb v-sg">sumGyu = 0</span><span class="vb v-si">sumIn = 0</span><span class="cs-label">콜스택:</span><span class="cs-val">[]</span>';
+  }
+  // Cards
+  let ch='';
+  for(let r=0;r<N;r++){
+    ch+=`<div class="rslot"><div class="rlabel">R${r+1}</div><div class="card card-g">${GYU[r]}</div><div style="font-size:11px;color:#999">VS</div><div class="card card-empty">?</div><div class="card-win">&nbsp;</div></div>`;
+  }
+  document.getElementById('rc').innerHTML=ch;
+  // Boolean
+  let bh='';
+  for(let i=0;i<N;i++)bh+=`<div class="bb"><div class="box">F</div><div class="idx">[${i}]=${IN[i]}</div></div>`;
+  document.getElementById('bc').innerHTML=bh;
+  // Description
+  document.getElementById('dc').innerHTML='방법을 선택하고 ▶ 재생 또는 다음 버튼으로 시작하세요.';
+  // Tree reset
+  if(treeData){
+    treeData.all.forEach(n=>{
+      const c=document.getElementById('N'+n.id);if(c)c.className.baseVal='tree-node tn-unvisited';
+      const e=document.getElementById('E'+n.id);if(e)e.className.baseVal='te-unvisited';
+      const el2=document.getElementById('EL'+n.id);if(el2)el2.style.opacity='0.3';
+      const nl=document.getElementById('NL'+n.id);if(nl)nl.textContent=n.d;
+      const sl=document.getElementById('SL'+n.id);if(sl)sl.style.display='none';
+    });
+  }
+  // Ops
+  document.getElementById('opsFill1').style.width='0%';
+  document.getElementById('opsNum1').textContent='0';
+  document.getElementById('opsFill2').style.width='0%';
+  document.getElementById('opsNum2').textContent='0';
+  document.getElementById('opsFill1').classList.toggle('inactive',curMethod!==1);
+  document.getElementById('opsFill2').classList.toggle('inactive',curMethod!==2);
+  // Console
+  document.getElementById('ob').innerHTML='';
+  document.getElementById('oc').textContent='(0개)';
+  document.getElementById('si').textContent=`0 / ${steps.length}`;
+}
+
+function renderVars(s){
+  const v=s.v;
+  if(curMethod===1){
+    const skStr=[...s.sk.map(x=>`perm(${x.cnt})`),`perm(${v.cnt})`].join(' → ');
+    document.getElementById('vc').innerHTML=
+      `<span class="vb v-cnt">cnt = ${v.cnt}</span><span class="vb v-i">i = ${v.i}</span>`+
+      `<span class="cs-label">콜스택:</span><span class="cs-val">${skStr}</span>`+
+      `<span style="margin-left:16px;font-size:13px;color:#64748b">승:<b style="color:#2e7d32">${s.win}</b> 패:<b style="color:#c62828">${s.lose}</b> 무:<b>${s.draw}</b> 순열:<b>${s.permCount}/24</b></span>`;
+  }else{
+    const skStr=[...s.sk.map(x=>`perm(${x.cnt},${x.sumGyu},${x.sumIn})`),`perm(${v.cnt},${v.sumGyu},${v.sumIn})`].join(' → ');
+    document.getElementById('vc').innerHTML=
+      `<span class="vb v-cnt">cnt = ${v.cnt}</span><span class="vb v-i">i = ${v.i}</span>`+
+      `<span class="vb v-sg">sumGyu = ${v.sumGyu}</span><span class="vb v-si">sumIn = ${v.sumIn}</span>`+
+      `<span class="cs-label">콜스택:</span><span class="cs-val">${skStr}</span>`+
+      `<span style="margin-left:16px;font-size:13px;color:#64748b">승:<b style="color:#2e7d32">${s.win}</b> 패:<b style="color:#c62828">${s.lose}</b> 무:<b>${s.draw}</b> 순열:<b>${s.permCount}/24</b></span>`;
+  }
+}
+
+function renderCards(s){
+  // Reconstruct which cards are placed based on call stack + current
+  const placed=new Array(N).fill(null);
+  if(curMethod===1&&s.ri){
+    // Use roundIn array
+    for(let r=0;r<N;r++){
+      if(s.ri[r]!==0)placed[r]=s.ri[r];
+    }
+    // Only show up to valid depth (roundIn may have stale values after backtrack)
+    const validDepth=s.a==='base'||s.a==='calcRound'||s.a==='result'?N:
+                     s.a==='set'||s.a==='sel'||s.a==='recurse'?s.v.cnt+1:
+                     s.v.cnt;
+    for(let r=validDepth;r<N;r++)placed[r]=null;
+  }else if(curMethod===2){
+    // Reconstruct from stack
+    for(let k=0;k<s.sk.length;k++){
+      const frame=s.sk[k];
+      placed[frame.cnt]=IN[frame.i];
+    }
+    if(s.v.i!=='-'&&(s.a==='sel'||s.a==='calcAndRecurse')){
+      placed[s.v.cnt]=IN[s.v.i];
+    }
+  }
+
+  let ch='';
+  for(let r=0;r<N;r++){
+    const hasCard=placed[r]!==null&&placed[r]!==0;
+    const isCalcRound=s.a==='calcRound'&&s.calcRound===r;
+    const cardCls=hasCard?(isCalcRound?'card card-i flash-calc':'card card-i'):'card card-empty';
+    const cardVal=hasCard?placed[r]:'?';
+    let winText='&nbsp;';
+    if(hasCard){
+      const g=GYU[r],c=placed[r];
+      if(g>c)winText=`<span class="gw">규+${g+c}</span>`;
+      else winText=`<span class="iw">인+${g+c}</span>`;
+    }
+    ch+=`<div class="rslot"><div class="rlabel">R${r+1}</div><div class="card card-g">${GYU[r]}</div><div style="font-size:11px;color:#999">VS</div><div class="${cardCls}" id="ci_${r}">${cardVal}</div><div class="card-win">${winText}</div></div>`;
+  }
+  document.getElementById('rc').innerHTML=ch;
+}
+
+function renderBool(s){
+  let bhi=-1,bsel=false;
+  if(s.a==='sel'){bhi=s.bi;bsel=true;}
+  else if(s.a==='desel'){bhi=s.bi;bsel=false;}
+  let bh='';
+  for(let i=0;i<N;i++){
+    let bc='bb';
+    if(i===bhi)bc+=bsel?' bsel':' bdesel';
+    else if(s.is[i])bc+=' btrue';
+    bh+=`<div class="${bc}"><div class="box">${s.is[i]?'T':'F'}</div><div class="idx">[${i}]=${IN[i]}</div></div>`;
+  }
+  document.getElementById('bc').innerHTML=bh;
+}
+
+function renderTree(s){
+  if(!treeData)return;
+  const nst=s.ns;
+  treeData.all.forEach(n=>{
+    const st=nst[n.id]||'unvisited';
+    const c=document.getElementById('N'+n.id);if(c)c.className.baseVal='tree-node tn-'+st;
+    const e=document.getElementById('E'+n.id);
+    if(e){
+      // Edge state follows the child node state
+      if(st==='calc')e.className.baseVal='te-calc';
+      else e.className.baseVal='te-'+st;
+    }
+    const el=document.getElementById('EL'+n.id);
+    if(el)el.style.opacity=(st==='unvisited')?'0.3':'1';
+    // Node labels for method 2
+    const nlEl=document.getElementById('NL'+n.id);
+    const slEl=document.getElementById('SL'+n.id);
+    if(curMethod===2&&s.nl&&s.nl[n.id]){
+      if(nlEl)nlEl.textContent=n.d;
+      if(slEl){slEl.textContent=s.nl[n.id];slEl.style.display='block';}
+    }else{
+      if(nlEl)nlEl.textContent=n.d;
+      if(slEl)slEl.style.display='none';
+    }
+  });
+  // Scroll active node into view
+  const ac=document.getElementById('N'+s.nid);
+  if(ac)ac.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+}
+
+function renderOps(s){
+  const ops1=curMethod===1?(s.ops1||0):96;
+  const ops2=curMethod===2?(s.ops2||0):64;
+  const fill1=document.getElementById('opsFill1');
+  const fill2=document.getElementById('opsFill2');
+  fill1.style.width=(ops1/96*100)+'%';
+  fill2.style.width=(ops2/96*100)+'%';// same scale (96 max) for fair comparison
+  document.getElementById('opsNum1').textContent=ops1;
+  document.getElementById('opsNum2').textContent=ops2;
+  fill1.classList.toggle('inactive',curMethod!==1);
+  fill2.classList.toggle('inactive',curMethod!==2);
+}
+
+function renderConsole(s){
+  const ob=document.getElementById('ob');
+  ob.innerHTML=s.o.map((l,i)=>`<div${i===s.o.length-1&&s.a==='result'?' class="new"':''}>${i+1}. ${l}</div>`).join('');
+  ob.scrollTop=ob.scrollHeight;
+  document.getElementById('oc').textContent=`(${s.o.length}개)`;
+}
+
+// ===== Playback controls =====
+function doReset(){stop();ci=-1;render();}
+function prev(){stop();if(ci>-1){ci--;render();}}
+function next(){if(ci<steps.length-1){ci++;render();}else stop();}
+function togglePlay(){playing?stop():start();}
+function start(){if(ci>=steps.length-1)ci=-1;playing=true;document.getElementById('playBtn').textContent='⏸ 정지';document.getElementById('playBtn').classList.add('playing');tick();}
+function stop(){playing=false;clearTimeout(timer);timer=null;document.getElementById('playBtn').textContent='▶ 재생';document.getElementById('playBtn').classList.remove('playing');}
+function tick(){if(!playing)return;const d=1100-spVal*100;timer=setTimeout(()=>{next();if(playing&&ci<steps.length-1)tick();else stop();},d);}
+function skipOut(){stop();for(let i=ci+1;i<steps.length;i++){if(steps[i].a==='result'){ci=i;render();return;}}ci=steps.length-1;render();}
+
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();next();}
+  else if(e.key==='ArrowLeft'){e.preventDefault();prev();}
+  else if(e.key==='Enter'){e.preventDefault();togglePlay();}
+  else if(e.key==='r'||e.key==='R')doReset();
+  else if(e.key==='s'||e.key==='S')skipOut();
+  else if(e.key==='1')switchMethod(1);
+  else if(e.key==='2')switchMethod(2);
+});
+
+// ===== Init =====
+initCode();
+rebuild();
+</script>
+</body>
+</html>
