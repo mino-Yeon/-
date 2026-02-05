@@ -19,8 +19,14 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0
 .controls input[type=range]{width:80px;vertical-align:middle;}
 .step-info{color:#94a3b8;font-size:13px;margin-left:auto;}
 .main{display:flex;flex:1;overflow:hidden;}
-.code-panel{width:38%;min-width:320px;background:#1e1e1e;display:flex;flex-direction:column;border-right:2px solid #34495e;}
-.panel-hd{background:#2d2d2d;color:#94a3b8;padding:8px 16px;font-size:12px;font-weight:600;border-bottom:1px solid #3d3d3d;}
+.code-panel{width:38%;min-width:320px;background:#1e1e1e;display:flex;flex-direction:column;border-right:2px solid #34495e;transition:width .3s,min-width .3s;}
+.code-panel.collapsed{width:40px;min-width:40px;}
+.code-panel.collapsed .code-body{display:none;}
+.code-panel.collapsed .panel-hd span{display:none;}
+.panel-hd{background:#2d2d2d;color:#94a3b8;padding:8px 16px;font-size:12px;font-weight:600;border-bottom:1px solid #3d3d3d;cursor:pointer;user-select:none;display:flex;align-items:center;gap:8px;}
+.panel-hd:hover{background:#3d3d3d;}
+.panel-hd::before{content:'◀';font-size:10px;transition:transform .3s;}
+.code-panel.collapsed .panel-hd::before{transform:rotate(180deg);}
 .code-body{flex:1;overflow-y:auto;padding:8px 0;}
 .cl{display:flex;padding:1px 0;font-family:'Consolas','D2Coding',monospace;font-size:13px;line-height:1.6;transition:background .15s;}
 .cl.active{background:#264f78;}
@@ -94,8 +100,8 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0
   <span class="kbd-help">키보드: ←→ 이전/다음 · Space 재생 · S 다음출력 · R 처음</span>
 </div>
 <div class="main">
-  <div class="code-panel">
-    <div class="panel-hd">Java Code</div>
+  <div class="code-panel" id="codePanel">
+    <div class="panel-hd" onclick="toggleCode()"><span>Java Code</span></div>
     <div class="code-body" id="cb"></div>
   </div>
   <div class="viz-panel">
@@ -150,6 +156,7 @@ const SRC=[
 ];
 function hl(t){t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');let cm='';t=t.replace(/(\/\/.*)$/gm,function(m){cm=m;return '\x00CM';});let ss=[];t=t.replace(/"([^"]*)"/g,function(m){ss.push(m);return '\x00S'+(ss.length-1);});t=t.replace(/\b(package|import|public|class|static|void|new|for|int|if|return)\b/g,'<span class="kw">$1</span>');t=t.replace(/\b(String|Arrays|Integer|System|Scanner)\b/g,'<span class="tp">$1</span>');t=t.replace(/\b(\d+)\b/g,'<span class="nm">$1</span>');ss.forEach((s,i)=>{t=t.replace('\x00S'+i,'<span class="st">'+s+'</span>');});if(cm)t=t.replace('\x00CM','<span class="cm">'+cm+'</span>');return t;}
 function initCode(){document.getElementById('cb').innerHTML=SRC.map((l,i)=>`<div class="cl" id="L${i+1}"><span class="ln">${i+1}</span><span class="lc">${hl(l)}</span></div>`).join('');}
+function toggleCode(){document.getElementById('codePanel').classList.toggle('collapsed');}
 
 const A=[3,5,7,9],N=4;
 let R=3;

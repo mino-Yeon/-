@@ -21,8 +21,14 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0
 .step-info{color:#94a3b8;font-size:13px;margin-left:auto;}
 .kbd-help{color:#64748b;font-size:11px;margin-left:8px;}
 .main{display:flex;flex:1;overflow:hidden;}
-.code-panel{width:38%;min-width:320px;background:#1e1e1e;display:flex;flex-direction:column;border-right:2px solid #283593;}
-.panel-hd{background:#2d2d2d;color:#94a3b8;padding:8px 16px;font-size:12px;font-weight:600;border-bottom:1px solid #3d3d3d;}
+.code-panel{width:38%;min-width:320px;background:#1e1e1e;display:flex;flex-direction:column;border-right:2px solid #283593;transition:width .3s,min-width .3s;}
+.code-panel.collapsed{width:40px;min-width:40px;}
+.code-panel.collapsed .code-body{display:none;}
+.code-panel.collapsed .panel-hd span{display:none;}
+.panel-hd{background:#2d2d2d;color:#94a3b8;padding:8px 16px;font-size:12px;font-weight:600;border-bottom:1px solid #3d3d3d;cursor:pointer;user-select:none;display:flex;align-items:center;gap:8px;}
+.panel-hd:hover{background:#3d3d3d;}
+.panel-hd::before{content:'◀';font-size:10px;transition:transform .3s;}
+.code-panel.collapsed .panel-hd::before{transform:rotate(180deg);}
 .code-body{flex:1;overflow-y:auto;padding:8px 0;}
 .cl{display:flex;padding:1px 0;font-family:'Consolas','D2Coding',monospace;font-size:13px;line-height:1.6;transition:background .15s;}
 .cl.active{background:#264f78;}
@@ -121,8 +127,8 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0
   <span class="kbd-help">키보드: ←→ 이전/다음 · Space 재생 · S 다음결과 · R 처음 · 1/2 방법전환</span>
 </div>
 <div class="main">
-  <div class="code-panel">
-    <div class="panel-hd" id="codeTitle">Java Code - 방법 1</div>
+  <div class="code-panel" id="codePanel">
+    <div class="panel-hd" id="codeTitle" onclick="toggleCode()"><span>Java Code - 방법 1</span></div>
     <div class="code-body" id="cb"></div>
   </div>
   <div class="viz-panel">
@@ -208,7 +214,11 @@ function initCode(){
   const src=curMethod===1?SRC1:SRC2;
   document.getElementById('cb').innerHTML=src.map((l,i)=>
     `<div class="cl" id="L${i+1}"><span class="ln">${i+1}</span><span class="lc">${hl(l)}</span></div>`).join('');
-  document.getElementById('codeTitle').textContent=curMethod===1?'Java Code - 방법 1 (매개변수 X)':'Java Code - 방법 2 (매개변수 O)';
+  document.getElementById('codeTitle').querySelector('span').textContent=curMethod===1?'Java Code - 방법 1 (매개변수 X)':'Java Code - 방법 2 (매개변수 O)';
+}
+
+function toggleCode(){
+  document.getElementById('codePanel').classList.toggle('collapsed');
 }
 
 // ===== Tree building =====
