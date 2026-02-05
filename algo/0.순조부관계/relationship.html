@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>순열·조합·부분집합 관계 시뮬레이터</title>
+<style>
+/* ── Reset & Base ── */
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','Malgun Gothic',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+
+/* ── Container ── */
+.container{max-width:1060px;margin:0 auto;padding:24px 20px 60px}
+
+/* ── Header ── */
+h1{text-align:center;font-size:1.7rem;font-weight:700;margin-bottom:8px;color:#1a1a2e}
+.subtitle{text-align:center;color:#666;font-size:.95rem;margin-bottom:28px}
+
+/* ── Control Panel ── */
+.controls{background:#fff;border-radius:14px;padding:22px 28px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:20px}
+.ctrl-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.ctrl-row:last-child{margin-bottom:0}
+.ctrl-label{font-weight:600;font-size:.92rem;min-width:110px;color:#444}
+.elem-btn{width:44px;height:44px;border-radius:10px;border:2.5px solid #d0d5dd;background:#fff;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .2s}
+.elem-btn:hover{border-color:#667eea;background:#f0f0ff}
+.elem-btn.on{background:#667eea;color:#fff;border-color:#667eea}
+.r-btn{min-width:40px;height:38px;border-radius:8px;border:2px solid #d0d5dd;background:#fff;font-size:1rem;font-weight:600;cursor:pointer;transition:all .2s;padding:0 10px}
+.r-btn:hover{border-color:#667eea;background:#f0f0ff}
+.r-btn.on{background:#667eea;color:#fff;border-color:#667eea}
+.r-btn:disabled{opacity:.35;cursor:not-allowed}
+.info-badge{background:#e8ecf4;padding:4px 12px;border-radius:20px;font-size:.85rem;font-weight:600;color:#555}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:4px;margin-bottom:0;background:#fff;border-radius:14px 14px 0 0;padding:8px 8px 0;box-shadow:0 -2px 12px rgba(0,0,0,.03)}
+.tab{flex:1;padding:13px 8px;border:none;background:transparent;font-size:.95rem;font-weight:600;cursor:pointer;border-radius:10px 10px 0 0;transition:all .2s;color:#888;border-bottom:3px solid transparent}
+.tab:hover{background:#f5f5f5;color:#555}
+.tab.active-dp{background:#fff8f0;color:#e67e22;border-bottom-color:#e67e22}
+.tab.active-pm{background:#f0f4ff;color:#2563eb;border-bottom-color:#2563eb}
+.tab.active-cb{background:#f0faf4;color:#16a34a;border-bottom-color:#16a34a}
+.tab.active-ss{background:#f8f0ff;color:#9333ea;border-bottom-color:#9333ea}
+
+/* ── Content ── */
+.content{background:#fff;border-radius:0 0 14px 14px;padding:28px;box-shadow:0 4px 16px rgba(0,0,0,.06);min-height:320px}
+
+/* ── Formula ── */
+.formula-box{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.formula{font-size:1.15rem;font-weight:700;letter-spacing:.3px}
+.formula .val{font-size:1.3rem}
+.formula-dp .val{color:#e67e22}
+.formula-pm .val{color:#2563eb}
+.formula-cb .val{color:#16a34a}
+.formula-ss .val{color:#9333ea}
+.count-badge{padding:5px 14px;border-radius:20px;font-weight:700;font-size:.9rem;color:#fff}
+.count-dp{background:#e67e22}
+.count-pm{background:#2563eb}
+.count-cb{background:#16a34a}
+.count-ss{background:#9333ea}
+
+/* ── Result Chips ── */
+.results{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px}
+.chip{padding:6px 13px;border-radius:8px;font-family:'Consolas','Courier New',monospace;font-size:.92rem;font-weight:600;border:2px solid transparent;transition:all .2s;cursor:default;white-space:nowrap}
+.chip-dp{background:#fff3e0;color:#bf5f00}
+.chip-pm{background:#e3f0ff;color:#1e50a2}
+.chip-cb{background:#e6f7ed;color:#0d6832}
+.chip-ss{background:#f3e8ff;color:#6b21a8}
+
+/* highlight: permutation inside dupPerm */
+.chip-dp.is-perm{border-color:#e67e22;box-shadow:0 0 0 1px #e67e2244}
+.chip-dp.is-dup{opacity:.5;border-style:dashed;border-color:#ccc}
+
+/* grouped permutations */
+.perm-group{background:#fafbfd;border:1.5px solid #e2e6ee;border-radius:10px;padding:10px 14px;margin-bottom:10px}
+.perm-group-header{font-size:.82rem;font-weight:700;color:#888;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.perm-group-header .comb-label{padding:3px 10px;border-radius:6px;font-family:'Consolas',monospace;font-size:.88rem}
+.perm-group .results{margin-bottom:0}
+
+/* expandable combinations */
+.comb-item{margin-bottom:8px}
+.comb-chip{cursor:pointer;user-select:none;transition:all .2s}
+.comb-chip:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.comb-chip.expanded{border-color:#16a34a;box-shadow:0 0 0 2px #16a34a33}
+.comb-expand{overflow:hidden;max-height:0;transition:max-height .35s ease;padding-left:16px}
+.comb-expand.open{max-height:500px;margin-top:6px}
+.comb-expand .expand-label{font-size:.8rem;color:#888;margin-bottom:4px;font-weight:600}
+.comb-expand .results{gap:5px}
+.comb-expand .chip{font-size:.84rem;padding:4px 10px}
+
+/* subset groups */
+.subset-group{background:#fafbfd;border:1.5px solid #e2e6ee;border-radius:10px;padding:10px 14px;margin-bottom:10px;transition:all .2s}
+.subset-group.highlighted{border-color:#9333ea;background:#f8f0ff;box-shadow:0 0 0 2px #9333ea22}
+.subset-group-header{font-size:.85rem;font-weight:700;color:#888;margin-bottom:6px}
+.subset-group-header .size-label{color:#6b21a8;font-weight:700}
+
+/* ── Relationship Box ── */
+.rel-box{background:linear-gradient(135deg,#fafbff,#f5f0ff);border:1.5px solid #e0d8f0;border-radius:10px;padding:16px 20px;margin-top:4px}
+.rel-box h3{font-size:.92rem;color:#7c3aed;margin-bottom:8px}
+.rel-box p{font-size:.88rem;color:#555;line-height:1.55}
+.rel-box .formula-highlight{display:inline-block;background:#fff;border:1.5px solid #d4bfff;border-radius:6px;padding:2px 10px;font-family:'Consolas',monospace;font-weight:700;color:#6b21a8;margin:3px 2px}
+.rel-box .example{margin-top:8px;padding:10px 14px;background:#fff;border-radius:8px;font-size:.86rem;color:#444;border-left:3px solid #7c3aed}
+
+/* ── Summary Section ── */
+.summary{background:#fff;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-top:24px}
+.summary h2{font-size:1.15rem;margin-bottom:18px;color:#1a1a2e;text-align:center}
+.comparison-table{width:100%;border-collapse:collapse;margin-bottom:22px;font-size:.9rem}
+.comparison-table th,.comparison-table td{padding:10px 12px;text-align:center;border-bottom:1px solid #eee}
+.comparison-table th{background:#f8f9fb;font-weight:700;color:#555;font-size:.82rem}
+.comparison-table td:first-child{font-weight:700;text-align:left}
+.comparison-table .c-dp{color:#e67e22}
+.comparison-table .c-pm{color:#2563eb}
+.comparison-table .c-cb{color:#16a34a}
+.comparison-table .c-ss{color:#9333ea}
+.comparison-table .yes{color:#16a34a;font-weight:700}
+.comparison-table .no{color:#dc2626;font-weight:700}
+
+.key-rels{display:grid;gap:12px}
+.key-rel{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;font-size:.9rem;background:#fafbfd;border:1px solid #eee}
+.key-rel .kr-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;flex-shrink:0}
+.kr-icon-1{background:#e3f0ff;color:#2563eb}
+.kr-icon-2{background:#f3e8ff;color:#9333ea}
+.kr-icon-3{background:#fff3e0;color:#e67e22}
+.key-rel .kr-formula{font-family:'Consolas',monospace;font-weight:700;color:#333}
+.key-rel .kr-example{color:#888;font-size:.85rem;margin-left:4px}
+
+/* ── Too many results ── */
+.too-many{font-size:.85rem;color:#888;font-style:italic;margin-top:4px}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+    .container{padding:12px 10px 40px}
+    .controls{padding:14px 16px}
+    .content{padding:18px 14px}
+    .ctrl-label{min-width:80px;font-size:.85rem}
+    .elem-btn{width:38px;height:38px;font-size:1rem}
+    .tabs{padding:6px 4px 0}
+    .tab{font-size:.82rem;padding:10px 4px}
+    .summary{padding:18px 14px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>순열·조합·부분집합 관계 시뮬레이터</h1>
+    <p class="subtitle">개념 간의 관계를 실시간으로 확인하세요</p>
+
+    <!-- Controls -->
+    <div class="controls">
+        <div class="ctrl-row">
+            <span class="ctrl-label">원소 선택</span>
+            <div id="elemBtns"></div>
+            <span class="info-badge" id="nBadge">n = 3</span>
+        </div>
+        <div class="ctrl-row">
+            <span class="ctrl-label">뽑는 개수 (r)</span>
+            <div id="rBtns"></div>
+            <span class="info-badge" id="rBadge" style="display:none"></span>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab" data-tab="dupPerm" onclick="switchTab('dupPerm')">중복순열</button>
+        <button class="tab" data-tab="perm" onclick="switchTab('perm')">순열</button>
+        <button class="tab" data-tab="comb" onclick="switchTab('comb')">조합</button>
+        <button class="tab" data-tab="subset" onclick="switchTab('subset')">부분집합</button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="content" id="tabContent"></div>
+
+    <!-- Relationship Summary -->
+    <div class="summary">
+        <h2>관계 요약</h2>
+        <table class="comparison-table" id="compTable"></table>
+        <div class="key-rels" id="keyRels"></div>
+    </div>
+</div>
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+const ALL = ['A','B','C','D','E'];
+let elems = ['A','B','C'];
+let r = 2;
+let tab = 'dupPerm';
+let expandedComb = null;  // index of expanded combination on comb tab
+
+/* ============================================================
+   ALGORITHMS
+   ============================================================ */
+function genDupPerm(el, k) {
+    if (k === 0) return [[]];
+    const res = [];
+    const sub = genDupPerm(el, k - 1);
+    for (const e of el)
+        for (const s of sub)
+            res.push([e, ...s]);
+    return res;
+}
+
+function genPerm(el, k) {
+    if (k === 0) return [[]];
+    const res = [];
+    for (let i = 0; i < el.length; i++) {
+        const rest = [...el.slice(0, i), ...el.slice(i + 1)];
+        for (const s of genPerm(rest, k - 1))
+            res.push([el[i], ...s]);
+    }
+    return res;
+}
+
+function genComb(el, k) {
+    if (k === 0) return [[]];
+    if (el.length < k) return [];
+    const res = [];
+    for (let i = 0; i <= el.length - k; i++)
+        for (const s of genComb(el.slice(i + 1), k - 1))
+            res.push([el[i], ...s]);
+    return res;
+}
+
+function genSubsets(el) {
+    let res = [[]];
+    for (const e of el)
+        res = res.concat(res.map(s => [...s, e]));
+    return res.sort((a, b) => a.length - b.length || a.toString().localeCompare(b.toString()));
+}
+
+/* ============================================================
+   MATH HELPERS
+   ============================================================ */
+function fact(n) { return n <= 1 ? 1 : n * fact(n - 1); }
+function nPr(n, k) { return k > n ? 0 : fact(n) / fact(n - k); }
+function nCr(n, k) { return k > n ? 0 : fact(n) / (fact(k) * fact(n - k)); }
+
+/* ============================================================
+   RENDERING HELPERS
+   ============================================================ */
+function chipHTML(arr, cls, extra = '') {
+    return `<span class="chip ${cls}" ${extra}>{${arr.join(', ')}}</span>`;
+}
+function arrStr(arr) { return arr.join(''); }
+
+const MAX_SHOW = 80;
+
+function resultChips(items, cls, extraFn) {
+    if (items.length === 0) return '<p style="color:#aaa;font-size:.9rem">결과 없음</p>';
+    let html = '<div class="results">';
+    const show = items.slice(0, MAX_SHOW);
+    show.forEach((it, i) => {
+        const ex = extraFn ? extraFn(it, i) : '';
+        html += `<span class="chip ${cls}" ${ex}>${arrStr(it)}</span>`;
+    });
+    html += '</div>';
+    if (items.length > MAX_SHOW)
+        html += `<p class="too-many">... 외 ${items.length - MAX_SHOW}개 (총 ${items.length}개)</p>`;
+    return html;
+}
+
+/* ============================================================
+   GROUP COLORS (for permutation grouping)
+   ============================================================ */
+const G_COLORS = [
+    {bg:'#e3f0ff',border:'#90bbf0'},
+    {bg:'#e6f7ed',border:'#7fd4a4'},
+    {bg:'#fff3e0',border:'#f0c070'},
+    {bg:'#fce4ec',border:'#f0a0b0'},
+    {bg:'#f3e8ff',border:'#c4a0e8'},
+    {bg:'#e0f7fa',border:'#80d0e0'},
+    {bg:'#fff8e1',border:'#e0d080'},
+    {bg:'#f1f8e9',border:'#a0d070'},
+    {bg:'#e8eaf6',border:'#9098d0'},
+    {bg:'#fbe9e7',border:'#e0a090'},
+    {bg:'#e0f2f1',border:'#80c8c0'},
+    {bg:'#ede7f6',border:'#b0a0d8'},
+    {bg:'#e1f5fe',border:'#80c8f0'},
+    {bg:'#f9fbe7',border:'#c8d870'},
+    {bg:'#fce4ec',border:'#e890a8'}
+];
+function gColor(i) { return G_COLORS[i % G_COLORS.length]; }
+
+/* ============================================================
+   TAB RENDERERS
+   ============================================================ */
+
+// ── 중복순열 ──
+function renderDupPerm() {
+    const n = elems.length;
+    const total = Math.pow(n, r);
+    const items = total <= 500 ? genDupPerm(elems, r) : null;
+    const permSet = new Set(genPerm(elems, r).map(arrStr));
+
+    let html = '';
+    // Formula
+    html += `<div class="formula-box">
+        <span class="formula formula-dp">n<sup>r</sup> = ${n}<sup>${r}</sup> = <span class="val">${total}</span></span>
+        <span class="count-badge count-dp">${total}가지</span>
+    </div>`;
+
+    // Results (always compute — max 5^5=3125 is fine for JS)
+    const items2 = items || genDupPerm(elems, r);
+    html += '<div class="results">';
+    items2.slice(0, MAX_SHOW).forEach(it => {
+        const s = arrStr(it);
+        const isPerm = permSet.has(s);
+        html += `<span class="chip chip-dp ${isPerm ? 'is-perm' : 'is-dup'}">${s}</span>`;
+    });
+    html += '</div>';
+    if (items2.length > MAX_SHOW)
+        html += `<p class="too-many">... 외 ${items2.length - MAX_SHOW}개 (총 ${items2.length}개)</p>`;
+
+    // Legend
+    const permCount = nPr(n, r);
+    const dupCount = total - permCount;
+    html += `<div style="margin-top:10px;font-size:.85rem;color:#666">
+        <span class="chip chip-dp is-perm" style="font-size:.8rem;padding:2px 8px">진한 것</span> = 순열에도 해당 (${permCount}개)&nbsp;&nbsp;
+        <span class="chip chip-dp is-dup" style="font-size:.8rem;padding:2px 8px">흐린 것</span> = 중복 사용 포함 (${dupCount}개)
+    </div>`;
+
+    // Relationship
+    html += `<div class="rel-box" style="margin-top:16px">
+        <h3>순열과의 관계</h3>
+        <p>중복순열에서 <b>같은 원소를 두 번 이상 사용한 경우를 제거</b>하면 순열이 됩니다.</p>
+        <div class="example">
+            중복순열 <span class="formula-highlight">${n}<sup>${r}</sup> = ${total}가지</span> 중에서
+            중복 없는 것만 남기면 → 순열 <span class="formula-highlight">${n}P${r} = ${nPr(n, r)}가지</span>
+        </div>
+    </div>`;
+
+    return html;
+}
+
+// ── 순열 ──
+function renderPerm() {
+    const n = elems.length;
+    const perms = genPerm(elems, r);
+    const combs = genComb(elems, r);
+
+    let html = '';
+    // Formula
+    html += `<div class="formula-box">
+        <span class="formula formula-pm">${n}P${r} = ${n}! / (${n}-${r})! = <span class="val">${nPr(n, r)}</span></span>
+        <span class="count-badge count-pm">${perms.length}가지</span>
+    </div>`;
+
+    // Grouped by combination
+    html += `<p style="font-size:.88rem;color:#888;margin-bottom:12px">같은 조합에서 나온 순열끼리 묶어 표시합니다 (${combs.length}개 그룹 × ${r > 0 ? r + '!' : '1'} = ${perms.length}개)</p>`;
+
+    combs.forEach((c, gi) => {
+        const cKey = arrStr(c);
+        const gc = gColor(gi);
+        const groupPerms = perms.filter(p => arrStr([...p].sort()) === arrStr([...c].sort()));
+        html += `<div class="perm-group" style="border-color:${gc.border};background:${gc.bg}22">
+            <div class="perm-group-header">
+                <span class="comb-label" style="background:${gc.bg};border:1.5px solid ${gc.border}">조합 {${c.join(', ')}}</span>
+                <span>→ ${fact(r)}개의 순열</span>
+            </div>
+            <div class="results">`;
+        groupPerms.forEach(p => {
+            html += `<span class="chip chip-pm" style="background:${gc.bg};border:1.5px solid ${gc.border}">${arrStr(p)}</span>`;
+        });
+        html += `</div></div>`;
+    });
+
+    // Relationship
+    html += `<div class="rel-box">
+        <h3>조합과의 관계</h3>
+        <p>같은 원소로 이루어진 순열들을 하나로 묶으면 <b>조합</b>이 됩니다.<br>
+        역으로, 하나의 조합을 나열하면 <b>r! 개의 순열</b>이 만들어집니다.</p>
+        <div class="example">
+            <span class="formula-highlight">${n}P${r} = ${n}C${r} × ${r}!</span>
+            → <span class="formula-highlight">${nPr(n, r)} = ${nCr(n, r)} × ${fact(r)}</span>
+        </div>
+    </div>`;
+
+    return html;
+}
+
+// ── 조합 ──
+function renderComb() {
+    const n = elems.length;
+    const combs = genComb(elems, r);
+
+    let html = '';
+    // Formula
+    html += `<div class="formula-box">
+        <span class="formula formula-cb">${n}C${r} = ${n}! / (${r}!·(${n}-${r})!) = <span class="val">${nCr(n, r)}</span></span>
+        <span class="count-badge count-cb">${combs.length}가지</span>
+    </div>`;
+
+    html += `<p style="font-size:.88rem;color:#888;margin-bottom:12px">조합을 클릭하면 해당 조합에서 만들 수 있는 순열이 펼쳐집니다.</p>`;
+
+    // Expandable combinations
+    combs.forEach((c, i) => {
+        const isExp = expandedComb === i;
+        const perms = genPerm(c, c.length);
+        html += `<div class="comb-item">
+            <span class="chip chip-cb comb-chip ${isExp ? 'expanded' : ''}"
+                  onclick="toggleExpand(${i})">{${c.join(', ')}}</span>
+            <div class="comb-expand ${isExp ? 'open' : ''}">
+                <div class="expand-label">이 조합을 나열하면 → ${r}! = ${fact(r)}가지 순열</div>
+                <div class="results">`;
+        perms.forEach(p => {
+            html += `<span class="chip chip-pm" style="font-size:.84rem;padding:4px 10px">${arrStr(p)}</span>`;
+        });
+        html += `</div></div></div>`;
+    });
+
+    // Relationship
+    html += `<div class="rel-box" style="margin-top:16px">
+        <h3>순열·부분집합과의 관계</h3>
+        <p><b>조합 → 순열:</b> 각 조합의 원소를 나열하면 r!개의 순열이 됩니다.</p>
+        <p style="margin-top:6px"><b>조합 → 부분집합:</b> 크기가 r인 부분집합의 개수 = nCr 입니다.<br>
+        모든 r(0~n)에 대한 nCr을 합치면 전체 부분집합(2<sup>n</sup>)이 됩니다.</p>
+        <div class="example">
+            <span class="formula-highlight">${n}P${r} = ${n}C${r} × ${r}! = ${nCr(n, r)} × ${fact(r)} = ${nPr(n, r)}</span><br>
+            <span class="formula-highlight">2<sup>${n}</sup> = ${Array.from({length: n + 1}, (_, k) => `${n}C${k}`).join(' + ')} = ${Array.from({length: n + 1}, (_, k) => nCr(n, k)).join(' + ')} = ${Math.pow(2, n)}</span>
+        </div>
+    </div>`;
+
+    return html;
+}
+
+// ── 부분집합 ──
+function renderSubset() {
+    const n = elems.length;
+    const subs = genSubsets(elems);
+    const total = Math.pow(2, n);
+
+    let html = '';
+    // Formula
+    html += `<div class="formula-box">
+        <span class="formula formula-ss">2<sup>n</sup> = 2<sup>${n}</sup> = <span class="val">${total}</span></span>
+        <span class="count-badge count-ss">${total}가지</span>
+    </div>`;
+
+    html += `<p style="font-size:.88rem;color:#888;margin-bottom:12px">크기별로 묶어 표시합니다. 현재 r=${r}에 해당하는 그룹이 강조됩니다.</p>`;
+
+    // Group by size
+    for (let sz = 0; sz <= n; sz++) {
+        const group = subs.filter(s => s.length === sz);
+        const isHL = sz === r;
+        html += `<div class="subset-group ${isHL ? 'highlighted' : ''}">
+            <div class="subset-group-header">
+                <span class="size-label">크기 ${sz}</span> :
+                ${n}C${sz} = <b>${nCr(n, sz)}개</b>
+                ${isHL ? ' ← <b style="color:#9333ea">현재 r과 동일 (= 조합의 결과)</b>' : ''}
+            </div>
+            <div class="results">`;
+        group.forEach(s => {
+            const label = s.length === 0 ? '∅' : `{${s.join(', ')}}`;
+            html += `<span class="chip chip-ss">${label}</span>`;
+        });
+        html += `</div></div>`;
+    }
+
+    // Sum line
+    html += `<div style="text-align:center;margin:14px 0 4px;font-size:.9rem;color:#555">
+        ${Array.from({length: n + 1}, (_, k) => `<span style="font-weight:700;color:${k === r ? '#9333ea' : '#666'}">${nCr(n, k)}</span>`).join(' + ')}
+        = <b>${total}</b> = 2<sup>${n}</sup>
+    </div>`;
+
+    // Relationship
+    html += `<div class="rel-box">
+        <h3>조합과의 관계</h3>
+        <p>크기가 r인 부분집합을 모은 것이 바로 <b>${n}C${r} (조합)</b>입니다.<br>
+        따라서 부분집합은 <b>모든 크기의 조합을 합친 것</b>과 같습니다.</p>
+        <div class="example">
+            2<sup>${n}</sup> = Σ<sub>r=0</sub><sup>${n}</sup> ${n}Cr
+            = ${Array.from({length: n + 1}, (_, k) => nCr(n, k)).join(' + ')}
+            = <b>${total}</b>
+        </div>
+    </div>`;
+
+    return html;
+}
+
+/* ============================================================
+   SUMMARY SECTION
+   ============================================================ */
+function renderSummary() {
+    const n = elems.length;
+    const dp = Math.pow(n, r);
+    const pm = nPr(n, r);
+    const cb = nCr(n, r);
+    const ss = Math.pow(2, n);
+
+    // Comparison table
+    let thtml = `<tr>
+        <th></th><th>순서 고려</th><th>중복 허용</th><th>공식</th><th>값 (n=${n}, r=${r})</th>
+    </tr>
+    <tr>
+        <td class="c-dp">중복순열</td><td class="yes">O</td><td class="yes">O</td>
+        <td>n<sup>r</sup></td><td class="c-dp" style="font-weight:700;font-size:1.05rem">${dp}</td>
+    </tr>
+    <tr>
+        <td class="c-pm">순열</td><td class="yes">O</td><td class="no">X</td>
+        <td>nPr</td><td class="c-pm" style="font-weight:700;font-size:1.05rem">${pm}</td>
+    </tr>
+    <tr>
+        <td class="c-cb">조합</td><td class="no">X</td><td class="no">X</td>
+        <td>nCr</td><td class="c-cb" style="font-weight:700;font-size:1.05rem">${cb}</td>
+    </tr>
+    <tr>
+        <td class="c-ss">부분집합</td><td colspan="2" style="color:#888;font-size:.82rem">모든 크기 포함</td>
+        <td>2<sup>n</sup></td><td class="c-ss" style="font-weight:700;font-size:1.05rem">${ss}</td>
+    </tr>`;
+    document.getElementById('compTable').innerHTML = thtml;
+
+    // Key relationships
+    let khtml = '';
+    khtml += `<div class="key-rel">
+        <div class="kr-icon kr-icon-1">1</div>
+        <div>
+            <span class="kr-formula">순열 = 조합 × r!</span>
+            <span class="kr-example">→ ${pm} = ${cb} × ${fact(r)}</span>
+        </div>
+    </div>`;
+    khtml += `<div class="key-rel">
+        <div class="kr-icon kr-icon-2">2</div>
+        <div>
+            <span class="kr-formula">부분집합 = Σ nCr (r=0~n)</span>
+            <span class="kr-example">→ ${ss} = ${Array.from({length: n + 1}, (_, k) => nCr(n, k)).join(' + ')}</span>
+        </div>
+    </div>`;
+    khtml += `<div class="key-rel">
+        <div class="kr-icon kr-icon-3">3</div>
+        <div>
+            <span class="kr-formula">중복순열 ⊇ 순열</span>
+            <span class="kr-example">→ ${dp} ≥ ${pm} (중복 허용 시 경우의 수 증가)</span>
+        </div>
+    </div>`;
+    document.getElementById('keyRels').innerHTML = khtml;
+}
+
+/* ============================================================
+   MAIN RENDER
+   ============================================================ */
+function render() {
+    // Elements buttons
+    const eb = document.getElementById('elemBtns');
+    eb.innerHTML = ALL.map(e =>
+        `<button class="elem-btn ${elems.includes(e) ? 'on' : ''}" onclick="toggleElem('${e}')">${e}</button>`
+    ).join('');
+    document.getElementById('nBadge').textContent = `n = ${elems.length}`;
+
+    // R buttons
+    const maxR = elems.length;
+    const rb = document.getElementById('rBtns');
+    let rhtml = '';
+    for (let i = 1; i <= Math.min(maxR, 5); i++)
+        rhtml += `<button class="r-btn ${r === i ? 'on' : ''}" onclick="setR(${i})">${i}</button>`;
+    rb.innerHTML = rhtml;
+
+    // Tabs
+    const tabClasses = {dupPerm:'active-dp', perm:'active-pm', comb:'active-cb', subset:'active-ss'};
+    document.querySelectorAll('.tab').forEach(t => {
+        t.className = 'tab' + (t.dataset.tab === tab ? ` ${tabClasses[tab]}` : '');
+    });
+
+    // Content
+    let content = '';
+    switch (tab) {
+        case 'dupPerm': content = renderDupPerm(); break;
+        case 'perm': content = renderPerm(); break;
+        case 'comb': content = renderComb(); break;
+        case 'subset': content = renderSubset(); break;
+    }
+    document.getElementById('tabContent').innerHTML = content;
+
+    // Summary
+    renderSummary();
+}
+
+/* ============================================================
+   EVENT HANDLERS
+   ============================================================ */
+function toggleElem(e) {
+    const idx = elems.indexOf(e);
+    if (idx >= 0) {
+        if (elems.length <= 2) return; // minimum 2
+        elems.splice(idx, 1);
+    } else {
+        elems.push(e);
+        elems.sort();
+    }
+    if (r > elems.length) r = elems.length;
+    expandedComb = null;
+    render();
+}
+
+function setR(newR) {
+    r = newR;
+    expandedComb = null;
+    render();
+}
+
+function switchTab(t) {
+    tab = t;
+    expandedComb = null;
+    render();
+}
+
+function toggleExpand(i) {
+    const prev = expandedComb;
+    expandedComb = expandedComb === i ? null : i;
+    const expands = document.querySelectorAll('.comb-expand');
+    const chips = document.querySelectorAll('.comb-chip');
+    if (prev !== null && expands[prev]) {
+        expands[prev].classList.remove('open');
+        chips[prev].classList.remove('expanded');
+    }
+    if (expandedComb !== null && expands[expandedComb]) {
+        requestAnimationFrame(() => {
+            expands[expandedComb].classList.add('open');
+            chips[expandedComb].classList.add('expanded');
+        });
+    }
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', render);
+</script>
+</body>
+</html>
