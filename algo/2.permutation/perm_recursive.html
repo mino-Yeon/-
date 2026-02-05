@@ -19,7 +19,7 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0
 .controls input[type=range]{width:80px;vertical-align:middle;}
 .step-info{color:#94a3b8;font-size:13px;margin-left:auto;}
 .main{display:flex;flex:1;overflow:hidden;}
-.code-panel{width:38%;min-width:320px;background:#1e1e1e;display:flex;flex-direction:column;border-right:2px solid #34495e;transition:width .3s,min-width .3s;}
+.code-panel{width:38%;min-width:320px;background:#1e1e1e;display:flex;flex-direction:column;transition:width .3s,min-width .3s;}
 .code-panel.collapsed{width:40px;min-width:40px;}
 .code-panel.collapsed .code-body{display:none;}
 .code-panel.collapsed .panel-hd span{display:none;}
@@ -87,6 +87,16 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0
 .kbd-help{color:#64748b;font-size:11px;margin-left:8px;}
 .highlight-box{display:inline-block;background:#fef3c7;border:1px solid #f59e0b;border-radius:4px;padding:0 6px;font-weight:700;color:#92400e;}
 .tree-note{text-align:center;color:#94a3b8;font-size:13px;padding:20px;line-height:1.6;}
+.viz-panel.tree-expanded .vs:not(.tree-sec):not(.desc-sec){display:none;}
+.viz-panel.tree-expanded .tree-sec{flex:1;}
+.tree-toggle{margin-left:auto;background:#64748b;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;}
+.tree-toggle:hover{background:#475569;}
+.resizer{width:6px;background:#34495e;cursor:col-resize;transition:background .15s;flex-shrink:0;}
+.resizer:hover,.resizer.dragging{background:#3498db;}
+body.resizing{cursor:col-resize;user-select:none;}
+body.resizing *{pointer-events:none;}
+body.resizing .resizer{pointer-events:auto;}
+.code-panel.collapsed+.resizer{display:none;}
 </style>
 </head>
 <body>
@@ -106,19 +116,20 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0
   <div class="sep"></div>
   <label>속도: <input type="range" id="spd" min="1" max="10" value="5" oninput="spVal=+this.value"></label>
   <span class="step-info" id="si">준비</span>
-  <span class="kbd-help">키보드: ←→ 이전/다음 · Space 재생 · S 다음출력 · R 처음</span>
+  <span class="kbd-help">키보드: ←→ 이전/다음 · Space 재생 · S 다음출력 · R 처음 · T 트리최대화</span>
 </div>
 <div class="main">
   <div class="code-panel" id="codePanel">
     <div class="panel-hd" onclick="toggleCode()"><span>Java Code</span></div>
     <div class="code-body" id="cb"></div>
   </div>
+  <div class="resizer" id="resizer"></div>
   <div class="viz-panel">
     <div class="vs"><div class="sh">변수 상태 / 콜스택</div><div class="sb"><div class="var-c" id="vc"></div></div></div>
     <div class="vs"><div class="sh">result (int[] 배열)</div><div class="sb"><div class="rc" id="rc"></div></div></div>
     <div class="vs"><div class="sh">isSelected (boolean[4]) &nbsp; <span style="color:#16a34a;font-size:11px;">* 중복 방지용!</span></div><div class="sb"><div class="bool-c" id="bc"></div></div></div>
-    <div class="vs"><div class="sh">실행 설명</div><div class="sb"><div class="desc" id="dc">R을 선택하고 ▶ 재생 또는 다음 버튼으로 시작하세요.</div></div></div>
-    <div class="vs tree-sec"><div class="sh">재귀 트리 (permutation 호출 구조) - 중복순열 구조에서 일부 경로 차단</div><div class="sb" id="tc"></div></div>
+    <div class="vs desc-sec"><div class="sh">실행 설명</div><div class="sb"><div class="desc" id="dc">R을 선택하고 ▶ 재생 또는 다음 버튼으로 시작하세요.</div></div></div>
+    <div class="vs tree-sec"><div class="sh">재귀 트리 (permutation 호출 구조) - 중복순열 구조에서 일부 경로 차단<button class="tree-toggle" id="treeToggle" onclick="toggleTreeExpand()">⤢ 최대화</button></div><div class="sb" id="tc"></div></div>
     <div class="vs out-sec"><div class="sh">콘솔 출력 <span id="oc">(0개)</span></div><div class="sb"><div class="ob" id="ob"></div></div></div>
   </div>
 </div>
@@ -411,7 +422,48 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='Enter'){e.preventDefault();togglePlay();}
   else if(e.key==='r'||e.key==='R'){if(document.activeElement.tagName!=='SELECT')doReset();}
   else if(e.key==='s'||e.key==='S')skipOut();
+  else if(e.key==='t'||e.key==='T')toggleTreeExpand();
 });
+
+// ===== Resizer =====
+(function(){
+  const resizer=document.getElementById('resizer');
+  const codePanel=document.getElementById('codePanel');
+  let startX,startW;
+  resizer.addEventListener('mousedown',function(e){
+    if(codePanel.classList.contains('collapsed'))return;
+    startX=e.clientX;
+    startW=codePanel.offsetWidth;
+    document.body.classList.add('resizing');
+    resizer.classList.add('dragging');
+    document.addEventListener('mousemove',onMouseMove);
+    document.addEventListener('mouseup',onMouseUp);
+  });
+  function onMouseMove(e){
+    const dx=e.clientX-startX;
+    const newW=Math.max(200,Math.min(startW+dx,window.innerWidth-300));
+    codePanel.style.width=newW+'px';
+    codePanel.style.minWidth=newW+'px';
+  }
+  function onMouseUp(){
+    document.body.classList.remove('resizing');
+    resizer.classList.remove('dragging');
+    document.removeEventListener('mousemove',onMouseMove);
+    document.removeEventListener('mouseup',onMouseUp);
+  }
+})();
+
+// ===== Tree expand =====
+function toggleTreeExpand(){
+  const vp=document.querySelector('.viz-panel');
+  const btn=document.getElementById('treeToggle');
+  vp.classList.toggle('tree-expanded');
+  if(vp.classList.contains('tree-expanded')){
+    btn.textContent='⤡ 축소';
+  }else{
+    btn.textContent='⤢ 최대화';
+  }
+}
 
 initCode();rebuild();
 </script>
