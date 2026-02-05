@@ -103,7 +103,7 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0
 <body>
 <div class="header">
   <h1>SWEA 6808: 규영이와 인영이 - 트리 시뮬레이션</h1>
-  <span class="sub">규영 카드: [1,3,5,7] &nbsp;|&nbsp; 인영 카드: [2,4,6,8] &nbsp;|&nbsp; 4장 축소 버전 (4! = 24 순열)</span>
+  <span class="sub">규영 카드: [7,5,3,1] &nbsp;|&nbsp; 인영 카드: [2,4,6,8] &nbsp;|&nbsp; 4장 축소 버전 (4! = 24 순열)</span>
 </div>
 <div class="controls">
   <button onclick="doReset()">⏮ 처음</button>
@@ -128,22 +128,22 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0
   <div class="viz-panel">
     <div class="vs"><div class="sh">변수 상태 / 콜스택</div><div class="sb"><div class="var-c" id="vc"></div></div></div>
     <div class="vs"><div class="sh">카드 라운드</div><div class="sb"><div class="round-c" id="rc"></div></div></div>
-    <div class="vs"><div class="sh">isSelected (boolean[4])</div><div class="sb"><div class="bool-c" id="bc"></div></div></div>
+    <!-- <div class="vs"><div class="sh">isSelected (boolean[4])</div><div class="sb"><div class="bool-c" id="bc"></div></div></div> -->
     <div class="vs"><div class="sh">실행 설명</div><div class="sb"><div class="desc" id="dc">방법을 선택하고 ▶ 재생 또는 다음 버튼으로 시작하세요.</div></div></div>
     <div class="vs tree-sec"><div class="sh">상태공간 트리 (순열 트리 - 65개 노드, 24개 리프)</div><div class="sb" id="tc"></div></div>
     <div class="vs ops-sec"><div class="sh">연산 횟수 비교 (라운드 비교 연산)</div><div class="sb">
       <div class="ops-row"><span class="ops-label" style="color:#6d28d9">방법 1 (완성 후 계산)</span><div class="ops-track"><div class="ops-fill m1" id="opsFill1"></div></div><span class="ops-num" id="opsNum1">0</span><span class="ops-max">/96</span></div>
       <div class="ops-row"><span class="ops-label" style="color:#0e7490">방법 2 (과정 중 계산)</span><div class="ops-track"><div class="ops-fill m2" id="opsFill2"></div></div><span class="ops-num" id="opsNum2">0</span><span class="ops-max">/64</span></div>
     </div></div>
-    <div class="vs out-sec"><div class="sh">콘솔 출력 <span id="oc">(0개)</span></div><div class="sb"><div class="ob" id="ob"></div></div></div>
+    <!-- <div class="vs out-sec"><div class="sh">콘솔 출력 <span id="oc">(0개)</span></div><div class="sb"><div class="ob" id="ob"></div></div></div> -->
   </div>
 </div>
 <script>
-const GYU=[1,3,5,7], IN=[2,4,6,8], N=4;
+const GYU=[7,5,3,1], IN=[2,4,6,8], N=4;
 
 // ===== Java source code =====
 const SRC1=[
-'static int[] roundGyu = {1, 3, 5, 7};',
+'static int[] roundGyu = {7, 5, 3, 1};',
 'static int[] in = {2, 4, 6, 8};',
 'static int N = 4;',
 'static int[] roundIn = new int[4];',
@@ -178,7 +178,7 @@ const SRC1=[
 ];
 
 const SRC2=[
-'static int[] roundGyu = {1, 3, 5, 7};',
+'static int[] roundGyu = {7, 5, 3, 1};',
 'static int[] in = {2, 4, 6, 8};',
 'static int N = 4;',
 'static boolean[] isSelected = new boolean[4];',
@@ -522,7 +522,7 @@ function render(){
   // Cards
   renderCards(s);
   // Boolean array
-  renderBool(s);
+  // renderBool(s);
   // Description
   document.getElementById('dc').innerHTML=s.d;
   // Tree
@@ -530,7 +530,7 @@ function render(){
   // Ops bars
   renderOps(s);
   // Console
-  renderConsole(s);
+  // renderConsole(s);
   // Step info
   document.getElementById('si').textContent=`${ci+1} / ${steps.length}`;
 }
@@ -549,9 +549,9 @@ function renderInitial(){
   }
   document.getElementById('rc').innerHTML=ch;
   // Boolean
-  let bh='';
-  for(let i=0;i<N;i++)bh+=`<div class="bb"><div class="box">F</div><div class="idx">[${i}]=${IN[i]}</div></div>`;
-  document.getElementById('bc').innerHTML=bh;
+  // let bh='';
+  // for(let i=0;i<N;i++)bh+=`<div class="bb"><div class="box">F</div><div class="idx">[${i}]=${IN[i]}</div></div>`;
+  // document.getElementById('bc').innerHTML=bh;
   // Description
   document.getElementById('dc').innerHTML='방법을 선택하고 ▶ 재생 또는 다음 버튼으로 시작하세요.';
   // Tree reset
@@ -572,9 +572,9 @@ function renderInitial(){
   document.getElementById('opsFill1').classList.toggle('inactive',curMethod!==1);
   document.getElementById('opsFill2').classList.toggle('inactive',curMethod!==2);
   // Console
-  document.getElementById('ob').innerHTML='';
-  document.getElementById('oc').textContent='(0개)';
-  document.getElementById('si').textContent=`0 / ${steps.length}`;
+  // document.getElementById('ob').innerHTML='';
+  // document.getElementById('oc').textContent='(0개)';
+  // document.getElementById('si').textContent=`0 / ${steps.length}`;
 }
 
 function renderVars(s){
