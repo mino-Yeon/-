@@ -202,18 +202,7 @@ const SRC2=[
 '}'
 ];
 
-function hl(t){
-  t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  let cm='';t=t.replace(/(\\/\\/.*)$/gm,function(m){cm=m;return '\x00CM';});
-  let ss=[];t=t.replace(/"([^"]*)"/g,function(m){ss.push(m);return '\x00S'+(ss.length-1);});
-  t=t.replace(/\b(static|void|new|for|int|if|else|return|boolean|continue)\b/g,'<span class="kw">$1</span>');
-  t=t.replace(/\b(String|Arrays)\b/g,'<span class="tp">$1</span>');
-  t=t.replace(/\b(permutation|calcTotal)\b/g,'<span class="fn">$1</span>');
-  t=t.replace(/\b(\d+)\b/g,'<span class="nm">$1</span>');
-  ss.forEach((s,i)=>{t=t.replace('\x00S'+i,'<span class="st">'+s+'</span>');});
-  if(cm)t=t.replace('\x00CM','<span class="cm">'+cm+'</span>');
-  return t;
-}
+function hl(t){t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');let cm='';t=t.replace(/(\/\/.*)$/gm,function(m){cm=m;return '\x00CM';});let ss=[];t=t.replace(/"([^"]*)"/g,function(m){ss.push(m);return '\x00S'+(ss.length-1);});t=t.replace(/\b(package|import|public|class|static|void|new|for|int|if|return|boolean)\b/g,'<span class="kw">$1</span>');t=t.replace(/\b(String|Arrays|Integer|System|Scanner)\b/g,'<span class="tp">$1</span>');t=t.replace(/\b(\d+)\b/g,'<span class="nm">$1</span>');ss.forEach((s,i)=>{t=t.replace('\x00S'+i,'<span class="st">'+s+'</span>');});if(cm)t=t.replace('\x00CM','<span class="cm">'+cm+'</span>');return t;}
 
 function initCode(){
   const src=curMethod===1?SRC1:SRC2;
@@ -614,10 +603,14 @@ function renderCards(s){
     for(let r=0;r<N;r++){
       if(s.ri[r]!==0)placed[r]=s.ri[r];
     }
-    // Only show up to valid depth (roundIn may have stale values after backtrack)
+    // Only show up to current depth
+    const depth=s.v.cnt;
+    // Determine actual placed cards from the path context
+    // Cards are placed for rounds 0..depth-1 if we're at depth cnt
+    // But roundIn may have stale values; use call stack to determine valid depth
     const validDepth=s.a==='base'||s.a==='calcRound'||s.a==='result'?N:
-                     s.a==='set'||s.a==='sel'||s.a==='recurse'?s.v.cnt+1:
-                     s.v.cnt;
+                     s.a==='call'?s.v.cnt:
+                     s.v.cnt+1;
     for(let r=validDepth;r<N;r++)placed[r]=null;
   }else if(curMethod===2){
     // Reconstruct from stack
@@ -625,7 +618,7 @@ function renderCards(s){
       const frame=s.sk[k];
       placed[frame.cnt]=IN[frame.i];
     }
-    if(s.v.i!=='-'&&(s.a==='sel'||s.a==='calcAndRecurse')){
+    if(s.v.i!=='-'&&s.a!=='loop'&&s.a!=='skip'&&s.a!=='call'){
       placed[s.v.cnt]=IN[s.v.i];
     }
   }
