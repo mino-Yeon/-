@@ -273,7 +273,7 @@ function initTree(td){
     n.ch.forEach(c=>{
       s+=`<line id="E${c.id}" x1="${n.x}" y1="${n.y}" x2="${c.x}" y2="${c.y}" class="te-unvisited"/>`;
       const mx=(n.x+c.x)/2,my=(n.y+c.y)/2+10;
-      const lblText=curMethod===2?`${GYU[n.d]}<tspan font-size="12px">vs</tspan>${IN[c.ci]}`:IN[c.ci];
+      const lblText=curMethod===2?`<tspan fill="#334155">${GYU[n.d]}</tspan><tspan font-size="12px" fill="#94a3b8">vs</tspan><tspan fill="#7c3aed">${IN[c.ci]}</tspan>`:IN[c.ci];
       s+=`<text id="EL${c.id}" x="${mx}" y="${my}" class="edge-lbl" style="opacity:0.3">${lblText}</text>`;
       draw(c);
     });
@@ -723,7 +723,7 @@ function renderTree(s){
         if(clEl){
           if(curMethod===1&&s.calcLabels&&s.calcLabels[r]&&n.id===s.nid){
             const lb=s.calcLabels[r];
-            clEl.innerHTML=`${lb.g}<tspan font-size="12px">vs</tspan>${lb.c}`;
+            clEl.innerHTML=`<tspan fill="#334155">${lb.g}</tspan><tspan font-size="12px" fill="#94a3b8">vs</tspan><tspan fill="#7c3aed">${lb.c}</tspan>`;
             clEl.style.opacity='1';
           }else{
             clEl.style.opacity='0';
