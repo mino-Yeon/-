@@ -259,12 +259,12 @@ function buildTree(){
   const lsp=80,lh=90;
   let li=0;
   function pos(n){
-    if(!n.ch.length){n.x=li*lsp+30;li++;}
+    if(!n.ch.length){n.x=li*lsp+50;li++;}
     else{n.ch.forEach(pos);n.x=(n.ch[0].x+n.ch[n.ch.length-1].x)/2;}
     n.y=n.d*lh+30;
   }
   pos(root);
-  return{root,all,w:li*lsp+60,h:(N+1)*lh+20,r:14};
+  return{root,all,w:li*lsp+60,h:(N+1)*lh+140,r:14};
 }
 
 function initTree(td){
@@ -273,12 +273,20 @@ function initTree(td){
     n.ch.forEach(c=>{
       s+=`<line id="E${c.id}" x1="${n.x}" y1="${n.y}" x2="${c.x}" y2="${c.y}" class="te-unvisited"/>`;
       const mx=(n.x+c.x)/2,my=(n.y+c.y)/2+10;
-      s+=`<text id="EL${c.id}" x="${mx}" y="${my}" class="edge-lbl" style="opacity:0.3">${IN[c.ci]}</text>`;
+      const lblText=curMethod===2?`${GYU[n.d]}<tspan font-size="12px">vs</tspan>${IN[c.ci]}`:IN[c.ci];
+      s+=`<text id="EL${c.id}" x="${mx}" y="${my}" class="edge-lbl" style="opacity:0.3">${lblText}</text>`;
       draw(c);
     });
     s+=`<circle id="N${n.id}" cx="${n.x}" cy="${n.y}" r="${r}" class="tree-node tn-unvisited"/>`;
     s+=`<text id="NL${n.id}" x="${n.x}" y="${n.y}" class="node-lbl">${n.d}</text>`;
     s+=`<text id="SL${n.id}" x="${n.x}" y="${n.y+26}" class="score-lbl" style="display:none"></text>`;
+    // calcTotal 표시용 (리프노드만)
+    if(n.ch.length===0){
+      for(let r=0;r<N;r++){
+        s+=`<text id="CL${n.id}_${r}" x="${n.x}" y="${n.y+28+r*20}" class="edge-lbl" style="opacity:0"></text>`;
+      }
+      s+=`<text id="CS${n.id}" x="${n.x}" y="${n.y+28+N*20}" class="score-lbl" style="opacity:0"></text>`;
+    }
   }
   draw(root);
   document.getElementById('tc').innerHTML=`<svg width="${w}" height="${h}">${s}</svg>`;
@@ -331,16 +339,19 @@ function genSteps1(){
       // calcTotal recalculation animation
       const ancestors=getAncestors(td,node);
       let sg=0,si=0;
+      const calcLabels=[];
       for(let round=0;round<N;round++){
         ops1++;
         const g=GYU[round],c=roundIn[round];
         const gw=g>c;
         if(gw)sg+=g+c; else si+=g+c;
+        calcLabels.push({g,c});
         // Temporarily mark ancestor as calc
         const calcNs={...ns};
         if(ancestors[round])calcNs[ancestors[round].id]='calc';
         S.push({l:gw?26:28,v:{cnt,i:round},ri:[...roundIn],is:[...isSel],o:[...out],sk:[...stk],
           nid:node.id,ns:calcNs,a:'calcRound',ops1,win,lose,draw,permCount,calcRound:round,
+          calcLabels:[...calcLabels],calcSg:sg,calcSi:si,
           d:`<span class="ac-calc">calcTotal 라운드${round+1}</span>: 규영(${g}) vs 인영(${c}) → ${gw?'규영':'인영'} +${g+c} (G:${sg} I:${si})`});
       }
       // Result
@@ -352,6 +363,7 @@ function genSteps1(){
       ns[node.id]='completed';
       S.push({l:sg>si?30:31,v:{cnt,i:'-'},ri:[...roundIn],is:[...isSel],o:[...out],sk:[...stk],
         nid:node.id,ns:{...ns},a:'result',ops1,win,lose,draw,permCount,
+        calcLabels:[...calcLabels],calcSg:sg,calcSi:si,
         d:`<span class="ac-res">결과: ${resultText}</span> (규영 ${sg}점 vs 인영 ${si}점)`});
       return;
     }
@@ -703,6 +715,30 @@ function renderTree(s){
     }else{
       if(nlEl)nlEl.textContent=n.d;
       if(slEl)slEl.style.display='none';
+    }
+    // calcTotal labels for method 1 (리프노드만)
+    if(n.ch.length===0){
+      for(let r=0;r<N;r++){
+        const clEl=document.getElementById('CL'+n.id+'_'+r);
+        if(clEl){
+          if(curMethod===1&&s.calcLabels&&s.calcLabels[r]&&n.id===s.nid){
+            const lb=s.calcLabels[r];
+            clEl.innerHTML=`${lb.g}<tspan font-size="12px">vs</tspan>${lb.c}`;
+            clEl.style.opacity='1';
+          }else{
+            clEl.style.opacity='0';
+          }
+        }
+      }
+      const csEl=document.getElementById('CS'+n.id);
+      if(csEl){
+        if(curMethod===1&&s.calcLabels&&s.calcLabels.length===N&&n.id===s.nid){
+          csEl.textContent=`G:${s.calcSg} I:${s.calcSi}`;
+          csEl.style.opacity='1';
+        }else{
+          csEl.style.opacity='0';
+        }
+      }
     }
   });
   // Scroll active node into view
