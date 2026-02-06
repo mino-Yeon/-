@@ -183,7 +183,7 @@ function initTree(td){
   function draw(n){
     n.ch.forEach((c,i)=>{
       s+=`<line id="E${c.id}" x1="${n.x}" y1="${n.y}" x2="${c.x}" y2="${c.y}" class="te-unvisited"/>`;
-      const mx=(n.x+c.x)/2,my=(n.y+c.y)/2-4;
+      const mx=(n.x+c.x)/2,my=(n.y+c.y)/2+(c.ch.length===0?2:-4);
       s+=`<text id="EL${c.id}" x="${mx}" y="${my}" class="edge-lbl" style="opacity:0">${A[i]}</text>`;
       draw(c);
     });
