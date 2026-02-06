@@ -88,9 +88,9 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0
 .te-back{stroke:#cbd5e1;stroke-width:1;}
 .te-skipped{stroke:#ef4444;stroke-width:2;stroke-dasharray:4,3;}
 .te-calc{stroke:#f97316;stroke-width:2.5;}
-.edge-lbl{font-size:11px;fill:#64748b;font-family:'Consolas','D2Coding',monospace;font-weight:600;text-anchor:middle;}
-.node-lbl{font-size:11px;fill:#333;font-family:'Consolas','D2Coding',monospace;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none;}
-.score-lbl{font-size:9px;fill:#6366f1;font-family:'Consolas','D2Coding',monospace;font-weight:600;text-anchor:middle;pointer-events:none;}
+.edge-lbl{font-size:22px;fill:#7c3aed;font-family:'Consolas','D2Coding',monospace;font-weight:600;text-anchor:middle;}
+.node-lbl{font-size:22px;fill:#64748b;font-family:'Consolas','D2Coding',monospace;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none;}
+.score-lbl{font-size:13px;fill:#6366f1;font-family:'Consolas','D2Coding',monospace;font-weight:600;text-anchor:middle;pointer-events:none;}
 .ops-sec .sb{padding:10px 16px;}
 .ops-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;}
 .ops-label{width:140px;text-align:right;font-weight:600;font-size:12px;}
@@ -256,7 +256,7 @@ function buildTree(){
     return node;
   }
   const root=build(0,[false,false,false,false],[]);
-  const lsp=40,lh=70;
+  const lsp=80,lh=90;
   let li=0;
   function pos(n){
     if(!n.ch.length){n.x=li*lsp+30;li++;}
@@ -272,13 +272,13 @@ function initTree(td){
   function draw(n){
     n.ch.forEach(c=>{
       s+=`<line id="E${c.id}" x1="${n.x}" y1="${n.y}" x2="${c.x}" y2="${c.y}" class="te-unvisited"/>`;
-      const mx=(n.x+c.x)/2,my=(n.y+c.y)/2-4;
+      const mx=(n.x+c.x)/2,my=(n.y+c.y)/2+10;
       s+=`<text id="EL${c.id}" x="${mx}" y="${my}" class="edge-lbl" style="opacity:0.3">${IN[c.ci]}</text>`;
       draw(c);
     });
     s+=`<circle id="N${n.id}" cx="${n.x}" cy="${n.y}" r="${r}" class="tree-node tn-unvisited"/>`;
     s+=`<text id="NL${n.id}" x="${n.x}" y="${n.y}" class="node-lbl">${n.d}</text>`;
-    s+=`<text id="SL${n.id}" x="${n.x}" y="${n.y+20}" class="score-lbl" style="display:none"></text>`;
+    s+=`<text id="SL${n.id}" x="${n.x}" y="${n.y+26}" class="score-lbl" style="display:none"></text>`;
   }
   draw(root);
   document.getElementById('tc').innerHTML=`<svg width="${w}" height="${h}">${s}</svg>`;
