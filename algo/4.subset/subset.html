@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>부분집합 시뮬레이션 - 재귀</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0f2f5;color:#333;height:100vh;display:flex;flex-direction:column;}
+.header{background:#2c3e50;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:16px;}
+.header h1{font-size:18px;} .header .sub{font-size:13px;color:#94a3b8;}
+.controls{background:#34495e;padding:10px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.controls button{background:#3498db;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:13px;font-family:inherit;}
+.controls button:hover{background:#2980b9;}
+.controls button.playing{background:#e74c3c;}
+.sep{width:1px;height:24px;background:#4a6278;margin:0 4px;}
+.controls label{color:#cbd5e1;font-size:13px;}
+.controls input[type=range]{width:80px;vertical-align:middle;}
+.step-info{color:#94a3b8;font-size:13px;margin-left:auto;}
+.main{display:flex;flex:1;overflow:hidden;}
+.code-panel{width:38%;min-width:320px;background:#1e1e1e;display:flex;flex-direction:column;transition:width .3s,min-width .3s;}
+.code-panel.collapsed{width:40px;min-width:40px;}
+.code-panel.collapsed .code-body{display:none;}
+.code-panel.collapsed .panel-hd span{display:none;}
+.panel-hd{background:#2d2d2d;color:#94a3b8;padding:8px 16px;font-size:12px;font-weight:600;border-bottom:1px solid #3d3d3d;cursor:pointer;user-select:none;display:flex;align-items:center;gap:8px;}
+.panel-hd:hover{background:#3d3d3d;}
+.panel-hd::before{content:'◀';font-size:10px;transition:transform .3s;}
+.code-panel.collapsed .panel-hd::before{transform:rotate(180deg);}
+.code-body{flex:1;overflow-y:auto;padding:8px 0;}
+.cl{display:flex;padding:1px 0;font-family:'Consolas','D2Coding',monospace;font-size:13px;line-height:1.6;transition:background .15s;}
+.cl.active{background:#264f78;}
+.cl.active .ln{color:#fff;}
+.ln{width:36px;text-align:right;padding-right:10px;color:#555;user-select:none;flex-shrink:0;}
+.lc{color:#d4d4d4;white-space:pre;}
+.kw{color:#569cd6;}.tp{color:#4ec9b0;}.nm{color:#b5cea8;}.st{color:#ce9178;}.cm{color:#6a9955;}
+.viz-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.vs{border-bottom:1px solid #ddd;}
+.vs .sh{background:#e8ecf0;padding:5px 16px;font-size:12px;font-weight:600;color:#64748b;}
+.vs .sb{padding:10px 16px;background:#fff;}
+.var-c{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.vb{display:inline-flex;padding:5px 12px;border-radius:6px;font-size:14px;font-weight:600;font-family:'Consolas','D2Coding',monospace;}
+.v-idx{background:#dbeafe;color:#1d4ed8;}
+.cs-label{font-size:12px;color:#64748b;margin-left:12px;}
+.cs-val{font-size:13px;font-family:'Consolas','D2Coding',monospace;color:#7c3aed;font-weight:600;}
+.arr-c{display:flex;align-items:flex-start;gap:6px;min-height:70px;flex-wrap:wrap;padding:4px 0;}
+.ab{width:60px;text-align:center;}
+.ab .box{width:60px;height:48px;display:flex;align-items:center;justify-content:center;border:2px solid #94a3b8;border-radius:8px;font-size:18px;font-weight:700;font-family:'Consolas','D2Coding',monospace;background:#f8fafc;transition:all .2s;}
+.ab .idx{font-size:11px;color:#64748b;margin-top:2px;font-weight:600;font-family:'Consolas','D2Coding',monospace;}
+.ab.current .box{border-color:#f59e0b;background:#fef3c7;color:#92400e;transform:scale(1.1);box-shadow:0 0 8px rgba(245,158,11,.4);}
+.ab.decided .box{border-color:#94a3b8;background:#e2e8f0;color:#475569;}
+.bool-c{display:flex;gap:6px;flex-wrap:wrap;padding:4px 0;}
+.bb{width:60px;text-align:center;}
+.bb .box{width:60px;height:40px;display:flex;align-items:center;justify-content:center;border:2px solid#cbd5e1;border-radius:6px;font-size:13px;font-weight:700;font-family:'Consolas','D2Coding',monospace;background:#f8fafc;color:#94a3b8;transition:all .2s;}
+.bb .idx{font-size:10px;color:#94a3b8;margin-top:2px;}
+.bb.btrue .box{border-color:#22c55e;background:#dcfce7;color:#15803d;}
+.bb.bsel .box{border-color:#22c55e;background:#bbf7d0;color:#15803d;transform:scale(1.08);box-shadow:0 0 8px rgba(34,197,94,.4);}
+.bb.bdesel .box{border-color:#ef4444;background:#fee2e2;color:#dc2626;transform:scale(0.95);box-shadow:0 0 8px rgba(239,68,68,.3);}
+.tree-sec{flex:1;display:flex;flex-direction:column;min-height:0;}
+.tree-sec .sb{flex:1;overflow:auto;padding:8px;position:relative;}
+.tree-node{transition:fill .2s,stroke .2s;}
+.tn-unvisited{fill:#f0f0f0;stroke:#ccc;stroke-width:1.5;}
+.tn-active{fill:#fbbf24;stroke:#f59e0b;stroke-width:2.5;}
+.tn-onpath{fill:#93c5fd;stroke:#3b82f6;stroke-width:2;}
+.tn-completed{fill:#86efac;stroke:#22c55e;stroke-width:2;}
+.tn-back{fill:#e2e8f0;stroke:#94a3b8;stroke-width:1;}
+.te-unvisited{stroke:#e5e7eb;stroke-width:1;}
+.te-active{stroke:#f59e0b;stroke-width:2;}
+.te-onpath{stroke:#3b82f6;stroke-width:2;}
+.te-completed{stroke:#22c55e;stroke-width:1.5;}
+.te-back{stroke:#cbd5e1;stroke-width:1;}
+.te-sel{stroke:#22c55e;stroke-width:2.5;}
+.te-unsel{stroke:#ef4444;stroke-width:2;stroke-dasharray:4,3;}
+.edge-lbl{font-size:20px;font-family:'Consolas','D2Coding',monospace;font-weight:600;text-anchor:middle;}
+.edge-lbl.sel{fill:#16a34a;}
+.edge-lbl.unsel{fill:#dc2626;}
+.node-lbl{font-size:22px;fill:#333;font-family:'Consolas','D2Coding',monospace;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none;}
+.desc{font-size:14px;line-height:1.5;min-height:38px;display:flex;align-items:center;}
+.ac-call{color:#ea580c;font-weight:600;}.ac-sel{color:#16a34a;font-weight:600;}.ac-unsel{color:#dc2626;font-weight:600;}.ac-pr{color:#2563eb;font-weight:600;}.ac-base{color:#7c3aed;font-weight:600;}
+.out-sec{max-height:140px;}
+.out-sec .sb{display:flex;flex-direction:column;}
+.ob{flex:1;overflow-y:auto;font-family:'Consolas','D2Coding',monospace;font-size:12px;line-height:1.5;max-height:100px;background:#1a1a2e;color:#a5f3fc;padding:8px 12px;border-radius:4px;}
+.ob .new{color:#fbbf24;font-weight:600;}
+.kbd-help{color:#64748b;font-size:11px;margin-left:8px;}
+.viz-panel.tree-expanded .vs:not(.tree-sec):not(.desc-sec){display:none;}
+.viz-panel.tree-expanded .tree-sec{flex:1;}
+.tree-toggle{margin-left:auto;background:#64748b;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;}
+.tree-toggle:hover{background:#475569;}
+.resizer{width:6px;background:#34495e;cursor:col-resize;transition:background .15s;flex-shrink:0;}
+.resizer:hover,.resizer.dragging{background:#3498db;}
+body.resizing{cursor:col-resize;user-select:none;}
+body.resizing *{pointer-events:none;}
+body.resizing .resizer{pointer-events:auto;}
+.code-panel.collapsed+.resizer{display:none;}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>4. 부분집합 - 재귀</h1>
+  <span class="sub">Subset.java &nbsp;|&nbsp; arr = {3, 5, 7, 9}, N=4 &nbsp;|&nbsp; <b>isSelected로 포함/비포함 결정 (이진 트리)</b></span>
+</div>
+<div class="controls">
+  <button onclick="doReset()">⏮ 처음</button>
+  <button onclick="prev()">◀ 이전</button>
+  <button id="playBtn" onclick="togglePlay()">▶ 재생</button>
+  <button onclick="next()">다음 ▶</button>
+  <div class="sep"></div>
+  <button onclick="skipOut()">⏩ 다음 출력</button>
+  <div class="sep"></div>
+  <label>속도: <input type="range" id="spd" min="1" max="10" value="5" oninput="spVal=+this.value"></label>
+  <span class="step-info" id="si">준비</span>
+  <span class="kbd-help">키보드: ←→ 이전/다음 · Space 재생 · S 다음출력 · R 처음 · T 트리최대화</span>
+</div>
+<div class="main">
+  <div class="code-panel" id="codePanel">
+    <div class="panel-hd" onclick="toggleCode()"><span>Java Code</span></div>
+    <div class="code-body" id="cb"></div>
+  </div>
+  <div class="resizer" id="resizer"></div>
+  <div class="viz-panel">
+    <div class="vs"><div class="sh">변수 상태 / 콜스택</div><div class="sb"><div class="var-c" id="vc"></div></div></div>
+    <div class="vs"><div class="sh">arr (원본 배열)</div><div class="sb"><div class="arr-c" id="ac"></div></div></div>
+    <div class="vs"><div class="sh">isSelected (boolean[4]) &nbsp; <span style="color:#7c3aed;font-size:11px;">* 포함 여부 결정</span></div><div class="sb"><div class="bool-c" id="bc"></div></div></div>
+    <div class="vs desc-sec"><div class="sh">실행 설명</div><div class="sb"><div class="desc" id="dc">▶ 재생 또는 다음 버튼으로 시작하세요.</div></div></div>
+    <div class="vs tree-sec"><div class="sh">재귀 트리 (subset 호출 구조) - 왼쪽: 포함(T), 오른쪽: 비포함(F)<button class="tree-toggle" id="treeToggle" onclick="toggleTreeExpand()">⤢ 최대화</button></div><div class="sb" id="tc"></div></div>
+    <div class="vs out-sec"><div class="sh">콘솔 출력 <span id="oc">(0개)</span></div><div class="sb"><div class="ob" id="ob"></div></div></div>
+  </div>
+</div>
+<script>
+const SRC=[
+'package day0206;',
+'public class Subset {',
+'    static int N = 4;    //전체 요소의 개수',
+'    static int[] arr = {3, 5, 7, 9};',
+'',
+'    static boolean[] isSelected;    //부분집합에 포함 여부',
+'    public static void main(String[] args) {',
+'',
+'        isSelected = new boolean[N];',
+'        subset(0);    //0인덱스 요소를 부분집합에 포함/비포함 여부 결정해',
+'    }',
+'',
+'    private static void subset(int idx) {',
+'        if(idx==N) {',
+'            for(int i=0; i<N; i++) {',
+'                if(isSelected[i]) System.out.print(arr[i]);',
+'            }',
+'            System.out.println();',
+'            return;',
+'        }',
+'',
+'        //idx요소 부분집합에 포함',
+'        isSelected[idx] = true;',
+'        subset(idx+1);    //idx+1요소의 포함/비포함은 재귀로 넘기기',
+'',
+'        //idx요소 부분집합에 비포함',
+'        isSelected[idx] = false;',
+'        subset(idx+1);    //idx+1요소의 포함/비포함은 재귀로 넘기기',
+'    }',
+'}'
+];
+function hl(t){t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');let cm='';t=t.replace(/(\/\/.*)$/gm,function(m){cm=m;return '\x00CM';});let ss=[];t=t.replace(/"([^"]*)"/g,function(m){ss.push(m);return '\x00S'+(ss.length-1);});t=t.replace(/\b(package|import|public|class|static|void|new|for|int|if|return|boolean)\b/g,'<span class="kw">$1</span>');t=t.replace(/\b(String|Arrays|Integer|System|Scanner)\b/g,'<span class="tp">$1</span>');t=t.replace(/\b(\d+)\b/g,'<span class="nm">$1</span>');ss.forEach((s,i)=>{t=t.replace('\x00S'+i,'<span class="st">'+s+'</span>');});if(cm)t=t.replace('\x00CM','<span class="cm">'+cm+'</span>');return t;}
+function initCode(){document.getElementById('cb').innerHTML=SRC.map((l,i)=>`<div class="cl" id="L${i+1}"><span class="ln">${i+1}</span><span class="lc">${hl(l)}</span></div>`).join('');}
+function toggleCode(){const panel=document.getElementById('codePanel');panel.classList.toggle('collapsed');if(panel.classList.contains('collapsed')){panel.style.width='';panel.style.minWidth='';}}
+
+const A=[3,5,7,9],N=4;
+
+// Build binary tree for subset (depth N, 2 children: include/exclude)
+function buildTree(){
+  let nid=0;const all=[];
+  function b(d,path){
+    const n={id:nid++,d:d,path:[...path],ch:[],x:0,y:0};
+    all.push(n);
+    if(d<N){
+      // Left child: include (true)
+      const left=b(d+1,[...path,true]);
+      left.pi=n.id;left.sel=true;
+      n.ch.push(left);
+      // Right child: exclude (false)
+      const right=b(d+1,[...path,false]);
+      right.pi=n.id;right.sel=false;
+      n.ch.push(right);
+    }
+    return n;
+  }
+  const root=b(0,[]);
+
+  const lsp=50;  // leaf spacing
+  const lh=70;   // level height
+
+  let li=0;
+  function pos(n){
+    if(!n.ch.length){n.x=li*lsp+40;li++;}
+    else{n.ch.forEach(pos);n.x=(n.ch[0].x+n.ch[n.ch.length-1].x)/2;}
+    n.y=n.d*lh+35;
+  }
+  pos(root);
+  return{root,all,w:li*lsp+80,h:(N+1)*lh+20,r:16};
+}
+
+function initTree(td){
+  const{root,w,h,r}=td;let s='';
+  function draw(n){
+    n.ch.forEach((c,idx)=>{
+      const isSel=c.sel;
+      s+=`<line id="E${c.id}" x1="${n.x}" y1="${n.y}" x2="${c.x}" y2="${c.y}" class="te-unvisited"/>`;
+      const mx=(n.x+c.x)/2+(isSel?-8:8),my=(n.y+c.y)/2-2;
+      const lbl=isSel?'T':'F';
+      const lblCls=isSel?'sel':'unsel';
+      s+=`<text id="EL${c.id}" x="${mx}" y="${my}" class="edge-lbl ${lblCls}" style="opacity:0.4">${lbl}</text>`;
+      draw(c);
+    });
+    const lbl=n.d;
+    s+=`<circle id="N${n.id}" cx="${n.x}" cy="${n.y}" r="${r}" class="tree-node tn-unvisited"/>`;
+    s+=`<text id="NL${n.id}" x="${n.x}" y="${n.y}" class="node-lbl">${lbl}</text>`;
+  }
+  draw(root);
+  document.getElementById('tc').innerHTML=`<svg width="${w}" height="${h}">${s}</svg>`;
+}
+
+function genSteps(){
+  const S=[];let isSel=[false,false,false,false],out=[],stk=[];
+  const td=buildTree();initTree(td);
+  const ns={};td.all.forEach(n=>ns[n.id]='unvisited');
+
+  function findNode(path){
+    for(const n of td.all){
+      if(n.path.length===path.length && n.path.every((v,i)=>v===path[i]))return n;
+    }
+    return td.root;
+  }
+
+  let curPath=[];
+
+  function subset(idx){
+    const node=findNode(curPath);
+    ns[node.id]='active';
+
+    S.push({l:13,v:{idx},is:[...isSel],o:[...out],sk:[...stk],nid:node.id,ns:{...ns},a:'call',idx:idx,
+      d:`<span class="ac-call">subset(${idx})</span> 호출 ${idx===0?'(시작)':''}`});
+
+    if(idx===N){
+      // Base case: print subset
+      const selected=[];
+      for(let i=0;i<N;i++){if(isSel[i])selected.push(A[i]);}
+      const ol=selected.length>0?selected.join(''):'(공집합)';
+      out.push(ol);
+      ns[node.id]='completed';
+      S.push({l:14,v:{idx},is:[...isSel],o:[...out],sk:[...stk],nid:node.id,ns:{...ns},a:'base',idx:idx,
+        d:`idx(${idx}) == N(${N}) → <span class="ac-pr">기저조건! 출력: ${ol}</span>`});
+      return;
+    }
+
+    // Include idx element
+    isSel[idx]=true;
+    ns[node.id]='active';
+    S.push({l:23,v:{idx},is:[...isSel],o:[...out],sk:[...stk],nid:node.id,ns:{...ns},a:'sel',idx:idx,bi:idx,
+      d:`<span class="ac-sel">isSelected[${idx}] = true</span> → arr[${idx}](=${A[idx]}) <b>포함</b>`});
+
+    S.push({l:24,v:{idx},is:[...isSel],o:[...out],sk:[...stk],nid:node.id,ns:{...ns},a:'recurse',idx:idx,
+      d:`<span class="ac-call">subset(${idx+1})</span> 재귀 호출 (포함 경로)`});
+
+    stk.push({idx,sel:true});
+    curPath.push(true);
+    subset(idx+1);
+    curPath.pop();
+    stk.pop();
+
+    // Exclude idx element
+    ns[node.id]='active';
+    isSel[idx]=false;
+    S.push({l:27,v:{idx},is:[...isSel],o:[...out],sk:[...stk],nid:node.id,ns:{...ns},a:'unsel',idx:idx,bi:idx,
+      d:`<span class="ac-unsel">isSelected[${idx}] = false</span> → arr[${idx}](=${A[idx]}) <b>비포함</b>`});
+
+    S.push({l:28,v:{idx},is:[...isSel],o:[...out],sk:[...stk],nid:node.id,ns:{...ns},a:'recurse',idx:idx,
+      d:`<span class="ac-call">subset(${idx+1})</span> 재귀 호출 (비포함 경로)`});
+
+    stk.push({idx,sel:false});
+    curPath.push(false);
+    subset(idx+1);
+    curPath.pop();
+    stk.pop();
+
+    ns[node.id]='back';
+  }
+
+  subset(0);
+  return{steps:S,tree:td};
+}
+
+let steps=[],ci=-1,playing=false,timer=null,spVal=5,treeData=null;
+
+function render(){
+  document.querySelectorAll('.cl.active').forEach(e=>e.classList.remove('active'));
+  if(ci>=0){
+    const s=steps[ci];
+    const el=document.getElementById('L'+s.l);
+    if(el){
+      el.classList.add('active');
+      el.scrollIntoView({block:'nearest',behavior:'smooth'});
+    }
+  }
+  if(ci<0){
+    document.getElementById('vc').innerHTML='<span class="vb v-idx">idx = -</span><span class="cs-label">콜스택:</span><span class="cs-val">[]</span>';
+    let h='';for(let i=0;i<N;i++)h+=`<div class="ab"><div class="box">${A[i]}</div><div class="idx">arr[${i}]</div></div>`;
+    document.getElementById('ac').innerHTML=h;
+    document.getElementById('bc').innerHTML=A.map((v,i)=>`<div class="bb"><div class="box">F</div><div class="idx">[${i}]=${v}</div></div>`).join('');
+    document.getElementById('dc').innerHTML='▶ 재생 또는 다음 버튼으로 시작하세요.';
+    document.getElementById('ob').innerHTML='';
+    document.getElementById('oc').textContent='(0개)';
+    document.getElementById('si').textContent=`0 / ${steps.length}`;
+    if(treeData){
+      treeData.all.forEach(n=>{
+        const c=document.getElementById('N'+n.id);if(c)c.className.baseVal='tree-node tn-unvisited';
+        const e=document.getElementById('E'+n.id);if(e)e.className.baseVal='te-unvisited';
+        const el=document.getElementById('EL'+n.id);if(el)el.style.opacity='0.4';
+      });
+    }
+    return;
+  }
+  const s=steps[ci];
+  const skStr=[...s.sk.map(x=>`sub(${x.idx})`),`sub(${s.v.idx})`].join(' → ');
+  document.getElementById('vc').innerHTML=`<span class="vb v-idx">idx = ${s.v.idx}</span><span class="cs-label">콜스택:</span><span class="cs-val">${skStr||'(비어있음)'}</span>`;
+
+  // arr display - highlight current idx
+  let ah='';
+  for(let i=0;i<N;i++){
+    let cls='ab';
+    if(i===s.idx && s.idx<N) cls+=' current';
+    else if(i<s.idx) cls+=' decided';
+    ah+=`<div class="${cls}"><div class="box">${A[i]}</div><div class="idx">arr[${i}]</div></div>`;
+  }
+  document.getElementById('ac').innerHTML=ah;
+
+  // isSelected display
+  let bhi=-1,bsel=false;
+  if(s.a==='sel'){bhi=s.bi;bsel=true;}
+  else if(s.a==='unsel'){bhi=s.bi;bsel=false;}
+  let bh='';
+  for(let i=0;i<N;i++){
+    let bc='bb';
+    if(i===bhi) bc+=bsel?' bsel':' bdesel';
+    else if(s.is[i]) bc+=' btrue';
+    bh+=`<div class="${bc}"><div class="box">${s.is[i]?'T':'F'}</div><div class="idx">[${i}]=${A[i]}</div></div>`;
+  }
+  document.getElementById('bc').innerHTML=bh;
+
+  document.getElementById('dc').innerHTML=s.d;
+
+  // Tree update
+  if(treeData){
+    const nst=s.ns;
+    treeData.all.forEach(n=>{
+      const st=nst[n.id]||'unvisited';
+      const c=document.getElementById('N'+n.id);if(c)c.className.baseVal='tree-node tn-'+st;
+      const e=document.getElementById('E'+n.id);
+      if(e){
+        if(st==='completed'||st==='back'){
+          // Color based on selection
+          e.className.baseVal=n.sel?'te-sel':'te-unsel';
+        }else if(st==='active'||st==='onpath'){
+          e.className.baseVal='te-'+st;
+        }else{
+          e.className.baseVal='te-unvisited';
+        }
+      }
+      const el=document.getElementById('EL'+n.id);
+      if(el)el.style.opacity=(st==='unvisited')?'0.4':'1';
+    });
+    const ac=document.getElementById('N'+s.nid);
+    if(ac)ac.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+  }
+
+  const ob=document.getElementById('ob');
+  ob.innerHTML=s.o.map((l,i)=>`<div${i===s.o.length-1&&s.a==='base'?' class="new"':''}>${i+1}. {${l}}</div>`).join('');
+  ob.scrollTop=ob.scrollHeight;
+  document.getElementById('oc').textContent=`(${s.o.length}개)`;
+  document.getElementById('si').textContent=`${ci+1} / ${steps.length}`;
+}
+
+function rebuild(){
+  ci=-1;
+  const g=genSteps();
+  steps=g.steps;
+  treeData=g.tree;
+  render();
+}
+function doReset(){stop();ci=-1;render();}
+function prev(){stop();if(ci>-1){ci--;render();}}
+function next(){if(ci<steps.length-1){ci++;render();}else stop();}
+function togglePlay(){playing?stop():start();}
+function start(){if(ci>=steps.length-1)ci=-1;playing=true;document.getElementById('playBtn').textContent='⏸ 정지';document.getElementById('playBtn').classList.add('playing');tick();}
+function stop(){playing=false;clearTimeout(timer);timer=null;document.getElementById('playBtn').textContent='▶ 재생';document.getElementById('playBtn').classList.remove('playing');}
+function tick(){if(!playing)return;const d=1100-spVal*100;timer=setTimeout(()=>{next();if(playing&&ci<steps.length-1)tick();else stop();},d);}
+function skipOut(){stop();for(let i=ci+1;i<steps.length;i++){if(steps[i].a==='base'){ci=i;render();return;}}ci=steps.length-1;render();}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();next();}
+  else if(e.key==='ArrowLeft'){e.preventDefault();prev();}
+  else if(e.key==='Enter'){e.preventDefault();togglePlay();}
+  else if(e.key==='r'||e.key==='R'){doReset();}
+  else if(e.key==='s'||e.key==='S')skipOut();
+  else if(e.key==='t'||e.key==='T')toggleTreeExpand();
+});
+
+// ===== Resizer =====
+(function(){
+  const resizer=document.getElementById('resizer');
+  const codePanel=document.getElementById('codePanel');
+  let startX,startW;
+  resizer.addEventListener('mousedown',function(e){
+    if(codePanel.classList.contains('collapsed'))return;
+    startX=e.clientX;
+    startW=codePanel.offsetWidth;
+    document.body.classList.add('resizing');
+    resizer.classList.add('dragging');
+    document.addEventListener('mousemove',onMouseMove);
+    document.addEventListener('mouseup',onMouseUp);
+  });
+  function onMouseMove(e){
+    const dx=e.clientX-startX;
+    const newW=Math.max(200,Math.min(startW+dx,window.innerWidth-300));
+    codePanel.style.width=newW+'px';
+    codePanel.style.minWidth=newW+'px';
+  }
+  function onMouseUp(){
+    document.body.classList.remove('resizing');
+    resizer.classList.remove('dragging');
+    document.removeEventListener('mousemove',onMouseMove);
+    document.removeEventListener('mouseup',onMouseUp);
+  }
+})();
+
+// ===== Tree expand =====
+function toggleTreeExpand(){
+  const vp=document.querySelector('.viz-panel');
+  const btn=document.getElementById('treeToggle');
+  vp.classList.toggle('tree-expanded');
+  if(vp.classList.contains('tree-expanded')){
+    btn.textContent='⤡ 축소';
+  }else{
+    btn.textContent='⤢ 최대화';
+  }
+}
+
+initCode();rebuild();
+</script>
+</body>
+</html>
