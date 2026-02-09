@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>순열 시뮬레이션 - Next Permutation</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif; background:#f0f2f5; color:#333; height:100vh; display:flex; flex-direction:column; }
+.header { background:#2c3e50; color:#fff; padding:12px 24px; display:flex; align-items:center; gap:16px; }
+.header h1 { font-size:18px; } .header .sub { font-size:13px; color:#94a3b8; }
+.controls { background:#34495e; padding:10px 24px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.controls button { background:#3498db; color:#fff; border:none; padding:6px 14px; border-radius:4px; cursor:pointer; font-size:13px; font-family:inherit; }
+.controls button:hover { background:#2980b9; }
+.controls button.playing { background:#e74c3c; }
+.sep { width:1px; height:24px; background:#4a6278; margin:0 4px; }
+.controls label { color:#cbd5e1; font-size:13px; }
+.controls input[type=range] { width:80px; vertical-align:middle; }
+.step-info { color:#94a3b8; font-size:13px; margin-left:auto; }
+.main { display:flex; flex:1; overflow:hidden; }
+.code-panel { width:42%; min-width:340px; background:#1e1e1e; display:flex; flex-direction:column; border-right:2px solid #34495e; }
+.panel-hd { background:#2d2d2d; color:#94a3b8; padding:8px 16px; font-size:12px; font-weight:600; border-bottom:1px solid #3d3d3d; }
+.code-body { flex:1; overflow-y:auto; padding:8px 0; }
+.cl { display:flex; padding:1px 0; font-family:'Consolas','D2Coding',monospace; font-size:14px; line-height:1.6; transition:background .15s; }
+.cl.active { background:#264f78; }
+.cl.skip-line { background:#4a2020; }
+.cl.active .ln { color:#fff; }
+.cl.skip-line .ln { color:#f87171; }
+.ln { width:36px; text-align:right; padding-right:10px; color:#555; user-select:none; flex-shrink:0; }
+.lc { color:#d4d4d4; white-space:pre; }
+.kw { color:#569cd6; } .tp { color:#4ec9b0; } .nm { color:#b5cea8; } .st { color:#ce9178; } .cm { color:#6a9955; }
+.viz-panel { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.vs { border-bottom:1px solid #ddd; }
+.vs .sh { background:#e8ecf0; padding:6px 16px; font-size:12px; font-weight:600; color:#64748b; }
+.vs .sb { padding:12px 16px; background:#fff; }
+.var-c { display:flex; gap:12px; flex-wrap:wrap; }
+.vb { display:inline-flex; align-items:center; padding:6px 14px; border-radius:6px; font-size:15px; font-weight:600; font-family:'Consolas','D2Coding',monospace; }
+.vi { background:#dbeafe; color:#1d4ed8; } .vj { background:#fce7f3; color:#be185d; } .vk { background:#d1fae5; color:#065f46; }
+.vn { background:#e2e8f0; color:#475569; }
+/* 배열 시각화 */
+.arr-viz { display:flex; flex-direction:column; align-items:flex-start; padding:4px 0; min-height:100px; }
+.arr-row { display:flex; gap:6px; }
+.ab { width:52px; text-align:center; }
+.ab .box { width:52px; height:48px; display:flex; align-items:center; justify-content:center; border:2px solid #94a3b8; border-radius:8px; font-size:20px; font-weight:700; font-family:'Consolas','D2Coding',monospace; background:#f8fafc; transition:all .25s; }
+.ab .idx { font-size:10px; color:#94a3b8; margin-top:2px; }
+.ab.comparing .box { border-color:#3b82f6; background:#dbeafe; color:#1d4ed8; }
+.ab.pos-im1 .box { border-color:#f59e0b; background:#fef3c7; color:#b45309; box-shadow:0 0 8px rgba(245,158,11,.4); }
+.ab.pos-j .box { border-color:#ec4899; background:#fce7f3; color:#be185d; box-shadow:0 0 8px rgba(236,72,153,.3); }
+.ab.swapping .box { transform:scale(1.15); border-color:#8b5cf6; background:#ede9fe; color:#6d28d9; box-shadow:0 0 12px rgba(139,92,246,.5); }
+.ab.desc-suffix .box { border-color:#f87171; background:#fee2e2; color:#dc2626; }
+.ab.reversed .box { border-color:#22c55e; background:#dcfce7; color:#15803d; }
+.ab.sorted .box { border-color:#22c55e; background:#f0fdf4; color:#166534; }
+.ptr-row { display:flex; gap:6px; margin-top:4px; height:22px; }
+.ptr-cell { width:52px; text-align:center; font-size:11px; font-weight:700; font-family:'Consolas','D2Coding',monospace; line-height:22px; }
+.ptr-im1 { color:#b45309; } .ptr-i { color:#1d4ed8; } .ptr-j { color:#be185d; } .ptr-k { color:#065f46; }
+.desc { font-size:15px; line-height:1.6; min-height:44px; display:flex; align-items:center; }
+.ac-sort { color:#16a34a; font-weight:600; } .ac-scan { color:#3b82f6; font-weight:600; } .ac-found { color:#7c3aed; font-weight:600; }
+.ac-swap { color:#8b5cf6; font-weight:600; } .ac-rev { color:#059669; font-weight:600; } .ac-done { color:#ef4444; font-weight:600; }
+.ac-call { color:#6366f1; font-weight:600; } .ac-ret { color:#6366f1; font-weight:600; } .ac-pr { color:#2563eb; font-weight:600; }
+.ac-init { color:#64748b; font-weight:600; } .ac-chk { color:#d97706; font-weight:600; }
+.out-sec { flex:1; display:flex; flex-direction:column; }
+.out-sec .sb { flex:1; display:flex; flex-direction:column; }
+.ob { flex:1; overflow-y:auto; font-family:'Consolas','D2Coding',monospace; font-size:12px; line-height:1.5; max-height:220px; background:#1a1a2e; color:#a5f3fc; padding:8px 12px; border-radius:4px; }
+.ob .new { color:#fbbf24; font-weight:600; }
+.kbd-help { color:#64748b; font-size:11px; margin-left:12px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>순열 - Next Permutation</h1>
+  <span class="sub">Perm_NextPermutation.java &nbsp;|&nbsp; arr = {7, 4, 5, 2, 1, 6, 3}</span>
+</div>
+<div class="controls">
+  <button onclick="reset()">⏮ 처음</button>
+  <button onclick="prev()">◀ 이전</button>
+  <button id="playBtn" onclick="togglePlay()">▶ 재생</button>
+  <button onclick="next()">다음 ▶</button>
+  <div class="sep"></div>
+  <button onclick="skipOut()">⏩ 다음 출력</button>
+  <div class="sep"></div>
+  <label>속도: <input type="range" id="spd" min="1" max="10" value="5" oninput="spVal=+this.value"></label>
+  <span class="step-info" id="si">준비</span>
+  <span class="kbd-help">키보드: ←→ 이전/다음 · Space 재생 · S 다음출력 · R 처음</span>
+</div>
+<div class="main">
+  <div class="code-panel">
+    <div class="panel-hd">Java Code</div>
+    <div class="code-body" id="cb"></div>
+  </div>
+  <div class="viz-panel">
+    <div class="vs"><div class="sh">변수 상태</div><div class="sb"><div class="var-c" id="vc"></div></div></div>
+    <div class="vs"><div class="sh">arr (int[4])</div><div class="sb"><div class="arr-viz" id="av"></div></div></div>
+    <div class="vs"><div class="sh">실행 설명</div><div class="sb"><div class="desc" id="dc">▶ 재생 또는 다음 버튼으로 시작하세요.</div></div></div>
+    <div class="vs out-sec"><div class="sh">콘솔 출력 <span id="oc">(0개)</span></div><div class="sb"><div class="ob" id="ob"></div></div></div>
+  </div>
+</div>
+<script>
+const SRC=[
+'package day0205;',
+'',
+'import java.util.Arrays;',
+'',
+'public class Perm_NextPermutation {',
+'',
+'    static int[] arr = {7, 4, 5, 2, 1, 6, 3};',
+'',
+'    //4P4',
+'    public static void main(String[] args) {',
+'        Arrays.sort(arr);    //가장 작은 순열 만들기',
+'',
+'        do {',
+'            System.out.println(Arrays.toString(arr));',
+'        } while (np(arr));',
+'    }',
+'',
+'    private static boolean np(int[] arr) {',
+'        int N = arr.length;',
+'',
+'        //1. i-1, i 비교시 i 요소가 더 큰 순간 찾기',
+'        int i = N - 1;',
+'        while(i > 0 && arr[i-1] >= arr[i]) i--;',
+'',
+'        if(i == 0) return false;  //더 이상 큰 순열 없음',
+'',
+'        //2. i-1과 swap할 j 인덱스 찾기',
+'        int j = N - 1;',
+'        while(arr[i-1] >= arr[j]) j--;',
+'',
+'        //3. i-1, j 요소 스왑',
+'        swap(arr, i-1, j);',
+'',
+'        //4. i~끝 요소들 오름차순 정렬',
+'        int k = N - 1;',
+'        while(i < k) swap(arr, i++, k--);',
+'',
+'        return true;    //순열 만들기 성공',
+'    }',
+'',
+'    private static void swap(int[] arr, int x, int y) {',
+'        int temp = arr[x];',
+'        arr[x] = arr[y];',
+'        arr[y] = temp;',
+'    }',
+'}'
+];
+function hl(t){t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');let cm='';t=t.replace(/(\/\/.*)$/gm,function(m){cm=m;return '\x00CM';});let ss=[];t=t.replace(/"([^"]*)"/g,function(m){ss.push(m);return '\x00S'+(ss.length-1);});t=t.replace(/\b(package|import|public|private|class|static|void|new|for|int|boolean|if|return|while|do|true|false|continue)\b/g,'<span class="kw">$1</span>');t=t.replace(/\b(String|Arrays|Integer|System|Scanner)\b/g,'<span class="tp">$1</span>');t=t.replace(/\b(\d+)\b/g,'<span class="nm">$1</span>');ss.forEach((s,i)=>{t=t.replace('\x00S'+i,'<span class="st">'+s+'</span>');});if(cm)t=t.replace('\x00CM','<span class="cm">'+cm+'</span>');return t;}
+function initCode(){document.getElementById('cb').innerHTML=SRC.map((l,i)=>`<div class="cl" id="L${i+1}"><span class="ln">${i+1}</span><span class="lc">${hl(l)}</span></div>`).join('');}
+
+const N=7;
+
+function genSteps(){
+  let arr=[7,4,5,2,1,6,3];
+  const S=[];
+  let O=[];
+
+  // sort 전
+  S.push({l:11,v:{i:'-',j:'-',k:'-',N:'-'},r:[...arr],o:[...O],a:'sort',d:'<span class="ac-sort">Arrays.sort(arr)</span>: 배열을 오름차순 정렬 → 가장 작은 순열 생성',hi:{}});
+  arr.sort((a,b)=>a-b);
+  // sort 후
+  S.push({l:11,v:{i:'-',j:'-',k:'-',N:'-'},r:[...arr],o:[...O],a:'sort',d:'<span class="ac-sort">정렬 완료</span>: arr = ['+arr.join(', ')+'] → 사전순 가장 작은 순열',hi:{sorted:true}});
+
+  let permCount=0;
+  let continueLoop=true;
+
+  while(continueLoop){
+    // print
+    permCount++;
+    const ol='['+arr.join(', ')+']';
+    O.push(ol);
+    S.push({l:14,v:{i:'-',j:'-',k:'-',N:'-'},r:[...arr],o:[...O],a:'print',d:'<span class="ac-pr">출력</span>: '+ol+' &nbsp; ('+permCount+'번째 순열)',hi:{}});
+
+    // call np
+    S.push({l:15,v:{i:'-',j:'-',k:'-',N:'-'},r:[...arr],o:[...O],a:'call',d:'<span class="ac-call">np(arr) 호출</span>: 다음 순열을 구합니다',hi:{}});
+
+    // np() 내부
+    // int N = arr.length
+    S.push({l:19,v:{i:'-',j:'-',k:'-',N:4},r:[...arr],o:[...O],a:'init',d:'<span class="ac-init">N</span> = arr.length → <b>4</b>',hi:{}});
+
+    // int i = N-1
+    let i=N-1;
+    S.push({l:22,v:{i,j:'-',k:'-',N:4},r:[...arr],o:[...O],a:'init',d:'<span class="ac-scan">Step1</span>: i = N - 1 → <b>'+i+'</b> (뒤에서부터 탐색 시작)',hi:{i:i}});
+
+    // while(i>0 && arr[i-1]>=arr[i]) i--
+    while(i>0 && arr[i-1]>=arr[i]){
+      const oldI=i;
+      S.push({l:23,v:{i,j:'-',k:'-',N:4},r:[...arr],o:[...O],a:'scan',
+        d:'<span class="ac-scan">Step1 탐색</span>: arr['+(i-1)+']('+arr[i-1]+') &gt;= arr['+i+']('+arr[i]+') → <b>true</b>, i-- → i='+(i-1),
+        hi:{cmp:[i-1,i],desc:[i,N-1]}});
+      i--;
+    }
+
+    // scan 결과
+    if(i>0){
+      S.push({l:23,v:{i,j:'-',k:'-',N:4},r:[...arr],o:[...O],a:'scan-done',
+        d:'<span class="ac-found">Step1 완료</span>: arr['+(i-1)+']('+arr[i-1]+') &lt; arr['+i+']('+arr[i]+') → i=<b>'+i+'</b>에서 멈춤',
+        hi:{cmp:[i-1,i],im1:i-1,desc:[i,N-1]}});
+    } else {
+      S.push({l:23,v:{i,j:'-',k:'-',N:4},r:[...arr],o:[...O],a:'scan-done',
+        d:'<span class="ac-scan">Step1 완료</span>: i=0까지 도달 → 배열 전체가 내림차순',
+        hi:{desc:[0,N-1]}});
+    }
+
+    // if(i==0) return false
+    if(i===0){
+      S.push({l:25,v:{i,j:'-',k:'-',N:4},r:[...arr],o:[...O],a:'done',
+        d:'<span class="ac-done">i == 0</span>: 더 이상 다음 순열이 없습니다 → <b>return false</b>',
+        hi:{desc:[0,N-1]}});
+      continueLoop=false;
+      break;
+    }
+
+    S.push({l:25,v:{i,j:'-',k:'-',N:4},r:[...arr],o:[...O],a:'check',
+      d:'<span class="ac-chk">i == 0 체크</span>: i='+i+' ≠ 0 → 다음 순열 존재, 계속 진행',
+      hi:{im1:i-1,desc:[i,N-1]}});
+
+    // int j = N-1
+    let j=N-1;
+    S.push({l:28,v:{i,j,k:'-',N:4},r:[...arr],o:[...O],a:'init',
+      d:'<span class="ac-scan">Step2</span>: j = N - 1 → <b>'+j+'</b> (뒤에서부터 교환 대상 탐색)',
+      hi:{im1:i-1,j:j,desc:[i,N-1]}});
+
+    // while(arr[i-1]>=arr[j]) j--
+    while(arr[i-1]>=arr[j]){
+      S.push({l:29,v:{i,j,k:'-',N:4},r:[...arr],o:[...O],a:'scan',
+        d:'<span class="ac-scan">Step2 탐색</span>: arr['+(i-1)+']('+arr[i-1]+') &gt;= arr['+j+']('+arr[j]+') → <b>true</b>, j-- → j='+(j-1),
+        hi:{im1:i-1,cmp:[i-1,j],desc:[i,N-1]}});
+      j--;
+    }
+
+    // j found
+    S.push({l:29,v:{i,j,k:'-',N:4},r:[...arr],o:[...O],a:'scan-done',
+      d:'<span class="ac-found">Step2 완료</span>: arr['+(i-1)+']('+arr[i-1]+') &lt; arr['+j+']('+arr[j]+') → j=<b>'+j+'</b>에서 멈춤',
+      hi:{im1:i-1,j:j,desc:[i,N-1]}});
+
+    // swap(arr, i-1, j) - 전
+    S.push({l:32,v:{i,j,k:'-',N:4},r:[...arr],o:[...O],a:'swap',
+      d:'<span class="ac-swap">Step3 교환</span>: swap(arr, '+(i-1)+', '+j+') → arr['+(i-1)+']('+arr[i-1]+') ↔ arr['+j+']('+arr[j]+')',
+      hi:{swap:[i-1,j],desc:[i,N-1]}});
+    // perform swap
+    let tmp=arr[i-1]; arr[i-1]=arr[j]; arr[j]=tmp;
+    // swap 후
+    S.push({l:32,v:{i,j,k:'-',N:4},r:[...arr],o:[...O],a:'swap',
+      d:'<span class="ac-swap">교환 완료</span>: arr = ['+arr.join(', ')+']',
+      hi:{im1:i-1,j:j,desc:[i,N-1]}});
+
+    // int k = N-1
+    let k=N-1;
+    S.push({l:35,v:{i,j,k,N:4},r:[...arr],o:[...O],a:'init',
+      d:'<span class="ac-rev">Step4</span>: k = N - 1 → <b>'+k+'</b> (i~끝 구간을 뒤집어 오름차순으로)',
+      hi:{rev:[i,N-1]}});
+
+    // while(i<k) swap(arr,i++,k--)
+    let ii=i, kk=k;
+    if(ii<kk){
+      while(ii<kk){
+        S.push({l:36,v:{i:ii,j,k:kk,N:4},r:[...arr],o:[...O],a:'reverse',
+          d:'<span class="ac-rev">Step4 뒤집기</span>: swap(arr, '+ii+', '+kk+') → arr['+ii+']('+arr[ii]+') ↔ arr['+kk+']('+arr[kk]+')',
+          hi:{swap:[ii,kk],rev:[i,N-1]}});
+        tmp=arr[ii]; arr[ii]=arr[kk]; arr[kk]=tmp;
+        ii++; kk--;
+        S.push({l:36,v:{i:ii,j,k:kk,N:4},r:[...arr],o:[...O],a:'reverse',
+          d:'<span class="ac-rev">뒤집기 진행</span>: arr = ['+arr.join(', ')+']',
+          hi:{rev:[i,N-1]}});
+      }
+    } else {
+      S.push({l:36,v:{i:ii,j,k:kk,N:4},r:[...arr],o:[...O],a:'reverse',
+        d:'<span class="ac-rev">Step4</span>: i('+ii+') &gt;= k('+kk+') → 뒤집을 구간 없음',
+        hi:{}});
+    }
+
+    // return true
+    S.push({l:38,v:{i:ii,j,k:kk,N:4},r:[...arr],o:[...O],a:'return',
+      d:'<span class="ac-ret">return true</span>: 다음 순열 생성 완료 → arr = ['+arr.join(', ')+']',
+      hi:{}});
+  }
+
+  // 최종 종료
+  S.push({l:15,v:{i:0,j:'-',k:'-',N:4},r:[...arr],o:[...O],a:'done',
+    d:'<span class="ac-done">종료</span>: np()가 false 반환 → do-while 루프 종료. 총 '+permCount+'개 순열 출력 완료.',
+    hi:{}});
+
+  return S;
+}
+
+let steps=[],ci=-1,playing=false,timer=null,spVal=5;
+
+function getBlockClass(idx,hi){
+  if(!hi) return 'ab';
+  if(hi.swap && (hi.swap[0]===idx||hi.swap[1]===idx)) return 'ab swapping';
+  if(hi.im1===idx) return 'ab pos-im1';
+  if(hi.j===idx) return 'ab pos-j';
+  if(hi.cmp && (hi.cmp[0]===idx||hi.cmp[1]===idx)) return 'ab comparing';
+  if(hi.rev && idx>=hi.rev[0] && idx<=hi.rev[1]) return 'ab reversed';
+  if(hi.desc && idx>=hi.desc[0] && idx<=hi.desc[1]) return 'ab desc-suffix';
+  if(hi.sorted) return 'ab sorted';
+  return 'ab';
+}
+
+function renderArrViz(arr,hi){
+  hi=hi||{};
+  let h='<div class="arr-row">';
+  for(let idx=0;idx<N;idx++){
+    h+='<div class="'+getBlockClass(idx,hi)+'"><div class="box">'+arr[idx]+'</div><div class="idx">['+idx+']</div></div>';
+  }
+  h+='</div><div class="ptr-row">';
+  for(let idx=0;idx<N;idx++){
+    let ptrs=[];
+    if(hi.im1===idx && hi.j===idx){ ptrs.push('<span class="ptr-im1">i-1</span>,<span class="ptr-j">j</span>'); }
+    else {
+      if(hi.im1===idx) ptrs.push('<span class="ptr-im1">i-1</span>');
+      if(hi.j===idx) ptrs.push('<span class="ptr-j">j</span>');
+    }
+    if(hi.i===idx) ptrs.push('<span class="ptr-i">i</span>');
+    if(hi.k===idx) ptrs.push('<span class="ptr-k">k</span>');
+    // swap 시 포인터도 표시
+    if(hi.swap){
+      if(hi.swap[0]===idx && !ptrs.length) ptrs.push('<span class="ptr-im1">↕</span>');
+      if(hi.swap[1]===idx && !ptrs.length) ptrs.push('<span class="ptr-j">↕</span>');
+    }
+    h+='<div class="ptr-cell">'+(ptrs.length?ptrs.join(' '):'&nbsp;')+'</div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+function render(){
+  document.querySelectorAll('.cl.active,.cl.skip-line').forEach(e=>{e.classList.remove('active');e.classList.remove('skip-line');});
+  if(ci>=0){
+    const s=steps[ci];
+    const el=document.getElementById('L'+s.l);
+    if(el){
+      el.classList.add(s.a==='done'?'skip-line':'active');
+      el.scrollIntoView({block:'nearest',behavior:'smooth'});
+    }
+  }
+  if(ci<0){
+    document.getElementById('vc').innerHTML='<span class="vb vi">i = -</span><span class="vb vj">j = -</span><span class="vb vk">k = -</span><span class="vb vn">N = -</span>';
+    document.getElementById('av').innerHTML=renderArrViz([7,4,5,2,1,6,3],{});
+    document.getElementById('dc').innerHTML='▶ 재생 또는 다음 버튼으로 시작하세요.';
+    document.getElementById('ob').innerHTML='';
+    document.getElementById('oc').textContent='(0개)';
+    document.getElementById('si').textContent=`0 / ${steps.length}`;
+    return;
+  }
+  const s=steps[ci];
+  document.getElementById('vc').innerHTML=`<span class="vb vi">i = ${s.v.i}</span><span class="vb vj">j = ${s.v.j}</span><span class="vb vk">k = ${s.v.k}</span><span class="vb vn">N = ${s.v.N}</span>`;
+  document.getElementById('av').innerHTML=renderArrViz(s.r,s.hi);
+  document.getElementById('dc').innerHTML=s.d;
+  const ob=document.getElementById('ob');
+  ob.innerHTML=s.o.map((l,i)=>`<div${i===s.o.length-1&&s.a==='print'?' class="new"':''}>${i+1}. ${l}</div>`).join('');
+  ob.scrollTop=ob.scrollHeight;
+  document.getElementById('oc').textContent=`(${s.o.length}개)`;
+  document.getElementById('si').textContent=`${ci+1} / ${steps.length}`;
+}
+
+function reset(){stop();ci=-1;render();}
+function prev(){stop();if(ci>-1){ci--;render();}}
+function next(){if(ci<steps.length-1){ci++;render();}else stop();}
+function togglePlay(){playing?stop():start();}
+function start(){if(ci>=steps.length-1)ci=-1;playing=true;document.getElementById('playBtn').textContent='⏸ 정지';document.getElementById('playBtn').classList.add('playing');tick();}
+function stop(){playing=false;clearTimeout(timer);timer=null;document.getElementById('playBtn').textContent='▶ 재생';document.getElementById('playBtn').classList.remove('playing');}
+function tick(){if(!playing)return;const d=1100-spVal*100;timer=setTimeout(()=>{next();if(playing&&ci<steps.length-1)tick();else stop();},d);}
+function skipOut(){stop();for(let i=ci+1;i<steps.length;i++){if(steps[i].a==='print'){ci=i;render();return;}}ci=steps.length-1;render();}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();next();}
+  else if(e.key==='ArrowLeft'){e.preventDefault();prev();}
+  else if(e.key==='Enter'){e.preventDefault();togglePlay();}
+  else if(e.key==='r'||e.key==='R')reset();
+  else if(e.key==='s'||e.key==='S')skipOut();
+});
+
+initCode();steps=genSteps();render();
+</script>
+</body>
+</html>
