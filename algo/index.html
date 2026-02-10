@@ -20,36 +20,93 @@
       /* 헤더 */
       .header {
         background: #2c3e50;
-        padding: 28px 40px;
+        padding: 20px 40px;
         border-bottom: 3px solid #3498db;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
       }
       .header h1 {
-        font-size: 24px;
+        font-size: 20px;
         font-weight: 700;
         color: #fff;
+        white-space: nowrap;
       }
       .header p {
-        font-size: 14px;
+        font-size: 13px;
         color: #94a3b8;
-        margin-top: 6px;
       }
 
-      /* 컨테이너 */
-      .container {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 32px 24px;
+      /* 사이드바 */
+      .sidebar {
+        position: fixed;
+        top: 64px;
+        left: 0;
+        width: 220px;
+        height: calc(100vh - 64px);
+        background: #212830;
+        border-right: 1px solid #2a3444;
+        overflow-y: auto;
+        padding: 12px 0;
+        z-index: 90;
+      }
+      .sidebar-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 18px;
+        cursor: pointer;
+        color: #94a3b8;
+        font-size: 13px;
+        font-weight: 500;
+        transition: background 0.15s, color 0.15s;
+        border-left: 3px solid transparent;
+        text-decoration: none;
+      }
+      .sidebar-item:hover {
+        background: #2a3444;
+        color: #e2e8f0;
+      }
+      .sidebar-item.active {
+        background: #1a2332;
+        color: #3498db;
+        border-left-color: #3498db;
+        font-weight: 600;
+      }
+      .sidebar-item .si-icon {
+        font-size: 18px;
+        flex-shrink: 0;
+        width: 24px;
+        text-align: center;
+      }
+      .sidebar-item .si-label {
+        line-height: 1.3;
+      }
+
+      /* 메인 콘텐츠 */
+      .main {
+        margin-left: 220px;
+        margin-top: 64px;
+        padding: 28px 32px;
+        max-width: 960px;
       }
 
       /* 카테고리 섹션 */
       .category {
-        margin-bottom: 40px;
+        margin-bottom: 36px;
+        scroll-margin-top: 80px;
       }
       .category-title {
-        font-size: 18px;
+        font-size: 17px;
         font-weight: 700;
         color: #3498db;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
         padding-bottom: 8px;
         border-bottom: 1px solid #2a3444;
         display: flex;
@@ -63,15 +120,15 @@
       /* 카드 그리드 */
       .card-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 16px;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 14px;
       }
 
       /* 카드 */
       .card {
         background: #2c3e50;
         border-radius: 8px;
-        padding: 20px 24px;
+        padding: 18px 22px;
         text-decoration: none;
         color: inherit;
         transition:
@@ -87,20 +144,20 @@
         border-color: #3498db;
       }
       .card-name {
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 600;
         color: #fff;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
       }
       .card-desc {
-        font-size: 13px;
+        font-size: 12px;
         color: #94a3b8;
         line-height: 1.5;
       }
       .card-tag {
         display: inline-block;
-        margin-top: 12px;
-        padding: 3px 10px;
+        margin-top: 10px;
+        padding: 2px 9px;
         background: #1a1e25;
         border-radius: 12px;
         font-size: 11px;
@@ -111,12 +168,41 @@
   <body>
     <div class="header">
       <h1>알고리즘 시뮬레이션</h1>
-      <p>단계별 코드 실행 과정을 시각적으로 확인할 수 있습니다</p>
+      <p>단계별 코드 실행 과정을 시각적으로 확인</p>
     </div>
 
-    <div class="container">
+    <!-- 사이드바 -->
+    <nav class="sidebar" id="sidebar">
+      <a class="sidebar-item" href="#sec-relation">
+        <span class="si-icon">&#128279;</span>
+        <span class="si-label">순조부 관계</span>
+      </a>
+      <a class="sidebar-item" href="#sec-dupperm">
+        <span class="si-icon">&#128256;</span>
+        <span class="si-label">중복순열</span>
+      </a>
+      <a class="sidebar-item" href="#sec-perm">
+        <span class="si-icon">&#128260;</span>
+        <span class="si-label">순열</span>
+      </a>
+      <a class="sidebar-item" href="#sec-comb">
+        <span class="si-icon">&#128290;</span>
+        <span class="si-label">조합</span>
+      </a>
+      <a class="sidebar-item" href="#sec-subset">
+        <span class="si-icon">&#128230;</span>
+        <span class="si-label">부분집합</span>
+      </a>
+      <a class="sidebar-item" href="#sec-card">
+        <span class="si-icon">&#127183;</span>
+        <span class="si-label">규영이와 인영이</span>
+      </a>
+    </nav>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="main">
       <!-- 순조부 관계 -->
-      <section class="category">
+      <section class="category" id="sec-relation">
         <h2 class="category-title"><span class="icon">&#128279;</span> 순열·조합·부분집합 관계</h2>
         <div class="card-grid">
           <a class="card" href="0.순조부관계/relationship.html">
@@ -128,7 +214,7 @@
       </section>
 
       <!-- 중복순열 -->
-      <section class="category">
+      <section class="category" id="sec-dupperm">
         <h2 class="category-title"><span class="icon">&#128256;</span> 중복순열 (Duplicate Permutation)</h2>
         <div class="card-grid">
           <a class="card" href="1.dupPerm/dupPerm_for_list.html">
@@ -155,7 +241,7 @@
       </section>
 
       <!-- 순열 -->
-      <section class="category">
+      <section class="category" id="sec-perm">
         <h2 class="category-title"><span class="icon">&#128260;</span> 순열 (Permutation)</h2>
         <div class="card-grid">
           <a class="card" href="2.permutation/perm_for_arr.html">
@@ -174,15 +260,15 @@
             <span class="card-tag">recursive</span>
           </a>
           <a class="card" href="2.permutation/perm_nextperm.html">
-            <div class="card-name">Next Permutation</div>
-            <div class="card-desc">정렬된 배열에서 사전순 다음 순열을 반복적으로 구하는 알고리즘 (do-while + np 함수 4단계)</div>
-            <span class="card-tag">iterative · in-place</span>
+            <div class="card-name">Next Permutation (단계별)</div>
+            <div class="card-desc">np() 함수의 4단계를 3가지 예시로 집중 학습 - 포인터와 색상으로 각 단계를 직관적으로 시각화</div>
+            <span class="card-tag">step-by-step</span>
           </a>
         </div>
       </section>
 
       <!-- 조합 -->
-      <section class="category">
+      <section class="category" id="sec-comb">
         <h2 class="category-title"><span class="icon">&#128290;</span> 조합 (Combination)</h2>
         <div class="card-grid">
           <a class="card" href="3.combination/combination_for_arr.html">
@@ -199,7 +285,7 @@
       </section>
 
       <!-- 부분집합 -->
-      <section class="category">
+      <section class="category" id="sec-subset">
         <h2 class="category-title"><span class="icon">&#128230;</span> 부분집합 (Subset)</h2>
         <div class="card-grid">
           <a class="card" href="4.subset/subset.html">
@@ -209,8 +295,9 @@
           </a>
         </div>
       </section>
+
       <!-- 규영이와 인영이 -->
-      <section class="category">
+      <section class="category" id="sec-card">
         <h2 class="category-title"><span class="icon">&#127183;</span> 규영이와 인영이 카드게임 (SWEA 6808)</h2>
         <div class="card-grid">
           <a class="card" href="규영이와 인영이/simulation.html">
@@ -226,5 +313,36 @@
         </div>
       </section>
     </div>
+
+    <script>
+      /* 사이드바 스크롤 연동 */
+      const sections = document.querySelectorAll('.category[id]');
+      const navItems = document.querySelectorAll('.sidebar-item');
+
+      function updateActive() {
+        let current = '';
+        const offset = 120;
+        for (const sec of sections) {
+          if (sec.getBoundingClientRect().top <= offset) current = sec.id;
+        }
+        if (!current && sections.length) current = sections[0].id;
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + current);
+        });
+      }
+
+      window.addEventListener('scroll', updateActive);
+      updateActive();
+
+      /* 부드러운 스크롤 */
+      navItems.forEach(item => {
+        item.addEventListener('click', e => {
+          e.preventDefault();
+          const id = item.getAttribute('href').slice(1);
+          const el = document.getElementById(id);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        });
+      });
+    </script>
   </body>
 </html>
