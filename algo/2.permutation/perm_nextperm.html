@@ -22,10 +22,12 @@ body { font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif; background:
 .code-panel.collapsed { width:40px; min-width:40px; }
 .code-panel.collapsed .code-body { display:none; }
 .code-panel.collapsed .panel-hd span { display:none; }
-.panel-hd { background:#2d2d2d; color:#94a3b8; padding:8px 16px; font-size:12px; font-weight:600; border-bottom:1px solid #3d3d3d; cursor:pointer; user-select:none; display:flex; align-items:center; gap:8px; }
-.panel-hd:hover { background:#3d3d3d; }
-.panel-hd::before { content:'◀'; font-size:10px; transition:transform .3s; }
-.code-panel.collapsed .panel-hd::before { transform:rotate(180deg); }
+.panel-hd { background:#2d2d2d; color:#94a3b8; padding:6px 12px; font-size:12px; font-weight:600; border-bottom:1px solid #3d3d3d; user-select:none; display:flex; align-items:center; gap:8px; }
+.fold-btn { cursor:pointer; padding:2px 4px; font-size:10px; transition:transform .3s; }
+.code-panel.collapsed .fold-btn { transform:rotate(180deg); }
+.ct { padding:3px 12px; border-radius:4px; cursor:pointer; font-size:12px; color:#94a3b8; transition:background .15s,color .15s; }
+.ct:hover { background:#3d3d3d; color:#d4d4d4; }
+.ct.active { background:#264f78; color:#fff; }
 .resizer { width:6px; background:#34495e; cursor:col-resize; transition:background .15s; flex-shrink:0; }
 .resizer:hover,.resizer.dragging { background:#3498db; }
 body.resizing { cursor:col-resize; user-select:none; }
@@ -58,7 +60,7 @@ body.resizing .resizer { pointer-events:auto; }
 .vs .sb { padding:12px 16px; background:#fff; }
 .var-c { display:flex; gap:12px; flex-wrap:wrap; }
 .vb { display:inline-flex; align-items:center; padding:6px 14px; border-radius:6px; font-size:15px; font-weight:600; font-family:'Consolas','D2Coding',monospace; }
-.vi { background:#dbeafe; color:#1d4ed8; } .vj { background:#fce7f3; color:#be185d; } .vk { background:#d1fae5; color:#065f46; }
+.vi { background:#dbeafe; color:#1d4ed8; } .vj { background:#fce7f3; color:#be185d; } .vleft { background:#e0f2fe; color:#0369a1; } .vright { background:#d1fae5; color:#065f46; }
 .vn { background:#e2e8f0; color:#475569; }
 /* 배열 시각화 */
 .arr-viz { display:flex; flex-direction:column; align-items:flex-start; padding:4px 0; min-height:100px; }
@@ -74,7 +76,7 @@ body.resizing .resizer { pointer-events:auto; }
 .ab.reversed .box { border-color:#22c55e; background:#dcfce7; color:#15803d; }
 .ptr-row { display:flex; gap:6px; margin-top:4px; height:22px; }
 .ptr-cell { width:48px; text-align:center; font-size:11px; font-weight:700; font-family:'Consolas','D2Coding',monospace; line-height:22px; }
-.ptr-im1 { color:#b45309; } .ptr-i { color:#1d4ed8; } .ptr-j { color:#be185d; } .ptr-k { color:#065f46; } .ptr-dim { color:#b0b8c4; }
+.ptr-im1 { color:#b45309; } .ptr-i { color:#1d4ed8; } .ptr-j { color:#be185d; } .ptr-left { color:#0369a1; } .ptr-right { color:#065f46; } .ptr-dim { color:#b0b8c4; }
 /* 설명 */
 .desc { font-size:15px; line-height:1.7; min-height:52px; display:flex; align-items:center; }
 .ac-scan { color:#3b82f6; font-weight:700; } .ac-found { color:#7c3aed; font-weight:700; }
@@ -103,14 +105,14 @@ body.resizing .resizer { pointer-events:auto; }
 </div>
 <div class="main">
   <div class="code-panel" id="codePanel">
-    <div class="panel-hd" onclick="toggleCode()"><span>np() 함수</span></div>
+    <div class="panel-hd"><span class="fold-btn" onclick="toggleCode()">◀</span><span class="ct active" id="ct0" onclick="switchCode(0)">while</span><span class="ct" id="ct1" onclick="switchCode(1)">for</span></div>
     <div class="code-body" id="cb"></div>
   </div>
   <div class="resizer" id="resizer"></div>
   <div class="viz-panel">
     <div class="ex-bar" id="exBar"><span class="ex-num">예제 1/3</span> <span class="ex-arr">[1, 2, 3, 4, 5, 6, 7]</span></div>
     <div class="stepper" id="stepper">
-      <div class="step-card" id="sc1"><span class="sn">①</span>내림차순이 아닌<br>숫자 찾기</div>
+      <div class="step-card" id="sc1"><span class="sn">①</span>오름차순인<br>숫자 찾기</div>
       <div class="step-card" id="sc2"><span class="sn">②</span>해당 숫자보다<br>큰 숫자 찾기</div>
       <div class="step-card" id="sc3"><span class="sn">③</span>스왑</div>
       <div class="step-card" id="sc4"><span class="sn">④</span>뒤의 요소들<br>뒤집기</div>
@@ -122,31 +124,58 @@ body.resizing .resizer { pointer-events:auto; }
 </div>
 <script>
 const SRC=[
-'private static boolean np(int[] arr) {',
+'static boolean np(int[] arr) {',
 '    int N = arr.length;',
 '',
-'    //1. 뒤에서부터 내림차순이 아닌 숫자(i-1) 찾기',
-'    int i = N - 1;',
+'    //1. 뒤에서부터 오름차순인 숫자찾기',
+'    int i=N-1;',
 '    while(i > 0 && arr[i-1] >= arr[i]) i--;',
 '',
 '    if(i == 0) return false;',
 '',
-'    //2. i-1보다 큰 숫자를 뒤에서부터 찾기(j)',
-'    int j = N - 1;',
+'    //2. 해당 숫자보다 큰 숫자를 뒤에서부터 찾기',
+'    int j=N-1;',
 '    while(arr[i-1] >= arr[j]) j--;',
 '',
-'    //3. arr[i-1], arr[j] 스왑',
+'    //3. 두 요소 스왑',
 '    swap(arr, i-1, j);',
 '',
-'    //4. i-1 뒤의 요소들 뒤집기',
-'    int k = N - 1;',
-'    while(i < k) swap(arr, i++, k--);',
+'    //4. 뒤의 요소들 뒤집기',
+'    int left=i, right=N-1;',
+'    while(left < right) swap(arr, left++, right--);',
 '',
 '    return true;',
 '}'
 ];
-function hl(t){t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');let cm='';t=t.replace(/(\/\/.*)$/gm,function(m){cm=m;return '\x00CM';});let ss=[];t=t.replace(/"([^"]*)"/g,function(m){ss.push(m);return '\x00S'+(ss.length-1);});t=t.replace(/\b(package|import|public|private|class|static|void|new|for|int|boolean|if|return|while|do|true|false|continue)\b/g,'<span class="kw">$1</span>');t=t.replace(/\b(String|Arrays|Integer|System|Scanner)\b/g,'<span class="tp">$1</span>');t=t.replace(/\b(\d+)\b/g,'<span class="nm">$1</span>');ss.forEach((s,i)=>{t=t.replace('\x00S'+i,'<span class="st">'+s+'</span>');});if(cm)t=t.replace('\x00CM','<span class="cm">'+cm+'</span>');return t;}
-function initCode(){document.getElementById('cb').innerHTML=SRC.map((l,i)=>`<div class="cl" id="L${i+1}"><span class="ln">${i+1}</span><span class="lc">${hl(l)}</span></div>`).join('');}
+const SRC_FOR=[
+'static boolean np(int[] arr) {',
+'    int N = arr.length;',
+'',
+'    //1. 뒤에서부터 오름차순인 숫자 찾기',
+'    int i=N-1;',
+'    for(; i>0; i--) if(arr[i-1] < arr[i]) break;',
+'',
+'    if(i==0) return false;',
+'',
+'    //2. 해당 숫자보다 큰 숫자를 뒤에서부터 찾기',
+'    int j=N-1;',
+'    for(; ; j--) if(arr[i-1] < arr[j]) break;',
+'',
+'    //3. 두 요소 스왑',
+'    swap(arr, i-1, j);',
+'',
+'    //4. 뒤의 요소들 뒤집기',
+'    int left=i, right=N-1;',
+'    while(left < right) swap(arr, left++, right--);',
+'',
+'    return true;',
+'}'
+];
+const SRCS=[SRC,SRC_FOR];
+let curSrc=0;
+function hl(t){t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');let cm='';t=t.replace(/(\/\/.*)$/gm,function(m){cm=m;return '\x00CM';});let ss=[];t=t.replace(/"([^"]*)"/g,function(m){ss.push(m);return '\x00S'+(ss.length-1);});t=t.replace(/\b(package|import|public|private|class|static|void|new|for|int|boolean|if|return|while|do|true|false|continue|break)\b/g,'<span class="kw">$1</span>');t=t.replace(/\b(String|Arrays|Integer|System|Scanner)\b/g,'<span class="tp">$1</span>');t=t.replace(/\b(\d+)\b/g,'<span class="nm">$1</span>');ss.forEach((s,i)=>{t=t.replace('\x00S'+i,'<span class="st">'+s+'</span>');});if(cm)t=t.replace('\x00CM','<span class="cm">'+cm+'</span>');return t;}
+function initCode(){document.getElementById('cb').innerHTML=SRCS[curSrc].map((l,i)=>`<div class="cl" id="L${i+1}"><span class="ln">${i+1}</span><span class="lc">${hl(l)}</span></div>`).join('');}
+function switchCode(idx){curSrc=idx;document.getElementById('ct0').className='ct'+(idx===0?' active':'');document.getElementById('ct1').className='ct'+(idx===1?' active':'');initCode();render();}
 
 const EXAMPLES=[
   {arr:[1,2,3,4,5,6,7], label:'가장 작은 순열 (오름차순)'},
@@ -162,101 +191,100 @@ function genSteps(){
     const label='['+arr.join(', ')+']';
 
     // 예제 시작
-    S.push({l:0,v:{i:'-',j:'-',k:'-',N:'-'},r:[...arr],a:'intro',phase:0,ex:e,
+    S.push({l:0,v:{i:'-',j:'-',left:'-',right:'-',N:'-'},r:[...arr],a:'intro',phase:0,ex:e,
       d:'<b>예제 '+(e+1)+'</b>: <b>'+label+'</b> — '+EXAMPLES[e].label});
 
     // int N = arr.length
-    S.push({l:2,v:{i:'-',j:'-',k:'-',N},r:[...arr],a:'init',phase:0,ex:e,
+    S.push({l:2,v:{i:'-',j:'-',left:'-',right:'-',N},r:[...arr],a:'init',phase:0,ex:e,
       d:'<span class="ac-init">N</span> = arr.length → <b>'+N+'</b>'});
 
     // ======= 1단계 =======
     let i=N-1;
-    S.push({l:5,v:{i,j:'-',k:'-',N},r:[...arr],a:'init',phase:1,ex:e,
+    S.push({l:5,v:{i,j:'-',left:'-',right:'-',N},r:[...arr],a:'init',phase:1,ex:e,
       d:'<span class="ac-scan">1단계 시작</span>: i = N-1 → <b>'+i+'</b> (뒤에서부터 탐색)',
       hi:{i:i,labels:{im1:i-1}}});
 
     while(i>0 && arr[i-1]>=arr[i]){
-      S.push({l:6,v:{i,j:'-',k:'-',N},r:[...arr],a:'scan',phase:1,ex:e,
+      S.push({l:6,v:{i,j:'-',left:'-',right:'-',N},r:[...arr],a:'scan',phase:1,ex:e,
         d:'arr['+(i-1)+']=<b>'+arr[i-1]+'</b> &gt;= arr['+i+']=<b>'+arr[i]+'</b> → 내림차순, i-- → <b>'+(i-1)+'</b>',
         hi:{cmp:[i-1,i],desc:[i,N-1],labels:{im1:i-1,i:i}}});
       i--;
     }
 
     if(i>0){
-      S.push({l:6,v:{i,j:'-',k:'-',N},r:[...arr],a:'found',phase:1,ex:e,
+      S.push({l:6,v:{i,j:'-',left:'-',right:'-',N},r:[...arr],a:'found',phase:1,ex:e,
         d:'arr['+(i-1)+']=<b>'+arr[i-1]+'</b> &lt; arr['+i+']=<b>'+arr[i]+'</b> → <span class="ac-found">i-1 = '+(i-1)+' (값: '+arr[i-1]+') 찾음!</span>',
         hi:{im1:i-1,desc:[i,N-1],idim:i}});
     } else {
-      S.push({l:6,v:{i,j:'-',k:'-',N},r:[...arr],a:'found',phase:1,ex:e,
+      S.push({l:6,v:{i,j:'-',left:'-',right:'-',N},r:[...arr],a:'found',phase:1,ex:e,
         d:'i = 0 → <span class="ac-done">배열 전체가 내림차순 (마지막 순열)</span>',
         hi:{desc:[0,N-1]}});
     }
 
     if(i===0){
-      S.push({l:8,v:{i,j:'-',k:'-',N},r:[...arr],a:'done',phase:1,ex:e,
+      S.push({l:8,v:{i,j:'-',left:'-',right:'-',N},r:[...arr],a:'done',phase:1,ex:e,
         d:'<span class="ac-done">return false</span> — 더 이상 다음 순열이 없습니다!',
         hi:{desc:[0,N-1]}});
       continue;
     }
 
-    S.push({l:8,v:{i,j:'-',k:'-',N},r:[...arr],a:'check',phase:1,ex:e,
+    S.push({l:8,v:{i,j:'-',left:'-',right:'-',N},r:[...arr],a:'check',phase:1,ex:e,
       d:'i = '+i+' ≠ 0 → 다음 순열 존재!',
       hi:{im1:i-1,desc:[i,N-1],idim:i}});
 
     // ======= 2단계 =======
     let j=N-1;
-    S.push({l:11,v:{i,j,k:'-',N},r:[...arr],a:'init',phase:2,ex:e,
+    S.push({l:11,v:{i,j,left:'-',right:'-',N},r:[...arr],a:'init',phase:2,ex:e,
       d:'<span class="ac-scan">2단계 시작</span>: j = N-1 → <b>'+j+'</b> (뒤에서부터 탐색)',
       hi:{im1:i-1,j,desc:[i,N-1]}});
 
     while(arr[i-1]>=arr[j]){
-      S.push({l:12,v:{i,j,k:'-',N},r:[...arr],a:'scan',phase:2,ex:e,
+      S.push({l:12,v:{i,j,left:'-',right:'-',N},r:[...arr],a:'scan',phase:2,ex:e,
         d:'arr['+(i-1)+']=<b>'+arr[i-1]+'</b> &gt;= arr['+j+']=<b>'+arr[j]+'</b> → j-- → <b>'+(j-1)+'</b>',
         hi:{im1:i-1,cmp:[i-1,j],desc:[i,N-1],labels:{j:j}}});
       j--;
     }
 
-    S.push({l:12,v:{i,j,k:'-',N},r:[...arr],a:'found',phase:2,ex:e,
+    S.push({l:12,v:{i,j,left:'-',right:'-',N},r:[...arr],a:'found',phase:2,ex:e,
       d:'arr['+(i-1)+']=<b>'+arr[i-1]+'</b> &lt; arr['+j+']=<b>'+arr[j]+'</b> → <span class="ac-found">j = '+j+' (값: '+arr[j]+') 찾음!</span>',
       hi:{im1:i-1,j,desc:[i,N-1]}});
 
     // ======= 3단계 =======
-    S.push({l:15,v:{i,j,k:'-',N},r:[...arr],a:'swap',phase:3,ex:e,
+    S.push({l:15,v:{i,j,left:'-',right:'-',N},r:[...arr],a:'swap',phase:3,ex:e,
       d:'<span class="ac-swap">3단계</span>: arr['+(i-1)+']=<b>'+arr[i-1]+'</b> ↔ arr['+j+']=<b>'+arr[j]+'</b> 스왑',
       hi:{swap:[i-1,j]}});
 
     let tmp=arr[i-1]; arr[i-1]=arr[j]; arr[j]=tmp;
 
-    S.push({l:15,v:{i,j,k:'-',N},r:[...arr],a:'swap',phase:3,ex:e,
+    S.push({l:15,v:{i,j,left:'-',right:'-',N},r:[...arr],a:'swap',phase:3,ex:e,
       d:'<span class="ac-swap">스왑 완료</span>: ['+arr.join(', ')+']',
       hi:{im1:i-1,j,desc:[i,N-1]}});
 
     // ======= 4단계 =======
-    let k=N-1;
-    S.push({l:18,v:{i,j,k,N},r:[...arr],a:'init',phase:4,ex:e,
-      d:'<span class="ac-rev">4단계 시작</span>: k = N-1 → <b>'+k+'</b> (i~끝 구간 뒤집기)',
-      hi:{rev:[i,N-1],i:i,k:k}});
+    let left=i,right=N-1;
+    S.push({l:18,v:{i,j,left,right,N},r:[...arr],a:'init',phase:4,ex:e,
+      d:'<span class="ac-rev">4단계 시작</span>: left = i → <b>'+left+'</b>, right = N-1 → <b>'+right+'</b> (뒤집기)',
+      hi:{rev:[i,N-1],left:left,right:right}});
 
-    let ii=i,kk=k;
-    if(ii<kk){
-      while(ii<kk){
-        S.push({l:19,v:{i:ii,j,k:kk,N},r:[...arr],a:'reverse',phase:4,ex:e,
-          d:'arr['+ii+']=<b>'+arr[ii]+'</b> ↔ arr['+kk+']=<b>'+arr[kk]+'</b> 스왑',
-          hi:{swap:[ii,kk],rev:[i,N-1],i:ii,k:kk}});
-        tmp=arr[ii]; arr[ii]=arr[kk]; arr[kk]=tmp;
-        ii++; kk--;
-        S.push({l:19,v:{i:ii,j,k:kk,N},r:[...arr],a:'reverse',phase:4,ex:e,
+    if(left<right){
+      while(left<right){
+        S.push({l:19,v:{i,j,left,right,N},r:[...arr],a:'reverse',phase:4,ex:e,
+          d:'arr['+left+']=<b>'+arr[left]+'</b> ↔ arr['+right+']=<b>'+arr[right]+'</b> 스왑',
+          hi:{swap:[left,right],rev:[i,N-1],left:left,right:right}});
+        tmp=arr[left]; arr[left]=arr[right]; arr[right]=tmp;
+        left++; right--;
+        S.push({l:19,v:{i,j,left,right,N},r:[...arr],a:'reverse',phase:4,ex:e,
           d:'['+arr.join(', ')+']',
-          hi:{rev:[i,N-1],i:ii,k:kk}});
+          hi:{rev:[i,N-1],left:left,right:right}});
       }
     } else {
-      S.push({l:19,v:{i:ii,j,k:kk,N},r:[...arr],a:'reverse',phase:4,ex:e,
-        d:'i('+ii+') &gt;= k('+kk+') → 뒤집을 구간 없음',
-        hi:{i:ii,k:kk}});
+      S.push({l:19,v:{i,j,left,right,N},r:[...arr],a:'reverse',phase:4,ex:e,
+        d:'left('+left+') &gt;= right('+right+') → 뒤집을 구간 없음',
+        hi:{left:left,right:right}});
     }
 
     // 결과
-    S.push({l:21,v:{i:ii,j,k:kk,N},r:[...arr],a:'result',phase:5,ex:e,
+    S.push({l:21,v:{i,j,left,right,N},r:[...arr],a:'result',phase:5,ex:e,
       d:'<span class="ac-ret">return true</span> — 결과: <b>['+arr.join(', ')+']</b>'});
   }
   return S;
@@ -294,7 +322,8 @@ function renderArrViz(arr,hi){
     }
     if(hi.i===idx||lb.i===idx) ptrs.push('<span class="ptr-i">i</span>');
     if(hi.idim===idx) ptrs.push('<span class="ptr-dim">i</span>');
-    if(hi.k===idx||lb.k===idx) ptrs.push('<span class="ptr-k">k</span>');
+    if(hi.left===idx||lb.left===idx) ptrs.push('<span class="ptr-left">left</span>');
+    if(hi.right===idx||lb.right===idx) ptrs.push('<span class="ptr-right">right</span>');
     if(hi.swap && !ptrs.length){
       if(hi.swap[0]===idx) ptrs.push('<span class="ptr-im1">↕</span>');
       if(hi.swap[1]===idx) ptrs.push('<span class="ptr-j">↕</span>');
@@ -335,7 +364,7 @@ function render(){
   if(ci<0){
     updateStepper(0);
     document.getElementById('exBar').innerHTML='<span class="ex-num">준비</span> 3개의 예제로 Next Permutation 4단계를 학습합니다';
-    document.getElementById('vc').innerHTML='<span class="vb vi">i = -</span><span class="vb vj">j = -</span><span class="vb vk">k = -</span><span class="vb vn">N = -</span>';
+    document.getElementById('vc').innerHTML='<span class="vb vi">i = -</span><span class="vb vj">j = -</span><span class="vb vleft">left = -</span><span class="vb vright">right = -</span><span class="vb vn">N = -</span>';
     document.getElementById('av').innerHTML=renderArrViz(EXAMPLES[0].arr,{});
     document.getElementById('dc').innerHTML='▶ 재생 또는 다음 버튼으로 시작하세요.';
     document.getElementById('si').textContent=`0 / ${steps.length}`;
@@ -344,7 +373,7 @@ function render(){
   const s=steps[ci];
   updateStepper(s.phase);
   updateExBar(s);
-  document.getElementById('vc').innerHTML=`<span class="vb vi">i = ${s.v.i}</span><span class="vb vj">j = ${s.v.j}</span><span class="vb vk">k = ${s.v.k}</span><span class="vb vn">N = ${s.v.N}</span>`;
+  document.getElementById('vc').innerHTML=`<span class="vb vi">i = ${s.v.i}</span><span class="vb vj">j = ${s.v.j}</span><span class="vb vleft">left = ${s.v.left}</span><span class="vb vright">right = ${s.v.right}</span><span class="vb vn">N = ${s.v.N}</span>`;
   document.getElementById('av').innerHTML=renderArrViz(s.r,s.hi);
   document.getElementById('dc').innerHTML=s.d;
   document.getElementById('si').textContent=`${ci+1} / ${steps.length}`;
