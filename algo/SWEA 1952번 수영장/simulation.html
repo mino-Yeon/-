@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SWEA 1952: 수영장 - 상태공간 트리</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0f2f5;color:#333;height:100vh;display:flex;flex-direction:column;}
+.header{background:#1a237e;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:16px;}
+.header h1{font-size:18px;} .header .sub{font-size:13px;color:#94a3b8;}
+.controls{background:#283593;padding:10px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.controls button{background:#3498db;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:13px;font-family:inherit;}
+.controls button:hover{background:#2980b9;}
+.controls button.playing{background:#e74c3c;}
+.controls label{color:#cbd5e1;font-size:13px;}
+.controls input[type=range]{width:80px;vertical-align:middle;}
+.step-info{color:#94a3b8;font-size:13px;margin-left:auto;}
+.kbd-help{color:#64748b;font-size:11px;margin-left:8px;}
+.sep{width:1px;height:24px;background:#4a5ea8;margin:0 4px;}
+.min-disp{display:inline-flex;align-items:center;gap:6px;background:#1e293b;color:#fbbf24;padding:6px 16px;border-radius:6px;font-family:'Consolas','D2Coding',monospace;font-size:20px;font-weight:700;border:2px solid #fbbf24;text-shadow:0 0 8px rgba(251,191,36,.4);}
+.min-disp .ml{color:#94a3b8;font-weight:600;font-size:14px;}
+.min-overlay{position:sticky;top:8px;left:8px;z-index:10;display:inline-flex;align-items:center;gap:6px;background:rgba(30,41,59,.92);color:#fbbf24;padding:8px 18px;border-radius:8px;font-family:'Consolas','D2Coding',monospace;font-size:22px;font-weight:700;border:2px solid #fbbf24;box-shadow:0 2px 12px rgba(0,0,0,.3);pointer-events:none;}
+.min-overlay .ml{color:#94a3b8;font-weight:600;font-size:14px;}
+.min-overlay .min-hist{font-size:13px;color:#94a3b8;font-weight:400;margin-left:8px;}
+.main{display:flex;flex:1;overflow:hidden;}
+.code-panel{width:30%;min-width:280px;background:#1e1e1e;display:flex;flex-direction:column;transition:width .3s,min-width .3s;}
+.code-panel.collapsed{width:40px;min-width:40px;}
+.code-panel.collapsed .code-body{display:none;}
+.code-panel.collapsed .panel-hd span{display:none;}
+.panel-hd{background:#2d2d2d;color:#94a3b8;padding:8px 16px;font-size:12px;font-weight:600;border-bottom:1px solid #3d3d3d;cursor:pointer;user-select:none;display:flex;align-items:center;gap:8px;}
+.panel-hd:hover{background:#3d3d3d;}
+.panel-hd::before{content:'◀';font-size:10px;transition:transform .3s;}
+.code-panel.collapsed .panel-hd::before{transform:rotate(180deg);}
+.code-body{flex:1;overflow-y:auto;padding:8px 0;}
+.cl{display:flex;padding:1px 0;font-family:'Consolas','D2Coding',monospace;font-size:13px;line-height:1.6;}
+.cl.active{background:#264f78;} .cl.prune-hl{background:#4a2020;} .cl.complete-hl{background:#1a3a20;}
+.cl.active .ln{color:#fff;} .cl.prune-hl .ln{color:#f87171;} .cl.complete-hl .ln{color:#4ade80;}
+.ln{width:36px;text-align:right;padding-right:10px;color:#555;user-select:none;flex-shrink:0;}
+.lc{color:#d4d4d4;white-space:pre;}
+.kw{color:#569cd6;}.tp{color:#4ec9b0;}.nm{color:#b5cea8;}.st{color:#ce9178;}.cm{color:#6a9955;}.fn{color:#dcdcaa;}
+.resizer{width:6px;background:#283593;cursor:col-resize;transition:background .15s;flex-shrink:0;}
+.resizer:hover,.resizer.dragging{background:#3498db;}
+body.resizing{cursor:col-resize;user-select:none;}
+body.resizing *{pointer-events:none;}
+body.resizing .resizer{pointer-events:auto;}
+.viz-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.vs{border-bottom:1px solid #ddd;}
+.vs .sh{background:#e8ecf0;padding:5px 16px;font-size:12px;font-weight:600;color:#64748b;}
+.vs .sb{padding:10px 16px;background:#fff;}
+.plan-tbl{border-collapse:collapse;font-size:12px;font-family:'Consolas','D2Coding',monospace;margin-bottom:8px;}
+.plan-tbl th,.plan-tbl td{padding:3px 10px;text-align:center;border:1px solid #e2e8f0;}
+.plan-tbl th{background:#f1f5f9;font-weight:600;color:#475569;}
+.plan-tbl .better{background:#dcfce7;font-weight:700;color:#15803d;}
+.plan-tbl .worse{color:#b0b0b0;}
+.legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:11px;color:#64748b;}
+.legend-item{display:flex;align-items:center;gap:3px;}
+.lg-dot{width:12px;height:12px;border-radius:50%;border:2px solid;display:inline-block;}
+.lg-line{width:18px;height:3px;border-radius:2px;display:inline-block;}
+.tree-sec{flex:1;display:flex;flex-direction:column;min-height:0;}
+.tree-sec .sb{flex:1;overflow:auto;padding:8px;position:relative;background:#fafafa;}
+.tree-node{transition:all .15s;cursor:pointer;}
+.tree-node:hover{filter:brightness(1.1);stroke-width:3;}
+.tn-unvisited{fill:#f0f0f0;stroke:#d1d5db;stroke-width:1.5;}
+.tn-internal{fill:#bfdbfe;stroke:#3b82f6;stroke-width:2;}
+.tn-completed{fill:#86efac;stroke:#22c55e;stroke-width:2;}
+.tn-pruned{fill:#fecaca;stroke:#ef4444;stroke-width:2;stroke-dasharray:3,2;}
+.tn-optimal{fill:#fde68a;stroke:#f59e0b;stroke-width:2.5;}
+.tn-active{fill:#fbbf24;stroke:#f59e0b;stroke-width:3;}
+.te-unvisited{stroke:#e5e7eb;stroke-width:1;}
+.te-day{stroke:#3b82f6;stroke-width:1.5;}
+.te-month{stroke:#22c55e;stroke-width:1.5;}
+.te-quarter{stroke:#f97316;stroke-width:2;stroke-dasharray:6,3;}
+.te-dim{opacity:.2;}
+.te-pruned-state{opacity:.4;}
+.te-optimal{stroke-width:3!important;opacity:1!important;}
+.te-highlight{stroke-width:3!important;opacity:1!important;filter:drop-shadow(0 0 2px rgba(0,0,0,.3));}
+.node-lbl{font-size:22px;fill:#334155;font-family:'Consolas','D2Coding',monospace;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none;}
+.cost-lbl{font-size:16px;fill:#64748b;font-family:'Consolas','D2Coding',monospace;text-anchor:middle;pointer-events:none;}
+.edge-cost{font-size:16px;font-family:'Consolas','D2Coding',monospace;text-anchor:middle;pointer-events:none;fill:#6b7280;}
+.info-sec{min-height:70px;}
+.info-sec .sb{padding:8px 16px;font-size:13px;line-height:1.7;}
+.info-path{font-family:'Consolas','D2Coding',monospace;font-size:12px;color:#6366f1;}
+.st-completed{color:#16a34a;font-weight:700;} .st-pruned{color:#dc2626;font-weight:700;}
+.st-internal{color:#2563eb;font-weight:700;} .st-unvisited{color:#94a3b8;font-weight:700;}
+.tree-toggle{margin-left:auto;background:#64748b;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;}
+.tree-toggle:hover{background:#475569;}
+.viz-panel.tree-expanded .vs:not(.tree-sec):not(.info-sec){display:none;}
+.viz-panel.tree-expanded .tree-sec{flex:1;}
+.summary{margin-top:4px;padding:6px 10px;background:#f8fafc;border-radius:4px;font-size:12px;line-height:1.6;font-family:'Consolas','D2Coding',monospace;color:#475569;}
+.summary b{color:#1e293b;}
+@keyframes nodePulse{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+.node-pulse{animation:nodePulse .3s ease;}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>SWEA 1952: 수영장 - 상태공간 트리</h1>
+  <span class="sub">cost=[10, 30, 60, 200] &nbsp;|&nbsp; plan=[2, 8, 1, 6, 3] &nbsp;|&nbsp; 5개월 축소 버전</span>
+</div>
+<div class="controls">
+  <button onclick="doReset()">⏮ 처음</button>
+  <button onclick="prev()">◀ 이전</button>
+  <button id="playBtn" onclick="togglePlay()">▶ 탐색 재생</button>
+  <button onclick="next()">다음 ▶</button>
+  <div class="sep"></div>
+  <button onclick="showFinal()">⏩ 결과 보기</button>
+  <div class="sep"></div>
+  <label>속도: <input type="range" id="spd" min="1" max="10" value="5" oninput="spVal=+this.value"></label>
+  <div class="min-disp"><span class="ml">min =</span><span id="minVal">200</span></div>
+  <span class="step-info" id="si">결과 보기</span>
+  <span class="kbd-help">←→ 이전/다음 · Space 재생 · R 처음 · F 결과 · T 트리확대</span>
+</div>
+<div class="main">
+  <div class="code-panel" id="codePanel">
+    <div class="panel-hd" onclick="toggleCode()"><span>Java Code (5개월 축소)</span></div>
+    <div class="code-body" id="cb"></div>
+  </div>
+  <div class="resizer" id="resizer"></div>
+  <div class="viz-panel" id="vizPanel">
+    <div class="vs plan-sec"><div class="sh">이용 계획 & 범례</div><div class="sb"><div id="planArea"></div><div class="legend" id="lgd"></div></div></div>
+    <div class="vs tree-sec"><div class="sh">상태공간 트리<span id="treeStat"></span><button class="tree-toggle" onclick="toggleTreeExpand()">⤢ 최대화</button></div><div class="sb" id="tc"><div class="min-overlay" id="minOv"><span class="ml">현재 최솟값</span> <span id="minVal2">200</span><span class="min-hist" id="minHist2"></span></div></div></div>
+    <div class="vs info-sec"><div class="sh">노드 정보</div><div class="sb" id="info">노드 위에 마우스를 올리면 상세 정보가 표시됩니다.</div></div>
+  </div>
+</div>
+<script>
+// ===== Constants =====
+const COST=[10,30,60,200], PLAN=[0,2,8,1,6,3], M=5;
+const TK_NAME=['하루권','한달권','세달권'], TK_KEY=['day','month','quarter'];
+const TK_COLOR=['#3b82f6','#22c55e','#f97316'];
+
+// ===== Java Source =====
+const SRC=[
+'static int[] cost = {10, 30, 60, 200};',
+'static int[] plan = {0, 2, 8, 1, 6, 3};',
+'static int min;',
+'',
+'public static void main(String[] args) {',
+'    min = cost[3];  // 1년권(200)으로 초기화',
+'    selectTicket(1, 0);',
+'    System.out.println(min);',
+'}',
+'',
+'static void selectTicket(int month, int costSum) {',
+'    if(min <= costSum) return;   // 가지치기',
+'    if(month > 5) {',
+'        min = costSum;           // 최솟값 갱신',
+'        return;',
+'    }',
+'    // 하루권',
+'    selectTicket(month+1, costSum + plan[month]*cost[0]);',
+'    // 한달권',
+'    selectTicket(month+1, costSum + cost[1]);',
+'    // 세달권',
+'    selectTicket(month+3, costSum + cost[2]);',
+'}'
+];
+
+// ===== Syntax Highlighter =====
+function hl(t){
+  t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let cm='';t=t.replace(/(\/\/.*)$/gm,function(m){cm=m;return '\x00CM';});
+  let ss=[];t=t.replace(/"([^"]*)"/g,function(m){ss.push(m);return '\x00S'+(ss.length-1);});
+  t=t.replace(/\b(static|void|int|if|return|public)\b/g,'<span class="kw">$1</span>');
+  t=t.replace(/\b(String|System)\b/g,'<span class="tp">$1</span>');
+  t=t.replace(/\b(\d+)\b/g,'<span class="nm">$1</span>');
+  ss.forEach((s,i)=>{t=t.replace('\x00S'+i,'<span class="st">'+s+'</span>');});
+  if(cm)t=t.replace('\x00CM','<span class="cm">'+cm+'</span>');
+  return t;
+}
+function initCode(){
+  document.getElementById('cb').innerHTML=SRC.map((l,i)=>
+    `<div class="cl" id="L${i}"><span class="ln">${i+1}</span><span class="lc">${hl(l)}</span></div>`).join('');
+}
+
+// ===== Plan Table & Legend =====
+function initPlan(){
+  let h='<table class="plan-tbl"><tr><th></th>';
+  for(let m=1;m<=M;m++) h+=`<th>${m}월</th>`;
+  h+='</tr><tr><th>이용일</th>';
+  for(let m=1;m<=M;m++) h+=`<td>${PLAN[m]}일</td>`;
+  h+='</tr><tr><th>하루권</th>';
+  for(let m=1;m<=M;m++){
+    const dc=PLAN[m]*COST[0], cls=dc<=COST[1]?'better':'worse';
+    h+=`<td class="${cls}">${dc}원</td>`;
+  }
+  h+='</tr><tr><th>한달권</th>';
+  for(let m=1;m<=M;m++){
+    const dc=PLAN[m]*COST[0], cls=COST[1]<=dc?'better':'worse';
+    h+=`<td class="${cls}">${COST[1]}원</td>`;
+  }
+  h+='</tr></table>';
+  document.getElementById('planArea').innerHTML=h;
+
+  let lg='';
+  lg+=`<span class="legend-item"><span class="lg-dot" style="background:#bfdbfe;border-color:#3b82f6"></span>내부노드</span>`;
+  lg+=`<span class="legend-item"><span class="lg-dot" style="background:#86efac;border-color:#22c55e"></span>완료(min갱신)</span>`;
+  lg+=`<span class="legend-item"><span class="lg-dot" style="background:#fecaca;border-color:#ef4444;border-style:dashed"></span>가지치기</span>`;
+  lg+=`<span class="legend-item"><span class="lg-dot" style="background:#fde68a;border-color:#f59e0b"></span>최적경로</span>`;
+  lg+=`<span class="legend-item"><span class="lg-dot" style="background:#f0f0f0;border-color:#ccc"></span>미방문</span>`;
+  lg+='<span style="margin-left:8px">|</span>';
+  lg+=`<span class="legend-item"><span class="lg-line" style="background:#3b82f6"></span>하루권</span>`;
+  lg+=`<span class="legend-item"><span class="lg-line" style="background:#22c55e"></span>한달권</span>`;
+  lg+=`<span class="legend-item"><span class="lg-line" style="background:#f97316;border-top:2px dashed #f97316;height:0"></span>세달권</span>`;
+  document.getElementById('lgd').innerHTML=lg;
+}
+
+// ===== Tree Building =====
+let allNodes=[], root=null;
+function buildTree(){
+  let nid=0; allNodes=[];
+  function build(month, costSum, parent, tkIdx, tkCost){
+    const node={id:nid++, month, costSum, parent, tkIdx, tkCost,
+      children:[], depth:parent?parent.depth+1:0,
+      state:'unvisited', dfsOrder:-1, minAtVisit:-1,
+      onOptimal:false, x:0, y:0};
+    allNodes.push(node);
+    if(month<=M){
+      node.children.push(build(month+1, costSum+PLAN[month]*COST[0], node, 0, PLAN[month]*COST[0]));
+      node.children.push(build(month+1, costSum+COST[1], node, 1, COST[1]));
+      node.children.push(build(month+3, costSum+COST[2], node, 2, COST[2]));
+    }
+    return node;
+  }
+  root=build(1,0,null,-1,0);
+}
+
+// ===== DFS Simulation =====
+let dfsSeq=[], minHist=[], finalMin=0, bestLeaf=null;
+function simulateDFS(){
+  let min=COST[3], order=0;
+  dfsSeq=[]; minHist=[{order:-1,min:COST[3],label:'초기값(1년권)'}];
+  allNodes.forEach(n=>{n.state='unvisited';n.dfsOrder=-1;n.onOptimal=false;});
+
+  function dfs(node){
+    node.dfsOrder=order++;
+    node.minAtVisit=min;
+    dfsSeq.push(node);
+    if(min<=node.costSum){
+      node.state='pruned';
+      node.pruneInfo=`min(${min}) ≤ costSum(${node.costSum})`;
+      return;
+    }
+    if(node.month>M){
+      min=node.costSum;
+      node.state='completed';
+      minHist.push({order:node.dfsOrder,min,label:`${node.costSum}원`});
+      return;
+    }
+    node.state='internal';
+    for(const ch of node.children) dfs(ch);
+  }
+  dfs(root);
+  finalMin=min;
+
+  // Find optimal leaf (lowest costSum among completed)
+  bestLeaf=null;
+  for(const n of dfsSeq){
+    if(n.state==='completed'&&(!bestLeaf||n.costSum<bestLeaf.costSum)) bestLeaf=n;
+  }
+  // Mark optimal path
+  if(bestLeaf){let n=bestLeaf;while(n){n.onOptimal=true;n=n.parent;}}
+}
+
+// ===== Layout =====
+let svgW=0, svgH=0;
+const R=15, LEAF_SP=50, LVL_H=90;
+function layoutTree(){
+  let li=0;
+  function pos(n){
+    if(!n.children.length){n.x=li*LEAF_SP+40;li++;}
+    else{n.children.forEach(pos);n.x=(n.children[0].x+n.children[n.children.length-1].x)/2;}
+    n.y=n.depth*LVL_H+35;
+  }
+  pos(root);
+  const maxX=allNodes.reduce((m,n)=>Math.max(m,n.x),0);
+  const maxD=allNodes.reduce((m,n)=>Math.max(m,n.depth),0);
+  svgW=maxX+60; svgH=(maxD+1)*LVL_H+60;
+}
+
+// ===== SVG Rendering =====
+function renderSVG(){
+  let s='';
+  // Edges first
+  function drawEdges(n){
+    n.children.forEach(c=>{
+      s+=`<line id="E${c.id}" x1="${n.x}" y1="${n.y}" x2="${c.x}" y2="${c.y}" class="te-unvisited"/>`;
+      // Edge cost label — 세달권(tkIdx=2)은 더 오른쪽으로 오프셋
+      const mx=(n.x+c.x)/2, my=(n.y+c.y)/2, dx=c.x-n.x;
+      let offsetX;
+      if(c.tkIdx===0) offsetX=-20;                      // 하루권: 왼쪽
+      else if(c.tkIdx===1) offsetX=-10;                  // 한달권: 약간 왼쪽
+      else offsetX=10;                                   // 세달권: 약간 오른쪽
+      s+=`<text id="EL${c.id}" x="${mx+offsetX}" y="${my+2}" class="edge-cost" style="opacity:.25">${c.tkCost}</text>`;
+      drawEdges(c);
+    });
+  }
+  drawEdges(root);
+  // Nodes
+  function drawNodes(n){
+    n.children.forEach(drawNodes);
+    s+=`<circle id="N${n.id}" cx="${n.x}" cy="${n.y}" r="${R}" class="tree-node tn-unvisited"/>`;
+    const lbl=n.month>M?'>'+M:n.month;
+    s+=`<text id="NL${n.id}" x="${n.x}" y="${n.y}" class="node-lbl">${lbl}</text>`;
+    s+=`<text id="CL${n.id}" x="${n.x}" y="${n.y+R+14}" class="cost-lbl">${n.costSum}</text>`;
+  }
+  drawNodes(root);
+  document.getElementById('tc').innerHTML=`<svg id="treeSvg" width="${svgW}" height="${svgH}">${s}</svg>`;
+
+  // Stats
+  const visited=dfsSeq.length, pruned=dfsSeq.filter(n=>n.state==='pruned').length;
+  const unvisited=allNodes.length-visited;
+  document.getElementById('treeStat').textContent=
+    ` (${allNodes.length}개 노드 · 방문${visited} · 가지치기${pruned} · 미방문${unvisited})`;
+
+  // Add hover events
+  const svg=document.getElementById('treeSvg');
+  svg.addEventListener('mouseover',onNodeOver);
+  svg.addEventListener('mouseout',onNodeOut);
+}
+
+// ===== Coloring =====
+function stateClass(st,onOpt){
+  if(onOpt&&(st==='completed'||st==='internal')) return 'tn-optimal';
+  if(st==='internal') return 'tn-internal';
+  if(st==='completed') return 'tn-completed';
+  if(st==='pruned') return 'tn-pruned';
+  return 'tn-unvisited';
+}
+function edgeStateClass(child,showOpt){
+  const tk='te-'+TK_KEY[child.tkIdx];
+  if(child.state==='unvisited') return 'te-unvisited te-dim';
+  let cls=tk;
+  if(child.state==='pruned') cls+=' te-pruned-state';
+  if(child.state==='unvisited') cls+=' te-dim';
+  if(showOpt&&child.onOptimal) cls+=' te-optimal';
+  return cls;
+}
+
+function applyFinal(){
+  allNodes.forEach(n=>{
+    const c=document.getElementById('N'+n.id);
+    if(c) c.className.baseVal='tree-node '+stateClass(n.state,n.onOptimal);
+    if(n.parent){
+      const e=document.getElementById('E'+n.id);
+      if(e) e.className.baseVal=edgeStateClass(n,true);
+      const el=document.getElementById('EL'+n.id);
+      if(el) el.style.opacity=(n.state==='unvisited')?'.15':'0.6';
+    }
+  });
+  updateMinDisplay(finalMin, minHist);
+}
+
+function applyReplay(idx){
+  // Reset all to unvisited
+  allNodes.forEach(n=>{
+    const c=document.getElementById('N'+n.id);
+    if(c) c.className.baseVal='tree-node tn-unvisited';
+    if(n.parent){
+      const e=document.getElementById('E'+n.id);
+      if(e) e.className.baseVal='te-unvisited te-dim';
+      const el=document.getElementById('EL'+n.id);
+      if(el) el.style.opacity='.15';
+    }
+  });
+  if(idx<0){
+    document.getElementById('minVal').textContent=COST[3];
+    hlCodeLine(-1);
+    return;
+  }
+  // Color visited up to idx
+  let curMin=COST[3];
+  for(let i=0;i<=idx;i++){
+    const n=dfsSeq[i];
+    const isCur=(i===idx);
+    const c=document.getElementById('N'+n.id);
+    if(c){
+      if(isCur) c.className.baseVal='tree-node tn-active';
+      else c.className.baseVal='tree-node '+stateClass(n.state,false);
+    }
+    if(n.parent){
+      const e=document.getElementById('E'+n.id);
+      if(e) e.className.baseVal='te-'+TK_KEY[n.tkIdx]+(n.state==='pruned'?' te-pruned-state':'');
+      const el=document.getElementById('EL'+n.id);
+      if(el) el.style.opacity='0.6';
+    }
+    if(n.state==='completed'&&n.costSum<curMin) curMin=n.costSum;
+    else if(i===0) curMin=COST[3];
+  }
+  // Update min display
+  const curNode=dfsSeq[idx];
+  let dispMin=curNode.minAtVisit;
+  if(curNode.state==='completed') dispMin=curNode.costSum;
+  // Build history up to current step
+  const histSoFar=minHist.filter(h=>h.order<=idx);
+  updateMinDisplay(dispMin, histSoFar);
+
+  // Highlight code line
+  if(curNode.state==='pruned') hlCodeLine(11,'prune-hl');
+  else if(curNode.state==='completed') hlCodeLine(13,'complete-hl');
+  else hlCodeLine(10,'active');
+
+  // Scroll to active node
+  const ac=document.getElementById('N'+curNode.id);
+  if(ac) ac.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+}
+
+function hlCodeLine(lineIdx,cls){
+  document.querySelectorAll('.cl.active,.cl.prune-hl,.cl.complete-hl').forEach(e=>{
+    e.classList.remove('active','prune-hl','complete-hl');
+  });
+  if(lineIdx<0) return;
+  const el=document.getElementById('L'+lineIdx);
+  if(el){el.classList.add(cls||'active');el.scrollIntoView({block:'nearest',behavior:'smooth'});}
+}
+
+function updateMinDisplay(val, hist){
+  document.getElementById('minVal').textContent=val;
+  document.getElementById('minVal2').textContent=val;
+  const histStr=hist.map(h=>h.min).join(' → ');
+  document.getElementById('minHist2').textContent=hist.length>1?'('+histStr+')':'';
+}
+
+// ===== Hover =====
+let hoveredNode=null;
+function onNodeOver(e){
+  const t=e.target;
+  if(!t.classList||!t.classList.contains('tree-node')) return;
+  const id=parseInt(t.id.substring(1));
+  const node=allNodes[id];
+  hoveredNode=node;
+  showNodeInfo(node);
+  if(isFinal) highlightPath(node);
+}
+function onNodeOut(e){
+  const t=e.target;
+  if(!t.classList||!t.classList.contains('tree-node')) return;
+  hoveredNode=null;
+  clearHighlight();
+  document.getElementById('info').innerHTML=makeSummaryHTML();
+}
+
+function getPath(node){
+  const path=[];
+  let n=node;
+  while(n){path.unshift(n);n=n.parent;}
+  return path;
+}
+
+function highlightPath(node){
+  // Dim all, then highlight path
+  allNodes.forEach(n=>{
+    const c=document.getElementById('N'+n.id);
+    if(c) c.style.opacity='.35';
+    if(n.parent){
+      const e=document.getElementById('E'+n.id);
+      if(e) e.style.opacity='.1';
+      const el=document.getElementById('EL'+n.id);
+      if(el) el.style.opacity='.1';
+    }
+  });
+  const path=getPath(node);
+  path.forEach(n=>{
+    const c=document.getElementById('N'+n.id);
+    if(c) c.style.opacity='1';
+    if(n.parent){
+      const e=document.getElementById('E'+n.id);
+      if(e){e.style.opacity='1';e.classList.add('te-highlight');}
+      const el=document.getElementById('EL'+n.id);
+      if(el) el.style.opacity='1';
+    }
+  });
+}
+
+function clearHighlight(){
+  allNodes.forEach(n=>{
+    const c=document.getElementById('N'+n.id);
+    if(c) c.style.opacity='';
+    if(n.parent){
+      const e=document.getElementById('E'+n.id);
+      if(e){e.style.opacity='';e.classList.remove('te-highlight');}
+      const el=document.getElementById('EL'+n.id);
+      if(el) el.style.opacity='';
+    }
+  });
+}
+
+function showNodeInfo(node){
+  const path=getPath(node);
+  let pathStr=path.map((n,i)=>{
+    if(i===0) return `<b>${n.month}월</b>(${n.costSum})`;
+    return `<span style="color:${TK_COLOR[n.tkIdx]}">→${TK_NAME[n.tkIdx]}(+${n.tkCost})</span> <b>${n.month>M?'완료':n.month+'월'}</b>(${n.costSum})`;
+  }).join(' ');
+
+  let stateStr='';
+  if(node.state==='completed') stateStr=`<span class="st-completed">완료 — min 갱신: ${node.minAtVisit} → ${node.costSum}</span>`;
+  else if(node.state==='pruned') stateStr=`<span class="st-pruned">가지치기 — ${node.pruneInfo}</span>`;
+  else if(node.state==='internal') stateStr=`<span class="st-internal">내부 노드 (탐색 완료)</span>`;
+  else stateStr=`<span class="st-unvisited">미방문 (부모 노드가 가지치기됨)</span>`;
+
+  let h=`<div><b>월:</b> ${node.month>M?'완료(>'+M+')':node.month+'월'} &nbsp;|&nbsp; <b>누적비용:</b> ${node.costSum}원 &nbsp;|&nbsp; <b>DFS순서:</b> ${node.dfsOrder>=0?'#'+(node.dfsOrder+1):'-'} &nbsp;|&nbsp; ${stateStr}</div>`;
+  h+=`<div class="info-path">경로: ${pathStr}</div>`;
+  if(node.onOptimal) h+=`<div style="color:#d97706;font-weight:700">★ 최적 경로 위의 노드</div>`;
+  document.getElementById('info').innerHTML=h;
+}
+
+function makeSummaryHTML(){
+  const visited=dfsSeq.length, pruned=dfsSeq.filter(n=>n.state==='pruned').length;
+  const completed=dfsSeq.filter(n=>n.state==='completed').length;
+  const unvisited=allNodes.length-visited;
+  const optPath=getPath(bestLeaf);
+  const optStr=optPath.map((n,i)=>{
+    if(i===0) return `${n.month}월`;
+    return `<span style="color:${TK_COLOR[n.tkIdx]}">${TK_NAME[n.tkIdx]}(+${n.tkCost})</span>→${n.month>M?'완료':n.month+'월'}`;
+  }).join(' ');
+  const minStr=minHist.map(h=>`${h.min}`).join(' → ');
+
+  return `<div class="summary"><b>최적 비용: ${finalMin}원</b> | 경로: ${optStr}<br>`+
+    `방문: ${visited}/${allNodes.length} | 완료: ${completed} | 가지치기: ${pruned} | 미방문: ${unvisited}<br>`+
+    `min 갱신: ${minStr}</div>`;
+}
+
+// ===== Playback =====
+let isFinal=true, ri=-1, playing=false, timer=null, spVal=5;
+
+function doReset(){
+  stop(); isFinal=false; ri=-1;
+  applyReplay(-1);
+  updateMinDisplay(COST[3],[{order:-1,min:COST[3],label:'초기값'}]);
+  document.getElementById('info').innerHTML='▶ 재생 또는 다음 버튼으로 DFS 탐색을 시작하세요.';
+  document.getElementById('si').textContent='탐색 준비';
+}
+function showFinal(){
+  stop(); isFinal=true; ri=dfsSeq.length-1;
+  applyFinal(); hlCodeLine(-1);
+  document.getElementById('info').innerHTML=makeSummaryHTML();
+  document.getElementById('si').textContent='결과 보기';
+}
+function prev(){
+  stop(); isFinal=false;
+  if(ri>-1){ri--;applyReplay(ri);}
+  updateStepInfo();
+  if(ri>=0) showNodeInfo(dfsSeq[ri]);
+}
+function next(){
+  if(isFinal) return;
+  if(ri<dfsSeq.length-1){ri++;applyReplay(ri);updateStepInfo();showNodeInfo(dfsSeq[ri]);}
+  else{stop();showFinal();}
+}
+function togglePlay(){playing?stop():startPlay();}
+function startPlay(){
+  if(isFinal){isFinal=false;ri=-1;applyReplay(-1);}
+  if(ri>=dfsSeq.length-1){ri=-1;applyReplay(-1);}
+  playing=true;
+  document.getElementById('playBtn').textContent='⏸ 정지';
+  document.getElementById('playBtn').classList.add('playing');
+  tick();
+}
+function stop(){
+  playing=false;clearTimeout(timer);timer=null;
+  document.getElementById('playBtn').textContent='▶ 탐색 재생';
+  document.getElementById('playBtn').classList.remove('playing');
+}
+function tick(){
+  if(!playing) return;
+  const d=1100-spVal*100;
+  timer=setTimeout(()=>{
+    if(ri<dfsSeq.length-1){ri++;applyReplay(ri);updateStepInfo();showNodeInfo(dfsSeq[ri]);tick();}
+    else{stop();showFinal();}
+  },d);
+}
+function updateStepInfo(){
+  document.getElementById('si').textContent=ri<0?'탐색 준비':`탐색: ${ri+1} / ${dfsSeq.length}`;
+}
+
+// ===== Code Panel =====
+function toggleCode(){
+  const p=document.getElementById('codePanel');
+  p.classList.toggle('collapsed');
+  if(p.classList.contains('collapsed')){p.style.width='';p.style.minWidth='';}
+}
+
+// ===== Tree Expand =====
+function toggleTreeExpand(){
+  const vp=document.getElementById('vizPanel');
+  vp.classList.toggle('tree-expanded');
+}
+
+// ===== Resizer =====
+(function(){
+  const resizer=document.getElementById('resizer');
+  const cp=document.getElementById('codePanel');
+  let sx,sw;
+  resizer.addEventListener('mousedown',function(e){
+    if(cp.classList.contains('collapsed'))return;
+    sx=e.clientX;sw=cp.offsetWidth;
+    document.body.classList.add('resizing');resizer.classList.add('dragging');
+    document.addEventListener('mousemove',onMM);document.addEventListener('mouseup',onMU);
+  });
+  function onMM(e){const nw=Math.max(200,Math.min(sw+(e.clientX-sx),window.innerWidth-300));cp.style.width=nw+'px';cp.style.minWidth=nw+'px';}
+  function onMU(){document.body.classList.remove('resizing');resizer.classList.remove('dragging');document.removeEventListener('mousemove',onMM);document.removeEventListener('mouseup',onMU);}
+})();
+
+// ===== Keyboard =====
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();if(isFinal){doReset();next();}else next();}
+  else if(e.key==='ArrowLeft'){e.preventDefault();prev();}
+  else if(e.key==='Enter'){e.preventDefault();togglePlay();}
+  else if(e.key==='r'||e.key==='R')doReset();
+  else if(e.key==='f'||e.key==='F')showFinal();
+  else if(e.key==='t'||e.key==='T')toggleTreeExpand();
+});
+
+// ===== Init =====
+initCode();
+initPlan();
+buildTree();
+simulateDFS();
+layoutTree();
+renderSVG();
+showFinal();
+</script>
+</body>
+</html>
