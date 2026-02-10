@@ -77,8 +77,10 @@ body.resizing .resizer{pointer-events:auto;}
 .te-highlight{stroke-width:3!important;opacity:1!important;filter:drop-shadow(0 0 2px rgba(0,0,0,.3));}
 .node-lbl{font-size:22px;fill:#334155;font-family:'Consolas','D2Coding',monospace;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none;}
 .cost-lbl{font-size:16px;fill:#64748b;font-family:'Consolas','D2Coding',monospace;text-anchor:middle;pointer-events:none;}
+.cost-lbl.cl-completed{fill:#15803d;font-weight:700;font-size:17px;}
+.cost-lbl.cl-optimal{fill:#b45309;font-weight:700;font-size:18px;}
 .edge-cost{font-size:16px;font-family:'Consolas','D2Coding',monospace;text-anchor:middle;pointer-events:none;fill:#6b7280;}
-.info-sec{min-height:70px;}
+.info-sec{height:100px;overflow-y:auto;flex-shrink:0;}
 .info-sec .sb{padding:8px 16px;font-size:13px;line-height:1.7;}
 .info-path{font-family:'Consolas','D2Coding',monospace;font-size:12px;color:#6366f1;}
 .st-completed{color:#16a34a;font-weight:700;} .st-pruned{color:#dc2626;font-weight:700;}
@@ -341,6 +343,13 @@ function applyFinal(){
   allNodes.forEach(n=>{
     const c=document.getElementById('N'+n.id);
     if(c) c.className.baseVal='tree-node '+stateClass(n.state,n.onOptimal);
+    const cl=document.getElementById('CL'+n.id);
+    if(cl){
+      let cc='cost-lbl';
+      if(n.onOptimal&&n.state==='completed') cc+=' cl-optimal';
+      else if(n.state==='completed') cc+=' cl-completed';
+      cl.className.baseVal=cc;
+    }
     if(n.parent){
       const e=document.getElementById('E'+n.id);
       if(e) e.className.baseVal=edgeStateClass(n,true);
@@ -356,6 +365,8 @@ function applyReplay(idx){
   allNodes.forEach(n=>{
     const c=document.getElementById('N'+n.id);
     if(c) c.className.baseVal='tree-node tn-unvisited';
+    const cl=document.getElementById('CL'+n.id);
+    if(cl) cl.className.baseVal='cost-lbl';
     if(n.parent){
       const e=document.getElementById('E'+n.id);
       if(e) e.className.baseVal='te-unvisited te-dim';
@@ -377,6 +388,15 @@ function applyReplay(idx){
     if(c){
       if(isCur) c.className.baseVal='tree-node tn-active';
       else c.className.baseVal='tree-node '+stateClass(n.state,false);
+    }
+    if(n.state==='completed'&&!isCur){
+      const cl=document.getElementById('CL'+n.id);
+      if(cl){
+        let cc='cost-lbl';
+        if(n.onOptimal) cc+=' cl-optimal';
+        else cc+=' cl-completed';
+        cl.className.baseVal=cc;
+      }
     }
     if(n.parent){
       const e=document.getElementById('E'+n.id);
@@ -400,9 +420,16 @@ function applyReplay(idx){
   else if(curNode.state==='completed') hlCodeLine(13,'complete-hl');
   else hlCodeLine(10,'active');
 
-  // Scroll to active node
-  const ac=document.getElementById('N'+curNode.id);
-  if(ac) ac.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+  // Scroll tree container to active node
+  scrollToNode(curNode);
+}
+
+function scrollToNode(node){
+  const tc=document.getElementById('tc');
+  if(!tc) return;
+  const targetX=node.x-tc.clientWidth/2;
+  const targetY=node.y-tc.clientHeight/2;
+  tc.scrollTo({left:Math.max(0,targetX),top:Math.max(0,targetY),behavior:'smooth'});
 }
 
 function hlCodeLine(lineIdx,cls){
