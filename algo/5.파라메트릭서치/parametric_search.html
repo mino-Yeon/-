@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나무 자르기 — 파라메트릭 서치</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0f2f5;color:#333;height:100vh;display:flex;flex-direction:column;}
+.header{background:#2c3e50;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:16px;}
+.header h1{font-size:18px;} .header .sub{font-size:13px;color:#94a3b8;}
+.controls{background:#34495e;padding:10px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.controls button{background:#3498db;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:13px;font-family:inherit;}
+.controls button:hover{background:#2980b9;}
+.controls button.playing{background:#e74c3c;}
+.sep{width:1px;height:24px;background:#4a6278;margin:0 4px;}
+.controls label{color:#cbd5e1;font-size:13px;}
+.controls input[type=range]{width:80px;vertical-align:middle;}
+.controls select{padding:4px 8px;border-radius:4px;border:1px solid #4a6278;background:#2c3e50;color:#cbd5e1;font-size:13px;font-family:inherit;}
+.controls .inp{padding:4px 8px;border-radius:4px;border:1px solid #4a6278;background:#2c3e50;color:#e2e8f0;font-size:13px;font-family:'Consolas','D2Coding',monospace;width:200px;}
+.controls .inp-m{width:60px;}
+.step-info{color:#94a3b8;font-size:13px;margin-left:auto;}
+.kbd-help{color:#64748b;font-size:11px;margin-left:8px;}
+.main{display:flex;flex:1;overflow:hidden;}
+
+/* 코드 패널 */
+.code-panel{width:34%;min-width:280px;background:#1e1e1e;display:flex;flex-direction:column;transition:width .3s,min-width .3s;}
+.code-panel.collapsed{width:40px;min-width:40px;}
+.code-panel.collapsed .code-body{display:none;}
+.code-panel.collapsed .panel-hd span{display:none;}
+.panel-hd{background:#2d2d2d;color:#94a3b8;padding:8px 16px;font-size:12px;font-weight:600;border-bottom:1px solid #3d3d3d;cursor:pointer;user-select:none;display:flex;align-items:center;gap:8px;}
+.panel-hd:hover{background:#3d3d3d;}
+.panel-hd::before{content:'◀';font-size:10px;transition:transform .3s;}
+.code-panel.collapsed .panel-hd::before{transform:rotate(180deg);}
+.code-body{flex:1;overflow-y:auto;padding:8px 0;}
+.cl{display:flex;padding:1px 0;font-family:'Consolas','D2Coding',monospace;font-size:13px;line-height:1.6;transition:background .15s;}
+.cl.active{background:#264f78;}
+.cl.active .ln{color:#fff;}
+.ln{width:36px;text-align:right;padding-right:10px;color:#555;user-select:none;flex-shrink:0;}
+.lc{color:#d4d4d4;white-space:pre;}
+.kw{color:#569cd6;}.tp{color:#4ec9b0;}.nm{color:#b5cea8;}.st{color:#ce9178;}.cm{color:#6a9955;}.op{color:#d4d4d4;}
+
+/* 리사이저 */
+.resizer{width:6px;background:#34495e;cursor:col-resize;transition:background .15s;flex-shrink:0;}
+.resizer:hover,.resizer.dragging{background:#3498db;}
+body.resizing{cursor:col-resize;user-select:none;}
+body.resizing *{pointer-events:none;}
+body.resizing .resizer{pointer-events:auto;}
+.code-panel.collapsed+.resizer{display:none;}
+
+/* 시각화 패널 */
+.viz-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.vs{border-bottom:1px solid #ddd;}
+.vs .sh{background:#e8ecf0;padding:5px 16px;font-size:12px;font-weight:600;color:#64748b;}
+.vs .sb{padding:10px 16px;background:#fff;}
+
+/* 나무 차트 */
+.chart-sec{flex:1;min-height:0;display:flex;flex-direction:column;}
+.chart-sec .sb{flex:1;overflow:auto;padding:12px 16px;position:relative;background:#fff;}
+.chart-wrap{position:relative;height:100%;min-height:260px;display:flex;align-items:flex-end;justify-content:center;gap:0;padding:28px 10px 28px 10px;}
+.tree-col{display:flex;flex-direction:column;align-items:center;flex:0 0 auto;}
+.cut-lbl{height:22px;font-size:12px;font-weight:700;color:#e65100;font-family:'Consolas','D2Coding',monospace;display:flex;align-items:flex-end;justify-content:center;visibility:hidden;}
+.cut-lbl.show{visibility:visible;}
+.bar-body{display:flex;flex-direction:column;border-radius:4px 4px 0 0;overflow:hidden;transition:opacity .3s;}
+.bar-cut{background:linear-gradient(180deg,#FFB74D,#FF9800);transition:height .4s ease;min-height:0;}
+.bar-remain{background:linear-gradient(180deg,#66BB6A,#43A047);transition:height .4s ease;min-height:0;}
+.bar-remain.full{border-radius:4px 4px 0 0;}
+.height-lbl{height:22px;font-size:12px;font-weight:700;color:#333;font-family:'Consolas','D2Coding',monospace;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.cut-line{position:absolute;left:8px;right:8px;border-top:2.5px dashed #F44336;z-index:5;pointer-events:none;transition:bottom .4s ease;display:none;}
+.cut-line-lbl{position:absolute;right:4px;top:-18px;color:#F44336;font-weight:700;font-size:13px;font-family:'Consolas','D2Coding',monospace;background:rgba(255,255,255,.85);padding:0 5px;border-radius:3px;}
+
+/* 탐색 범위 바 */
+.range-sec .sb{padding:10px 16px 14px;background:#fff;position:relative;}
+.range-wrap{position:relative;height:28px;margin:0 4px;}
+.range-track{position:absolute;left:0;right:0;top:8px;height:12px;background:#e0e0e0;border-radius:6px;}
+.range-fill{position:absolute;top:0;height:100%;background:#42A5F5;border-radius:6px;opacity:.45;transition:left .4s,width .4s;}
+.range-mid{position:absolute;top:-8px;transform:translateX(-50%);color:#F44336;font-weight:700;font-size:18px;line-height:1;transition:left .4s;display:none;}
+.range-labels{position:relative;top:24px;height:22px;}
+.range-labels span{position:absolute;transform:translateX(-50%);font-size:11px;font-family:'Consolas','D2Coding',monospace;color:#64748b;white-space:nowrap;}
+.range-labels .rl-low{color:#1565C0;font-weight:700;}
+.range-labels .rl-high{color:#1565C0;font-weight:700;}
+.range-labels .rl-mid{color:#F44336;font-weight:700;top:-1px;}
+
+/* 변수 & 설명 */
+.var-c{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.vb{display:inline-flex;padding:5px 12px;border-radius:6px;font-size:14px;font-weight:600;font-family:'Consolas','D2Coding',monospace;}
+.v-lo{background:#dbeafe;color:#1d4ed8;}
+.v-hi{background:#dbeafe;color:#1d4ed8;}
+.v-mid{background:#fef3c7;color:#92400e;}
+.v-tot{background:#fce7f3;color:#9d174d;}
+.v-ans{background:#dcfce7;color:#166534;}
+.v-m{background:#f3e8ff;color:#7c3aed;}
+.vb.changed{animation:vbPulse .4s ease;}
+@keyframes vbPulse{0%{transform:scale(1);}50%{transform:scale(1.15);}100%{transform:scale(1);}}
+.desc{font-size:14px;line-height:1.6;min-height:38px;display:flex;align-items:center;}
+.desc .t{color:#2e7d32;font-weight:700;}
+.desc .f{color:#c62828;font-weight:700;}
+.desc .answer{color:#1565c0;font-weight:700;font-size:1.1em;}
+
+/* 히스토리 테이블 */
+.hist-sec .sb{padding:8px 16px;background:#fff;max-height:160px;overflow-y:auto;}
+.hist-tbl{width:100%;border-collapse:collapse;font-size:13px;font-family:'Consolas','D2Coding',monospace;}
+.hist-tbl th{background:#e3f2fd;color:#1565c0;padding:5px 8px;font-weight:600;border:1px solid #bbdefb;position:sticky;top:0;}
+.hist-tbl td{padding:4px 8px;text-align:center;border:1px solid #e0e0e0;}
+.hist-tbl tr.gte td{background:#e8f5e9;}
+.hist-tbl tr.lt td{background:#fff3e0;}
+.hist-tbl tr.current td{outline:2px solid #1565c0;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>5. 나무 자르기 — 파라메트릭 서치</h1>
+  <span class="sub">TreeCutting.java &nbsp;|&nbsp; 이진 탐색으로 최적의 절단 높이 H 찾기</span>
+</div>
+<div class="controls" id="ctrlBar">
+  <label>나무: <input class="inp" id="treesInp" value="20, 15, 10, 17, 25"></label>
+  <label>M: <input class="inp inp-m" id="mInp" value="20"></label>
+  <button onclick="randomize()">랜덤</button>
+  <button onclick="doReset()">적용</button>
+  <div class="sep"></div>
+  <button onclick="doReset()">⏮ 처음</button>
+  <button onclick="prev()">◀ 이전</button>
+  <button id="playBtn" onclick="togglePlay()">▶ 재생</button>
+  <button onclick="next()">다음 ▶</button>
+  <div class="sep"></div>
+  <button onclick="skipToEnd()">⏩ 결과</button>
+  <div class="sep"></div>
+  <label>속도: <input type="range" id="spd" min="1" max="10" value="5" oninput="spVal=+this.value"></label>
+  <span class="step-info" id="si">준비</span>
+  <span class="kbd-help">키보드: ←→ Space R E</span>
+</div>
+<div class="main">
+  <div class="code-panel" id="codePanel">
+    <div class="panel-hd" onclick="toggleCode()"><span>Java Code</span></div>
+    <div class="code-body" id="cb"></div>
+  </div>
+  <div class="resizer" id="resizer"></div>
+  <div class="viz-panel">
+    <!-- 나무 차트 -->
+    <div class="vs chart-sec">
+      <div class="sh">나무 시각화</div>
+      <div class="sb">
+        <div class="chart-wrap" id="chartWrap">
+          <div class="cut-line" id="cutLine"><span class="cut-line-lbl" id="cutLineLbl"></span></div>
+        </div>
+      </div>
+    </div>
+    <!-- 탐색 범위 -->
+    <div class="vs range-sec">
+      <div class="sh">탐색 범위 (low ~ high)</div>
+      <div class="sb">
+        <div class="range-wrap" id="rangeWrap">
+          <div class="range-track"><div class="range-fill" id="rangeFill"></div></div>
+          <div class="range-mid" id="rangeMid">▼</div>
+          <div class="range-labels" id="rangeLabels"></div>
+        </div>
+      </div>
+    </div>
+    <!-- 변수 -->
+    <div class="vs">
+      <div class="sh">변수 상태</div>
+      <div class="sb"><div class="var-c" id="vc"></div></div>
+    </div>
+    <!-- 설명 -->
+    <div class="vs desc-sec">
+      <div class="sh">실행 설명</div>
+      <div class="sb"><div class="desc" id="descArea"></div></div>
+    </div>
+    <!-- 히스토리 -->
+    <div class="vs hist-sec">
+      <div class="sh">반복 히스토리</div>
+      <div class="sb">
+        <table class="hist-tbl">
+          <thead><tr><th>#</th><th>low</th><th>high</th><th>mid</th><th>합계</th><th>비교</th><th>answer</th></tr></thead>
+          <tbody id="histBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── 전역 변수 ── */
+let trees = [20, 15, 10, 17, 25];
+let target = 20;
+let steps = [], ci = 0;
+let iterations = [];  // 반복 히스토리
+let playing = false, playTimer = null, spVal = 5;
+let prevVars = {};
+
+/* ── 코드 패널 ── */
+function hl(s) {
+  s = s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  s = s.replace(/(\/\/.*)$/gm,'<span class="cm">$1</span>');
+  s = s.replace(/\b(int|long|for|if|else|while|return|static|void|Math|max)\b/g,'<span class="kw">$1</span>');
+  s = s.replace(/\b(\d+)\b/g,'<span class="nm">$1</span>');
+  return s;
+}
+
+function initCode() {
+  const lines = [
+    `int[] trees = {${trees.join(', ')}};`,
+    `int M = ${target};`,
+    ``,
+    `int low = 0, high = max(trees);`,
+    `int answer = 0;`,
+    `while (low <= high) {`,
+    `    int mid = (low + high) / 2;`,
+    `    long total = 0;`,
+    `    for (int i = 0; i < N; i++)`,
+    `        if (trees[i] > mid)`,
+    `            total += trees[i] - mid;`,
+    `    if (total >= M) {`,
+    `        answer = mid;`,
+    `        low = mid + 1;`,
+    `    } else {`,
+    `        high = mid - 1;`,
+    `    }`,
+    `}`,
+    `return answer;`,
+  ];
+  document.getElementById('cb').innerHTML = lines.map((l,i) => {
+    const n = i + 1;
+    return `<div class="cl" data-line="${n}"><span class="ln">${String(n).padStart(2)}</span><span class="lc">${hl(l)}</span></div>`;
+  }).join('');
+}
+
+/* ── 스텝 생성 ── */
+function genSteps() {
+  steps = [];
+  iterations = [];
+  const N = trees.length;
+  const maxH = Math.max(...trees);
+
+  // 초기화
+  steps.push({l:[1], v:{}, cutLine:null, cuts:null, iter:0, a:'init',
+    d:`나무 높이 배열: [${trees.join(', ')}]`});
+  steps.push({l:[2], v:{M:target}, cutLine:null, cuts:null, iter:0, a:'init',
+    d:`목표 길이 M = ${target}`});
+
+  let low = 0, high = maxH, answer = 0;
+  steps.push({l:[4], v:{low, high}, cutLine:null, cuts:null, iter:0, a:'init',
+    d:`low = 0, high = max(trees) = ${high}`});
+  steps.push({l:[5], v:{low, high, answer}, cutLine:null, cuts:null, iter:0, a:'init',
+    d:`answer = 0 초기화`});
+
+  let iter = 0;
+  while (low <= high) {
+    iter++;
+    const lowBefore = low, highBefore = high;
+
+    // while 조건 true
+    steps.push({l:[6], v:{low, high, answer}, cutLine:null, cuts:null, iter, a:'while_true',
+      d:`<b>[반복 ${iter}]</b> low(${low}) &le; high(${high}) &rarr; <span class="t">true</span>`});
+
+    // mid 계산
+    const mid = Math.floor((low + high) / 2);
+    steps.push({l:[7], v:{low, high, mid, answer}, cutLine:mid, cuts:null, iter, a:'calc_mid',
+      d:`mid = (${low} + ${high}) / 2 = <b>${mid}</b> &mdash; 절단선 설정`});
+
+    // total 계산
+    let total = 0;
+    const cutAmounts = [];
+    for (let i = 0; i < N; i++) {
+      const c = Math.max(0, trees[i] - mid);
+      cutAmounts.push(c);
+      total += c;
+    }
+    steps.push({l:[8,9,10,11], v:{low, high, mid, total, answer}, cutLine:mid, cuts:[...cutAmounts], iter, a:'calc_total',
+      d:`잘린 양: [${cutAmounts.join(', ')}] &rarr; 합계 = <b>${total}</b>`});
+
+    // 비교 & 갱신
+    if (total >= target) {
+      steps.push({l:[12], v:{low, high, mid, total, answer}, cutLine:mid, cuts:[...cutAmounts], iter, a:'compare',
+        d:`${total} &ge; ${target} &rarr; <span class="t">충분!</span> 더 높은 H를 시도`});
+      answer = mid;
+      low = mid + 1;
+      steps.push({l:[13,14], v:{low, high, mid, total, answer}, cutLine:mid, cuts:[...cutAmounts], iter, a:'update',
+        d:`answer = ${answer}, low = mid + 1 = ${low}`});
+      iterations.push({n:iter, low:lowBefore, high:highBefore, mid, total, gte:true, answer, doneAt:steps.length-1});
+    } else {
+      steps.push({l:[12], v:{low, high, mid, total, answer}, cutLine:mid, cuts:[...cutAmounts], iter, a:'compare',
+        d:`${total} &lt; ${target} &rarr; <span class="f">부족!</span> H를 낮춰야 한다`});
+      high = mid - 1;
+      steps.push({l:[15,16], v:{low, high, mid, total, answer}, cutLine:mid, cuts:[...cutAmounts], iter, a:'update',
+        d:`high = mid - 1 = ${high}`});
+      iterations.push({n:iter, low:lowBefore, high:highBefore, mid, total, gte:false, answer, doneAt:steps.length-1});
+    }
+  }
+
+  // while 조건 false
+  steps.push({l:[6], v:{low, high, answer}, cutLine:null, cuts:null, iter:0, a:'while_false',
+    d:`low(${low}) &gt; high(${high}) &rarr; <span class="f">false</span>, 탐색 종료!`});
+
+  // 최종 결과
+  const finalCuts = trees.map(t => Math.max(0, t - answer));
+  steps.push({l:[19], v:{low, high, answer}, cutLine:answer, cuts:finalCuts, iter:0, a:'return',
+    d:`최종 답: 절단기 높이 H = <span class="answer">${answer}</span>`});
+}
+
+/* ── 차트 초기화 ── */
+let barEls = [];
+const MAX_BAR_H = 200;
+
+function initChart() {
+  const wrap = document.getElementById('chartWrap');
+  // 기존 바 제거 (cut-line은 유지)
+  wrap.querySelectorAll('.tree-col').forEach(e => e.remove());
+  barEls = [];
+  const maxH = Math.max(...trees);
+  const N = trees.length;
+  const barW = Math.min(64, Math.max(36, Math.floor(500 / (N * 1.3))));
+
+  for (let i = 0; i < N; i++) {
+    const col = document.createElement('div');
+    col.className = 'tree-col';
+    col.style.width = barW + 'px';
+    col.style.margin = '0 ' + Math.max(4, Math.floor(barW * 0.2)) + 'px';
+
+    const cutLbl = document.createElement('div');
+    cutLbl.className = 'cut-lbl';
+    cutLbl.textContent = '';
+
+    const body = document.createElement('div');
+    body.className = 'bar-body';
+    body.style.width = barW + 'px';
+    const totalH = Math.round(trees[i] / maxH * MAX_BAR_H);
+    body.style.height = totalH + 'px';
+
+    const bCut = document.createElement('div');
+    bCut.className = 'bar-cut';
+    bCut.style.height = '0px';
+
+    const bRemain = document.createElement('div');
+    bRemain.className = 'bar-remain full';
+    bRemain.style.height = totalH + 'px';
+
+    body.appendChild(bCut);
+    body.appendChild(bRemain);
+
+    const hLbl = document.createElement('div');
+    hLbl.className = 'height-lbl';
+    hLbl.textContent = trees[i];
+
+    col.appendChild(cutLbl);
+    col.appendChild(body);
+    col.appendChild(hLbl);
+    wrap.insertBefore(col, document.getElementById('cutLine'));
+
+    barEls.push({col, cutLbl, body, bCut, bRemain, hLbl});
+  }
+}
+
+/* ── 렌더링 ── */
+function render() {
+  if (!steps.length) return;
+  const s = steps[ci];
+
+  // 코드 하이라이트
+  document.querySelectorAll('.cl').forEach(el => el.classList.remove('active'));
+  (s.l || []).forEach(ln => {
+    const el = document.querySelector(`.cl[data-line="${ln}"]`);
+    if (el) el.classList.add('active');
+  });
+
+  // 나무 차트
+  renderChart(s);
+
+  // 탐색 범위
+  renderRange(s);
+
+  // 변수
+  renderVars(s);
+
+  // 설명
+  document.getElementById('descArea').innerHTML = s.d;
+
+  // 히스토리
+  renderHistory(s);
+
+  // 스텝 정보
+  document.getElementById('si').textContent = `${ci + 1} / ${steps.length}`;
+
+  prevVars = {...(s.v || {})};
+}
+
+function renderChart(s) {
+  const maxH = Math.max(...trees);
+  const cutLine = document.getElementById('cutLine');
+  const cutLineLbl = document.getElementById('cutLineLbl');
+
+  if (s.cutLine !== null && s.cutLine !== undefined) {
+    const bottomPx = Math.round(s.cutLine / maxH * MAX_BAR_H) + 52; // 28 padding + 22 height-lbl + 2 margin
+    cutLine.style.display = 'block';
+    cutLine.style.bottom = bottomPx + 'px';
+    cutLineLbl.textContent = 'H = ' + s.cutLine;
+  } else {
+    cutLine.style.display = 'none';
+  }
+
+  for (let i = 0; i < trees.length; i++) {
+    const el = barEls[i];
+    if (!el) continue;
+    const totalH = Math.round(trees[i] / maxH * MAX_BAR_H);
+
+    if (s.cuts && s.cuts[i] > 0) {
+      const cutH = Math.round(s.cuts[i] / maxH * MAX_BAR_H);
+      const remainH = totalH - cutH;
+      el.bCut.style.height = cutH + 'px';
+      el.bRemain.style.height = remainH + 'px';
+      el.bRemain.classList.remove('full');
+      el.cutLbl.textContent = '+' + s.cuts[i];
+      el.cutLbl.classList.add('show');
+    } else {
+      el.bCut.style.height = '0px';
+      el.bRemain.style.height = totalH + 'px';
+      el.bRemain.classList.add('full');
+      if (s.cuts && s.cuts[i] === 0) {
+        el.cutLbl.textContent = '0';
+        el.cutLbl.classList.add('show');
+      } else {
+        el.cutLbl.textContent = '';
+        el.cutLbl.classList.remove('show');
+      }
+    }
+  }
+}
+
+function renderRange(s) {
+  const maxH = Math.max(...trees);
+  const fill = document.getElementById('rangeFill');
+  const midEl = document.getElementById('rangeMid');
+  const labels = document.getElementById('rangeLabels');
+
+  const v = s.v || {};
+  const lo = v.low, hi = v.high;
+
+  if (lo === undefined || hi === undefined) {
+    fill.style.left = '0%';
+    fill.style.width = '100%';
+    midEl.style.display = 'none';
+    labels.innerHTML = `<span style="left:0%">0</span><span style="left:100%">${maxH}</span>`;
+    return;
+  }
+
+  const loPct = (lo / maxH * 100).toFixed(1);
+  const hiPct = (hi / maxH * 100).toFixed(1);
+  const wRaw = Math.max(0, (hi - lo) / maxH * 100);
+  const wPct = wRaw.toFixed(1);
+
+  fill.style.left = loPct + '%';
+  fill.style.width = wRaw < 1 && lo <= hi ? 'max(' + wPct + '%, 4px)' : wPct + '%';
+
+  let html = '';
+  if (parseFloat(loPct) > 8) html += `<span style="left:0%">0</span>`;
+  if (parseFloat(hiPct) < 92) html += `<span style="left:100%">${maxH}</span>`;
+  html += `<span class="rl-low" style="left:${loPct}%">low=${lo}</span>`;
+  if (hi !== lo) html += `<span class="rl-high" style="left:${hiPct}%">high=${hi}</span>`;
+  else html += `<span class="rl-high" style="left:${hiPct}%;top:12px">high=${hi}</span>`;
+
+  if (v.mid !== undefined) {
+    const midPct = (v.mid / maxH * 100).toFixed(1);
+    midEl.style.display = 'block';
+    midEl.style.left = midPct + '%';
+    html += `<span class="rl-mid" style="left:${midPct}%">mid=${v.mid}</span>`;
+  } else {
+    midEl.style.display = 'none';
+  }
+
+  labels.innerHTML = html;
+}
+
+function renderVars(s) {
+  const v = s.v || {};
+  const parts = [];
+  const show = (name, val, cls) => {
+    if (val === undefined) return;
+    const changed = prevVars[name] !== undefined && prevVars[name] !== val;
+    parts.push(`<span class="vb ${cls}${changed ? ' changed' : ''}">${name} = ${val}</span>`);
+  };
+  show('low', v.low, 'v-lo');
+  show('high', v.high, 'v-hi');
+  show('mid', v.mid, 'v-mid');
+  show('total', v.total, 'v-tot');
+  show('answer', v.answer, 'v-ans');
+  if (v.M !== undefined) parts.push(`<span class="vb v-m">M = ${v.M}</span>`);
+  document.getElementById('vc').innerHTML = parts.join('');
+}
+
+function renderHistory(s) {
+  const body = document.getElementById('histBody');
+  const completed = iterations.filter(it => ci >= it.doneAt);
+  if (!completed.length) { body.innerHTML = ''; return; }
+
+  let html = '';
+  for (const it of completed) {
+    const isCurrent = s.iter === it.n;
+    const cls = (it.gte ? 'gte' : 'lt') + (isCurrent ? ' current' : '');
+    html += `<tr class="${cls}">`;
+    html += `<td>${it.n}</td><td>${it.low}</td><td>${it.high}</td><td>${it.mid}</td>`;
+    html += `<td>${it.total}</td>`;
+    html += `<td>${it.gte ? `${it.total} &ge; ${target} ✓` : `${it.total} &lt; ${target} ✗`}</td>`;
+    html += `<td>${it.answer}</td></tr>`;
+  }
+  body.innerHTML = html;
+}
+
+/* ── 재생 컨트롤 ── */
+function next() {
+  if (ci < steps.length - 1) { ci++; render(); }
+  else stopPlay();
+}
+function prev() {
+  if (ci > 0) { ci--; render(); }
+}
+function togglePlay() {
+  if (playing) stopPlay();
+  else startPlay();
+}
+function startPlay() {
+  if (ci >= steps.length - 1) return;
+  playing = true;
+  document.getElementById('playBtn').textContent = '⏸ 정지';
+  document.getElementById('playBtn').classList.add('playing');
+  tick();
+}
+function stopPlay() {
+  playing = false;
+  clearTimeout(playTimer);
+  document.getElementById('playBtn').textContent = '▶ 재생';
+  document.getElementById('playBtn').classList.remove('playing');
+}
+function tick() {
+  if (!playing) return;
+  next();
+  if (ci >= steps.length - 1) { stopPlay(); return; }
+  const delay = 1200 - spVal * 100;
+  playTimer = setTimeout(tick, delay);
+}
+function skipToEnd() {
+  stopPlay();
+  ci = steps.length - 1;
+  render();
+}
+function doReset() {
+  stopPlay();
+  parseInput();
+  initCode();
+  genSteps();
+  initChart();
+  ci = 0;
+  prevVars = {};
+  render();
+}
+
+/* ── 입력 처리 ── */
+function parseInput() {
+  const tStr = document.getElementById('treesInp').value.trim();
+  const parsed = tStr.split(/[,\s]+/).map(Number).filter(n => n > 0 && !isNaN(n));
+  if (parsed.length >= 2) trees = parsed;
+  const m = parseInt(document.getElementById('mInp').value);
+  if (m > 0) target = m;
+}
+
+function randomize() {
+  const N = 5 + Math.floor(Math.random() * 3);
+  const arr = [];
+  for (let i = 0; i < N; i++) arr.push(5 + Math.floor(Math.random() * 26));
+  document.getElementById('treesInp').value = arr.join(', ');
+  const maxH = Math.max(...arr);
+  const M = Math.max(1, Math.floor(maxH * 0.3 + Math.random() * maxH * 0.5));
+  document.getElementById('mInp').value = M;
+  doReset();
+}
+
+/* ── 코드 패널 토글 ── */
+function toggleCode() {
+  document.getElementById('codePanel').classList.toggle('collapsed');
+}
+
+/* ── 리사이저 ── */
+(function(){
+  const resizer = document.getElementById('resizer');
+  const cp = document.getElementById('codePanel');
+  let startX, startW;
+  resizer.addEventListener('mousedown', e => {
+    e.preventDefault();
+    startX = e.clientX; startW = cp.offsetWidth;
+    document.body.classList.add('resizing');
+    resizer.classList.add('dragging');
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+  function onMove(e) { const w = startW + (e.clientX - startX); cp.style.width = Math.max(200, w) + 'px'; cp.style.minWidth = Math.max(200, w) + 'px'; }
+  function onUp() { document.body.classList.remove('resizing'); resizer.classList.remove('dragging'); document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
+})();
+
+/* ── 키보드 ── */
+document.addEventListener('keydown', e => {
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+  switch(e.key) {
+    case 'ArrowRight': e.preventDefault(); next(); break;
+    case 'ArrowLeft':  e.preventDefault(); prev(); break;
+    case ' ':          e.preventDefault(); togglePlay(); break;
+    case 'r': case 'R': doReset(); break;
+    case 'e': case 'E': skipToEnd(); break;
+  }
+});
+
+/* ── 초기 실행 ── */
+doReset();
+</script>
+</body>
+</html>
