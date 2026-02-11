@@ -9,22 +9,15 @@
 body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0f2f5;color:#333;height:100vh;display:flex;flex-direction:column;}
 .header{background:#1a237e;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:16px;}
 .header h1{font-size:18px;} .header .sub{font-size:13px;color:#94a3b8;}
-.controls{background:#283593;padding:10px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.controls button{background:#3498db;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:13px;font-family:inherit;}
-.controls button:hover{background:#2980b9;}
-.controls button.playing{background:#e74c3c;}
-.controls label{color:#cbd5e1;font-size:13px;}
-.controls input[type=range]{width:80px;vertical-align:middle;}
-.step-info{color:#94a3b8;font-size:13px;margin-left:auto;}
-.kbd-help{color:#64748b;font-size:11px;margin-left:8px;}
-.sep{width:1px;height:24px;background:#4a5ea8;margin:0 4px;}
+.controls{background:#283593;padding:10px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .min-disp{display:inline-flex;align-items:center;gap:6px;background:#1e293b;color:#fbbf24;padding:6px 16px;border-radius:6px;font-family:'Consolas','D2Coding',monospace;font-size:20px;font-weight:700;border:2px solid #fbbf24;text-shadow:0 0 8px rgba(251,191,36,.4);}
 .min-disp .ml{color:#94a3b8;font-weight:600;font-size:14px;}
-.min-overlay{position:sticky;top:8px;left:8px;z-index:10;display:inline-flex;align-items:center;gap:6px;background:rgba(30,41,59,.92);color:#fbbf24;padding:8px 18px;border-radius:8px;font-family:'Consolas','D2Coding',monospace;font-size:22px;font-weight:700;border:2px solid #fbbf24;box-shadow:0 2px 12px rgba(0,0,0,.3);pointer-events:none;}
+.summary-disp{color:#cbd5e1;font-size:13px;font-family:'Consolas','D2Coding',monospace;}
+.min-overlay{position:absolute;top:30px;left:16px;z-index:10;display:inline-flex;align-items:center;gap:6px;background:rgba(30,41,59,.92);color:#fbbf24;padding:8px 18px;border-radius:8px;font-family:'Consolas','D2Coding',monospace;font-size:22px;font-weight:700;border:2px solid #fbbf24;box-shadow:0 2px 12px rgba(0,0,0,.3);pointer-events:none;}
 .min-overlay .ml{color:#94a3b8;font-weight:600;font-size:14px;}
 .min-overlay .min-hist{font-size:13px;color:#94a3b8;font-weight:400;margin-left:8px;}
 .main{display:flex;flex:1;overflow:hidden;}
-.code-panel{width:30%;min-width:280px;background:#1e1e1e;display:flex;flex-direction:column;transition:width .3s,min-width .3s;}
+.code-panel{width:24%;min-width:280px;background:#1e1e1e;display:flex;flex-direction:column;transition:width .3s,min-width .3s;}
 .code-panel.collapsed{width:40px;min-width:40px;}
 .code-panel.collapsed .code-body{display:none;}
 .code-panel.collapsed .panel-hd span{display:none;}
@@ -34,8 +27,6 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0
 .code-panel.collapsed .panel-hd::before{transform:rotate(180deg);}
 .code-body{flex:1;overflow-y:auto;padding:8px 0;}
 .cl{display:flex;padding:1px 0;font-family:'Consolas','D2Coding',monospace;font-size:13px;line-height:1.6;}
-.cl.active{background:#264f78;} .cl.prune-hl{background:#4a2020;} .cl.complete-hl{background:#1a3a20;}
-.cl.active .ln{color:#fff;} .cl.prune-hl .ln{color:#f87171;} .cl.complete-hl .ln{color:#4ade80;}
 .ln{width:36px;text-align:right;padding-right:10px;color:#555;user-select:none;flex-shrink:0;}
 .lc{color:#d4d4d4;white-space:pre;}
 .kw{color:#569cd6;}.tp{color:#4ec9b0;}.nm{color:#b5cea8;}.st{color:#ce9178;}.cm{color:#6a9955;}.fn{color:#dcdcaa;}
@@ -57,7 +48,7 @@ body.resizing .resizer{pointer-events:auto;}
 .legend-item{display:flex;align-items:center;gap:3px;}
 .lg-dot{width:12px;height:12px;border-radius:50%;border:2px solid;display:inline-block;}
 .lg-line{width:18px;height:3px;border-radius:2px;display:inline-block;}
-.tree-sec{flex:1;display:flex;flex-direction:column;min-height:0;}
+.tree-sec{flex:1;display:flex;flex-direction:column;min-height:0;position:relative;}
 .tree-sec .sb{flex:1;overflow:auto;padding:8px;position:relative;background:#fafafa;}
 .tree-node{transition:all .15s;cursor:pointer;}
 .tree-node:hover{filter:brightness(1.1);stroke-width:3;}
@@ -66,7 +57,6 @@ body.resizing .resizer{pointer-events:auto;}
 .tn-completed{fill:#86efac;stroke:#22c55e;stroke-width:2;}
 .tn-pruned{fill:#fecaca;stroke:#ef4444;stroke-width:2;stroke-dasharray:3,2;}
 .tn-optimal{fill:#fde68a;stroke:#f59e0b;stroke-width:2.5;}
-.tn-active{fill:#fbbf24;stroke:#f59e0b;stroke-width:3;}
 .te-unvisited{stroke:#e5e7eb;stroke-width:1;}
 .te-day{stroke:#3b82f6;stroke-width:1.5;}
 .te-month{stroke:#22c55e;stroke-width:1.5;}
@@ -80,19 +70,10 @@ body.resizing .resizer{pointer-events:auto;}
 .cost-lbl.cl-completed{fill:#15803d;font-weight:700;font-size:17px;}
 .cost-lbl.cl-optimal{fill:#b45309;font-weight:700;font-size:18px;}
 .edge-cost{font-size:16px;font-family:'Consolas','D2Coding',monospace;text-anchor:middle;pointer-events:none;fill:#6b7280;}
-.info-sec{height:100px;overflow-y:auto;flex-shrink:0;}
-.info-sec .sb{padding:8px 16px;font-size:13px;line-height:1.7;}
-.info-path{font-family:'Consolas','D2Coding',monospace;font-size:12px;color:#6366f1;}
-.st-completed{color:#16a34a;font-weight:700;} .st-pruned{color:#dc2626;font-weight:700;}
-.st-internal{color:#2563eb;font-weight:700;} .st-unvisited{color:#94a3b8;font-weight:700;}
 .tree-toggle{margin-left:auto;background:#64748b;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;}
 .tree-toggle:hover{background:#475569;}
-.viz-panel.tree-expanded .vs:not(.tree-sec):not(.info-sec){display:none;}
+.viz-panel.tree-expanded .vs:not(.tree-sec){display:none;}
 .viz-panel.tree-expanded .tree-sec{flex:1;}
-.summary{margin-top:4px;padding:6px 10px;background:#f8fafc;border-radius:4px;font-size:12px;line-height:1.6;font-family:'Consolas','D2Coding',monospace;color:#475569;}
-.summary b{color:#1e293b;}
-@keyframes nodePulse{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
-.node-pulse{animation:nodePulse .3s ease;}
 </style>
 </head>
 <body>
@@ -101,17 +82,8 @@ body.resizing .resizer{pointer-events:auto;}
   <span class="sub">cost=[10, 30, 60, 200] &nbsp;|&nbsp; plan=[2, 8, 1, 6, 3] &nbsp;|&nbsp; 5개월 축소 버전</span>
 </div>
 <div class="controls">
-  <button onclick="doReset()">⏮ 처음</button>
-  <button onclick="prev()">◀ 이전</button>
-  <button id="playBtn" onclick="togglePlay()">▶ 탐색 재생</button>
-  <button onclick="next()">다음 ▶</button>
-  <div class="sep"></div>
-  <button onclick="showFinal()">⏩ 결과 보기</button>
-  <div class="sep"></div>
-  <label>속도: <input type="range" id="spd" min="1" max="10" value="5" oninput="spVal=+this.value"></label>
-  <div class="min-disp"><span class="ml">min =</span><span id="minVal">200</span></div>
-  <span class="step-info" id="si">결과 보기</span>
-  <span class="kbd-help">←→ 이전/다음 · Space 재생 · R 처음 · F 결과 · T 트리확대</span>
+  <div class="min-disp"><span class="ml">최적 비용 =</span><span id="minVal"></span></div>
+  <span class="summary-disp" id="summaryDisp"></span>
 </div>
 <div class="main">
   <div class="code-panel" id="codePanel">
@@ -121,8 +93,11 @@ body.resizing .resizer{pointer-events:auto;}
   <div class="resizer" id="resizer"></div>
   <div class="viz-panel" id="vizPanel">
     <div class="vs plan-sec"><div class="sh">이용 계획 & 범례</div><div class="sb"><div id="planArea"></div><div class="legend" id="lgd"></div></div></div>
-    <div class="vs tree-sec"><div class="sh">상태공간 트리<span id="treeStat"></span><button class="tree-toggle" onclick="toggleTreeExpand()">⤢ 최대화</button></div><div class="sb" id="tc"><div class="min-overlay" id="minOv"><span class="ml">현재 최솟값</span> <span id="minVal2">200</span><span class="min-hist" id="minHist2"></span></div></div></div>
-    <div class="vs info-sec"><div class="sh">노드 정보</div><div class="sb" id="info">노드 위에 마우스를 올리면 상세 정보가 표시됩니다.</div></div>
+    <div class="vs tree-sec">
+      <div class="sh">상태공간 트리<span id="treeStat"></span><button class="tree-toggle" onclick="toggleTreeExpand()">⤢ 최대화</button></div>
+      <div class="sb" id="tc"></div>
+      <div class="min-overlay" id="minOv"><span class="ml">최솟값</span> <span id="minVal2"></span><span class="min-hist" id="minHist2"></span></div>
+    </div>
   </div>
 </div>
 <script>
@@ -240,7 +215,6 @@ function simulateDFS(){
     dfsSeq.push(node);
     if(min<=node.costSum){
       node.state='pruned';
-      node.pruneInfo=`min(${min}) ≤ costSum(${node.costSum})`;
       return;
     }
     if(node.month>M){
@@ -255,12 +229,10 @@ function simulateDFS(){
   dfs(root);
   finalMin=min;
 
-  // Find optimal leaf (lowest costSum among completed)
   bestLeaf=null;
   for(const n of dfsSeq){
     if(n.state==='completed'&&(!bestLeaf||n.costSum<bestLeaf.costSum)) bestLeaf=n;
   }
-  // Mark optimal path
   if(bestLeaf){let n=bestLeaf;while(n){n.onOptimal=true;n=n.parent;}}
 }
 
@@ -283,22 +255,19 @@ function layoutTree(){
 // ===== SVG Rendering =====
 function renderSVG(){
   let s='';
-  // Edges first
   function drawEdges(n){
     n.children.forEach(c=>{
       s+=`<line id="E${c.id}" x1="${n.x}" y1="${n.y}" x2="${c.x}" y2="${c.y}" class="te-unvisited"/>`;
-      // Edge cost label — 세달권(tkIdx=2)은 더 오른쪽으로 오프셋
-      const mx=(n.x+c.x)/2, my=(n.y+c.y)/2, dx=c.x-n.x;
+      const mx=(n.x+c.x)/2, my=(n.y+c.y)/2;
       let offsetX;
-      if(c.tkIdx===0) offsetX=-20;                      // 하루권: 왼쪽
-      else if(c.tkIdx===1) offsetX=-10;                  // 한달권: 약간 왼쪽
-      else offsetX=10;                                   // 세달권: 약간 오른쪽
+      if(c.tkIdx===0) offsetX=-20;
+      else if(c.tkIdx===1) offsetX=-10;
+      else offsetX=10;
       s+=`<text id="EL${c.id}" x="${mx+offsetX}" y="${my+2}" class="edge-cost" style="opacity:.25">${c.tkCost}</text>`;
       drawEdges(c);
     });
   }
   drawEdges(root);
-  // Nodes
   function drawNodes(n){
     n.children.forEach(drawNodes);
     s+=`<circle id="N${n.id}" cx="${n.x}" cy="${n.y}" r="${R}" class="tree-node tn-unvisited"/>`;
@@ -309,13 +278,11 @@ function renderSVG(){
   drawNodes(root);
   document.getElementById('tc').innerHTML=`<svg id="treeSvg" width="${svgW}" height="${svgH}">${s}</svg>`;
 
-  // Stats
   const visited=dfsSeq.length, pruned=dfsSeq.filter(n=>n.state==='pruned').length;
   const unvisited=allNodes.length-visited;
   document.getElementById('treeStat').textContent=
     ` (${allNodes.length}개 노드 · 방문${visited} · 가지치기${pruned} · 미방문${unvisited})`;
 
-  // Add hover events
   const svg=document.getElementById('treeSvg');
   svg.addEventListener('mouseover',onNodeOver);
   svg.addEventListener('mouseout',onNodeOut);
@@ -329,13 +296,12 @@ function stateClass(st,onOpt){
   if(st==='pruned') return 'tn-pruned';
   return 'tn-unvisited';
 }
-function edgeStateClass(child,showOpt){
+function edgeStateClass(child){
   const tk='te-'+TK_KEY[child.tkIdx];
   if(child.state==='unvisited') return 'te-unvisited te-dim';
   let cls=tk;
   if(child.state==='pruned') cls+=' te-pruned-state';
-  if(child.state==='unvisited') cls+=' te-dim';
-  if(showOpt&&child.onOptimal) cls+=' te-optimal';
+  if(child.onOptimal) cls+=' te-optimal';
   return cls;
 }
 
@@ -352,119 +318,35 @@ function applyFinal(){
     }
     if(n.parent){
       const e=document.getElementById('E'+n.id);
-      if(e) e.className.baseVal=edgeStateClass(n,true);
+      if(e) e.className.baseVal=edgeStateClass(n);
       const el=document.getElementById('EL'+n.id);
       if(el) el.style.opacity=(n.state==='unvisited')?'.15':'0.6';
     }
   });
-  updateMinDisplay(finalMin, minHist);
-}
-
-function applyReplay(idx){
-  // Reset all to unvisited
-  allNodes.forEach(n=>{
-    const c=document.getElementById('N'+n.id);
-    if(c) c.className.baseVal='tree-node tn-unvisited';
-    const cl=document.getElementById('CL'+n.id);
-    if(cl) cl.className.baseVal='cost-lbl';
-    if(n.parent){
-      const e=document.getElementById('E'+n.id);
-      if(e) e.className.baseVal='te-unvisited te-dim';
-      const el=document.getElementById('EL'+n.id);
-      if(el) el.style.opacity='.15';
-    }
-  });
-  if(idx<0){
-    document.getElementById('minVal').textContent=COST[3];
-    hlCodeLine(-1);
-    return;
-  }
-  // Color visited up to idx
-  let curMin=COST[3];
-  for(let i=0;i<=idx;i++){
-    const n=dfsSeq[i];
-    const isCur=(i===idx);
-    const c=document.getElementById('N'+n.id);
-    if(c){
-      if(isCur) c.className.baseVal='tree-node tn-active';
-      else c.className.baseVal='tree-node '+stateClass(n.state,false);
-    }
-    if(n.state==='completed'&&!isCur){
-      const cl=document.getElementById('CL'+n.id);
-      if(cl){
-        let cc='cost-lbl';
-        if(n.onOptimal) cc+=' cl-optimal';
-        else cc+=' cl-completed';
-        cl.className.baseVal=cc;
-      }
-    }
-    if(n.parent){
-      const e=document.getElementById('E'+n.id);
-      if(e) e.className.baseVal='te-'+TK_KEY[n.tkIdx]+(n.state==='pruned'?' te-pruned-state':'');
-      const el=document.getElementById('EL'+n.id);
-      if(el) el.style.opacity='0.6';
-    }
-    if(n.state==='completed'&&n.costSum<curMin) curMin=n.costSum;
-    else if(i===0) curMin=COST[3];
-  }
-  // Update min display
-  const curNode=dfsSeq[idx];
-  let dispMin=curNode.minAtVisit;
-  if(curNode.state==='completed') dispMin=curNode.costSum;
-  // Build history up to current step
-  const histSoFar=minHist.filter(h=>h.order<=idx);
-  updateMinDisplay(dispMin, histSoFar);
-
-  // Highlight code line
-  if(curNode.state==='pruned') hlCodeLine(11,'prune-hl');
-  else if(curNode.state==='completed') hlCodeLine(13,'complete-hl');
-  else hlCodeLine(10,'active');
-
-  // Scroll tree container to active node
-  scrollToNode(curNode);
-}
-
-function scrollToNode(node){
-  const tc=document.getElementById('tc');
-  if(!tc) return;
-  const targetX=node.x-tc.clientWidth/2;
-  const targetY=node.y-tc.clientHeight/2;
-  tc.scrollTo({left:Math.max(0,targetX),top:Math.max(0,targetY),behavior:'smooth'});
-}
-
-function hlCodeLine(lineIdx,cls){
-  document.querySelectorAll('.cl.active,.cl.prune-hl,.cl.complete-hl').forEach(e=>{
-    e.classList.remove('active','prune-hl','complete-hl');
-  });
-  if(lineIdx<0) return;
-  const el=document.getElementById('L'+lineIdx);
-  if(el){el.classList.add(cls||'active');el.scrollIntoView({block:'nearest',behavior:'smooth'});}
-}
-
-function updateMinDisplay(val, hist){
-  document.getElementById('minVal').textContent=val;
-  document.getElementById('minVal2').textContent=val;
-  const histStr=hist.map(h=>h.min).join(' → ');
-  document.getElementById('minHist2').textContent=hist.length>1?'('+histStr+')':'';
+  // Min displays
+  document.getElementById('minVal').textContent=finalMin;
+  document.getElementById('minVal2').textContent=finalMin;
+  document.getElementById('minHist2').textContent='('+minHist.map(h=>h.min).join(' → ')+')';
+  // Summary
+  const optPath=getPath(bestLeaf);
+  const optStr=optPath.map((n,i)=>{
+    if(i===0) return n.month+'월';
+    return TK_NAME[n.tkIdx]+'(+'+n.tkCost+') → '+(n.month>M?'완료':n.month+'월');
+  }).join(' ');
+  document.getElementById('summaryDisp').innerHTML=
+    '경로: '+optStr+' &nbsp;|&nbsp; min 갱신: '+minHist.map(h=>h.min).join(' → ');
 }
 
 // ===== Hover =====
-let hoveredNode=null;
 function onNodeOver(e){
   const t=e.target;
   if(!t.classList||!t.classList.contains('tree-node')) return;
-  const id=parseInt(t.id.substring(1));
-  const node=allNodes[id];
-  hoveredNode=node;
-  showNodeInfo(node);
-  if(isFinal) highlightPath(node);
+  highlightPath(allNodes[parseInt(t.id.substring(1))]);
 }
 function onNodeOut(e){
   const t=e.target;
   if(!t.classList||!t.classList.contains('tree-node')) return;
-  hoveredNode=null;
   clearHighlight();
-  document.getElementById('info').innerHTML=makeSummaryHTML();
 }
 
 function getPath(node){
@@ -475,7 +357,6 @@ function getPath(node){
 }
 
 function highlightPath(node){
-  // Dim all, then highlight path
   allNodes.forEach(n=>{
     const c=document.getElementById('N'+n.id);
     if(c) c.style.opacity='.35';
@@ -512,94 +393,6 @@ function clearHighlight(){
   });
 }
 
-function showNodeInfo(node){
-  const path=getPath(node);
-  let pathStr=path.map((n,i)=>{
-    if(i===0) return `<b>${n.month}월</b>(${n.costSum})`;
-    return `<span style="color:${TK_COLOR[n.tkIdx]}">→${TK_NAME[n.tkIdx]}(+${n.tkCost})</span> <b>${n.month>M?'완료':n.month+'월'}</b>(${n.costSum})`;
-  }).join(' ');
-
-  let stateStr='';
-  if(node.state==='completed') stateStr=`<span class="st-completed">완료 — min 갱신: ${node.minAtVisit} → ${node.costSum}</span>`;
-  else if(node.state==='pruned') stateStr=`<span class="st-pruned">가지치기 — ${node.pruneInfo}</span>`;
-  else if(node.state==='internal') stateStr=`<span class="st-internal">내부 노드 (탐색 완료)</span>`;
-  else stateStr=`<span class="st-unvisited">미방문 (부모 노드가 가지치기됨)</span>`;
-
-  let h=`<div><b>월:</b> ${node.month>M?'완료(>'+M+')':node.month+'월'} &nbsp;|&nbsp; <b>누적비용:</b> ${node.costSum}원 &nbsp;|&nbsp; <b>DFS순서:</b> ${node.dfsOrder>=0?'#'+(node.dfsOrder+1):'-'} &nbsp;|&nbsp; ${stateStr}</div>`;
-  h+=`<div class="info-path">경로: ${pathStr}</div>`;
-  if(node.onOptimal) h+=`<div style="color:#d97706;font-weight:700">★ 최적 경로 위의 노드</div>`;
-  document.getElementById('info').innerHTML=h;
-}
-
-function makeSummaryHTML(){
-  const visited=dfsSeq.length, pruned=dfsSeq.filter(n=>n.state==='pruned').length;
-  const completed=dfsSeq.filter(n=>n.state==='completed').length;
-  const unvisited=allNodes.length-visited;
-  const optPath=getPath(bestLeaf);
-  const optStr=optPath.map((n,i)=>{
-    if(i===0) return `${n.month}월`;
-    return `<span style="color:${TK_COLOR[n.tkIdx]}">${TK_NAME[n.tkIdx]}(+${n.tkCost})</span>→${n.month>M?'완료':n.month+'월'}`;
-  }).join(' ');
-  const minStr=minHist.map(h=>`${h.min}`).join(' → ');
-
-  return `<div class="summary"><b>최적 비용: ${finalMin}원</b> | 경로: ${optStr}<br>`+
-    `방문: ${visited}/${allNodes.length} | 완료: ${completed} | 가지치기: ${pruned} | 미방문: ${unvisited}<br>`+
-    `min 갱신: ${minStr}</div>`;
-}
-
-// ===== Playback =====
-let isFinal=true, ri=-1, playing=false, timer=null, spVal=5;
-
-function doReset(){
-  stop(); isFinal=false; ri=-1;
-  applyReplay(-1);
-  updateMinDisplay(COST[3],[{order:-1,min:COST[3],label:'초기값'}]);
-  document.getElementById('info').innerHTML='▶ 재생 또는 다음 버튼으로 DFS 탐색을 시작하세요.';
-  document.getElementById('si').textContent='탐색 준비';
-}
-function showFinal(){
-  stop(); isFinal=true; ri=dfsSeq.length-1;
-  applyFinal(); hlCodeLine(-1);
-  document.getElementById('info').innerHTML=makeSummaryHTML();
-  document.getElementById('si').textContent='결과 보기';
-}
-function prev(){
-  stop(); isFinal=false;
-  if(ri>-1){ri--;applyReplay(ri);}
-  updateStepInfo();
-  if(ri>=0) showNodeInfo(dfsSeq[ri]);
-}
-function next(){
-  if(isFinal) return;
-  if(ri<dfsSeq.length-1){ri++;applyReplay(ri);updateStepInfo();showNodeInfo(dfsSeq[ri]);}
-  else{stop();showFinal();}
-}
-function togglePlay(){playing?stop():startPlay();}
-function startPlay(){
-  if(isFinal){isFinal=false;ri=-1;applyReplay(-1);}
-  if(ri>=dfsSeq.length-1){ri=-1;applyReplay(-1);}
-  playing=true;
-  document.getElementById('playBtn').textContent='⏸ 정지';
-  document.getElementById('playBtn').classList.add('playing');
-  tick();
-}
-function stop(){
-  playing=false;clearTimeout(timer);timer=null;
-  document.getElementById('playBtn').textContent='▶ 탐색 재생';
-  document.getElementById('playBtn').classList.remove('playing');
-}
-function tick(){
-  if(!playing) return;
-  const d=1100-spVal*100;
-  timer=setTimeout(()=>{
-    if(ri<dfsSeq.length-1){ri++;applyReplay(ri);updateStepInfo();showNodeInfo(dfsSeq[ri]);tick();}
-    else{stop();showFinal();}
-  },d);
-}
-function updateStepInfo(){
-  document.getElementById('si').textContent=ri<0?'탐색 준비':`탐색: ${ri+1} / ${dfsSeq.length}`;
-}
-
 // ===== Code Panel =====
 function toggleCode(){
   const p=document.getElementById('codePanel');
@@ -609,8 +402,7 @@ function toggleCode(){
 
 // ===== Tree Expand =====
 function toggleTreeExpand(){
-  const vp=document.getElementById('vizPanel');
-  vp.classList.toggle('tree-expanded');
+  document.getElementById('vizPanel').classList.toggle('tree-expanded');
 }
 
 // ===== Resizer =====
@@ -631,12 +423,7 @@ function toggleTreeExpand(){
 // ===== Keyboard =====
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT')return;
-  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();if(isFinal){doReset();next();}else next();}
-  else if(e.key==='ArrowLeft'){e.preventDefault();prev();}
-  else if(e.key==='Enter'){e.preventDefault();togglePlay();}
-  else if(e.key==='r'||e.key==='R')doReset();
-  else if(e.key==='f'||e.key==='F')showFinal();
-  else if(e.key==='t'||e.key==='T')toggleTreeExpand();
+  if(e.key==='t'||e.key==='T')toggleTreeExpand();
 });
 
 // ===== Init =====
@@ -646,7 +433,7 @@ buildTree();
 simulateDFS();
 layoutTree();
 renderSVG();
-showFinal();
+applyFinal();
 </script>
 </body>
 </html>
