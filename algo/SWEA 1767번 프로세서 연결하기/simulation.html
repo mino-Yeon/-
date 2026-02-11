@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SWEA 1767 프로세서 연결하기 시뮬레이션</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#1a1e25;color:#e2e8f0;min-height:100vh;display:flex;flex-direction:column}
+
+/* 헤더 */
+.header{background:#2c3e50;padding:12px 24px;border-bottom:3px solid #3498db;display:flex;align-items:center;gap:16px;flex-shrink:0}
+.header h1{font-size:18px;font-weight:700;color:#fff;white-space:nowrap}
+.header .sub{font-size:12px;color:#94a3b8}
+
+/* 탭 */
+.tab-bar{display:flex;background:#212830;border-bottom:1px solid #2a3444;flex-shrink:0}
+.tab-btn{padding:10px 20px;cursor:pointer;color:#94a3b8;font-size:13px;font-weight:600;border:none;background:none;border-bottom:3px solid transparent;transition:all .15s}
+.tab-btn:hover{color:#e2e8f0;background:#2a3444}
+.tab-btn.active{color:#3498db;border-bottom-color:#3498db;background:#1a2332}
+
+/* 컨트롤 */
+.controls{display:flex;align-items:center;gap:8px;padding:8px 16px;background:#212830;border-bottom:1px solid #2a3444;flex-wrap:wrap;flex-shrink:0}
+.controls button{padding:5px 12px;border:1px solid #34495e;background:#2c3e50;color:#e2e8f0;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;transition:all .15s}
+.controls button:hover{background:#34495e;border-color:#3498db}
+.controls button:disabled{opacity:.4;cursor:default}
+.spd-wrap{display:flex;align-items:center;gap:4px;margin-left:auto}
+.spd-wrap label{font-size:11px;color:#64748b}
+.spd-wrap input[type=range]{width:80px;accent-color:#3498db}
+#si{font-size:12px;color:#64748b;margin-left:8px;white-space:nowrap}
+
+/* 메인 레이아웃 */
+.main{display:flex;flex:1;overflow:hidden}
+
+/* 코드 패널 */
+.code-panel{width:380px;min-width:200px;display:flex;flex-direction:column;border-right:1px solid #2a3444;background:#1e2530}
+.panel-hd{padding:8px 12px;background:#212830;cursor:pointer;font-size:12px;font-weight:600;color:#94a3b8;border-bottom:1px solid #2a3444;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.panel-hd:hover{background:#2a3444;color:#e2e8f0}
+.code-body{flex:1;overflow:auto;font-family:'Consolas','Courier New',monospace;font-size:12.5px;line-height:1.65;padding:8px 0}
+.cl{display:flex;padding:0 10px;min-height:20px;transition:background .15s}
+.cl.active{background:#3b2e00}
+.ln{width:28px;text-align:right;color:#4a5568;margin-right:10px;user-select:none;flex-shrink:0}
+.lc{white-space:pre}
+.kw{color:#c678dd}.tp{color:#e5c07b}.st{color:#98c379}.nm{color:#d19a66}.cm{color:#5c6370;font-style:italic}.fn{color:#61afef}
+
+/* 리사이저 */
+.resizer{width:5px;cursor:col-resize;background:#2a3444;transition:background .15s;flex-shrink:0}
+.resizer:hover,.resizer.dragging{background:#3498db}
+body.resizing{cursor:col-resize;user-select:none}
+
+/* 시각화 패널 */
+.viz-panel{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:12px}
+.vs{background:#212830;border-radius:6px;border:1px solid #2a3444;overflow:hidden}
+.sh{padding:6px 12px;font-size:12px;font-weight:600;color:#94a3b8;background:#1a1e25;border-bottom:1px solid #2a3444;display:flex;justify-content:space-between;align-items:center}
+.sb{padding:10px 12px}
+
+/* 그리드 맵 */
+.grid-wrap{display:flex;justify-content:center;padding:4px}
+.grid{display:inline-grid;gap:1px;background:#2a3444;border:2px solid #34495e;border-radius:4px}
+.cell{width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;position:relative;transition:all .25s}
+.cell-hdr{background:#1a1e25!important;color:#4a5568;font-size:10px;font-weight:600;width:28px;height:28px}
+.cell-empty{background:#1e2530;color:#4a5568}
+.cell-edge{background:#1a3a5c;color:#5dade2}
+.cell-core{background:#7d6608;color:#f1c40f}
+.cell-core-active{background:#b7950b;color:#fff;animation:pulse .8s infinite}
+.cell-core-connected{background:#1e6b3a;color:#2ecc71}
+.cell-core-skip{background:#3a3a3a;color:#777}
+.cell-wire-0{background:#1a4a7a;color:#5dade2}
+.cell-wire-1{background:#1a5c3a;color:#58d68d}
+.cell-wire-2{background:#4a1a6a;color:#bb8fce}
+.cell-wire-try{background:#3a3520;color:#f39c12;border:1px dashed #f39c12}
+.cell-collision{border:3px solid #e74c3c!important;box-shadow:inset 0 0 10px rgba(231,76,60,.5)}
+.cell-coll-empty{background:#5a1a1a;color:#e74c3c}
+.cell-coll-empty::after{content:'\2715';position:absolute;font-size:16px;color:#e74c3c}
+@keyframes pulse{0%,100%{box-shadow:inset 0 0 8px rgba(241,196,15,.3)}50%{box-shadow:inset 0 0 16px rgba(241,196,15,.7)}}
+
+/* 상태 정보 */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px}
+.info-item{display:flex;gap:6px;font-size:12px;align-items:baseline}
+.info-label{color:#64748b;white-space:nowrap}
+.info-val{color:#e2e8f0;font-weight:600}
+.info-val.best{color:#2ecc71}
+
+/* 설명 */
+.desc{font-size:13px;color:#e2e8f0;line-height:1.6;min-height:20px}
+.desc .ac-call{color:#e67e22}.desc .ac-fail{color:#e74c3c}.desc .ac-ok{color:#2ecc71}.desc .ac-skip{color:#95a5a6}.desc .ac-back{color:#f39c12}.desc .ac-best{color:#3498db}
+
+/* 진행률 */
+.progress-bar{height:3px;background:#2a3444;border-radius:2px;overflow:hidden;flex-shrink:0}
+.progress-fill{height:100%;background:#3498db;transition:width .15s;width:0}
+
+/* 콘솔 출력 */
+.ob{font-family:'Consolas',monospace;font-size:12px;max-height:120px;overflow-y:auto}
+.ob div{padding:2px 0;border-bottom:1px solid #2a3444;color:#94a3b8}
+.ob div.new{color:#2ecc71;font-weight:600}
+
+/* 범례 */
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:8px;justify-content:center}
+.legend span{display:flex;align-items:center;gap:4px;font-size:11px;color:#94a3b8}
+.lg{display:inline-block;width:14px;height:14px;border-radius:2px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>SWEA 1767 프로세서 연결하기</h1>
+  <span class="sub">7×7 맵 · 내부 코어 3개 · 최대 코어 연결 + 최소 전선 길이</span>
+</header>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab(1)">방식 1: 중복순열 + 백트래킹</button>
+  <button class="tab-btn" onclick="switchTab(2)">방식 2: 조합 + 중복순열 + 백트래킹</button>
+</div>
+
+<div class="controls">
+  <button onclick="doReset()" title="처음 (R)">⏮ 처음</button>
+  <button onclick="prev()" title="이전 (←)">◀ 이전</button>
+  <button id="playBtn" onclick="togglePlay()" title="재생/정지 (Space)">▶ 재생</button>
+  <button onclick="next()" title="다음 (→)">다음 ▶</button>
+  <button onclick="skipToEnd()" title="끝 (E)">⏭ 끝</button>
+  <div class="spd-wrap">
+    <label>속도</label>
+    <input type="range" id="spd" min="1" max="10" value="5" oninput="onSpeedChange()">
+    <span id="si">준비</span>
+  </div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+
+<div class="main">
+  <div class="code-panel" id="codePanel">
+    <div class="panel-hd" onclick="toggleCode()"><span id="codeTitle">의사코드</span><span id="codeToggle">◀</span></div>
+    <div class="code-body" id="cb"></div>
+  </div>
+  <div class="resizer" id="resizer"></div>
+  <div class="viz-panel">
+    <div class="vs">
+      <div class="sh">7×7 그리드 맵</div>
+      <div class="sb">
+        <div class="grid-wrap"><div class="grid" id="gridEl" style="grid-template-columns:28px repeat(7,40px);grid-template-rows:28px repeat(7,40px)"></div></div>
+        <div class="legend">
+          <span><i class="lg cell-edge"></i>가장자리 코어</span>
+          <span><i class="lg cell-core"></i>내부 코어</span>
+          <span><i class="lg cell-core-active"></i>현재 처리 중</span>
+          <span><i class="lg cell-core-connected"></i>연결 완료</span>
+          <span><i class="lg cell-wire-0"></i>코어0 전선</span>
+          <span><i class="lg cell-wire-1"></i>코어1 전선</span>
+          <span><i class="lg cell-wire-2"></i>코어2 전선</span>
+          <span><i class="lg" style="border:2px solid #e74c3c;background:#5a1a1a"></i>충돌</span>
+        </div>
+      </div>
+    </div>
+    <div class="vs">
+      <div class="sh">상태 정보</div>
+      <div class="sb">
+        <div class="info-grid" id="infoGrid">
+          <div class="info-item"><span class="info-label">현재 코어:</span><span class="info-val" id="infoCoreIdx">-</span></div>
+          <div class="info-item"><span class="info-label">선택:</span><span class="info-val" id="infoDir">-</span></div>
+          <div class="info-item"><span class="info-label">전선 길이:</span><span class="info-val" id="infoWireLen">-</span></div>
+          <div class="info-item"><span class="info-label">연결 코어:</span><span class="info-val" id="infoConnCnt">0</span></div>
+          <div class="info-item"><span class="info-label">전선 합:</span><span class="info-val" id="infoTotalWire">0</span></div>
+          <div class="info-item"><span class="info-label" id="infoRLabel" style="display:none">목표 r:</span><span class="info-val" id="infoR" style="display:none">-</span></div>
+          <div class="info-item"><span class="info-label">최대 코어:</span><span class="info-val best" id="infoBestCore">0</span></div>
+          <div class="info-item"><span class="info-label">최소 전선:</span><span class="info-val best" id="infoBestWire">∞</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="vs desc-sec">
+      <div class="sh">실행 설명</div>
+      <div class="sb"><div class="desc" id="dc">시뮬레이션을 시작하려면 ▶ 다음 버튼을 클릭하세요.</div></div>
+    </div>
+    <div class="vs out-sec">
+      <div class="sh">탐색 결과 <span id="oc">(0건)</span></div>
+      <div class="sb"><div class="ob" id="ob"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── 맵 설정 ─── */
+const N = 7;
+const CORES = [{idx:0,r:1,c:3},{idx:1,r:3,c:1},{idx:2,r:4,c:4}]; // 0-indexed
+const EDGE_CORES = [{r:0,c:0},{r:0,c:6},{r:6,c:3}];
+const DIR_NAME = ['상','하','좌','우'];
+const DR = [-1,1,0,0], DC = [0,0,-1,1];
+const WIRE_COLORS = ['cell-wire-0','cell-wire-1','cell-wire-2'];
+
+/* ─── 탭 1 의사코드 ─── */
+const SRC1 = [
+  'def setCore(idx, connectedCnt, wireLength):',
+  '    if idx == 3:',
+  '        갱신(connectedCnt, wireLength)',
+  '        return',
+  '',
+  '    setCore(idx+1, connectedCnt, wireLength)  # 설치 X',
+  '',
+  '    for dir in [상, 하, 좌, 우]:',
+  '        length = getLength(core[idx], dir)',
+  '        if length == 0: continue  # 가지치기',
+  '        setLine(core[idx], dir, length, 설치)',
+  '        setCore(idx+1, cnt+1, wire+length)  # 재귀',
+  '        setLine(core[idx], dir, length, 되돌림)',
+];
+
+/* ─── 탭 2 의사코드 ─── */
+const SRC2 = [
+  'for r in [3, 2, 1]:',
+  '    combination(0, 0, r, 0)',
+  '    if 성공: break',
+  '',
+  'def combination(idx, start, r, wireLength):',
+  '    if idx == r:',
+  '        minWireLength 갱신',
+  '        return',
+  '',
+  '    for i in [start .. 2]:',
+  '        for dir in [상, 하, 좌, 우]:',
+  '            length = getLength(core[i], dir)',
+  '            if length == 0: continue  # 가지치기',
+  '            setLine(core[i], dir, length, 설치)',
+  '            combination(idx+1, i+1, r, wire+length)',
+  '            setLine(core[i], dir, length, 되돌림)',
+];
+
+/* ─── 구문 강조 ─── */
+function hl(t){
+  t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let cm='';
+  t=t.replace(/(#.*)$/gm,m=>{cm=m;return'\x00CM'});
+  t=t.replace(/\b(def|if|for|in|return|break|continue)\b/g,'<span class="kw">$1</span>');
+  t=t.replace(/\b(connectedCnt|wireLength|idx|dir|length|r|i|start|wire|cnt|minWireLength)\b/g,'<span class="fn">$1</span>');
+  t=t.replace(/\b(\d+)\b/g,'<span class="nm">$1</span>');
+  t=t.replace(/\b(setCore|getLength|setLine|combination|갱신)\b/g,'<span class="tp">$1</span>');
+  if(cm) t=t.replace('\x00CM','<span class="cm">'+cm+'</span>');
+  return t;
+}
+
+function initCode(src){
+  document.getElementById('cb').innerHTML=src.map((l,i)=>
+    `<div class="cl" id="L${i+1}"><span class="ln">${i+1}</span><span class="lc">${hl(l)}</span></div>`
+  ).join('');
+}
+
+/* ─── 맵 유틸리티 ─── */
+function makeMap(){
+  const m=Array.from({length:N},()=>Array(N).fill(0));
+  EDGE_CORES.forEach(c=>{m[c.r][c.c]=9});
+  CORES.forEach(c=>{m[c.r][c.c]=8});
+  return m;
+}
+
+function cloneMap(m){return m.map(r=>[...r])}
+
+function getLength(map,core,dir){
+  let r=core.r+DR[dir], c=core.c+DC[dir], len=0;
+  while(r>=0&&r<N&&c>=0&&c<N){
+    if(map[r][c]!==0) return {len:0,cells:[],collR:r,collC:c};
+    len++;
+    r+=DR[dir]; c+=DC[dir];
+  }
+  const cells=[];
+  r=core.r+DR[dir]; c=core.c+DC[dir];
+  for(let k=0;k<len;k++){cells.push([r,c]);r+=DR[dir];c+=DC[dir]}
+  return {len,cells,collR:-1,collC:-1};
+}
+
+function setLine(map,cells,val){
+  cells.forEach(([r,c])=>{map[r][c]=val});
+}
+
+/* ─── Step 생성: 탭 1 ─── */
+function genSteps1(){
+  const S=[];
+  const map=makeMap();
+  let bestConn=0, bestWire=Infinity;
+  const outputs=[];
+
+  function setCore(idx,connCnt,wireLen){
+    if(idx===3){
+      let isNew=false;
+      if(connCnt>bestConn||(connCnt===bestConn&&wireLen<bestWire)){
+        bestConn=connCnt; bestWire=wireLen; isNew=true;
+      }
+      const msg=`코어 ${connCnt}개 연결, 전선 ${wireLen} ${isNew?'→ 최적해 갱신!':''}`;
+      outputs.push(msg);
+      S.push({t:'leaf',l:3,ci2:idx,conn:connCnt,wire:wireLen,bestC:bestConn,bestW:bestWire,isNew,map:cloneMap(map),
+        d:`<span class="ac-${isNew?'best':'skip'}">리프 도달: ${msg}</span>`,out:[...outputs]});
+      return;
+    }
+
+    // 설치 X
+    S.push({t:'skip',l:6,ci2:idx,dir:'X',conn:connCnt,wire:wireLen,bestC:bestConn,bestW:bestWire,map:cloneMap(map),
+      d:`<span class="ac-skip">코어 ${idx} (${CORES[idx].r},${CORES[idx].c}) → 설치하지 않음 (X)</span>`,out:[...outputs]});
+    setCore(idx+1,connCnt,wireLen);
+
+    for(let d=0;d<4;d++){
+      const res=getLength(map,CORES[idx],d);
+      if(res.len===0){
+        S.push({t:'fail',l:10,ci2:idx,dir:DIR_NAME[d],dirIdx:d,conn:connCnt,wire:wireLen,bestC:bestConn,bestW:bestWire,
+          collR:res.collR,collC:res.collC,tryPath:getTryPath(CORES[idx],d,res.collR,res.collC),
+          map:cloneMap(map),
+          d:`<span class="ac-fail">코어 ${idx} ${DIR_NAME[d]}방향: (${res.collR},${res.collC})에서 충돌 → 가지치기</span>`,out:[...outputs]});
+        continue;
+      }
+      // 설치
+      setLine(map,res.cells,idx+1);
+      S.push({t:'install',l:11,ci2:idx,dir:DIR_NAME[d],dirIdx:d,wl:res.len,cells:[...res.cells],
+        conn:connCnt+1,wire:wireLen+res.len,bestC:bestConn,bestW:bestWire,map:cloneMap(map),
+        d:`<span class="ac-ok">코어 ${idx} ${DIR_NAME[d]}방향 전선 설치 (길이 ${res.len})</span>`,out:[...outputs]});
+      setCore(idx+1,connCnt+1,wireLen+res.len);
+      // 되돌림
+      setLine(map,res.cells,0);
+      S.push({t:'back',l:13,ci2:idx,dir:DIR_NAME[d],dirIdx:d,cells:[...res.cells],
+        conn:connCnt,wire:wireLen,bestC:bestConn,bestW:bestWire,map:cloneMap(map),
+        d:`<span class="ac-back">코어 ${idx} ${DIR_NAME[d]}방향 전선 되돌림</span>`,out:[...outputs]});
+    }
+  }
+
+  setCore(0,0,0);
+  return S;
+}
+
+function getTryPath(core,dir,collR,collC){
+  const cells=[];
+  let r=core.r+DR[dir],c=core.c+DC[dir];
+  while(!(r===collR&&c===collC)){cells.push([r,c]);r+=DR[dir];c+=DC[dir]}
+  return cells;
+}
+
+/* ─── Step 생성: 탭 2 ─── */
+function genSteps2(){
+  const S=[];
+  const map=makeMap();
+  let bestWire=Infinity;
+  let found=false;
+  const outputs=[];
+
+  function combination(idx,start,rr,wireLen){
+    if(idx===rr){
+      let isNew=false;
+      if(wireLen<bestWire){bestWire=wireLen;isNew=true;found=true}
+      const msg=`${rr}개 연결 완료, 전선 ${wireLen} ${isNew?'→ 최소 갱신!':''}`;
+      outputs.push(msg);
+      S.push({t:'leaf',l:7,ci2:idx,r:rr,conn:rr,wire:wireLen,bestC:rr,bestW:bestWire,isNew,map:cloneMap(map),
+        d:`<span class="ac-${isNew?'best':'skip'}">리프: ${msg}</span>`,out:[...outputs]});
+      return;
+    }
+
+    for(let i=start;i<CORES.length;i++){
+      S.push({t:'selcore',l:10,ci2:idx,coreI:i,r:rr,conn:idx,wire:wireLen,bestC:rr,bestW:bestWire,map:cloneMap(map),
+        d:`<span class="ac-call">조합: 코어 ${i} (${CORES[i].r},${CORES[i].c}) 선택 (idx=${idx})</span>`,out:[...outputs]});
+
+      for(let d=0;d<4;d++){
+        const res=getLength(map,CORES[i],d);
+        if(res.len===0){
+          S.push({t:'fail',l:13,ci2:idx,coreI:i,dir:DIR_NAME[d],dirIdx:d,r:rr,conn:idx,wire:wireLen,bestC:rr,bestW:bestWire,
+            collR:res.collR,collC:res.collC,tryPath:getTryPath(CORES[i],d,res.collR,res.collC),
+            map:cloneMap(map),
+            d:`<span class="ac-fail">코어 ${i} ${DIR_NAME[d]}방향: (${res.collR},${res.collC})에서 충돌</span>`,out:[...outputs]});
+          continue;
+        }
+        setLine(map,res.cells,i+1);
+        S.push({t:'install',l:14,ci2:idx,coreI:i,dir:DIR_NAME[d],dirIdx:d,wl:res.len,cells:[...res.cells],
+          r:rr,conn:idx+1,wire:wireLen+res.len,bestC:rr,bestW:bestWire,map:cloneMap(map),
+          d:`<span class="ac-ok">코어 ${i} ${DIR_NAME[d]}방향 전선 설치 (길이 ${res.len})</span>`,out:[...outputs]});
+        combination(idx+1,i+1,rr,wireLen+res.len);
+        setLine(map,res.cells,0);
+        S.push({t:'back',l:16,ci2:idx,coreI:i,dir:DIR_NAME[d],dirIdx:d,cells:[...res.cells],
+          r:rr,conn:idx,wire:wireLen,bestC:rr,bestW:bestWire,map:cloneMap(map),
+          d:`<span class="ac-back">코어 ${i} ${DIR_NAME[d]}방향 전선 되돌림</span>`,out:[...outputs]});
+      }
+    }
+  }
+
+  for(let r=3;r>=1;r--){
+    S.push({t:'setr',l:1,r,bestC:r,bestW:bestWire,map:cloneMap(map),conn:0,wire:0,
+      d:`<span class="ac-call">r = ${r}: ${r}개 코어 설치 시도</span>`,out:[...outputs]});
+
+    combination(0,0,r,0);
+
+    if(found){
+      S.push({t:'rdone',l:3,r,success:true,bestC:r,bestW:bestWire,map:cloneMap(map),conn:r,wire:bestWire,
+        d:`<span class="ac-best">r=${r} 라운드 성공! 최적: ${r}개 코어, 전선 ${bestWire}</span>`,out:[...outputs]});
+      break;
+    } else {
+      S.push({t:'rdone',l:3,r,success:false,bestC:0,bestW:bestWire,map:cloneMap(map),conn:0,wire:0,
+        d:`<span class="ac-fail">r=${r} 라운드: ${r}개 모두 설치 불가 → r=${r-1}로 이동</span>`,out:[...outputs]});
+    }
+  }
+  return S;
+}
+
+/* ─── 상태 ─── */
+let steps=[], ci=-1, playing=false, timer=null, activeTab=1;
+let cache1=null, cache2=null;
+
+function rebuild(){
+  ci=-1;
+  if(activeTab===1){
+    if(!cache1) cache1=genSteps1();
+    steps=cache1;
+    initCode(SRC1);
+  } else {
+    if(!cache2) cache2=genSteps2();
+    steps=cache2;
+    initCode(SRC2);
+  }
+  document.getElementById('infoRLabel').style.display=activeTab===2?'':'none';
+  document.getElementById('infoR').style.display=activeTab===2?'':'none';
+  renderInitial();
+  updateStepInfo();
+}
+
+function switchTab(tab){
+  if(tab===activeTab) return;
+  pause();
+  activeTab=tab;
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i+1===tab));
+  rebuild();
+}
+
+/* ─── 그리드 렌더링 ─── */
+function renderInitial(){
+  const g=document.getElementById('gridEl');
+  const map=makeMap();
+  let html='<div class="cell cell-hdr"></div>';
+  for(let c=0;c<N;c++) html+=`<div class="cell cell-hdr">${c}</div>`;
+  for(let r=0;r<N;r++){
+    html+=`<div class="cell cell-hdr">${r}</div>`;
+    for(let c=0;c<N;c++){
+      const id=`c${r}_${c}`;
+      let cls='cell-empty', txt='';
+      if(map[r][c]===9){cls='cell-edge';txt='C'}
+      else if(map[r][c]===8){
+        cls='cell-core';
+        const ci2=CORES.findIndex(k=>k.r===r&&k.c===c);
+        txt=ci2>=0?ci2:'C';
+      }
+      html+=`<div class="cell ${cls}" id="${id}">${txt}</div>`;
+    }
+  }
+  g.innerHTML=html;
+  // reset info
+  ['infoCoreIdx','infoDir','infoWireLen'].forEach(id=>document.getElementById(id).textContent='-');
+  ['infoConnCnt','infoTotalWire'].forEach(id=>document.getElementById(id).textContent='0');
+  document.getElementById('infoBestCore').textContent='0';
+  document.getElementById('infoBestWire').textContent='∞';
+  document.getElementById('infoR').textContent='-';
+  document.getElementById('dc').innerHTML='시뮬레이션을 시작하려면 ▶ 다음 버튼을 클릭하세요.';
+  document.getElementById('ob').innerHTML='';
+  document.getElementById('oc').textContent='(0건)';
+  // reset code highlight
+  document.querySelectorAll('.cl.active').forEach(el=>el.classList.remove('active'));
+}
+
+function renderMap(map,step){
+  for(let r=0;r<N;r++){
+    for(let c=0;c<N;c++){
+      const el=document.getElementById(`c${r}_${c}`);
+      const v=map[r][c];
+      let cls='cell-empty', txt='';
+      if(v===9){cls='cell-edge';txt='C'}
+      else if(v===8){
+        const ci2=CORES.findIndex(k=>k.r===r&&k.c===c);
+        // 코어 상태 결정
+        if(step && step.t==='skip' && step.ci2===ci2){
+          cls='cell-core-skip'; txt='X';
+        } else {
+          cls='cell-core'; txt=ci2>=0?ci2:'C';
+        }
+      }
+      else if(v>=1&&v<=3){cls=WIRE_COLORS[v-1];txt='W'+(v-1)}
+      else{cls='cell-empty';txt=''}
+      el.className='cell '+cls;
+      el.textContent=txt;
+    }
+  }
+  // 코어 상태 오버레이: 설치된 코어, 현재 코어 표시
+  renderCoreOverlay(map,step);
+}
+
+function renderCoreOverlay(map,step){
+  if(!step) return;
+  CORES.forEach((core,idx)=>{
+    const el=document.getElementById(`c${core.r}_${core.c}`);
+    // 이미 전선이 연결된 코어인지 확인 (맵에서 주변에 해당 전선이 있는지)
+    let connected=false;
+    for(let d=0;d<4;d++){
+      const nr=core.r+DR[d],nc=core.c+DC[d];
+      if(nr>=0&&nr<N&&nc>=0&&nc<N&&map[nr][nc]===idx+1){connected=true;break}
+    }
+    if(connected){
+      el.className='cell cell-core-connected';
+      el.textContent=idx;
+    }
+    // 현재 처리 중인 코어 하이라이트
+    const currentCore = activeTab===1 ? step.ci2 : (step.coreI!==undefined?step.coreI:step.ci2);
+    if(idx===currentCore && (step.t==='install'||step.t==='fail'||step.t==='back'||step.t==='selcore')){
+      if(!connected){
+        el.className='cell cell-core-active';
+        el.textContent=idx;
+      }
+    }
+  });
+}
+
+/* ─── 충돌/시도 경로 표시 ─── */
+function renderTryPath(step){
+  if(step.t==='fail'){
+    // 시도 경로 점선
+    if(step.tryPath){
+      step.tryPath.forEach(([r,c])=>{
+        const el=document.getElementById(`c${r}_${c}`);
+        if(el.className.includes('cell-empty')){
+          el.className='cell cell-wire-try';
+          el.textContent='·';
+        }
+      });
+    }
+    // 충돌 지점: 기존 셀에 빨간 테두리 추가
+    if(step.collR>=0&&step.collC>=0){
+      const el=document.getElementById(`c${step.collR}_${step.collC}`);
+      el.classList.add('cell-collision');
+    }
+  }
+}
+
+/* ─── 메인 렌더 ─── */
+function render(){
+  if(ci<0){renderInitial();return}
+  const step=steps[ci];
+  if(!step) return;
+
+  // 맵 렌더
+  renderMap(step.map,step);
+  renderTryPath(step);
+
+  // 코드 하이라이트
+  document.querySelectorAll('.cl.active').forEach(el=>el.classList.remove('active'));
+  const lineEl=document.getElementById('L'+step.l);
+  if(lineEl) lineEl.classList.add('active');
+
+  // 상태 정보
+  const coreIdx = activeTab===1 ? step.ci2 : (step.coreI!==undefined?step.coreI:step.ci2);
+  document.getElementById('infoCoreIdx').textContent=
+    coreIdx!==undefined&&coreIdx<CORES.length?`${coreIdx} (${CORES[coreIdx].r},${CORES[coreIdx].c})`:'-';
+  document.getElementById('infoDir').textContent=step.dir||'-';
+  document.getElementById('infoWireLen').textContent=step.wl!==undefined?step.wl:'-';
+  document.getElementById('infoConnCnt').textContent=step.conn!==undefined?step.conn:'0';
+  document.getElementById('infoTotalWire').textContent=step.wire!==undefined?step.wire:'0';
+  document.getElementById('infoBestCore').textContent=step.bestC||'0';
+  document.getElementById('infoBestWire').textContent=step.bestW===Infinity?'∞':step.bestW;
+  if(activeTab===2) document.getElementById('infoR').textContent=step.r||'-';
+
+  // 설명
+  document.getElementById('dc').innerHTML=step.d||'';
+
+  // 콘솔 출력
+  if(step.out){
+    const ob=document.getElementById('ob');
+    ob.innerHTML=step.out.map((o,i)=>`<div${i===step.out.length-1?' class="new"':''}>${o}</div>`).join('');
+    document.getElementById('oc').textContent=`(${step.out.length}건)`;
+    ob.scrollTop=ob.scrollHeight;
+  }
+
+  updateStepInfo();
+}
+
+function updateStepInfo(){
+  const total=steps.length;
+  document.getElementById('si').textContent=ci<0?'준비':`${ci+1} / ${total}`;
+  document.getElementById('progFill').style.width=total?((ci+1)/total*100)+'%':'0';
+}
+
+/* ─── 재생 제어 ─── */
+function next(){
+  if(ci<steps.length-1){ci++;render()}
+  else pause();
+}
+function prev(){
+  if(ci>-1){ci--;render()}
+}
+function doReset(){pause();ci=-1;render()}
+function skipToEnd(){pause();ci=steps.length-1;render()}
+function play(){
+  if(ci>=steps.length-1) return;
+  playing=true;
+  document.getElementById('playBtn').textContent='⏸ 정지';
+  tick();
+}
+function pause(){
+  playing=false;
+  clearTimeout(timer);
+  document.getElementById('playBtn').textContent='▶ 재생';
+}
+function togglePlay(){playing?pause():play()}
+function tick(){
+  if(!playing) return;
+  const v=+document.getElementById('spd').value;
+  const d=1100-v*100;
+  timer=setTimeout(()=>{next();if(playing&&ci<steps.length-1)tick();else pause()},d);
+}
+function onSpeedChange(){
+  if(playing){clearTimeout(timer);tick()}
+}
+
+/* ─── 코드 패널 토글 ─── */
+let codeOpen=true;
+function toggleCode(){
+  codeOpen=!codeOpen;
+  const cp=document.getElementById('codePanel');
+  cp.style.display=codeOpen?'flex':'none';
+  document.getElementById('codeToggle').textContent=codeOpen?'◀':'▶';
+}
+
+/* ─── 리사이저 ─── */
+(function(){
+  const rs=document.getElementById('resizer'),cp=document.getElementById('codePanel');
+  let sx,sw;
+  rs.addEventListener('mousedown',e=>{
+    sx=e.clientX;sw=cp.offsetWidth;
+    document.body.classList.add('resizing');rs.classList.add('dragging');
+    document.addEventListener('mousemove',onM);document.addEventListener('mouseup',onU);
+  });
+  function onM(e){const nw=Math.max(200,Math.min(sw+(e.clientX-sx),window.innerWidth-300));cp.style.width=nw+'px';cp.style.minWidth=nw+'px'}
+  function onU(){document.body.classList.remove('resizing');rs.classList.remove('dragging');document.removeEventListener('mousemove',onM);document.removeEventListener('mouseup',onU)}
+})();
+
+/* ─── 키보드 단축키 ─── */
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||e.target.tagName==='TEXTAREA') return;
+  switch(e.key){
+    case 'ArrowRight':e.preventDefault();next();break;
+    case 'ArrowLeft':e.preventDefault();prev();break;
+    case ' ':e.preventDefault();togglePlay();break;
+    case 'r':case 'R':e.preventDefault();doReset();break;
+    case 'e':case 'E':e.preventDefault();skipToEnd();break;
+  }
+});
+
+/* ─── 초기화 ─── */
+rebuild();
+</script>
+</body>
+</html>
