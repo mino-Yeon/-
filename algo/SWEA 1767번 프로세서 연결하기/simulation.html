@@ -89,6 +89,8 @@ body.resizing{cursor:col-resize;user-select:none}
 .case-banner.show{display:block}
 .case-banner.best{background:#1a3a2a;border:2px solid #2ecc71;color:#2ecc71}
 .case-banner.normal{background:#1e2530;border:2px solid #4a5568;color:#94a3b8}
+.case-banner.fail{background:#3a1a1a;border:2px solid #e74c3c;color:#e74c3c}
+.case-banner.progress{background:#1a2a3a;border:2px solid #3498db;color:#3498db}
 .cell-core-pruned{background:#4a1a1a;color:#e74c3c;font-size:10px}
 </style>
 </head>
@@ -472,7 +474,18 @@ function render(){
   if(step.t==='leaf'){
     const cls=step.isNew?'best':'normal';
     banner.className='case-banner show '+cls;
-    banner.textContent=`${step.isNew?'\u2705':'\u2714\ufe0f'} \uacbd\uc6b0\uc758 \uc218 #${step.leafNum} \uc644\uc131 \u2014 \ucf54\uc5b4 ${step.conn}\uac1c, \uc804\uc120 ${step.wire}`;
+    banner.textContent=`${step.isNew?'\u2705':'\u2714\ufe0f'} 경우의 수 #${step.leafNum} 완성 — 코어 ${step.conn}개, 전선 ${step.wire}`;
+  } else if(step.t==='rdone'){
+    if(step.success){
+      banner.className='case-banner show best';
+      banner.textContent=`✅ ${step.r}개 설치 성공! 성공 시도 중 최소 전선길이: ${step.bestW}`;
+    } else {
+      banner.className='case-banner show fail';
+      banner.textContent=`❌ ${step.r}개 시도 실패 → ${step.r-1}개로 재시도`;
+    }
+  } else if(activeTab===2&&step.r){
+    banner.className='case-banner show progress';
+    banner.textContent=`🔄 ${step.r}개 설치 시도 중...`;
   } else {
     banner.className='case-banner';
   }
