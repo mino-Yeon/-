@@ -84,6 +84,12 @@ body.resizing{cursor:col-resize;user-select:none}
 .legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:8px;justify-content:center}
 .legend span{display:flex;align-items:center;gap:4px;font-size:11px;color:#94a3b8}
 .lg{display:inline-block;width:14px;height:14px;border-radius:2px;flex-shrink:0}
+
+.case-banner{text-align:center;padding:8px 12px;font-size:13px;font-weight:700;border-radius:4px;display:none;margin-top:8px}
+.case-banner.show{display:block}
+.case-banner.best{background:#1a3a2a;border:2px solid #2ecc71;color:#2ecc71}
+.case-banner.normal{background:#1e2530;border:2px solid #4a5568;color:#94a3b8}
+.cell-core-pruned{background:#4a1a1a;color:#e74c3c;font-size:10px}
 </style>
 </head>
 <body>
@@ -134,6 +140,7 @@ body.resizing{cursor:col-resize;user-select:none}
           <span><i class="lg cell-wire-2"></i>코어2</span>
           <span><i class="lg" style="border:2px solid #e74c3c;background:#5a1a1a"></i>충돌</span>
         </div>
+        <div class="case-banner" id="caseBanner"></div>
       </div>
     </div>
     <div class="vs">
@@ -254,17 +261,18 @@ function getTryPath(core,dir,collR,collC){
 /* ─── Step 생성: 탭 1 ─── */
 function genSteps1(){
   const S=[],map=makeMap(),outputs=[];
-  let bestConn=0,bestWire=Infinity;
+  let bestConn=0,bestWire=Infinity,leafNum=0;
   const skipped=new Set();
 
   function setCore(idx,connCnt,wireLen){
     if(idx===3){
+      leafNum++;
       let isNew=false;
       if(connCnt>bestConn||(connCnt===bestConn&&wireLen<bestWire)){bestConn=connCnt;bestWire=wireLen;isNew=true}
       const msg=`코어 ${connCnt}개 연결, 전선 ${wireLen} ${isNew?'→ 최적해 갱신!':''}`;
       outputs.push(msg);
       S.push({t:'leaf',l:3,ci2:idx,conn:connCnt,wire:wireLen,bestC:bestConn,bestW:bestWire,isNew,map:cloneMap(map),
-        skips:[...skipped],
+        skips:[...skipped],leafNum,
         d:`<span class="ac-${isNew?'best':'skip'}">리프 도달: ${msg}</span>`,out:[...outputs]});
       return;
     }
@@ -278,10 +286,12 @@ function genSteps1(){
     for(let d=0;d<4;d++){
       const res=getLength(map,CORES[idx],d);
       if(res.len===0){
+        const remaining=[];for(let k=idx+1;k<3;k++)remaining.push(k);
+        const prunedMsg=remaining.length?` (코어 ${remaining.join(', ')} 미탐색)`:'';
         S.push({t:'fail',l:10,ci2:idx,dir:DIR_NAME[d],dirIdx:d,conn:connCnt,wire:wireLen,bestC:bestConn,bestW:bestWire,
           collR:res.collR,collC:res.collC,tryPath:getTryPath(CORES[idx],d,res.collR,res.collC),map:cloneMap(map),
-          skips:[...skipped],
-          d:`<span class="ac-fail">코어 ${idx} ${DIR_NAME[d]}방향: (${res.collR},${res.collC})에서 충돌 → 가지치기</span>`,out:[...outputs]});
+          skips:[...skipped],pruned:remaining,
+          d:`<span class="ac-fail">코어 ${idx} ${DIR_NAME[d]}방향: (${res.collR},${res.collC})에서 충돌 → 가지치기${prunedMsg}</span>`,out:[...outputs]});
         continue;
       }
       setLine(map,res.cells,idx+1);
@@ -304,15 +314,17 @@ function genSteps1(){
 /* ─── Step 생성: 탭 2 ─── */
 function genSteps2(){
   const S=[],map=makeMap(),outputs=[];
-  let bestWire=Infinity,found=false;
+  let bestWire=Infinity,found=false,leafNum=0;
 
   function combination(idx,start,rr,wireLen){
     if(idx===rr){
+      leafNum++;
       let isNew=false;
       if(wireLen<bestWire){bestWire=wireLen;isNew=true;found=true}
       const msg=`${rr}개 연결 완료, 전선 ${wireLen} ${isNew?'→ 최소 갱신!':''}`;
       outputs.push(msg);
       S.push({t:'leaf',l:7,ci2:idx,r:rr,conn:rr,wire:wireLen,bestC:rr,bestW:bestWire,isNew,map:cloneMap(map),
+        leafNum,
         d:`<span class="ac-${isNew?'best':'skip'}">리프: ${msg}</span>`,out:[...outputs]});
       return;
     }
@@ -407,6 +419,7 @@ function renderInitial(){
   document.getElementById('dc').innerHTML='시뮬레이션을 시작하려면 ▶ 다음 버튼을 클릭하세요.';
   document.getElementById('ob').innerHTML='';
   document.getElementById('oc').textContent='(0건)';
+  document.getElementById('caseBanner').className='case-banner';
   document.querySelectorAll('.cl.active').forEach(el=>el.classList.remove('active'));
 }
 
@@ -429,6 +442,7 @@ function renderCoreOverlay(map,step){
       if(nr>=0&&nr<N&&nc>=0&&nc<N&&map[nr][nc]===idx+1){connected=true;break}
     }
     if(connected){el.className='cell cell-core-connected';el.textContent=idx}
+    else if(step.pruned&&step.pruned.includes(idx)){el.className='cell cell-core-pruned';el.textContent='X'}
     else if(step.skips&&step.skips.includes(idx)){el.className='cell cell-core-skip';el.textContent='X'}
     const cur=activeTab===1?step.ci2:(step.coreI!==undefined?step.coreI:step.ci2);
     if(idx===cur&&(step.t==='install'||step.t==='fail'||step.t==='back'||step.t==='selcore')){
@@ -453,6 +467,15 @@ function render(){
   if(ci<0){renderInitial();return}
   const step=steps[ci];if(!step)return;
   renderMap(step.map,step);renderTryPath(step);
+
+  const banner=document.getElementById('caseBanner');
+  if(step.t==='leaf'){
+    const cls=step.isNew?'best':'normal';
+    banner.className='case-banner show '+cls;
+    banner.textContent=`${step.isNew?'\u2705':'\u2714\ufe0f'} \uacbd\uc6b0\uc758 \uc218 #${step.leafNum} \uc644\uc131 \u2014 \ucf54\uc5b4 ${step.conn}\uac1c, \uc804\uc120 ${step.wire}`;
+  } else {
+    banner.className='case-banner';
+  }
 
   document.querySelectorAll('.cl.active').forEach(el=>el.classList.remove('active'));
   const lineEl=document.getElementById('L'+step.l);
