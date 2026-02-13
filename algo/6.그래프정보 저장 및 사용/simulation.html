@@ -51,36 +51,63 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0
 .ac-call{color:#ea580c;font-weight:600;}.ac-set{color:#7c3aed;font-weight:600;}.ac-sel{color:#16a34a;font-weight:600;}
 .ac-res{color:#2563eb;font-weight:600;}.ac-lp{color:#7c3aed;font-weight:600;}.ac-q{color:#0891b2;font-weight:600;}
 .ac-type{color:#dc2626;font-weight:700;}.ac-warn{color:#dc2626;background:#fef2f2;padding:2px 6px;border-radius:4px;font-size:12px;}
-/* Memory visualization */
+
+/* ===== Memory Visualization ===== */
 .mem-sec{flex:1;display:flex;flex-direction:column;min-height:0;}
 .mem-sec .sb{flex:1;overflow:auto;padding:12px 16px;}
 .mem-space{position:relative;}
-.mem-title{font-size:11px;color:#94a3b8;font-weight:600;margin-bottom:12px;letter-spacing:1px;text-transform:uppercase;}
+.mem-title{font-size:11px;color:#94a3b8;font-weight:600;margin-bottom:14px;letter-spacing:1px;text-transform:uppercase;}
+
+/* 3-column layout: variable | arrow | array+lists */
 .mem-layout{display:flex;align-items:flex-start;gap:0;}
-.mem-var-section{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;padding-top:24px;}
-.mem-var-box{padding:12px 16px;background:#dbeafe;border:2px solid #93c5fd;border-radius:10px;text-align:center;min-width:110px;transition:all .2s;}
-.mem-var-box.hl{border-color:#3b82f6;box-shadow:0 0 12px rgba(59,130,246,.4);background:#bfdbfe;}
-.mv-name{font-weight:700;font-size:16px;color:#1e40af;font-family:'Consolas','D2Coding',monospace;}
+
+/* Variable box */
+.mem-var-section{flex-shrink:0;padding-top:28px;}
+.mem-var-box{padding:14px 18px;background:#dbeafe;border:2.5px solid #93c5fd;border-radius:10px;text-align:center;min-width:120px;transition:all .2s;}
+.mem-var-box.hl{border-color:#3b82f6;box-shadow:0 0 14px rgba(59,130,246,.45);background:#bfdbfe;}
+.mv-name{font-weight:700;font-size:17px;color:#1e40af;font-family:'Consolas','D2Coding',monospace;}
 .mv-type{font-size:10px;color:#6b7280;margin-top:2px;}
-.mv-val{font-size:13px;color:#94a3b8;margin-top:4px;font-family:'Consolas','D2Coding',monospace;}
-.mem-main-arrow{font-size:18px;color:#3b82f6;padding:28px 6px 0 6px;font-family:'Consolas',monospace;letter-spacing:-3px;flex-shrink:0;font-weight:700;}
-.mem-arr-outer{border:2px solid #64748b;border-radius:10px;overflow:hidden;flex:1;min-width:0;transition:all .2s;}
-.mem-arr-outer.hl{border-color:#3b82f6;box-shadow:0 0 12px rgba(59,130,246,.3);}
-.mem-arr-title{background:#334155;color:#fff;padding:7px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;}
-.arr-type-hint{font-size:11px;color:#94a3b8;font-weight:400;}
-.mem-slot{display:flex;align-items:center;padding:7px 14px;border-bottom:1px solid #e2e8f0;gap:8px;transition:background .2s;flex-wrap:nowrap;}
-.mem-slot:last-child{border-bottom:none;}
-.mem-slot.hl{background:#fef9c3;}
-.mem-idx{font-weight:700;color:#334155;font-family:'Consolas','D2Coding',monospace;width:28px;flex-shrink:0;font-size:14px;}
-.mem-type{font-size:11px;color:#6b7280;width:100px;flex-shrink:0;}
-.mem-val{font-family:'Consolas','D2Coding',monospace;font-size:13px;flex-shrink:0;}
-.null-val{color:#94a3b8;font-style:italic;}
-.ref-val{color:#3b82f6;font-weight:600;}
-.mem-slot-arrow{font-size:14px;color:#22c55e;font-family:'Consolas',monospace;flex-shrink:0;font-weight:700;}
-.mem-list{display:inline-flex;align-items:center;gap:4px;background:#f0fdf4;border:2px solid #86efac;border-radius:8px;padding:4px 10px;transition:all .2s;flex-shrink:0;}
-.mem-list.hl{border-color:#f59e0b;box-shadow:0 0 10px rgba(245,158,11,.35);background:#fffbeb;}
-.ml-label{font-size:10px;color:#15803d;font-weight:700;margin-right:2px;white-space:nowrap;}
-.ml-items{display:inline-flex;align-items:center;gap:3px;font-family:'Consolas','D2Coding',monospace;font-size:13px;font-weight:600;color:#334155;}
+.mv-addr{margin-top:8px;border-top:1px dashed #93c5fd;padding-top:6px;}
+.addr-label{font-size:11px;color:#6b7280;}
+.addr-val{font-size:13px;color:#a855f7;font-weight:700;font-family:'Consolas','D2Coding',monospace;}
+.addr-null{font-size:13px;color:#94a3b8;font-style:italic;font-family:'Consolas','D2Coding',monospace;}
+
+/* Arrow: variable → array */
+.mem-arrow-h{display:flex;align-items:center;padding:36px 20px 0 20px;color:#3b82f6;font-size:20px;font-weight:700;font-family:'Consolas',monospace;flex-shrink:0;}
+
+/* Array + ArrayList grid area */
+.mem-arr-area{flex:1;min-width:0;}
+.arr-grid{display:grid;grid-template-columns:auto auto auto;align-items:stretch;row-gap:0;column-gap:0;}
+
+/* Array header (column 1 only) */
+.arr-hd{background:#334155;color:#fff;padding:8px 14px;font-size:13px;font-weight:600;
+  border:2.5px solid #475569;border-bottom:1px solid #64748b;border-radius:10px 10px 0 0;transition:all .2s;}
+.arr-hd.hl{border-color:#3b82f6;box-shadow:0 0 10px rgba(59,130,246,.3);}
+.arr-type-hint{display:block;font-size:10px;color:#94a3b8;font-weight:400;margin-top:2px;}
+.obj-addr{font-size:11px;color:#c084fc;font-weight:700;font-family:'Consolas','D2Coding',monospace;margin-right:6px;}
+
+/* Array slot (column 1, bordered to form continuous box) */
+.arr-slot{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#fff;
+  border-left:2.5px solid #475569;border-right:2.5px solid #475569;border-bottom:1px solid #e2e8f0;
+  font-family:'Consolas','D2Coding',monospace;font-size:13px;transition:background .2s;}
+.arr-slot.last{border-bottom:2.5px solid #475569;border-radius:0 0 10px 10px;}
+.arr-slot.hl{background:#fef9c3;}
+.slot-idx{font-weight:700;color:#334155;font-size:14px;min-width:24px;}
+.slot-type{font-size:11px;color:#9ca3af;white-space:nowrap;}
+.slot-sep{color:#cbd5e1;margin:0 2px;}
+
+/* Arrow: slot → ArrayList (column 2) */
+.arr-al-arrow{display:flex;align-items:center;justify-content:center;padding:0 10px;color:#22c55e;font-size:15px;font-weight:700;font-family:'Consolas',monospace;white-space:nowrap;}
+
+/* ArrayList box (column 3, separate entity) */
+.al-wrap{display:flex;flex-direction:column;justify-content:center;padding:3px 0;}
+.al-addr-tag{font-size:10px;color:#a855f7;font-weight:700;font-family:'Consolas','D2Coding',monospace;padding-left:6px;line-height:1;}
+.al-box{background:#f0fdf4;border:2px solid #86efac;border-radius:8px;padding:5px 10px;transition:all .2s;min-width:80px;}
+.al-box.hl{border-color:#f59e0b;box-shadow:0 0 10px rgba(245,158,11,.35);background:#fffbeb;}
+.al-type{font-size:10px;color:#15803d;font-weight:700;margin-bottom:1px;}
+.al-items{display:inline-flex;align-items:center;gap:3px;font-family:'Consolas','D2Coding',monospace;font-size:13px;font-weight:600;color:#334155;flex-wrap:wrap;}
+
+/* Elements inside ArrayList */
 .ml-empty{color:#94a3b8;font-weight:400;font-size:12px;}
 .ml-elem{background:#fff;border:1.5px solid #86efac;border-radius:4px;padding:2px 8px;transition:all .2s;display:inline-block;}
 .ml-elem.hl{background:#fef3c7;border-color:#f59e0b;box-shadow:0 0 8px rgba(245,158,11,.45);transform:scale(1.1);}
@@ -93,6 +120,7 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0
 .node-hd{font-weight:700;color:#c2410c;font-size:10px;margin-right:1px;}
 .nf{color:#6b7280;font-size:11px;font-family:'Consolas','D2Coding',monospace;}
 .nf b{color:#1e293b;font-weight:700;}
+
 /* Console output */
 .out-sec .sb{padding:8px 16px;}
 .ob{overflow-y:auto;font-family:'Consolas','D2Coding',monospace;font-size:13px;line-height:1.6;max-height:100px;background:#1a1a2e;color:#a5f3fc;padding:8px 12px;border-radius:6px;min-height:36px;}
@@ -103,8 +131,6 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0
 body.resizing{cursor:col-resize;user-select:none;}
 body.resizing *{pointer-events:none;}
 body.resizing .resizer{pointer-events:auto;}
-/* Edge info mini-bar */
-.edge-info{font-size:12px;color:#64748b;margin-left:auto;font-family:'Consolas','D2Coding',monospace;}
 </style>
 </head>
 <body>
@@ -145,6 +171,10 @@ const N=6;
 const EDGES_UW=[[0,1],[0,2],[2,3],[0,4],[1,4],[3,4],[4,5],[2,4]];
 const EDGES_W=[[0,1,300],[0,2,170],[2,3,220],[0,4,200],[1,4,150],[3,4,80],[4,5,120],[2,4,330]];
 const QUERIES=[1,0,2];
+
+// Memory addresses
+const ADDR_ARR='0x100';
+const ADDR_AL=['0x200','0x210','0x220','0x230','0x240','0x250'];
 
 // ===== Source code arrays =====
 const SRC1=[
@@ -246,7 +276,7 @@ function genSteps1(){
 
   function mem(ov){return{varVisible:true,arrVisible:true,slots:copySlots(slots),hlVar:false,hlArr:false,hlSlot:-1,hlList:-1,hlElem:null,newElem:null,...ov};}
 
-  // Step 0: declare adjList (variable only)
+  // Step 0: declare adjList
   S.push({l:3,a:'declare',
     d:'<span class="ac-call">List&lt;Integer&gt;[] adjList</span> 선언 — <span class="ac-type">List[] 타입 참조변수</span> 생성 (초기값: <b>null</b>)',
     mem:{varVisible:true,arrVisible:false,slots:copySlots(slots),hlVar:true,hlArr:false,hlSlot:-1,hlList:-1,hlElem:null,newElem:null},
@@ -258,11 +288,11 @@ function genSteps1(){
     mem:mem({hlArr:true}),
     vars:{},output:[]});
 
-  // Steps 2-7: new ArrayList for each
+  // Steps 2-7: new ArrayList
   for(let num=0;num<N;num++){
     slots[num].hasRef=true;
     S.push({l:5,a:'newList',
-      d:`<span class="ac-sel">adjList[${num}] = new ArrayList&lt;&gt;()</span> — [${num}]번 칸에 <b>실제 ArrayList 객체</b> 생성 후 참조 연결`,
+      d:`<span class="ac-sel">adjList[${num}] = new ArrayList&lt;&gt;()</span> — [${num}]번 칸에 <b>실제 ArrayList 객체</b> 생성 후 참조(주소) 저장`,
       mem:mem({hlSlot:num,hlList:num}),
       vars:{num},output:[]});
   }
@@ -300,7 +330,6 @@ function genSteps1(){
       mem:mem({hlSlot:qFrom,hlList:qFrom}),
       vars:{from:qFrom},output:[...output]});
   }
-
   return S;
 }
 
@@ -311,28 +340,24 @@ function genSteps2(){
 
   function mem(ov){return{varVisible:true,arrVisible:true,slots:copySlots(slots),hlVar:false,hlArr:false,hlSlot:-1,hlList:-1,hlElem:null,newElem:null,...ov};}
 
-  // Step 0: declare
   S.push({l:12,a:'declare',
     d:'<span class="ac-call">List&lt;Node&gt;[] adjList</span> 선언 — <span class="ac-type">List[] 타입 참조변수</span> 생성 (초기값: <b>null</b>)',
     mem:{varVisible:true,arrVisible:false,slots:copySlots(slots),hlVar:true,hlArr:false,hlSlot:-1,hlList:-1,hlElem:null,newElem:null},
     vars:{},output:[]});
 
-  // Step 1: new List[N]
   S.push({l:12,a:'newArray',
     d:'<span class="ac-set">= new List[6]</span> — 6칸짜리 배열 객체 생성. <span class="ac-warn">각 요소의 타입은 List 참조변수이며, 초기값은 모두 null</span>',
     mem:mem({hlArr:true}),
     vars:{},output:[]});
 
-  // Steps 2-7: new ArrayList
   for(let num=0;num<N;num++){
     slots[num].hasRef=true;
     S.push({l:14,a:'newList',
-      d:`<span class="ac-sel">adjList[${num}] = new ArrayList&lt;&gt;()</span> — [${num}]번 칸에 <b>실제 ArrayList 객체</b> 생성 후 참조 연결`,
+      d:`<span class="ac-sel">adjList[${num}] = new ArrayList&lt;&gt;()</span> — [${num}]번 칸에 <b>실제 ArrayList 객체</b> 생성 후 참조(주소) 저장`,
       mem:mem({hlSlot:num,hlList:num}),
       vars:{num},output:[]});
   }
 
-  // Steps 8-15: add edges
   for(const[from,to,cost] of EDGES_W){
     slots[from].items.push({num:to,cost});
     const ei=slots[from].items.length-1;
@@ -342,7 +367,6 @@ function genSteps2(){
       vars:{from,to,cost},output:[]});
   }
 
-  // Steps 16+: queries
   const output=[];
   for(const qFrom of QUERIES){
     const list=slots[qFrom].items;
@@ -366,7 +390,6 @@ function genSteps2(){
       mem:mem({hlSlot:qFrom,hlList:qFrom}),
       vars:{from:qFrom},output:[...output]});
   }
-
   return S;
 }
 
@@ -393,24 +416,14 @@ function rebuild(){
 // ===== Render =====
 function render(){
   document.querySelectorAll('.cl.active').forEach(e=>e.classList.remove('active'));
-
   if(ci<0){renderInitial();return;}
-
   const s=steps[ci];
-
-  // Code highlight
   const el=document.getElementById('L'+s.l);
   if(el){el.classList.add('active');el.scrollIntoView({block:'nearest',behavior:'smooth'});}
-
-  // Variables
   renderVars(s);
-  // Description
   document.getElementById('dc').innerHTML=s.d;
-  // Memory
   renderMemory(s);
-  // Console
   renderConsole(s);
-  // Step info
   document.getElementById('si').textContent=`${ci+1} / ${steps.length}`;
 }
 
@@ -441,6 +454,7 @@ function renderVars(s){
   document.getElementById('vc').innerHTML=h;
 }
 
+// ===== Memory Rendering =====
 function renderMemory(s){
   const m=s.mem;
   const isW=curTab===2;
@@ -450,42 +464,73 @@ function renderMemory(s){
   let h='<div class="mem-space"><div class="mem-title">메모리 공간</div>';
   h+='<div class="mem-layout">';
 
-  // Variable box
+  // ── Column 1: adjList variable ──
   if(m.varVisible){
     h+=`<div class="mem-var-section">`;
     h+=`<div class="mem-var-box${m.hlVar?' hl':''}">`;
     h+=`<div class="mv-name">adjList</div>`;
     h+=`<div class="mv-type">${typeStr}[] 참조변수</div>`;
-    if(!m.arrVisible) h+=`<div class="mv-val">null</div>`;
-    h+=`</div>`;
-    if(m.arrVisible) h+=`<div class="mem-main-arrow">───→</div>`;
-    h+=`</div>`;
+    h+=`<div class="mv-addr"><span class="addr-label">값: </span>`;
+    if(m.arrVisible){
+      h+=`<span class="addr-val">${ADDR_ARR}</span>`;
+    }else{
+      h+=`<span class="addr-null">null</span>`;
+    }
+    h+=`</div></div></div>`;
+
+    // ── Arrow: variable → array ──
+    if(m.arrVisible){
+      h+=`<div class="mem-arrow-h">───→</div>`;
+    }
   }
 
-  // Array + ArrayLists
+  // ── Column 2+3: Array box + ArrayList boxes (CSS grid) ──
   if(m.arrVisible){
-    h+=`<div class="mem-arr-outer${m.hlArr?' hl':''}">`;
-    h+=`<div class="mem-arr-title">new List[${N}] 배열 객체 <span class="arr-type-hint">(각 요소 타입: ${typeStr} 참조변수)</span></div>`;
+    h+=`<div class="mem-arr-area"><div class="arr-grid">`;
 
+    // Row 0: Header (col 1 only)
+    h+=`<div class="arr-hd${m.hlArr?' hl':''}">`;
+    h+=`<span class="obj-addr">${ADDR_ARR}</span> new List[${N}] 배열 객체`;
+    h+=`<span class="arr-type-hint">각 요소 타입: ${typeStr} 참조변수</span>`;
+    h+=`</div>`;
+    h+=`<div></div><div></div>`; // empty grid cells for cols 2,3
+
+    // Rows 1-6: Slots
     for(let i=0;i<N;i++){
       const slot=m.slots[i];
       const isSlotHl=m.hlSlot===i;
-      h+=`<div class="mem-slot${isSlotHl?' hl':''}">`;
-      h+=`<div class="mem-idx">[${i}]</div>`;
-      h+=`<div class="mem-type">${typeStr} 참조변수</div>`;
+      const isLast=i===N-1;
 
-      if(!slot.hasRef){
-        h+=`<div class="mem-val null-val">null</div>`;
+      // Col 1: Array slot (bordered to form continuous box with header)
+      h+=`<div class="arr-slot${isSlotHl?' hl':''}${isLast?' last':''}">`;
+      h+=`<span class="slot-idx">[${i}]</span>`;
+      h+=`<span class="slot-type">List 참조변수</span>`;
+      h+=`<span class="slot-sep">:</span>`;
+      if(slot.hasRef){
+        h+=`<span class="addr-val">${ADDR_AL[i]}</span>`;
       }else{
-        h+=`<div class="mem-val ref-val">ref</div>`;
-        h+=`<div class="mem-slot-arrow">→</div>`;
+        h+=`<span class="addr-null">null</span>`;
+      }
+      h+=`</div>`;
+
+      // Col 2: Arrow
+      if(slot.hasRef){
+        h+=`<div class="arr-al-arrow">──→</div>`;
+      }else{
+        h+=`<div></div>`;
+      }
+
+      // Col 3: ArrayList box (separate entity)
+      if(slot.hasRef){
         const isListHl=m.hlList===i;
-        h+=`<div class="mem-list${isListHl?' hl':''}">`;
-        h+=`<span class="ml-label">${alTypeStr}</span>`;
-        h+='<span class="ml-items">';
+        h+=`<div class="al-wrap">`;
+        h+=`<div class="al-addr-tag">${ADDR_AL[i]}</div>`;
+        h+=`<div class="al-box${isListHl?' hl':''}">`;
+        h+=`<div class="al-type">${alTypeStr}</div>`;
+        h+=`<div class="al-items">`;
 
         if(slot.items.length===0){
-          h+='<span class="ml-empty">{ }</span>';
+          h+=`<span class="ml-empty">{ }</span>`;
         }else{
           h+='{ ';
           for(let j=0;j<slot.items.length;j++){
@@ -493,7 +538,11 @@ function renderMemory(s){
             const isNew=m.newElem&&m.newElem[0]===i&&m.newElem[1]===j;
             if(isW){
               const nd=slot.items[j];
-              h+=`<span class="ml-node${isEHl?' hl':''}${isNew?' new-elem':''}"><span class="node-hd">Node</span><span class="nf">num:<b>${nd.num}</b></span><span class="nf">cost:<b>${nd.cost}</b></span></span>`;
+              h+=`<span class="ml-node${isEHl?' hl':''}${isNew?' new-elem':''}">`;
+              h+=`<span class="node-hd">Node</span>`;
+              h+=`<span class="nf">num:<b>${nd.num}</b></span> `;
+              h+=`<span class="nf">cost:<b>${nd.cost}</b></span>`;
+              h+=`</span>`;
             }else{
               h+=`<span class="ml-elem${isEHl?' hl':''}${isNew?' new-elem':''}">${slot.items[j]}</span>`;
             }
@@ -501,15 +550,16 @@ function renderMemory(s){
           }
           h+=' }';
         }
-
-        h+='</span></div>';
+        h+=`</div></div></div>`;
+      }else{
+        h+=`<div></div>`;
       }
-      h+='</div>';
     }
-    h+='</div>';
+
+    h+=`</div></div>`; // close arr-grid, mem-arr-area
   }
 
-  h+='</div></div>';
+  h+='</div></div>'; // close mem-layout, mem-space
   document.getElementById('memArea').innerHTML=h;
 }
 
