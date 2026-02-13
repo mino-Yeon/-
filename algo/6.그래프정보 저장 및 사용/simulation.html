@@ -77,22 +77,22 @@ body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0
 
 /* Array + ArrayList grid area */
 .mem-arr-area{flex:1;min-width:0;}
-.arr-grid{display:grid;grid-template-columns:auto auto auto;align-items:stretch;row-gap:0;column-gap:0;}
+.arr-grid{display:grid;grid-template-columns:240px auto 1fr;align-items:stretch;row-gap:0;column-gap:0;}
 
 /* Array header (column 1 only) */
-.arr-hd{background:#334155;color:#fff;padding:8px 14px;font-size:13px;font-weight:600;
-  border:2.5px solid #475569;border-bottom:1px solid #64748b;border-radius:10px 10px 0 0;transition:all .2s;}
+.arr-hd{background:#334155;color:#fff;padding:8px 12px;font-size:13px;font-weight:600;
+  border:2.5px solid #475569;border-bottom:1px solid #64748b;border-radius:10px 10px 0 0;transition:all .2s;overflow:hidden;}
 .arr-hd.hl{border-color:#3b82f6;box-shadow:0 0 10px rgba(59,130,246,.3);}
 .arr-type-hint{display:block;font-size:10px;color:#94a3b8;font-weight:400;margin-top:2px;}
 .obj-addr{font-size:11px;color:#c084fc;font-weight:700;font-family:'Consolas','D2Coding',monospace;margin-right:6px;}
 
 /* Array slot (column 1, bordered to form continuous box) */
-.arr-slot{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#fff;
+.arr-slot{display:flex;align-items:center;gap:6px;padding:7px 10px;background:#fff;
   border-left:2.5px solid #475569;border-right:2.5px solid #475569;border-bottom:1px solid #e2e8f0;
-  font-family:'Consolas','D2Coding',monospace;font-size:13px;transition:background .2s;}
+  font-family:'Consolas','D2Coding',monospace;font-size:13px;transition:background .2s;overflow:hidden;}
 .arr-slot.last{border-bottom:2.5px solid #475569;border-radius:0 0 10px 10px;}
 .arr-slot.hl{background:#fef9c3;}
-.slot-idx{font-weight:700;color:#334155;font-size:14px;min-width:24px;}
+.slot-idx{font-weight:700;color:#334155;font-size:13px;min-width:20px;}
 .slot-type{font-size:11px;color:#9ca3af;white-space:nowrap;}
 .slot-sep{color:#cbd5e1;margin:0 2px;}
 
@@ -143,8 +143,6 @@ body.resizing .resizer{pointer-events:auto;}
   <button onclick="prev()">◀ 이전</button>
   <button id="playBtn" onclick="togglePlay()">▶ 재생</button>
   <button onclick="next()">다음 ▶</button>
-  <div class="sep"></div>
-  <button onclick="skipNext()">⏩ 다음 단계</button>
   <div class="sep"></div>
   <button id="tab1" class="tab-btn tab-active" onclick="switchTab(1)">가중치 없는 그래프</button>
   <button id="tab2" class="tab-btn" onclick="switchTab(2)">가중치 있는 그래프</button>
@@ -504,7 +502,7 @@ function renderMemory(s){
       // Col 1: Array slot (bordered to form continuous box with header)
       h+=`<div class="arr-slot${isSlotHl?' hl':''}${isLast?' last':''}">`;
       h+=`<span class="slot-idx">[${i}]</span>`;
-      h+=`<span class="slot-type">List 참조변수</span>`;
+      h+=`<span class="slot-type">${typeStr} 참조변수</span>`;
       h+=`<span class="slot-sep">:</span>`;
       if(slot.hasRef){
         h+=`<span class="addr-val">${ADDR_AL[i]}</span>`;
@@ -583,16 +581,6 @@ function togglePlay(){playing?stop():start();}
 function start(){if(ci>=steps.length-1)ci=-1;playing=true;document.getElementById('playBtn').textContent='⏸ 정지';document.getElementById('playBtn').classList.add('playing');tick();}
 function stop(){playing=false;clearTimeout(timer);timer=null;document.getElementById('playBtn').textContent='▶ 재생';document.getElementById('playBtn').classList.remove('playing');}
 function tick(){if(!playing)return;const d=1100-spVal*100;timer=setTimeout(()=>{next();if(playing&&ci<steps.length-1)tick();else stop();},d);}
-function skipNext(){
-  stop();
-  if(ci<0){ci=0;render();return;}
-  const curAction=steps[ci].a;
-  for(let i=ci+1;i<steps.length;i++){
-    if(steps[i].a!==curAction){ci=i;render();return;}
-  }
-  ci=steps.length-1;render();
-}
-
 // ===== Keyboard =====
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
