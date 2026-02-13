@@ -575,7 +575,10 @@ function randomize() {
 
 /* ── 코드 패널 토글 ── */
 function toggleCode() {
-  document.getElementById('codePanel').classList.toggle('collapsed');
+  const cp = document.getElementById('codePanel');
+  cp.style.width = '';
+  cp.style.minWidth = '';
+  cp.classList.toggle('collapsed');
 }
 
 /* ── 리사이저 ── */
