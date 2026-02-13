@@ -317,41 +317,51 @@ function genSteps1(){
 function genSteps2(){
   const S=[],map=makeMap(),outputs=[];
   let bestWire=Infinity,found=false,leafNum=0;
+  const skips=new Set();
 
   function combination(idx,start,rr,wireLen){
     if(idx===rr){
       leafNum++;
+      const added=[];
+      for(let k=start;k<3;k++) if(!skips.has(k)){skips.add(k);added.push(k)}
       let isNew=false;
       if(wireLen<bestWire){bestWire=wireLen;isNew=true;found=true}
       const msg=`${rr}개 연결 완료, 전선 ${wireLen} ${isNew?'→ 최소 갱신!':''}`;
       outputs.push(msg);
       S.push({t:'leaf',l:7,ci2:idx,r:rr,conn:rr,wire:wireLen,bestC:rr,bestW:bestWire,isNew,map:cloneMap(map),
-        leafNum,
+        leafNum,skips:[...skips],
         d:`<span class="ac-${isNew?'best':'skip'}">리프: ${msg}</span>`,out:[...outputs]});
+      added.forEach(k=>skips.delete(k));
       return;
     }
     for(let i=start;i<CORES.length;i++){
       S.push({t:'selcore',l:10,ci2:idx,coreI:i,r:rr,conn:idx,wire:wireLen,bestC:rr,bestW:bestWire,map:cloneMap(map),
+        skips:[...skips],
         d:`<span class="ac-call">조합: 코어 ${i} (${CORES[i].r},${CORES[i].c}) 선택 (idx=${idx})</span>`,out:[...outputs]});
       for(let d=0;d<4;d++){
         const res=getLength(map,CORES[i],d);
         if(res.len===0){
           S.push({t:'fail',l:13,ci2:idx,coreI:i,dir:DIR_NAME[d],dirIdx:d,r:rr,conn:idx,wire:wireLen,bestC:rr,bestW:bestWire,
             collR:res.collR,collC:res.collC,tryPath:getTryPath(CORES[i],d,res.collR,res.collC),map:cloneMap(map),
+            skips:[...skips],
             d:`<span class="ac-fail">코어 ${i} ${DIR_NAME[d]}방향: (${res.collR},${res.collC})에서 충돌</span>`,out:[...outputs]});
           continue;
         }
         setLine(map,res.cells,i+1);
         S.push({t:'install',l:14,ci2:idx,coreI:i,dir:DIR_NAME[d],dirIdx:d,wl:res.len,cells:[...res.cells],
           r:rr,conn:idx+1,wire:wireLen+res.len,bestC:rr,bestW:bestWire,map:cloneMap(map),
+          skips:[...skips],
           d:`<span class="ac-ok">코어 ${i} ${DIR_NAME[d]}방향 전선 설치 (길이 ${res.len})</span>`,out:[...outputs]});
         combination(idx+1,i+1,rr,wireLen+res.len);
         setLine(map,res.cells,0);
         S.push({t:'back',l:16,ci2:idx,coreI:i,dir:DIR_NAME[d],dirIdx:d,cells:[...res.cells],
           r:rr,conn:idx,wire:wireLen,bestC:rr,bestW:bestWire,map:cloneMap(map),
+          skips:[...skips],
           d:`<span class="ac-back">코어 ${i} ${DIR_NAME[d]}방향 전선 되돌림</span>`,out:[...outputs]});
       }
+      skips.add(i);
     }
+    for(let i=start;i<CORES.length;i++) skips.delete(i);
   }
 
   for(let r=3;r>=1;r--){
