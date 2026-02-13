@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인접리스트 메모리 시뮬레이션</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0f2f5;color:#333;height:100vh;display:flex;flex-direction:column;}
+.header{background:#1a237e;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:16px;}
+.header h1{font-size:18px;} .header .sub{font-size:13px;color:#94a3b8;}
+.controls{background:#283593;padding:10px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.controls button{background:#3498db;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:13px;font-family:inherit;}
+.controls button:hover{background:#2980b9;}
+.controls button.playing{background:#e74c3c;}
+.sep{width:1px;height:24px;background:#4a5ea8;margin:0 4px;}
+.tab-btn{background:#4a5ea8!important;color:#cbd5e1!important;border:2px solid transparent!important;transition:all .15s;}
+.tab-btn.tab-active{background:#3498db!important;color:#fff!important;border-color:#2980b9!important;}
+.controls label{color:#cbd5e1;font-size:13px;}
+.controls input[type=range]{width:80px;vertical-align:middle;}
+.step-info{color:#94a3b8;font-size:13px;margin-left:auto;}
+.kbd-help{color:#64748b;font-size:11px;margin-left:8px;}
+.main{display:flex;flex:1;overflow:hidden;}
+.code-panel{width:34%;min-width:280px;background:#1e1e1e;display:flex;flex-direction:column;transition:width .3s,min-width .3s;}
+.code-panel.collapsed{width:40px;min-width:40px;}
+.code-panel.collapsed+.resizer{display:none;}
+.code-panel.collapsed .code-body{display:none;}
+.code-panel.collapsed .panel-hd span{display:none;}
+.panel-hd{background:#2d2d2d;color:#94a3b8;padding:8px 16px;font-size:12px;font-weight:600;border-bottom:1px solid #3d3d3d;cursor:pointer;user-select:none;display:flex;align-items:center;gap:8px;}
+.panel-hd:hover{background:#3d3d3d;}
+.panel-hd::before{content:'◀';font-size:10px;transition:transform .3s;}
+.code-panel.collapsed .panel-hd::before{transform:rotate(180deg);}
+.code-body{flex:1;overflow-y:auto;padding:8px 0;}
+.cl{display:flex;padding:1px 0;font-family:'Consolas','D2Coding',monospace;font-size:13px;line-height:1.6;transition:background .15s;}
+.cl.active{background:#264f78;}
+.cl.active .ln{color:#fff;}
+.ln{width:36px;text-align:right;padding-right:10px;color:#555;user-select:none;flex-shrink:0;}
+.lc{color:#d4d4d4;white-space:pre;}
+.kw{color:#569cd6;}.tp{color:#4ec9b0;}.nm{color:#b5cea8;}.st{color:#ce9178;}.cm{color:#6a9955;}.fn{color:#dcdcaa;}
+.viz-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.vs{border-bottom:1px solid #ddd;}
+.vs .sh{background:#e8ecf0;padding:5px 16px;font-size:12px;font-weight:600;color:#64748b;}
+.vs .sb{padding:10px 16px;background:#fff;}
+/* Variable badges */
+.var-c{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.vb{display:inline-flex;padding:5px 12px;border-radius:6px;font-size:14px;font-weight:600;font-family:'Consolas','D2Coding',monospace;}
+.v-from{background:#dbeafe;color:#1d4ed8;}.v-to{background:#fef3c7;color:#92400e;}.v-cost{background:#ffedd5;color:#9a3412;}.v-num{background:#e0f2fe;color:#0c4a6e;}
+.v-phase{background:#f0fdf4;color:#166534;font-size:12px;font-weight:700;padding:4px 10px;border-radius:12px;border:1px solid #86efac;}
+/* Description */
+.desc{font-size:14px;line-height:1.6;min-height:38px;display:flex;align-items:center;}
+.ac-call{color:#ea580c;font-weight:600;}.ac-set{color:#7c3aed;font-weight:600;}.ac-sel{color:#16a34a;font-weight:600;}
+.ac-res{color:#2563eb;font-weight:600;}.ac-lp{color:#7c3aed;font-weight:600;}.ac-q{color:#0891b2;font-weight:600;}
+.ac-type{color:#dc2626;font-weight:700;}.ac-warn{color:#dc2626;background:#fef2f2;padding:2px 6px;border-radius:4px;font-size:12px;}
+/* Memory visualization */
+.mem-sec{flex:1;display:flex;flex-direction:column;min-height:0;}
+.mem-sec .sb{flex:1;overflow:auto;padding:12px 16px;}
+.mem-space{position:relative;}
+.mem-title{font-size:11px;color:#94a3b8;font-weight:600;margin-bottom:12px;letter-spacing:1px;text-transform:uppercase;}
+.mem-layout{display:flex;align-items:flex-start;gap:0;}
+.mem-var-section{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;padding-top:24px;}
+.mem-var-box{padding:12px 16px;background:#dbeafe;border:2px solid #93c5fd;border-radius:10px;text-align:center;min-width:110px;transition:all .2s;}
+.mem-var-box.hl{border-color:#3b82f6;box-shadow:0 0 12px rgba(59,130,246,.4);background:#bfdbfe;}
+.mv-name{font-weight:700;font-size:16px;color:#1e40af;font-family:'Consolas','D2Coding',monospace;}
+.mv-type{font-size:10px;color:#6b7280;margin-top:2px;}
+.mv-val{font-size:13px;color:#94a3b8;margin-top:4px;font-family:'Consolas','D2Coding',monospace;}
+.mem-main-arrow{font-size:18px;color:#3b82f6;padding:28px 6px 0 6px;font-family:'Consolas',monospace;letter-spacing:-3px;flex-shrink:0;font-weight:700;}
+.mem-arr-outer{border:2px solid #64748b;border-radius:10px;overflow:hidden;flex:1;min-width:0;transition:all .2s;}
+.mem-arr-outer.hl{border-color:#3b82f6;box-shadow:0 0 12px rgba(59,130,246,.3);}
+.mem-arr-title{background:#334155;color:#fff;padding:7px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.arr-type-hint{font-size:11px;color:#94a3b8;font-weight:400;}
+.mem-slot{display:flex;align-items:center;padding:7px 14px;border-bottom:1px solid #e2e8f0;gap:8px;transition:background .2s;flex-wrap:nowrap;}
+.mem-slot:last-child{border-bottom:none;}
+.mem-slot.hl{background:#fef9c3;}
+.mem-idx{font-weight:700;color:#334155;font-family:'Consolas','D2Coding',monospace;width:28px;flex-shrink:0;font-size:14px;}
+.mem-type{font-size:11px;color:#6b7280;width:100px;flex-shrink:0;}
+.mem-val{font-family:'Consolas','D2Coding',monospace;font-size:13px;flex-shrink:0;}
+.null-val{color:#94a3b8;font-style:italic;}
+.ref-val{color:#3b82f6;font-weight:600;}
+.mem-slot-arrow{font-size:14px;color:#22c55e;font-family:'Consolas',monospace;flex-shrink:0;font-weight:700;}
+.mem-list{display:inline-flex;align-items:center;gap:4px;background:#f0fdf4;border:2px solid #86efac;border-radius:8px;padding:4px 10px;transition:all .2s;flex-shrink:0;}
+.mem-list.hl{border-color:#f59e0b;box-shadow:0 0 10px rgba(245,158,11,.35);background:#fffbeb;}
+.ml-label{font-size:10px;color:#15803d;font-weight:700;margin-right:2px;white-space:nowrap;}
+.ml-items{display:inline-flex;align-items:center;gap:3px;font-family:'Consolas','D2Coding',monospace;font-size:13px;font-weight:600;color:#334155;}
+.ml-empty{color:#94a3b8;font-weight:400;font-size:12px;}
+.ml-elem{background:#fff;border:1.5px solid #86efac;border-radius:4px;padding:2px 8px;transition:all .2s;display:inline-block;}
+.ml-elem.hl{background:#fef3c7;border-color:#f59e0b;box-shadow:0 0 8px rgba(245,158,11,.45);transform:scale(1.1);}
+@keyframes addPop{0%{transform:scale(0);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.ml-elem.new-elem{animation:addPop .35s ease-out;background:#bbf7d0;border-color:#22c55e;}
+/* Node elements (weighted) */
+.ml-node{display:inline-flex;align-items:center;gap:3px;background:#fff7ed;border:1.5px solid #fdba74;border-radius:5px;padding:2px 7px;transition:all .2s;}
+.ml-node.hl{background:#fef3c7;border-color:#f59e0b;box-shadow:0 0 8px rgba(245,158,11,.45);transform:scale(1.05);}
+.ml-node.new-elem{animation:addPop .35s ease-out;background:#fed7aa;border-color:#f97316;}
+.node-hd{font-weight:700;color:#c2410c;font-size:10px;margin-right:1px;}
+.nf{color:#6b7280;font-size:11px;font-family:'Consolas','D2Coding',monospace;}
+.nf b{color:#1e293b;font-weight:700;}
+/* Console output */
+.out-sec .sb{padding:8px 16px;}
+.ob{overflow-y:auto;font-family:'Consolas','D2Coding',monospace;font-size:13px;line-height:1.6;max-height:100px;background:#1a1a2e;color:#a5f3fc;padding:8px 12px;border-radius:6px;min-height:36px;}
+.ob .new{color:#fbbf24;font-weight:600;}
+/* Resizer */
+.resizer{width:6px;background:#283593;cursor:col-resize;transition:background .15s;flex-shrink:0;}
+.resizer:hover,.resizer.dragging{background:#3498db;}
+body.resizing{cursor:col-resize;user-select:none;}
+body.resizing *{pointer-events:none;}
+body.resizing .resizer{pointer-events:auto;}
+/* Edge info mini-bar */
+.edge-info{font-size:12px;color:#64748b;margin-left:auto;font-family:'Consolas','D2Coding',monospace;}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>인접리스트(Adjacency List) 메모리 구조 시뮬레이션</h1>
+  <span class="sub">N=6 (도시) &nbsp;|&nbsp; M=8 (간선) &nbsp;|&nbsp; 단방향 그래프</span>
+</div>
+<div class="controls">
+  <button onclick="doReset()">⏮ 처음</button>
+  <button onclick="prev()">◀ 이전</button>
+  <button id="playBtn" onclick="togglePlay()">▶ 재생</button>
+  <button onclick="next()">다음 ▶</button>
+  <div class="sep"></div>
+  <button onclick="skipNext()">⏩ 다음 단계</button>
+  <div class="sep"></div>
+  <button id="tab1" class="tab-btn tab-active" onclick="switchTab(1)">가중치 없는 그래프</button>
+  <button id="tab2" class="tab-btn" onclick="switchTab(2)">가중치 있는 그래프</button>
+  <div class="sep"></div>
+  <label>속도: <input type="range" id="spd" min="1" max="10" value="5" oninput="spVal=+this.value"></label>
+  <span class="step-info" id="si">준비</span>
+  <span class="kbd-help">키보드: ←→ 이전/다음 · Space 재생 · R 처음 · 1/2 탭전환</span>
+</div>
+<div class="main">
+  <div class="code-panel" id="codePanel">
+    <div class="panel-hd" id="codeTitle" onclick="toggleCode()"><span>Java Code - 가중치 없는 그래프</span></div>
+    <div class="code-body" id="cb"></div>
+  </div>
+  <div class="resizer" id="resizer"></div>
+  <div class="viz-panel">
+    <div class="vs"><div class="sh">변수 상태</div><div class="sb"><div class="var-c" id="vc"></div></div></div>
+    <div class="vs desc-sec"><div class="sh">실행 설명</div><div class="sb"><div class="desc" id="dc">탭을 선택하고 ▶ 재생 또는 다음 버튼으로 시작하세요.</div></div></div>
+    <div class="vs mem-sec"><div class="sh">메모리 공간</div><div class="sb" id="memArea"></div></div>
+    <div class="vs out-sec"><div class="sh">콘솔 출력 <span id="oc"></span></div><div class="sb"><div class="ob" id="ob"></div></div></div>
+  </div>
+</div>
+<script>
+const N=6;
+const EDGES_UW=[[0,1],[0,2],[2,3],[0,4],[1,4],[3,4],[4,5],[2,4]];
+const EDGES_W=[[0,1,300],[0,2,170],[2,3,220],[0,4,200],[1,4,150],[3,4,80],[4,5,120],[2,4,330]];
+const QUERIES=[1,0,2];
+
+// ===== Source code arrays =====
+const SRC1=[
+'int N = 6, M = 8, K = 3;',
+'',
+'List<Integer>[] adjList = new List[N];   // 인접 리스트',
+'for(int num = 0; num < N; num++)',
+'    adjList[num] = new ArrayList<>();',
+'',
+'// M개의 도로 정보를 인접리스트에 저장',
+'for(int i = 0; i < M; i++) {',
+'    int from = Integer.parseInt(st.nextToken());',
+'    int to = Integer.parseInt(st.nextToken());',
+'    adjList[from].add(to);',
+'}',
+'',
+'// K개의 각 도시에서 출발하여 이동가능한 도시정보 출력',
+'for(int i = 0; i < K; i++) {',
+'    int from = Integer.parseInt(br.readLine());',
+'    sb.append(from).append("=[");',
+'    for(int to : adjList[from]) {',
+'        sb.append(to).append(",");',
+'    }',
+'    sb.append("]\\n");',
+'}'
+];
+
+const SRC2=[
+'static class Node {',
+'    int num;    // 도착 도시 번호',
+'    int cost;   // 비용',
+'    public Node(int num, int cost) {',
+'        this.num = num;',
+'        this.cost = cost;',
+'    }',
+'}',
+'',
+'int N = 6, M = 8, K = 3;',
+'',
+'List<Node>[] adjList = new List[N];   // 인접 리스트',
+'for(int num = 0; num < N; num++)',
+'    adjList[num] = new ArrayList<>();',
+'',
+'// M개의 도로 정보를 인접리스트에 저장',
+'for(int i = 0; i < M; i++) {',
+'    int from = Integer.parseInt(st.nextToken());',
+'    int to = Integer.parseInt(st.nextToken());',
+'    int cost = Integer.parseInt(st.nextToken());',
+'    adjList[from].add(new Node(to, cost));',
+'}',
+'',
+'// K개의 각 도시에서 출발하여 이동가능한 도시정보 출력',
+'for(int i = 0; i < K; i++) {',
+'    int from = Integer.parseInt(br.readLine());',
+'    sb.append(from).append("=[");',
+'    for(Node to : adjList[from]) {',
+'        sb.append(to.num+" "+to.cost).append(",");',
+'    }',
+'    sb.append("]\\n");',
+'}'
+];
+
+// ===== Syntax highlighter =====
+function hl(t){
+  t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let cm='';
+  t=t.replace(/(\/\/.*)$/gm,function(m){cm=m;return '\x00CM';});
+  let ss=[];
+  t=t.replace(/"([^"]*)"/g,function(m){ss.push(m);return '\x00S'+(ss.length-1);});
+  t=t.replace(/\b(package|import|public|class|static|void|new|for|int|if|return|boolean|this)\b/g,'<span class="kw">$1</span>');
+  t=t.replace(/\b(String|List|ArrayList|Integer|Node)\b/g,'<span class="tp">$1</span>');
+  t=t.replace(/\b(\d+)\b/g,'<span class="nm">$1</span>');
+  ss.forEach((s,i)=>{t=t.replace('\x00S'+i,'<span class="st">'+s+'</span>');});
+  if(cm)t=t.replace('\x00CM','<span class="cm">'+cm+'</span>');
+  return t;
+}
+
+function initCode(){
+  const src=curTab===1?SRC1:SRC2;
+  document.getElementById('cb').innerHTML=src.map((l,i)=>
+    `<div class="cl" id="L${i+1}"><span class="ln">${i+1}</span><span class="lc">${hl(l)}</span></div>`).join('');
+  document.getElementById('codeTitle').querySelector('span').textContent=
+    curTab===1?'Java Code - 가중치 없는 그래프':'Java Code - 가중치 있는 그래프';
+}
+
+function toggleCode(){
+  const panel=document.getElementById('codePanel');
+  panel.classList.toggle('collapsed');
+  if(panel.classList.contains('collapsed')){panel.style.width='';panel.style.minWidth='';}
+}
+
+// ===== Helper: deep copy slots =====
+function copySlots(slots){return slots.map(s=>({hasRef:s.hasRef,items:s.items.map(x=>typeof x==='object'?{...x}:x)}));}
+
+// ===== genSteps1: Unweighted =====
+function genSteps1(){
+  const S=[];
+  const slots=Array.from({length:N},()=>({hasRef:false,items:[]}));
+
+  function mem(ov){return{varVisible:true,arrVisible:true,slots:copySlots(slots),hlVar:false,hlArr:false,hlSlot:-1,hlList:-1,hlElem:null,newElem:null,...ov};}
+
+  // Step 0: declare adjList (variable only)
+  S.push({l:3,a:'declare',
+    d:'<span class="ac-call">List&lt;Integer&gt;[] adjList</span> 선언 — <span class="ac-type">List[] 타입 참조변수</span> 생성 (초기값: <b>null</b>)',
+    mem:{varVisible:true,arrVisible:false,slots:copySlots(slots),hlVar:true,hlArr:false,hlSlot:-1,hlList:-1,hlElem:null,newElem:null},
+    vars:{},output:[]});
+
+  // Step 1: new List[N]
+  S.push({l:3,a:'newArray',
+    d:'<span class="ac-set">= new List[6]</span> — 6칸짜리 배열 객체 생성. <span class="ac-warn">각 요소의 타입은 List 참조변수이며, 초기값은 모두 null</span>',
+    mem:mem({hlArr:true}),
+    vars:{},output:[]});
+
+  // Steps 2-7: new ArrayList for each
+  for(let num=0;num<N;num++){
+    slots[num].hasRef=true;
+    S.push({l:5,a:'newList',
+      d:`<span class="ac-sel">adjList[${num}] = new ArrayList&lt;&gt;()</span> — [${num}]번 칸에 <b>실제 ArrayList 객체</b> 생성 후 참조 연결`,
+      mem:mem({hlSlot:num,hlList:num}),
+      vars:{num},output:[]});
+  }
+
+  // Steps 8-15: add edges
+  for(const[from,to] of EDGES_UW){
+    slots[from].items.push(to);
+    const ei=slots[from].items.length-1;
+    S.push({l:11,a:'add',
+      d:`<span class="ac-set">adjList[${from}].add(${to})</span> — ${from}번 리스트에 <b>${to}</b> 추가 &nbsp;(간선: ${from} → ${to})`,
+      mem:mem({hlSlot:from,hlList:from,newElem:[from,ei]}),
+      vars:{from,to},output:[]});
+  }
+
+  // Steps 16+: queries
+  const output=[];
+  for(const qFrom of QUERIES){
+    const list=slots[qFrom].items;
+    S.push({l:18,a:'queryStart',
+      d:`<span class="ac-q">adjList[${qFrom}]</span> 순회 시작 — ${qFrom}번 도시에서 출발하여 이동 가능한 도시 조회`,
+      mem:mem({hlSlot:qFrom,hlList:qFrom}),
+      vars:{from:qFrom},output:[...output]});
+
+    for(let j=0;j<list.length;j++){
+      S.push({l:19,a:'queryElem',
+        d:`<span class="ac-q">to = ${list[j]}</span> — adjList[${qFrom}]의 <b>${j}번째 요소</b> 접근 → sb.append(${list[j]})`,
+        mem:mem({hlSlot:qFrom,hlList:qFrom,hlElem:[qFrom,j]}),
+        vars:{from:qFrom,to:list[j]},output:[...output]});
+    }
+
+    const resStr=`${qFrom}=[${list.join(',')}${list.length?',':''}]`;
+    output.push(resStr);
+    S.push({l:21,a:'queryResult',
+      d:`<span class="ac-res">출력 완료: ${resStr}</span>`,
+      mem:mem({hlSlot:qFrom,hlList:qFrom}),
+      vars:{from:qFrom},output:[...output]});
+  }
+
+  return S;
+}
+
+// ===== genSteps2: Weighted =====
+function genSteps2(){
+  const S=[];
+  const slots=Array.from({length:N},()=>({hasRef:false,items:[]}));
+
+  function mem(ov){return{varVisible:true,arrVisible:true,slots:copySlots(slots),hlVar:false,hlArr:false,hlSlot:-1,hlList:-1,hlElem:null,newElem:null,...ov};}
+
+  // Step 0: declare
+  S.push({l:12,a:'declare',
+    d:'<span class="ac-call">List&lt;Node&gt;[] adjList</span> 선언 — <span class="ac-type">List[] 타입 참조변수</span> 생성 (초기값: <b>null</b>)',
+    mem:{varVisible:true,arrVisible:false,slots:copySlots(slots),hlVar:true,hlArr:false,hlSlot:-1,hlList:-1,hlElem:null,newElem:null},
+    vars:{},output:[]});
+
+  // Step 1: new List[N]
+  S.push({l:12,a:'newArray',
+    d:'<span class="ac-set">= new List[6]</span> — 6칸짜리 배열 객체 생성. <span class="ac-warn">각 요소의 타입은 List 참조변수이며, 초기값은 모두 null</span>',
+    mem:mem({hlArr:true}),
+    vars:{},output:[]});
+
+  // Steps 2-7: new ArrayList
+  for(let num=0;num<N;num++){
+    slots[num].hasRef=true;
+    S.push({l:14,a:'newList',
+      d:`<span class="ac-sel">adjList[${num}] = new ArrayList&lt;&gt;()</span> — [${num}]번 칸에 <b>실제 ArrayList 객체</b> 생성 후 참조 연결`,
+      mem:mem({hlSlot:num,hlList:num}),
+      vars:{num},output:[]});
+  }
+
+  // Steps 8-15: add edges
+  for(const[from,to,cost] of EDGES_W){
+    slots[from].items.push({num:to,cost});
+    const ei=slots[from].items.length-1;
+    S.push({l:21,a:'add',
+      d:`<span class="ac-set">adjList[${from}].add(new Node(${to}, ${cost}))</span> — ${from}번 리스트에 <b>Node(${to}, ${cost})</b> 추가 &nbsp;(간선: ${from} →<sup>${cost}</sup> ${to})`,
+      mem:mem({hlSlot:from,hlList:from,newElem:[from,ei]}),
+      vars:{from,to,cost},output:[]});
+  }
+
+  // Steps 16+: queries
+  const output=[];
+  for(const qFrom of QUERIES){
+    const list=slots[qFrom].items;
+    S.push({l:28,a:'queryStart',
+      d:`<span class="ac-q">adjList[${qFrom}]</span> 순회 시작 — ${qFrom}번 도시에서 출발하여 이동 가능한 도시 조회`,
+      mem:mem({hlSlot:qFrom,hlList:qFrom}),
+      vars:{from:qFrom},output:[...output]});
+
+    for(let j=0;j<list.length;j++){
+      const nd=list[j];
+      S.push({l:29,a:'queryElem',
+        d:`<span class="ac-q">to = Node(${nd.num}, ${nd.cost})</span> — adjList[${qFrom}]의 <b>${j}번째 요소</b> 접근 → to.num=${nd.num}, to.cost=${nd.cost}`,
+        mem:mem({hlSlot:qFrom,hlList:qFrom,hlElem:[qFrom,j]}),
+        vars:{from:qFrom,to:nd.num,cost:nd.cost},output:[...output]});
+    }
+
+    const resStr=`${qFrom}=[${list.map(x=>x.num+' '+x.cost).join(',')}${list.length?',':''}]`;
+    output.push(resStr);
+    S.push({l:31,a:'queryResult',
+      d:`<span class="ac-res">출력 완료: ${resStr}</span>`,
+      mem:mem({hlSlot:qFrom,hlList:qFrom}),
+      vars:{from:qFrom},output:[...output]});
+  }
+
+  return S;
+}
+
+// ===== State =====
+let curTab=1;
+let steps=[],ci=-1,playing=false,timer=null,spVal=5;
+let cache1=null,cache2=null;
+
+function switchTab(t){
+  if(t===curTab)return;
+  stop();curTab=t;
+  document.getElementById('tab1').classList.toggle('tab-active',t===1);
+  document.getElementById('tab2').classList.toggle('tab-active',t===2);
+  initCode();rebuild();
+}
+
+function rebuild(){
+  ci=-1;
+  if(curTab===1){if(!cache1)cache1=genSteps1();steps=cache1;}
+  else{if(!cache2)cache2=genSteps2();steps=cache2;}
+  render();
+}
+
+// ===== Render =====
+function render(){
+  document.querySelectorAll('.cl.active').forEach(e=>e.classList.remove('active'));
+
+  if(ci<0){renderInitial();return;}
+
+  const s=steps[ci];
+
+  // Code highlight
+  const el=document.getElementById('L'+s.l);
+  if(el){el.classList.add('active');el.scrollIntoView({block:'nearest',behavior:'smooth'});}
+
+  // Variables
+  renderVars(s);
+  // Description
+  document.getElementById('dc').innerHTML=s.d;
+  // Memory
+  renderMemory(s);
+  // Console
+  renderConsole(s);
+  // Step info
+  document.getElementById('si').textContent=`${ci+1} / ${steps.length}`;
+}
+
+function renderInitial(){
+  document.getElementById('vc').innerHTML='<span class="v-phase">준비</span>';
+  document.getElementById('dc').innerHTML='탭을 선택하고 ▶ 재생 또는 다음 버튼으로 시작하세요.';
+  document.getElementById('memArea').innerHTML='<div class="mem-space"><div class="mem-title">메모리 공간</div><div style="color:#94a3b8;padding:20px;text-align:center;font-size:14px;">시뮬레이션을 시작하면 메모리 구조가 여기에 표시됩니다.</div></div>';
+  document.getElementById('ob').innerHTML='';
+  document.getElementById('oc').textContent='';
+  document.getElementById('si').textContent=`0 / ${steps.length}`;
+}
+
+function renderVars(s){
+  const v=s.vars;
+  let h='';
+  if(s.a==='declare'||s.a==='newArray'){
+    h='<span class="v-phase">초기화</span>';
+  }else if(s.a==='newList'){
+    h=`<span class="v-phase">ArrayList 생성</span><span class="vb v-num">num = ${v.num}</span>`;
+  }else if(s.a==='add'){
+    h=`<span class="v-phase">간선 저장</span><span class="vb v-from">from = ${v.from}</span><span class="vb v-to">to = ${v.to}</span>`;
+    if(curTab===2) h+=`<span class="vb v-cost">cost = ${v.cost}</span>`;
+  }else if(s.a==='queryStart'||s.a==='queryElem'||s.a==='queryResult'){
+    h=`<span class="v-phase">사용 (조회)</span><span class="vb v-from">from = ${v.from}</span>`;
+    if(v.to!==undefined) h+=`<span class="vb v-to">to = ${v.to}</span>`;
+    if(curTab===2&&v.cost!==undefined) h+=`<span class="vb v-cost">cost = ${v.cost}</span>`;
+  }
+  document.getElementById('vc').innerHTML=h;
+}
+
+function renderMemory(s){
+  const m=s.mem;
+  const isW=curTab===2;
+  const typeStr=isW?'List&lt;Node&gt;':'List&lt;Integer&gt;';
+  const alTypeStr=isW?'ArrayList&lt;Node&gt;':'ArrayList&lt;Integer&gt;';
+
+  let h='<div class="mem-space"><div class="mem-title">메모리 공간</div>';
+  h+='<div class="mem-layout">';
+
+  // Variable box
+  if(m.varVisible){
+    h+=`<div class="mem-var-section">`;
+    h+=`<div class="mem-var-box${m.hlVar?' hl':''}">`;
+    h+=`<div class="mv-name">adjList</div>`;
+    h+=`<div class="mv-type">${typeStr}[] 참조변수</div>`;
+    if(!m.arrVisible) h+=`<div class="mv-val">null</div>`;
+    h+=`</div>`;
+    if(m.arrVisible) h+=`<div class="mem-main-arrow">───→</div>`;
+    h+=`</div>`;
+  }
+
+  // Array + ArrayLists
+  if(m.arrVisible){
+    h+=`<div class="mem-arr-outer${m.hlArr?' hl':''}">`;
+    h+=`<div class="mem-arr-title">new List[${N}] 배열 객체 <span class="arr-type-hint">(각 요소 타입: ${typeStr} 참조변수)</span></div>`;
+
+    for(let i=0;i<N;i++){
+      const slot=m.slots[i];
+      const isSlotHl=m.hlSlot===i;
+      h+=`<div class="mem-slot${isSlotHl?' hl':''}">`;
+      h+=`<div class="mem-idx">[${i}]</div>`;
+      h+=`<div class="mem-type">${typeStr} 참조변수</div>`;
+
+      if(!slot.hasRef){
+        h+=`<div class="mem-val null-val">null</div>`;
+      }else{
+        h+=`<div class="mem-val ref-val">ref</div>`;
+        h+=`<div class="mem-slot-arrow">→</div>`;
+        const isListHl=m.hlList===i;
+        h+=`<div class="mem-list${isListHl?' hl':''}">`;
+        h+=`<span class="ml-label">${alTypeStr}</span>`;
+        h+='<span class="ml-items">';
+
+        if(slot.items.length===0){
+          h+='<span class="ml-empty">{ }</span>';
+        }else{
+          h+='{ ';
+          for(let j=0;j<slot.items.length;j++){
+            const isEHl=m.hlElem&&m.hlElem[0]===i&&m.hlElem[1]===j;
+            const isNew=m.newElem&&m.newElem[0]===i&&m.newElem[1]===j;
+            if(isW){
+              const nd=slot.items[j];
+              h+=`<span class="ml-node${isEHl?' hl':''}${isNew?' new-elem':''}"><span class="node-hd">Node</span><span class="nf">num:<b>${nd.num}</b></span><span class="nf">cost:<b>${nd.cost}</b></span></span>`;
+            }else{
+              h+=`<span class="ml-elem${isEHl?' hl':''}${isNew?' new-elem':''}">${slot.items[j]}</span>`;
+            }
+            if(j<slot.items.length-1) h+=', ';
+          }
+          h+=' }';
+        }
+
+        h+='</span></div>';
+      }
+      h+='</div>';
+    }
+    h+='</div>';
+  }
+
+  h+='</div></div>';
+  document.getElementById('memArea').innerHTML=h;
+}
+
+function renderConsole(s){
+  const ob=document.getElementById('ob');
+  if(!s.output||s.output.length===0){
+    ob.innerHTML='<span style="color:#64748b;">(조회 결과가 여기에 출력됩니다)</span>';
+    document.getElementById('oc').textContent='';
+    return;
+  }
+  ob.innerHTML=s.output.map((l,i)=>`<div${i===s.output.length-1&&s.a==='queryResult'?' class="new"':''}>  ${l}</div>`).join('');
+  ob.scrollTop=ob.scrollHeight;
+  document.getElementById('oc').textContent=`(${s.output.length}개)`;
+}
+
+// ===== Playback =====
+function doReset(){stop();ci=-1;render();}
+function prev(){stop();if(ci>-1){ci--;render();}}
+function next(){if(ci<steps.length-1){ci++;render();}else stop();}
+function togglePlay(){playing?stop():start();}
+function start(){if(ci>=steps.length-1)ci=-1;playing=true;document.getElementById('playBtn').textContent='⏸ 정지';document.getElementById('playBtn').classList.add('playing');tick();}
+function stop(){playing=false;clearTimeout(timer);timer=null;document.getElementById('playBtn').textContent='▶ 재생';document.getElementById('playBtn').classList.remove('playing');}
+function tick(){if(!playing)return;const d=1100-spVal*100;timer=setTimeout(()=>{next();if(playing&&ci<steps.length-1)tick();else stop();},d);}
+function skipNext(){
+  stop();
+  if(ci<0){ci=0;render();return;}
+  const curAction=steps[ci].a;
+  for(let i=ci+1;i<steps.length;i++){
+    if(steps[i].a!==curAction){ci=i;render();return;}
+  }
+  ci=steps.length-1;render();
+}
+
+// ===== Keyboard =====
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();next();}
+  else if(e.key==='ArrowLeft'){e.preventDefault();prev();}
+  else if(e.key==='Enter'){e.preventDefault();togglePlay();}
+  else if(e.key==='r'||e.key==='R')doReset();
+  else if(e.key==='1')switchTab(1);
+  else if(e.key==='2')switchTab(2);
+});
+
+// ===== Resizer =====
+(function(){
+  const resizer=document.getElementById('resizer');
+  const codePanel=document.getElementById('codePanel');
+  let startX,startW;
+  resizer.addEventListener('mousedown',function(e){
+    if(codePanel.classList.contains('collapsed'))return;
+    startX=e.clientX;startW=codePanel.offsetWidth;
+    document.body.classList.add('resizing');resizer.classList.add('dragging');
+    document.addEventListener('mousemove',onMM);document.addEventListener('mouseup',onMU);
+  });
+  function onMM(e){const dx=e.clientX-startX;const nw=Math.max(200,Math.min(startW+dx,window.innerWidth-300));codePanel.style.width=nw+'px';codePanel.style.minWidth=nw+'px';}
+  function onMU(){document.body.classList.remove('resizing');resizer.classList.remove('dragging');document.removeEventListener('mousemove',onMM);document.removeEventListener('mouseup',onMU);}
+})();
+
+// ===== Init =====
+initCode();
+rebuild();
+</script>
+</body>
+</html>
