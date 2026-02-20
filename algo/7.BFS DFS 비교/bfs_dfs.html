@@ -61,12 +61,14 @@ body { font-family:'Segoe UI','맑은 고딕',sans-serif; background:#f0f2f5; co
 .cell.visited { background:#e0e7ff; border-color:#6366f1; }
 .cell.path-final { background:#bbf7d0; border-color:#16a34a; }
 .cell.current { box-shadow:0 0 0 3px #f59e0b; z-index:2; }
-.cell.no-path { background:#fee2e2; }
+.cell.blocked { background:#fee2e2; border-color:#ef4444; }
+.cell.blocked::after { content:''; position:absolute; font-size:1rem; }
+.cell.unvisited-bt { background:#fff; border-color:#cbd5e1; }
 @keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.08)} 100%{transform:scale(1)} }
 
 /* SVG overlay for arrows */
 .svg-overlay { position:absolute; top:0; left:0; pointer-events:none; }
-.arrow-line { stroke-width:2.5; fill:none; marker-end:url(#arrowHead); }
+.arrow-line { stroke-width:2.5; fill:none; }
 .arrow-bfs { stroke:#2563eb; }
 .arrow-dfs { stroke:#dc2626; }
 .arrow-back { opacity:0.25; stroke-dasharray:4,3; }
@@ -83,6 +85,7 @@ body { font-family:'Segoe UI','맑은 고딕',sans-serif; background:#f0f2f5; co
 .info-area .msg { margin-top:6px; padding:6px 10px; border-radius:6px; font-weight:600; text-align:center; }
 .msg-success { background:#dcfce7; color:#16a34a; }
 .msg-fail { background:#fee2e2; color:#dc2626; }
+.msg-warn { background:#fef3c7; color:#92400e; }
 
 /* ── Legend ── */
 .legend { display:flex; gap:12px; justify-content:center; padding:10px; flex-wrap:wrap; font-size:0.75rem; }
@@ -90,26 +93,62 @@ body { font-family:'Segoe UI','맑은 고딕',sans-serif; background:#f0f2f5; co
 .legend-box { width:18px; height:18px; border-radius:4px; border:2px solid #cbd5e1; }
 
 /* ── Tab2 specifics ── */
-.tab2-panels { display:flex; gap:16px; padding:16px; justify-content:center; flex-wrap:wrap; }
-.tab2-panel { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:16px; flex:1; min-width:300px; max-width:560px; }
-.path-list { max-height:220px; overflow-y:auto; font-family:'Consolas',monospace; font-size:0.75rem; padding:6px;
+.t2-btn-group { display:flex; gap:8px; justify-content:center; padding:16px 16px 0; flex-wrap:wrap; }
+.t2-btn-card { background:#fff; border:2px solid #e2e8f0; border-radius:10px; padding:12px 18px; cursor:pointer;
+  text-align:center; transition:all .2s; min-width:180px; flex:1; max-width:260px; }
+.t2-btn-card:hover { border-color:#3b82f6; transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,.1); }
+.t2-btn-card.active { border-color:#2563eb; background:#eff6ff; }
+.t2-btn-card.disabled { opacity:.5; pointer-events:none; }
+.t2-btn-card .bc-num { font-size:1.5rem; font-weight:800; margin-bottom:4px; }
+.t2-btn-card .bc-title { font-size:0.85rem; font-weight:700; margin-bottom:2px; }
+.t2-btn-card .bc-desc { font-size:0.7rem; color:#64748b; }
+.t2-btn-card.bc-fail { border-color:#fca5a5; }
+.t2-btn-card.bc-fail .bc-num { color:#dc2626; }
+.t2-btn-card.bc-warn { border-color:#fcd34d; }
+.t2-btn-card.bc-warn .bc-num { color:#f59e0b; }
+.t2-btn-card.bc-ok { border-color:#86efac; }
+.t2-btn-card.bc-ok .bc-num { color:#16a34a; }
+
+.tab2-body { display:flex; gap:16px; padding:16px; justify-content:center; flex-wrap:wrap; }
+.tab2-left { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:16px; min-width:300px; flex:1; max-width:480px; }
+.tab2-right { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:16px; flex:1; min-width:300px; max-width:560px; }
+
+.path-list { max-height:180px; overflow-y:auto; font-family:'Consolas',monospace; font-size:0.72rem; padding:6px;
   background:#f8fafc; border-radius:6px; margin-top:8px; }
 .path-list .path-item { padding:3px 6px; border-bottom:1px solid #e2e8f0; }
 .path-list .path-item:last-child { border:none; }
 .stats-box { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:10px; }
-.stat-card { background:#f1f5f9; border-radius:8px; padding:10px; text-align:center; }
-.stat-card .stat-val { font-size:1.3rem; font-weight:700; color:#2563eb; }
-.stat-card .stat-label { font-size:0.7rem; color:#64748b; }
-.warning-box { margin-top:10px; padding:10px; background:#fef3c7; border:1px solid #f59e0b; border-radius:8px;
-  font-size:0.8rem; color:#92400e; display:none; }
-.warning-box.show { display:block; }
+.stat-card { background:#f1f5f9; border-radius:8px; padding:8px; text-align:center; }
+.stat-card .stat-val { font-size:1.2rem; font-weight:700; color:#2563eb; transition:color .3s; }
+.stat-card .stat-label { font-size:0.65rem; color:#64748b; }
+.stat-card .stat-val.warn { color:#f59e0b; }
+.stat-card .stat-val.danger { color:#dc2626; }
+
+/* Queue cards */
+.queue-cards { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; max-height:200px; overflow-y:auto; padding:4px; }
+.q-card { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:6px 8px; font-size:0.65rem;
+  min-width:120px; max-width:180px; transition:all .3s; }
+.q-card.highlight { border-color:#f59e0b; background:#fffbeb; box-shadow:0 0 8px rgba(245,158,11,.3); }
+.q-card .qc-pos { font-weight:700; color:#2563eb; margin-bottom:2px; }
+.q-card .qc-path { color:#475569; font-family:'Consolas',monospace; word-break:break-all; margin-bottom:2px; }
+.q-card .qc-visited { display:grid; grid-template-columns:repeat(4,12px); gap:1px; }
+.q-card .qc-bit { width:12px; height:12px; border-radius:2px; background:#e2e8f0; border:1px solid #cbd5e1; }
+.q-card .qc-bit.on { background:#3b82f6; border-color:#2563eb; }
+
+/* Counters bar */
+.counters-bar { display:flex; gap:10px; justify-content:center; padding:8px; background:#f8fafc;
+  border-radius:8px; margin:8px 0; flex-wrap:wrap; }
+.counter-item { display:flex; align-items:center; gap:4px; font-size:0.78rem; font-weight:600; }
+.counter-item .ci-icon { font-size:1rem; }
+.counter-item .ci-val { font-family:'Consolas',monospace; font-weight:800; transition:color .3s; }
 
 /* ── Responsive ── */
 @media (max-width:768px) {
-  .panels, .tab2-panels { flex-direction:column; align-items:center; }
-  .panel, .tab2-panel { max-width:100%; }
+  .panels, .tab2-body { flex-direction:column; align-items:center; }
+  .panel, .tab2-left, .tab2-right { max-width:100%; }
   .grid { grid-template-columns:repeat(4,56px); grid-template-rows:repeat(4,56px); }
   .cell { width:56px; height:56px; }
+  .t2-btn-group { flex-direction:column; align-items:center; }
 }
 </style>
 </head>
@@ -136,7 +175,7 @@ body { font-family:'Segoe UI','맑은 고딕',sans-serif; background:#f0f2f5; co
 <div class="header" style="position:relative;">
   <a href="../index.html" class="back-link">&#8592; 메인</a>
   <h1>BFS vs DFS 비교 시뮬레이션</h1>
-  <p>4×4 격자에서 BFS와 DFS의 탐색 과정을 비교합니다</p>
+  <p>4x4 격자에서 BFS와 DFS의 탐색 과정을 비교합니다</p>
 </div>
 
 <!-- Tabs -->
@@ -168,7 +207,6 @@ body { font-family:'Segoe UI','맑은 고딕',sans-serif; background:#f0f2f5; co
   </div>
 
   <div class="panels">
-    <!-- BFS Panel -->
     <div class="panel">
       <h3 class="bfs-title">BFS (너비 우선 탐색)</h3>
       <div class="grid-container" id="bfs-grid-container">
@@ -181,7 +219,6 @@ body { font-family:'Segoe UI','맑은 고딕',sans-serif; background:#f0f2f5; co
         <div id="bfs-msg"></div>
       </div>
     </div>
-    <!-- DFS Panel -->
     <div class="panel">
       <h3 class="dfs-title">DFS (깊이 우선 탐색)</h3>
       <div class="grid-container" id="dfs-grid-container">
@@ -199,9 +236,27 @@ body { font-family:'Segoe UI','맑은 고딕',sans-serif; background:#f0f2f5; co
 
 <!-- ===================== TAB 2 ===================== -->
 <div id="tab1" class="tab-content">
-  <div class="controls">
-    <button class="btn-start" id="t2-dfs-btn" onclick="tab2RunDFS()" style="background:#dc2626;">DFS 모든 경로 탐색</button>
-    <button class="btn-start" id="t2-bfs-btn" onclick="tab2RunBFS()">BFS 모든 경로 탐색</button>
+  <!-- 3 Button Cards -->
+  <div class="t2-btn-group">
+    <div class="t2-btn-card bc-fail" id="t2-card-1" onclick="tab2Run(1)">
+      <div class="bc-num">①</div>
+      <div class="bc-title">BFS + 전역 방문 배열</div>
+      <div class="bc-desc">전역 배열 1개 사용 — 왜 안 될까?</div>
+    </div>
+    <div class="t2-btn-card bc-warn" id="t2-card-2" onclick="tab2Run(2)">
+      <div class="bc-num">②</div>
+      <div class="bc-title">BFS + 배열 복사</div>
+      <div class="bc-desc">경로마다 배열 복사 — 되긴 하는데...?</div>
+    </div>
+    <div class="t2-btn-card bc-ok" id="t2-card-3" onclick="tab2Run(3)">
+      <div class="bc-num">③</div>
+      <div class="bc-title">DFS + 백트래킹</div>
+      <div class="bc-desc">DFS + 백트래킹 — 이게 정답!</div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls" style="border-top:1px solid #e2e8f0;">
     <button class="btn-reset" onclick="tab2Reset()">초기화</button>
     <div class="speed-wrap">
       <span>느리게</span>
@@ -211,37 +266,49 @@ body { font-family:'Segoe UI','맑은 고딕',sans-serif; background:#f0f2f5; co
     <span style="font-size:0.78rem;color:#64748b;">셀 클릭 = 장애물 토글</span>
   </div>
 
+  <!-- Counters bar (for mode 2) -->
+  <div class="counters-bar" id="t2-counters" style="display:none; margin:0 16px;">
+    <div class="counter-item"><span class="ci-icon">📋</span> 배열 복사: <span class="ci-val" id="t2-cnt-copy">0</span>회</div>
+    <div class="counter-item"><span class="ci-icon">📦</span> 큐 원소: <span class="ci-val" id="t2-cnt-qsize">0</span>개</div>
+    <div class="counter-item"><span class="ci-icon">💾</span> 메모리: <span class="ci-val" id="t2-cnt-mem">0</span> x 16칸</div>
+  </div>
+
   <div class="legend">
     <div class="legend-item"><div class="legend-box" style="background:#dbeafe;border-color:#2563eb;"></div>시작점</div>
     <div class="legend-item"><div class="legend-box" style="background:#fef3c7;border-color:#f59e0b;"></div>끝점</div>
     <div class="legend-item"><div class="legend-box" style="background:#1e293b;border-color:#0f172a;"></div>장애물</div>
     <div class="legend-item"><div class="legend-box" style="background:#bfdbfe;border-color:#3b82f6;"></div>탐색 중</div>
     <div class="legend-item"><div class="legend-box" style="background:#e0e7ff;border-color:#6366f1;"></div>방문 완료</div>
+    <div class="legend-item"><div class="legend-box" style="background:#fee2e2;border-color:#ef4444;"></div>차단됨</div>
     <div class="legend-item"><div class="legend-box" style="background:#bbf7d0;border-color:#16a34a;"></div>경로 발견</div>
   </div>
 
-  <div class="tab2-panels">
-    <div class="tab2-panel">
-      <h3 class="dfs-title" style="border-bottom:2px solid #dc2626;">격자 & 탐색 시각화</h3>
+  <div class="tab2-body">
+    <div class="tab2-left">
+      <h3 id="t2-grid-title" style="color:#475569;">격자 & 탐색 시각화</h3>
       <div class="grid-container" id="t2-grid-container">
         <div class="grid" id="t2-grid"></div>
       </div>
       <div class="info-area" id="t2-info">
-        <div class="label" id="t2-ds-label">스택 / 큐:</div>
-        <div class="stack-state" id="t2-ds-state">[ ]</div>
+        <div class="label" id="t2-ds-label">큐 / 스택:</div>
+        <div class="queue-state" id="t2-ds-state">[ ]</div>
         <div class="depth-info" id="t2-depth"></div>
         <div id="t2-msg"></div>
       </div>
+      <!-- Queue cards area (mode 2) -->
+      <div id="t2-qcards-wrap" style="display:none;">
+        <div class="label" style="margin-top:10px;font-weight:700;color:#475569;">큐 원소 카드 (각자 방문 배열 복사본 보유):</div>
+        <div class="queue-cards" id="t2-qcards"></div>
+      </div>
     </div>
-    <div class="tab2-panel">
+    <div class="tab2-right">
       <h3 style="color:#475569;">발견된 경로 목록</h3>
-      <div class="path-list" id="t2-path-list"><span style="color:#94a3b8;">아직 탐색을 시작하지 않았습니다.</span></div>
+      <div class="path-list" id="t2-path-list"><span style="color:#94a3b8;">버튼을 선택하여 탐색을 시작하세요.</span></div>
       <div class="stats-box">
         <div class="stat-card"><div class="stat-val" id="t2-stat-paths">0</div><div class="stat-label">발견 경로 수</div></div>
         <div class="stat-card"><div class="stat-val" id="t2-stat-visits">0</div><div class="stat-label">총 방문 횟수</div></div>
-        <div class="stat-card"><div class="stat-val" id="t2-stat-maxds">0</div><div class="stat-label">최대 스택/큐</div></div>
+        <div class="stat-card"><div class="stat-val" id="t2-stat-maxds">0</div><div class="stat-label">최대 큐/스택</div></div>
       </div>
-      <div class="warning-box" id="t2-warning"></div>
     </div>
   </div>
 </div>
@@ -259,14 +326,12 @@ let walls = Array.from({length:ROWS},()=>Array(COLS).fill(false));
 let t1Running=false, t2Running=false;
 let t1Timer=null, t2Timer=null;
 
-function key(r,c){return r*COLS+c;}
-function rc(k){return [Math.floor(k/COLS), k%COLS];}
 function inBounds(r,c){return r>=0&&r<ROWS&&c>=0&&c<COLS;}
 function isStart(r,c){return r===START[0]&&c===START[1];}
 function isEnd(r,c){return r===END[0]&&c===END[1];}
 function speedMs(sliderId){
   const v=document.getElementById(sliderId).value;
-  return 1100 - v*100; // 1=1000ms, 10=100ms
+  return 1100 - v*100;
 }
 function coordStr(r,c){return `(${r},${c})`;}
 
@@ -297,7 +362,6 @@ function buildGrid(containerId, gridId, onClick){
       grid.appendChild(cell);
     }
   }
-  // SVG overlay
   const container=document.getElementById(containerId);
   let svg=container.querySelector('.svg-overlay');
   if(svg) svg.remove();
@@ -323,7 +387,6 @@ function cellCenter(r,c){
 
 function drawArrow(svg, r1,c1, r2,c2, cls){
   const p1=cellCenter(r1,c1), p2=cellCenter(r2,c2);
-  // shorten line so arrow tip doesn't overlap center
   const dx=p2.x-p1.x, dy=p2.y-p1.y;
   const len=Math.sqrt(dx*dx+dy*dy);
   const shorten=14;
@@ -333,7 +396,6 @@ function drawArrow(svg, r1,c1, r2,c2, cls){
   line.setAttribute('x1',sx); line.setAttribute('y1',sy);
   line.setAttribute('x2',ex); line.setAttribute('y2',ey);
   line.setAttribute('class','arrow-line '+cls);
-  // set marker based on class
   if(cls.includes('arrow-final')){
     line.setAttribute('marker-end','url(#arrowHeadGreen)');
   } else if(cls.includes('arrow-bfs')){
@@ -353,7 +415,7 @@ function clearSVG(containerId){
 function setCellState(gridId, r, c, state, depth, order){
   const cell=document.getElementById(gridId+'-'+r+'-'+c);
   if(!cell) return;
-  cell.classList.remove('visiting','visited','path-final','current','no-path');
+  cell.classList.remove('visiting','visited','path-final','current','blocked','unvisited-bt');
   if(state) cell.classList.add(state);
   const dEl=document.getElementById(gridId+'-d-'+r+'-'+c);
   const oEl=document.getElementById(gridId+'-o-'+r+'-'+c);
@@ -365,7 +427,7 @@ function resetCellStates(gridId){
   for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
     const cell=document.getElementById(gridId+'-'+r+'-'+c);
     if(!cell) continue;
-    cell.classList.remove('visiting','visited','path-final','current','no-path');
+    cell.classList.remove('visiting','visited','path-final','current','blocked','unvisited-bt');
     if(isStart(r,c)) cell.classList.add('start');
     if(isEnd(r,c)) cell.classList.add('end');
     document.getElementById(gridId+'-d-'+r+'-'+c).textContent='';
@@ -384,10 +446,8 @@ function toggleWall(r,c){
 }
 
 function refreshAllGrids(){
-  // Tab1 grids
   buildGrid('bfs-grid-container','bfs-grid',toggleWall);
   buildGrid('dfs-grid-container','dfs-grid',toggleWall);
-  // Tab2 grid
   buildGrid('t2-grid-container','t2-grid',toggleWall);
 }
 
@@ -398,23 +458,15 @@ function tab1Start(){
   if(t1Running) return;
   t1Running=true;
   document.getElementById('t1-start').disabled=true;
-
-  // Generate BFS steps
   const bfsSteps=genBFSSteps();
-  // Generate DFS steps
   const dfsSteps=genDFSSteps();
-
-  // Run both in parallel
   let bi=0, di=0;
-  const bfsDone=()=>bi>=bfsSteps.length;
-  const dfsDone=()=>di>=dfsSteps.length;
-
   function tick(){
     if(!t1Running) return;
     const ms=speedMs('t1-speed');
-    if(!bfsDone()) applyBFSStep(bfsSteps[bi++]);
-    if(!dfsDone()) applyDFSStep(dfsSteps[di++]);
-    if(bfsDone()&&dfsDone()){
+    if(bi<bfsSteps.length) applyBFSStep(bfsSteps[bi++]);
+    if(di<dfsSteps.length) applyDFSStep(dfsSteps[di++]);
+    if(bi>=bfsSteps.length&&di>=dfsSteps.length){
       t1Running=false;
       document.getElementById('t1-start').disabled=false;
       return;
@@ -427,10 +479,8 @@ function tab1Start(){
 function tab1Reset(){
   t1Running=false;
   if(t1Timer) clearTimeout(t1Timer);
-  resetCellStates('bfs-grid');
-  resetCellStates('dfs-grid');
-  clearSVG('bfs-grid-container');
-  clearSVG('dfs-grid-container');
+  resetCellStates('bfs-grid'); resetCellStates('dfs-grid');
+  clearSVG('bfs-grid-container'); clearSVG('dfs-grid-container');
   document.getElementById('bfs-queue').textContent='[ ]';
   document.getElementById('dfs-stack').textContent='[ ]';
   document.getElementById('bfs-depth').textContent='';
@@ -440,7 +490,6 @@ function tab1Reset(){
   document.getElementById('t1-start').disabled=false;
 }
 
-/* ── BFS step generation ── */
 function genBFSSteps(){
   const steps=[];
   const visited=Array.from({length:ROWS},()=>Array(COLS).fill(false));
@@ -449,38 +498,24 @@ function genBFSSteps(){
   const queue=[[START[0],START[1]]];
   visited[START[0]][START[1]]=true;
   depth[START[0]][START[1]]=0;
-  let order=1;
-  let found=false;
-
-  steps.push({type:'init', queue:[[...START]], visited:[[...START]], depth:0, order:1, cur:START});
-
+  let order=1, found=false;
+  steps.push({type:'init', queue:[[...START]], depth:0, order:1, cur:START});
   while(queue.length>0){
     const [r,c]=queue.shift();
-    steps.push({type:'dequeue', cur:[r,c], queue:queue.map(q=>[...q]), depth:depth[r][c], order:order});
-
+    steps.push({type:'dequeue', cur:[r,c], queue:queue.map(q=>[...q]), depth:depth[r][c], order});
     if(isEnd(r,c)){
       found=true;
-      // trace path
-      const path=[];
-      let cr=r, cc=c;
-      while(parent[cr][cc]!==null){
-        path.unshift([cr,cc]);
-        const p=parent[cr][cc];
-        cr=p[0]; cc=p[1];
-      }
+      const path=[]; let cr=r,cc=c;
+      while(parent[cr][cc]!==null){ path.unshift([cr,cc]); const p=parent[cr][cc]; cr=p[0]; cc=p[1]; }
       path.unshift([START[0],START[1]]);
       steps.push({type:'found', path, depth:depth[r][c]});
       break;
     }
-
     for(let d=0;d<4;d++){
       const nr=r+DR[d], nc=c+DC[d];
       if(!inBounds(nr,nc)||walls[nr][nc]||visited[nr][nc]) continue;
-      visited[nr][nc]=true;
-      depth[nr][nc]=depth[r][c]+1;
-      parent[nr][nc]=[r,c];
-      queue.push([nr,nc]);
-      order++;
+      visited[nr][nc]=true; depth[nr][nc]=depth[r][c]+1; parent[nr][nc]=[r,c];
+      queue.push([nr,nc]); order++;
       steps.push({type:'enqueue', cur:[r,c], next:[nr,nc], queue:queue.map(q=>[...q]), depth:depth[nr][nc], order});
     }
   }
@@ -488,50 +523,33 @@ function genBFSSteps(){
   return steps;
 }
 
-/* ── DFS step generation (iterative with stack for shortest-path-like behavior, but actually recursive) ── */
 function genDFSSteps(){
   const steps=[];
   const visited=Array.from({length:ROWS},()=>Array(COLS).fill(false));
   const depthArr=Array.from({length:ROWS},()=>Array(COLS).fill(-1));
   const parent=Array.from({length:ROWS},()=>Array(COLS).fill(null));
-  let order=1;
-  let found=false;
-  let foundPath=null;
-
-  // Iterative DFS with explicit stack
+  let order=1, found=false;
   const stack=[[START[0],START[1]]];
   depthArr[START[0]][START[1]]=0;
-
   steps.push({type:'init', stack:[[...START]], depth:0, order:1, cur:START});
-
   while(stack.length>0){
     const [r,c]=stack.pop();
     if(visited[r][c]) continue;
     visited[r][c]=true;
     steps.push({type:'pop', cur:[r,c], parent:parent[r][c], stack:stack.map(s=>[...s]), depth:depthArr[r][c], order});
     order++;
-
     if(isEnd(r,c)){
       found=true;
-      const path=[];
-      let cr=r, cc=c;
-      while(parent[cr][cc]!==null){
-        path.unshift([cr,cc]);
-        const p=parent[cr][cc];
-        cr=p[0]; cc=p[1];
-      }
+      const path=[]; let cr=r,cc=c;
+      while(parent[cr][cc]!==null){ path.unshift([cr,cc]); const p=parent[cr][cc]; cr=p[0]; cc=p[1]; }
       path.unshift([START[0],START[1]]);
-      foundPath=path;
       steps.push({type:'found', path, depth:depthArr[r][c]});
       break;
     }
-
-    // push neighbors in reverse order so first direction is explored first
     for(let d=3;d>=0;d--){
       const nr=r+DR[d], nc=c+DC[d];
       if(!inBounds(nr,nc)||walls[nr][nc]||visited[nr][nc]) continue;
-      depthArr[nr][nc]=depthArr[r][c]+1;
-      parent[nr][nc]=[r,c];
+      depthArr[nr][nc]=depthArr[r][c]+1; parent[nr][nc]=[r,c];
       stack.push([nr,nc]);
       steps.push({type:'push', cur:[r,c], next:[nr,nc], stack:stack.map(s=>[...s]), depth:depthArr[nr][nc], order});
     }
@@ -540,7 +558,6 @@ function genDFSSteps(){
   return steps;
 }
 
-/* ── Apply steps visually ── */
 let bfsOrder=0;
 function applyBFSStep(step){
   const gridId='bfs-grid';
@@ -562,11 +579,9 @@ function applyBFSStep(step){
       document.getElementById('bfs-queue').textContent='[ '+step.queue.map(q=>coordStr(q[0],q[1])).join(', ')+' ]';
       break;
     case 'found':
-      // clear all arrows, draw final path
       svg.innerHTML='';
       for(let i=0;i<step.path.length-1;i++){
-        const [r1,c1]=step.path[i], [r2,c2]=step.path[i+1];
-        drawArrow(svg,r1,c1,r2,c2,'arrow-bfs arrow-final');
+        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-bfs arrow-final');
       }
       step.path.forEach(([r,c])=>setCellState(gridId,r,c,'path-final',null,null));
       document.getElementById('bfs-msg').innerHTML='<div class="msg msg-success">최단 경로 발견! 길이: '+step.depth+'</div>';
@@ -575,14 +590,11 @@ function applyBFSStep(step){
       document.getElementById('bfs-msg').innerHTML='<div class="msg msg-fail">경로 없음</div>';
       break;
   }
-  // mark dequeued cell as visited (not current) after processing
-  if(step.type==='dequeue' || step.type==='enqueue'){
-    // update previously current cells
+  if(step.type==='dequeue'||step.type==='enqueue'){
     for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
       const cell=document.getElementById(gridId+'-'+r+'-'+c);
-      if(cell && cell.classList.contains('current') && !(r===step.cur[0]&&c===step.cur[1])){
-        cell.classList.remove('current');
-        cell.classList.add('visited');
+      if(cell&&cell.classList.contains('current')&&!(r===step.cur[0]&&c===step.cur[1])){
+        cell.classList.remove('current'); cell.classList.add('visited');
       }
     }
   }
@@ -593,24 +605,15 @@ function applyDFSStep(step){
   const gridId='dfs-grid';
   const svg=document.getElementById('dfs-grid-container').querySelector('.svg-overlay');
   switch(step.type){
-    case 'init':
-      dfsOrder=0;
-      break;
+    case 'init': dfsOrder=0; break;
     case 'pop':
       dfsOrder++;
-      // remove previous current
       for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
         const cell=document.getElementById(gridId+'-'+r+'-'+c);
-        if(cell && cell.classList.contains('current')){
-          cell.classList.remove('current');
-          cell.classList.add('visited');
-        }
+        if(cell&&cell.classList.contains('current')){ cell.classList.remove('current'); cell.classList.add('visited'); }
       }
       setCellState(gridId,step.cur[0],step.cur[1],'current',step.depth,dfsOrder);
-      // draw arrow from parent to current (only when actually visited)
-      if(step.parent){
-        drawArrow(svg,step.parent[0],step.parent[1],step.cur[0],step.cur[1],'arrow-dfs');
-      }
+      if(step.parent) drawArrow(svg,step.parent[0],step.parent[1],step.cur[0],step.cur[1],'arrow-dfs');
       document.getElementById('dfs-stack').textContent='[ '+step.stack.map(s=>coordStr(s[0],s[1])).join(', ')+' ]';
       document.getElementById('dfs-depth').textContent='현재 depth: '+step.depth;
       break;
@@ -619,10 +622,7 @@ function applyDFSStep(step){
       break;
     case 'found':
       svg.innerHTML='';
-      for(let i=0;i<step.path.length-1;i++){
-        const [r1,c1]=step.path[i], [r2,c2]=step.path[i+1];
-        drawArrow(svg,r1,c1,r2,c2,'arrow-dfs arrow-final');
-      }
+      for(let i=0;i<step.path.length-1;i++) drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-dfs arrow-final');
       step.path.forEach(([r,c])=>setCellState(gridId,r,c,'path-final',null,null));
       document.getElementById('dfs-msg').innerHTML='<div class="msg msg-success">경로 발견! 길이: '+step.depth+'</div>';
       break;
@@ -633,313 +633,70 @@ function applyDFSStep(step){
 }
 
 /* ================================================================
-   TAB 2: 모든 경로 탐색
+   TAB 2: 모든 경로 탐색 (3가지 방법)
    ================================================================ */
-let t2PathCount=0, t2VisitCount=0, t2MaxDS=0;
+let t2Mode=0; // 1,2,3
+let t2Stats={paths:0, visits:0, maxDS:0, copies:0, qSize:0, mem:0};
 
-function tab2RunDFS(){
+function tab2SetButtons(disabled){
+  ['t2-card-1','t2-card-2','t2-card-3'].forEach(id=>{
+    document.getElementById(id).classList.toggle('disabled',disabled);
+  });
+}
+
+function tab2Run(mode){
   if(t2Running) return;
   t2Running=true;
-  document.getElementById('t2-dfs-btn').disabled=true;
-  document.getElementById('t2-bfs-btn').disabled=true;
-
-  const steps=genAllPathsDFS();
-  let si=0;
-  t2PathCount=0; t2VisitCount=0; t2MaxDS=0;
+  t2Mode=mode;
+  tab2SetButtons(true);
+  resetCellStates('t2-grid');
+  clearSVG('t2-grid-container');
   document.getElementById('t2-path-list').innerHTML='';
-  document.getElementById('t2-ds-label').textContent='스택 (Stack):';
-  document.getElementById('t2-ds-state').className='stack-state';
-  document.getElementById('t2-warning').classList.remove('show');
-
-  function tick(){
-    if(!t2Running||si>=steps.length){
-      t2Running=false;
-      document.getElementById('t2-dfs-btn').disabled=false;
-      document.getElementById('t2-bfs-btn').disabled=false;
-      if(t2PathCount===0){
-        document.getElementById('t2-msg').innerHTML='<div class="msg msg-fail">경로 없음</div>';
-      } else {
-        document.getElementById('t2-msg').innerHTML='<div class="msg msg-success">탐색 완료! '+t2PathCount+'개 경로 발견</div>';
-      }
-      return;
-    }
-    applyTab2DFSStep(steps[si++]);
-    t2Timer=setTimeout(tick, speedMs('t2-speed'));
-  }
-  tick();
-}
-
-function genAllPathsDFS(){
-  const steps=[];
-  const visited=Array.from({length:ROWS},()=>Array(COLS).fill(false));
-  let visitCount=0, maxStack=0, pathCount=0;
-
-  function dfs(r,c,depth,path){
-    visited[r][c]=true;
-    visitCount++;
-    path.push([r,c]);
-    const stackSnap=path.map(p=>[...p]);
-    if(stackSnap.length>maxStack) maxStack=stackSnap.length;
-
-    steps.push({type:'visit', cur:[r,c], depth, path:[...path.map(p=>[...p])], stackSize:stackSnap.length,
-      visitCount, maxStack});
-
-    if(isEnd(r,c)){
-      pathCount++;
-      steps.push({type:'path-found', path:[...path.map(p=>[...p])], pathCount, visitCount, maxStack});
-    } else {
-      for(let d=0;d<4;d++){
-        const nr=r+DR[d], nc=c+DC[d];
-        if(!inBounds(nr,nc)||walls[nr][nc]||visited[nr][nc]) continue;
-        steps.push({type:'explore', cur:[r,c], next:[nr,nc], depth:depth+1});
-        dfs(nr,nc,depth+1,path);
-      }
-    }
-    // backtrack
-    visited[r][c]=false;
-    path.pop();
-    steps.push({type:'backtrack', cur:[r,c], depth, path:[...path.map(p=>[...p])], visitCount, maxStack});
-  }
-
-  dfs(START[0],START[1],0,[]);
-  steps.push({type:'done', pathCount, visitCount, maxStack});
-  return steps;
-}
-
-function applyTab2DFSStep(step){
-  const gridId='t2-grid';
-  const svg=document.getElementById('t2-grid-container').querySelector('.svg-overlay');
-
-  switch(step.type){
-    case 'visit':
-      t2VisitCount=step.visitCount;
-      if(step.stackSize>t2MaxDS) t2MaxDS=step.stackSize;
-      // clear previous current
-      document.querySelectorAll('#t2-grid .cell.current').forEach(c=>{ c.classList.remove('current'); c.classList.add('visited'); });
-      setCellState(gridId,step.cur[0],step.cur[1],'current',step.depth,step.visitCount);
-      // draw path arrows
-      svg.innerHTML='';
-      for(let i=0;i<step.path.length-1;i++){
-        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-dfs');
-      }
-      document.getElementById('t2-ds-state').textContent='[ '+step.path.map(p=>coordStr(p[0],p[1])).join(' → ')+' ]';
-      document.getElementById('t2-depth').textContent='현재 depth: '+step.depth;
-      updateTab2Stats();
-      break;
-
-    case 'path-found':
-      t2PathCount=step.pathCount;
-      // highlight path
-      step.path.forEach(([r,c])=>setCellState(gridId,r,c,'path-final',null,null));
-      svg.innerHTML='';
-      for(let i=0;i<step.path.length-1;i++){
-        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-dfs arrow-final');
-      }
-      // add to list
-      const pathStr=step.path.map(p=>coordStr(p[0],p[1])).join(' → ');
-      const listEl=document.getElementById('t2-path-list');
-      const item=document.createElement('div');
-      item.className='path-item';
-      item.textContent=`경로 ${step.pathCount}: ${pathStr} (길이: ${step.path.length-1})`;
-      listEl.appendChild(item);
-      listEl.scrollTop=listEl.scrollHeight;
-      updateTab2Stats();
-      break;
-
-    case 'backtrack':
-      // dim the cell being backtracked from
-      setCellState(gridId,step.cur[0],step.cur[1],'visited',null,null);
-      document.getElementById(gridId+'-'+step.cur[0]+'-'+step.cur[1]).classList.remove('current','path-final');
-      document.getElementById(gridId+'-'+step.cur[0]+'-'+step.cur[1]).classList.add('visited');
-      // redraw path
-      svg.innerHTML='';
-      for(let i=0;i<step.path.length-1;i++){
-        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-dfs');
-      }
-      if(step.path.length>0){
-        document.getElementById('t2-ds-state').textContent='[ '+step.path.map(p=>coordStr(p[0],p[1])).join(' → ')+' ]';
-      } else {
-        document.getElementById('t2-ds-state').textContent='[ ]';
-      }
-      break;
-
-    case 'done':
-      t2MaxDS=step.maxStack;
-      updateTab2Stats();
-      break;
-  }
-}
-
-function updateTab2Stats(){
-  document.getElementById('t2-stat-paths').textContent=t2PathCount;
-  document.getElementById('t2-stat-visits').textContent=t2VisitCount;
-  document.getElementById('t2-stat-maxds').textContent=t2MaxDS;
-}
-
-/* ── Tab2 BFS all paths ── */
-function tab2RunBFS(){
-  if(t2Running) return;
-  t2Running=true;
-  document.getElementById('t2-dfs-btn').disabled=true;
-  document.getElementById('t2-bfs-btn').disabled=true;
-  document.getElementById('t2-ds-label').textContent='큐 (Queue):';
-  document.getElementById('t2-ds-state').className='queue-state';
-  document.getElementById('t2-path-list').innerHTML='';
-  document.getElementById('t2-warning').classList.remove('show');
   document.getElementById('t2-msg').innerHTML='';
-  t2PathCount=0; t2VisitCount=0; t2MaxDS=0;
+  t2Stats={paths:0, visits:0, maxDS:0, copies:0, qSize:0, mem:0};
+  updateT2Stats();
 
-  const steps=genAllPathsBFS();
+  // mode-specific UI
+  const counters=document.getElementById('t2-counters');
+  const qcardsWrap=document.getElementById('t2-qcards-wrap');
+  counters.style.display=(mode===2)?'flex':'none';
+  qcardsWrap.style.display=(mode===2)?'block':'none';
+  if(mode===2) document.getElementById('t2-qcards').innerHTML='';
+  updateT2Counters();
+
+  if(mode===3){
+    document.getElementById('t2-ds-label').textContent='스택 (Stack):';
+    document.getElementById('t2-ds-state').className='stack-state';
+    document.getElementById('t2-grid-title').textContent='③ DFS + 백트래킹';
+    document.getElementById('t2-grid-title').style.color='#16a34a';
+  } else {
+    document.getElementById('t2-ds-label').textContent='큐 (Queue):';
+    document.getElementById('t2-ds-state').className='queue-state';
+    document.getElementById('t2-grid-title').textContent = mode===1 ? '① BFS + 전역 방문 배열' : '② BFS + 경로별 배열 복사';
+    document.getElementById('t2-grid-title').style.color = mode===1 ? '#dc2626' : '#f59e0b';
+  }
+  document.getElementById('t2-ds-state').textContent='[ ]';
+  document.getElementById('t2-depth').textContent='';
+
+  let steps;
+  if(mode===1) steps=genMode1Steps();
+  else if(mode===2) steps=genMode2Steps();
+  else steps=genMode3Steps();
+
   let si=0;
-
   function tick(){
     if(!t2Running||si>=steps.length){
       t2Running=false;
-      document.getElementById('t2-dfs-btn').disabled=false;
-      document.getElementById('t2-bfs-btn').disabled=false;
-      if(t2PathCount===0){
-        document.getElementById('t2-msg').innerHTML='<div class="msg msg-fail">경로 없음</div>';
-      } else {
-        document.getElementById('t2-msg').innerHTML='<div class="msg msg-success">탐색 완료! '+t2PathCount+'개 경로 발견</div>';
-      }
+      tab2SetButtons(false);
       return;
     }
-    applyTab2BFSStep(steps[si++]);
+    const step=steps[si++];
+    if(mode===1) applyMode1Step(step);
+    else if(mode===2) applyMode2Step(step);
+    else applyMode3Step(step);
     t2Timer=setTimeout(tick, speedMs('t2-speed'));
   }
   tick();
-}
-
-function genAllPathsBFS(){
-  const steps=[];
-  // BFS with full path in each queue entry: [path]
-  const queue=[[[START[0],START[1]]]];
-  let visitCount=0, maxQ=1, pathCount=0;
-
-  steps.push({type:'init', queueSize:1});
-
-  while(queue.length>0){
-    const path=queue.shift();
-    const [r,c]=path[path.length-1];
-    visitCount++;
-
-    steps.push({type:'dequeue', cur:[r,c], path:[...path.map(p=>[...p])], queueSize:queue.length,
-      visitCount, maxQ, depth:path.length-1});
-
-    if(isEnd(r,c)){
-      pathCount++;
-      steps.push({type:'path-found', path:[...path.map(p=>[...p])], pathCount, visitCount, maxQ, queueSize:queue.length});
-      continue;
-    }
-
-    for(let d=0;d<4;d++){
-      const nr=r+DR[d], nc=c+DC[d];
-      if(!inBounds(nr,nc)||walls[nr][nc]) continue;
-      // check if already in path (no revisit)
-      if(path.some(p=>p[0]===nr&&p[1]===nc)) continue;
-      const newPath=[...path,[nr,nc]];
-      queue.push(newPath);
-    }
-
-    if(queue.length>maxQ) maxQ=queue.length;
-
-    // warning if queue gets large
-    if(queue.length>30){
-      steps.push({type:'warning', queueSize:queue.length, maxQ, visitCount,
-        msg:`큐 크기가 ${queue.length}개로 폭발적으로 증가하고 있습니다! BFS로 모든 경로를 탐색하면 큐의 각 원소에 경로 전체를 저장해야 하므로 메모리가 급격히 증가합니다.`});
-    }
-
-    steps.push({type:'expand', cur:[r,c], queueSize:queue.length, maxQ, visitCount});
-
-    // safety limit
-    if(queue.length>500){
-      steps.push({type:'abort', queueSize:queue.length, maxQ, visitCount, pathCount,
-        msg:'큐 크기가 500을 초과하여 탐색을 중단합니다. BFS로 모든 경로를 찾는 것은 비효율적입니다!'});
-      break;
-    }
-  }
-
-  steps.push({type:'done', pathCount, visitCount, maxQ});
-  return steps;
-}
-
-function applyTab2BFSStep(step){
-  const gridId='t2-grid';
-  const svg=document.getElementById('t2-grid-container').querySelector('.svg-overlay');
-
-  switch(step.type){
-    case 'init':
-      setCellState(gridId,START[0],START[1],'visiting',0,1);
-      break;
-
-    case 'dequeue':
-      t2VisitCount=step.visitCount;
-      if(step.queueSize+1>t2MaxDS) t2MaxDS=step.queueSize+1;
-      // clear previous
-      resetCellStates(gridId);
-      // highlight path being examined
-      step.path.forEach(([r,c],i)=>{
-        if(i===step.path.length-1) setCellState(gridId,r,c,'current',i,null);
-        else setCellState(gridId,r,c,'visiting',i,null);
-      });
-      svg.innerHTML='';
-      for(let i=0;i<step.path.length-1;i++){
-        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-bfs');
-      }
-      document.getElementById('t2-ds-state').textContent=`큐 크기: ${step.queueSize} | 현재 경로: ${step.path.map(p=>coordStr(p[0],p[1])).join(' → ')}`;
-      document.getElementById('t2-depth').textContent='현재 depth: '+step.depth;
-      updateTab2Stats();
-      break;
-
-    case 'path-found':
-      t2PathCount=step.pathCount;
-      resetCellStates(gridId);
-      step.path.forEach(([r,c])=>setCellState(gridId,r,c,'path-final',null,null));
-      svg.innerHTML='';
-      for(let i=0;i<step.path.length-1;i++){
-        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-bfs arrow-final');
-      }
-      const pathStr=step.path.map(p=>coordStr(p[0],p[1])).join(' → ');
-      const listEl=document.getElementById('t2-path-list');
-      const item=document.createElement('div');
-      item.className='path-item';
-      item.textContent=`경로 ${step.pathCount}: ${pathStr} (길이: ${step.path.length-1})`;
-      listEl.appendChild(item);
-      listEl.scrollTop=listEl.scrollHeight;
-      updateTab2Stats();
-      break;
-
-    case 'warning':
-      const warn=document.getElementById('t2-warning');
-      warn.textContent=step.msg;
-      warn.classList.add('show');
-      t2MaxDS=step.maxQ;
-      updateTab2Stats();
-      break;
-
-    case 'expand':
-      t2MaxDS=step.maxQ;
-      updateTab2Stats();
-      break;
-
-    case 'abort':
-      t2PathCount=step.pathCount;
-      t2MaxDS=step.maxQ;
-      t2VisitCount=step.visitCount;
-      updateTab2Stats();
-      document.getElementById('t2-msg').innerHTML='<div class="msg msg-fail">'+step.msg+'</div>';
-      t2Running=false;
-      document.getElementById('t2-dfs-btn').disabled=false;
-      document.getElementById('t2-bfs-btn').disabled=false;
-      break;
-
-    case 'done':
-      t2PathCount=step.pathCount;
-      t2MaxDS=step.maxQ;
-      t2VisitCount=step.visitCount;
-      updateTab2Stats();
-      break;
-  }
 }
 
 function tab2Reset(){
@@ -950,12 +707,480 @@ function tab2Reset(){
   document.getElementById('t2-ds-state').textContent='[ ]';
   document.getElementById('t2-depth').textContent='';
   document.getElementById('t2-msg').innerHTML='';
-  document.getElementById('t2-path-list').innerHTML='<span style="color:#94a3b8;">아직 탐색을 시작하지 않았습니다.</span>';
-  document.getElementById('t2-warning').classList.remove('show');
-  t2PathCount=0; t2VisitCount=0; t2MaxDS=0;
-  updateTab2Stats();
-  document.getElementById('t2-dfs-btn').disabled=false;
-  document.getElementById('t2-bfs-btn').disabled=false;
+  document.getElementById('t2-path-list').innerHTML='<span style="color:#94a3b8;">버튼을 선택하여 탐색을 시작하세요.</span>';
+  document.getElementById('t2-counters').style.display='none';
+  document.getElementById('t2-qcards-wrap').style.display='none';
+  document.getElementById('t2-grid-title').textContent='격자 & 탐색 시각화';
+  document.getElementById('t2-grid-title').style.color='#475569';
+  t2Stats={paths:0, visits:0, maxDS:0, copies:0, qSize:0, mem:0};
+  updateT2Stats();
+  tab2SetButtons(false);
+}
+
+function updateT2Stats(){
+  document.getElementById('t2-stat-paths').textContent=t2Stats.paths;
+  document.getElementById('t2-stat-visits').textContent=t2Stats.visits;
+  document.getElementById('t2-stat-maxds').textContent=t2Stats.maxDS;
+}
+
+function updateT2Counters(){
+  const copyEl=document.getElementById('t2-cnt-copy');
+  const qsEl=document.getElementById('t2-cnt-qsize');
+  const memEl=document.getElementById('t2-cnt-mem');
+  copyEl.textContent=t2Stats.copies;
+  qsEl.textContent=t2Stats.qSize;
+  memEl.textContent=t2Stats.mem;
+  // color escalation
+  [copyEl,qsEl,memEl].forEach(el=>{
+    const v=parseInt(el.textContent);
+    if(v>50) el.style.color='#dc2626';
+    else if(v>20) el.style.color='#f59e0b';
+    else el.style.color='#333';
+  });
+}
+
+function addPathToList(pathArr, num){
+  const str=pathArr.map(p=>coordStr(p[0],p[1])).join(' → ');
+  const el=document.getElementById('t2-path-list');
+  const item=document.createElement('div');
+  item.className='path-item';
+  item.textContent=`경로 ${num}: ${str} (길이: ${pathArr.length-1})`;
+  el.appendChild(item);
+  el.scrollTop=el.scrollHeight;
+}
+
+/* ── 실제 모든 경로 수 계산 (비교용) ── */
+function countAllPaths(){
+  const visited=Array.from({length:ROWS},()=>Array(COLS).fill(false));
+  let count=0;
+  function dfs(r,c){
+    if(isEnd(r,c)){ count++; return; }
+    visited[r][c]=true;
+    for(let d=0;d<4;d++){
+      const nr=r+DR[d], nc=c+DC[d];
+      if(!inBounds(nr,nc)||walls[nr][nc]||visited[nr][nc]) continue;
+      dfs(nr,nc);
+    }
+    visited[r][c]=false;
+  }
+  dfs(START[0],START[1]);
+  return count;
+}
+
+/* ================================================================
+   MODE 1: BFS + 전역 방문 배열 1개 (오작동)
+   ================================================================ */
+function genMode1Steps(){
+  const steps=[];
+  const visited=Array.from({length:ROWS},()=>Array(COLS).fill(false));
+  const queue=[ {pos:[START[0],START[1]], path:[[START[0],START[1]]], depth:0} ];
+  visited[START[0]][START[1]]=true;
+  let visitCount=0, maxQ=1, pathCount=0;
+  let blockedCount=0;
+  const totalPaths=countAllPaths();
+
+  steps.push({type:'init', visited:visited.map(r=>[...r])});
+
+  while(queue.length>0){
+    const item=queue.shift();
+    const [r,c]=item.pos;
+    visitCount++;
+
+    steps.push({type:'dequeue', cur:[r,c], path:item.path.map(p=>[...p]), depth:item.depth,
+      queueSize:queue.length, visitCount, maxQ, visited:visited.map(r=>[...r])});
+
+    if(isEnd(r,c)){
+      pathCount++;
+      steps.push({type:'path-found', path:item.path.map(p=>[...p]), pathCount, visitCount, maxQ,
+        visited:visited.map(r=>[...r])});
+      continue;
+    }
+
+    for(let d=0;d<4;d++){
+      const nr=r+DR[d], nc=c+DC[d];
+      if(!inBounds(nr,nc)||walls[nr][nc]) continue;
+      if(visited[nr][nc]){
+        // 자기 경로에 의한 차단은 무시, 다른 경로에 의한 차단만 표시
+        const inOwnPath=item.path.some(p=>p[0]===nr&&p[1]===nc);
+        if(!inOwnPath){
+          blockedCount++;
+          steps.push({type:'blocked', cur:[r,c], target:[nr,nc], blockedCount, visitCount,
+            visited:visited.map(r=>[...r]), path:item.path.map(p=>[...p])});
+        }
+        continue;
+      }
+      visited[nr][nc]=true;
+      const newPath=[...item.path,[nr,nc]];
+      queue.push({pos:[nr,nc], path:newPath, depth:item.depth+1});
+    }
+    if(queue.length>maxQ) maxQ=queue.length;
+    steps.push({type:'expand', queueSize:queue.length, maxQ, visitCount});
+  }
+
+  steps.push({type:'done', pathCount, visitCount, maxQ, totalPaths, blockedCount,
+    visited:visited.map(r=>[...r])});
+  return steps;
+}
+
+/* 전역 visited 상태를 격자에 반영하는 헬퍼 */
+function renderGlobalVisited(gridId, visited, curPath){
+  resetCellStates(gridId);
+  // 1) 전역 visited 배열에서 방문된 셀을 모두 'visited'로 표시
+  const pathSet=new Set(curPath?curPath.map(p=>p[0]*COLS+p[1]):[]);
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    if(!visited[r][c]||walls[r][c]) continue;
+    if(isStart(r,c)||isEnd(r,c)) continue;
+    if(pathSet.has(r*COLS+c)) continue; // 현재 경로는 별도 처리
+    setCellState(gridId,r,c,'visited',null,null);
+  }
+  // 2) 현재 경로를 위에 덮어쓰기
+  if(curPath){
+    curPath.forEach(([r,c],i)=>{
+      if(i===curPath.length-1) setCellState(gridId,r,c,'current',i,null);
+      else setCellState(gridId,r,c,'visiting',i,null);
+    });
+  }
+}
+
+function applyMode1Step(step){
+  const gridId='t2-grid';
+  const svg=document.getElementById('t2-grid-container').querySelector('.svg-overlay');
+  switch(step.type){
+    case 'init':
+      setCellState(gridId,START[0],START[1],'visiting',0,1);
+      break;
+    case 'dequeue':
+      t2Stats.visits=step.visitCount;
+      if(step.queueSize+1>t2Stats.maxDS) t2Stats.maxDS=step.queueSize+1;
+      // 전역 visited 전체를 격자에 표시 + 현재 경로 오버레이
+      renderGlobalVisited(gridId, step.visited, step.path);
+      svg.innerHTML='';
+      for(let i=0;i<step.path.length-1;i++)
+        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-bfs');
+      document.getElementById('t2-ds-state').textContent=`큐 크기: ${step.queueSize}`;
+      document.getElementById('t2-depth').textContent='현재 depth: '+step.depth;
+      updateT2Stats();
+      break;
+    case 'blocked':
+      t2Stats.visits=step.visitCount;
+      // 전역 visited 표시 + 현재 경로
+      renderGlobalVisited(gridId, step.visited, step.path);
+      // 차단된 셀을 빨간색으로 강조
+      setCellState(gridId,step.target[0],step.target[1],'blocked',null,null);
+      const bCell=document.getElementById(gridId+'-d-'+step.target[0]+'-'+step.target[1]);
+      bCell.textContent='X';
+      bCell.style.color='#dc2626';
+      updateT2Stats();
+      break;
+    case 'path-found':
+      t2Stats.paths=step.pathCount;
+      renderGlobalVisited(gridId, step.visited, null);
+      step.path.forEach(([r,c])=>setCellState(gridId,r,c,'path-final',null,null));
+      svg.innerHTML='';
+      for(let i=0;i<step.path.length-1;i++)
+        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-bfs arrow-final');
+      addPathToList(step.path, step.pathCount);
+      updateT2Stats();
+      break;
+    case 'expand':
+      t2Stats.maxDS=step.maxQ;
+      updateT2Stats();
+      break;
+    case 'done':
+      t2Stats.paths=step.pathCount;
+      t2Stats.visits=step.visitCount;
+      t2Stats.maxDS=step.maxQ;
+      updateT2Stats();
+      // 최종: 전역 visited 전체를 보여줌
+      renderGlobalVisited(gridId, step.visited, null);
+      const missing=step.totalPaths - step.pathCount;
+      let msg;
+      if(step.pathCount===0){
+        msg='<div class="msg msg-fail">경로를 하나도 찾지 못했습니다.</div>';
+      } else {
+        msg=`<div class="msg msg-fail">전역 방문 배열 1개로는 모든 경로를 탐색할 수 없습니다!<br>`+
+          `발견: ${step.pathCount}개 / 실제: ${step.totalPaths}개 (${missing}개 누락)<br>`+
+          `차단 횟수: ${step.blockedCount}회 — 먼저 방문된 노드가 다른 경로를 차단했습니다.</div>`;
+      }
+      document.getElementById('t2-msg').innerHTML=msg;
+      break;
+  }
+}
+
+/* ================================================================
+   MODE 2: BFS + 경로별 방문 배열 복사 (메모리 폭발)
+   ================================================================ */
+function genMode2Steps(){
+  const steps=[];
+  const initVisited=Array.from({length:ROWS},()=>Array(COLS).fill(false));
+  initVisited[START[0]][START[1]]=true;
+  // each queue entry: {pos, path, visited (2d copy)}
+  const queue=[ {pos:[START[0],START[1]], path:[[START[0],START[1]]], visited:initVisited} ];
+  let visitCount=0, maxQ=1, pathCount=0, copyCount=0;
+
+  steps.push({type:'init'});
+
+  while(queue.length>0){
+    const item=queue.shift();
+    const [r,c]=item.pos;
+    visitCount++;
+
+    // snapshot queue for card display (limit to 12 cards for perf)
+    const qSnap=queue.slice(0,12).map(q=>({
+      pos:[...q.pos],
+      path:q.path.map(p=>[...p]),
+      visited:q.visited.map(row=>[...row])
+    }));
+
+    steps.push({type:'dequeue', cur:[r,c], path:item.path.map(p=>[...p]), depth:item.path.length-1,
+      queueSize:queue.length, visitCount, maxQ, copyCount, qSnap, totalInQ:queue.length});
+
+    if(isEnd(r,c)){
+      pathCount++;
+      steps.push({type:'path-found', path:item.path.map(p=>[...p]), pathCount, visitCount, maxQ, copyCount,
+        queueSize:queue.length});
+      continue;
+    }
+
+    for(let d=0;d<4;d++){
+      const nr=r+DR[d], nc=c+DC[d];
+      if(!inBounds(nr,nc)||walls[nr][nc]||item.visited[nr][nc]) continue;
+      // COPY the visited array
+      const newVisited=item.visited.map(row=>[...row]);
+      newVisited[nr][nc]=true;
+      copyCount++;
+      const newPath=[...item.path,[nr,nc]];
+      queue.push({pos:[nr,nc], path:newPath, visited:newVisited});
+    }
+    if(queue.length>maxQ) maxQ=queue.length;
+
+    steps.push({type:'expand', queueSize:queue.length, maxQ, visitCount, copyCount});
+
+    if(queue.length>300){
+      steps.push({type:'abort', queueSize:queue.length, maxQ, visitCount, pathCount, copyCount,
+        msg:`큐 크기 ${queue.length}개, 배열 복사 ${copyCount}회 — 메모리 폭발로 탐색을 중단합니다!`});
+      break;
+    }
+  }
+
+  steps.push({type:'done', pathCount, visitCount, maxQ, copyCount});
+  return steps;
+}
+
+function renderQueueCards(qSnap, totalInQ){
+  const container=document.getElementById('t2-qcards');
+  container.innerHTML='';
+  qSnap.forEach((q,idx)=>{
+    const card=document.createElement('div');
+    card.className='q-card'+(idx===0?' highlight':'');
+    // position
+    let html=`<div class="qc-pos">위치: ${coordStr(q.pos[0],q.pos[1])}</div>`;
+    // path
+    html+=`<div class="qc-path">${q.path.map(p=>coordStr(p[0],p[1])).join('→')}</div>`;
+    // visited bitmap
+    html+='<div class="qc-visited">';
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+      html+=`<div class="qc-bit${q.visited[r][c]?' on':''}"></div>`;
+    }
+    html+='</div>';
+    card.innerHTML=html;
+    container.appendChild(card);
+  });
+  if(totalInQ>qSnap.length){
+    const more=document.createElement('div');
+    more.className='q-card';
+    more.style.display='flex'; more.style.alignItems='center'; more.style.justifyContent='center';
+    more.style.color='#64748b'; more.style.fontWeight='700';
+    more.textContent=`... +${totalInQ-qSnap.length}개 더`;
+    container.appendChild(more);
+  }
+}
+
+function applyMode2Step(step){
+  const gridId='t2-grid';
+  const svg=document.getElementById('t2-grid-container').querySelector('.svg-overlay');
+  switch(step.type){
+    case 'init':
+      setCellState(gridId,START[0],START[1],'visiting',0,1);
+      break;
+    case 'dequeue':
+      t2Stats.visits=step.visitCount;
+      t2Stats.copies=step.copyCount;
+      t2Stats.qSize=step.totalInQ;
+      t2Stats.mem=step.copyCount;
+      if(step.queueSize+1>t2Stats.maxDS) t2Stats.maxDS=step.queueSize+1;
+      resetCellStates(gridId);
+      step.path.forEach(([r,c],i)=>{
+        if(i===step.path.length-1) setCellState(gridId,r,c,'current',i,null);
+        else setCellState(gridId,r,c,'visiting',i,null);
+      });
+      svg.innerHTML='';
+      for(let i=0;i<step.path.length-1;i++)
+        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-bfs');
+      document.getElementById('t2-ds-state').textContent=`큐 크기: ${step.totalInQ} | 현재: ${step.path.map(p=>coordStr(p[0],p[1])).join('→')}`;
+      document.getElementById('t2-depth').textContent='현재 depth: '+step.depth;
+      renderQueueCards(step.qSnap, step.totalInQ);
+      updateT2Stats();
+      updateT2Counters();
+      break;
+    case 'path-found':
+      t2Stats.paths=step.pathCount;
+      t2Stats.copies=step.copyCount;
+      t2Stats.qSize=step.queueSize;
+      t2Stats.mem=step.copyCount;
+      resetCellStates(gridId);
+      step.path.forEach(([r,c])=>setCellState(gridId,r,c,'path-final',null,null));
+      svg.innerHTML='';
+      for(let i=0;i<step.path.length-1;i++)
+        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-bfs arrow-final');
+      addPathToList(step.path, step.pathCount);
+      updateT2Stats();
+      updateT2Counters();
+      break;
+    case 'expand':
+      t2Stats.maxDS=step.maxQ;
+      t2Stats.copies=step.copyCount;
+      t2Stats.qSize=step.queueSize;
+      t2Stats.mem=step.copyCount;
+      updateT2Stats();
+      updateT2Counters();
+      break;
+    case 'abort':
+      t2Stats.paths=step.pathCount;
+      t2Stats.visits=step.visitCount;
+      t2Stats.maxDS=step.maxQ;
+      t2Stats.copies=step.copyCount;
+      t2Stats.qSize=step.queueSize;
+      t2Stats.mem=step.copyCount;
+      updateT2Stats();
+      updateT2Counters();
+      document.getElementById('t2-msg').innerHTML=
+        `<div class="msg msg-warn">모든 경로는 찾을 수 있지만, 메모리 사용량이 폭발적으로 증가합니다!<br>`+
+        `배열 복사 ${step.copyCount}회, 최대 큐 ${step.maxQ}개<br>${step.msg}</div>`;
+      t2Running=false;
+      tab2SetButtons(false);
+      break;
+    case 'done':
+      t2Stats.paths=step.pathCount;
+      t2Stats.visits=step.visitCount;
+      t2Stats.maxDS=step.maxQ;
+      t2Stats.copies=step.copyCount;
+      t2Stats.mem=step.copyCount;
+      updateT2Stats();
+      updateT2Counters();
+      document.getElementById('t2-msg').innerHTML=
+        `<div class="msg msg-warn">모든 경로는 찾을 수 있지만, 메모리 사용량이 폭발적으로 증가합니다!<br>`+
+        `발견: ${step.pathCount}개 | 배열 복사: ${step.copyCount}회 | 최대 큐: ${step.maxQ}개</div>`;
+      break;
+  }
+}
+
+/* ================================================================
+   MODE 3: DFS + 백트래킹 (올바른 해법)
+   ================================================================ */
+function genMode3Steps(){
+  const steps=[];
+  const visited=Array.from({length:ROWS},()=>Array(COLS).fill(false));
+  let visitCount=0, maxStack=0, pathCount=0;
+
+  function dfs(r,c,depth,path){
+    visited[r][c]=true;
+    visitCount++;
+    path.push([r,c]);
+    if(path.length>maxStack) maxStack=path.length;
+
+    steps.push({type:'visit', cur:[r,c], depth, path:path.map(p=>[...p]),
+      stackSize:path.length, visitCount, maxStack,
+      visited:visited.map(row=>[...row])});
+
+    if(isEnd(r,c)){
+      pathCount++;
+      steps.push({type:'path-found', path:path.map(p=>[...p]), pathCount, visitCount, maxStack});
+    } else {
+      for(let d=0;d<4;d++){
+        const nr=r+DR[d], nc=c+DC[d];
+        if(!inBounds(nr,nc)||walls[nr][nc]||visited[nr][nc]) continue;
+        dfs(nr,nc,depth+1,path);
+      }
+    }
+    // backtrack
+    visited[r][c]=false;
+    path.pop();
+    steps.push({type:'backtrack', cur:[r,c], depth, path:path.map(p=>[...p]),
+      visitCount, maxStack, visited:visited.map(row=>[...row])});
+  }
+
+  dfs(START[0],START[1],0,[]);
+  steps.push({type:'done', pathCount, visitCount, maxStack});
+  return steps;
+}
+
+function applyMode3Step(step){
+  const gridId='t2-grid';
+  const svg=document.getElementById('t2-grid-container').querySelector('.svg-overlay');
+  switch(step.type){
+    case 'visit':
+      t2Stats.visits=step.visitCount;
+      if(step.stackSize>t2Stats.maxDS) t2Stats.maxDS=step.stackSize;
+      // clear previous current
+      document.querySelectorAll('#t2-grid .cell.current').forEach(c=>{
+        c.classList.remove('current'); c.classList.add('visited');
+      });
+      setCellState(gridId,step.cur[0],step.cur[1],'current',step.depth,step.visitCount);
+      // draw path arrows
+      svg.innerHTML='';
+      for(let i=0;i<step.path.length-1;i++)
+        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-dfs');
+      document.getElementById('t2-ds-state').textContent='[ '+step.path.map(p=>coordStr(p[0],p[1])).join(' → ')+' ]';
+      document.getElementById('t2-depth').textContent='현재 depth: '+step.depth;
+      updateT2Stats();
+      break;
+    case 'path-found':
+      t2Stats.paths=step.pathCount;
+      step.path.forEach(([r,c])=>setCellState(gridId,r,c,'path-final',null,null));
+      svg.innerHTML='';
+      for(let i=0;i<step.path.length-1;i++)
+        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-dfs arrow-final');
+      addPathToList(step.path, step.pathCount);
+      updateT2Stats();
+      break;
+    case 'backtrack':
+      // unmark cell visually — show it returning to unvisited
+      const cell=document.getElementById(gridId+'-'+step.cur[0]+'-'+step.cur[1]);
+      if(cell){
+        cell.classList.remove('current','visited','path-final');
+        cell.classList.add('unvisited-bt');
+        // clear depth display to show unmark
+        document.getElementById(gridId+'-d-'+step.cur[0]+'-'+step.cur[1]).textContent='';
+        document.getElementById(gridId+'-o-'+step.cur[0]+'-'+step.cur[1]).textContent='';
+        // restore start/end styling
+        if(isStart(step.cur[0],step.cur[1])) cell.classList.add('start');
+        if(isEnd(step.cur[0],step.cur[1])) cell.classList.add('end');
+      }
+      // redraw path
+      svg.innerHTML='';
+      for(let i=0;i<step.path.length-1;i++)
+        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-dfs');
+      if(step.path.length>0){
+        document.getElementById('t2-ds-state').textContent='[ '+step.path.map(p=>coordStr(p[0],p[1])).join(' → ')+' ]';
+      } else {
+        document.getElementById('t2-ds-state').textContent='[ ]';
+      }
+      break;
+    case 'done':
+      t2Stats.paths=step.pathCount;
+      t2Stats.visits=step.visitCount;
+      t2Stats.maxDS=step.maxStack;
+      updateT2Stats();
+      if(step.pathCount===0){
+        document.getElementById('t2-msg').innerHTML='<div class="msg msg-fail">경로 없음</div>';
+      } else {
+        document.getElementById('t2-msg').innerHTML=
+          `<div class="msg msg-success">전역 방문 배열 1개로 모든 경로를 정확하게 탐색할 수 있습니다!<br>`+
+          `발견: ${step.pathCount}개 | 방문: ${step.visitCount}회 | 최대 스택: ${step.maxStack}</div>`;
+      }
+      break;
+  }
 }
 
 /* ================================================================
