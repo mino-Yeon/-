@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BFS vs DFS 비교 시뮬레이션</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI','맑은 고딕',sans-serif; background:#f0f2f5; color:#333; }
+
+/* ── Header ── */
+.header { background:linear-gradient(135deg,#2563eb,#7c3aed); color:#fff; padding:16px 24px; text-align:center; }
+.header h1 { font-size:1.5rem; margin-bottom:4px; }
+.header p { font-size:0.85rem; opacity:0.85; }
+.back-link { position:absolute; left:16px; top:16px; color:#fff; text-decoration:none; font-size:0.9rem; }
+
+/* ── Tabs ── */
+.tabs { display:flex; justify-content:center; gap:4px; background:#e2e8f0; padding:6px; }
+.tab-btn { padding:10px 28px; border:none; background:transparent; font-size:0.95rem; cursor:pointer;
+  border-radius:6px; font-weight:600; color:#64748b; transition:all .2s; }
+.tab-btn.active { background:#fff; color:#2563eb; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+
+/* ── Controls ── */
+.controls { display:flex; align-items:center; justify-content:center; gap:12px; padding:12px; background:#fff;
+  border-bottom:1px solid #e2e8f0; flex-wrap:wrap; }
+.controls button { padding:8px 18px; border:none; border-radius:6px; font-size:0.85rem; cursor:pointer;
+  font-weight:600; transition:all .15s; }
+.btn-start { background:#2563eb; color:#fff; }
+.btn-start:hover { background:#1d4ed8; }
+.btn-start:disabled { background:#94a3b8; cursor:not-allowed; }
+.btn-reset { background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; }
+.btn-reset:hover { background:#e2e8f0; }
+.speed-wrap { display:flex; align-items:center; gap:6px; font-size:0.8rem; color:#64748b; }
+.speed-wrap input[type=range] { width:100px; }
+
+/* ── Grid Panel ── */
+.panels { display:flex; gap:16px; padding:16px; justify-content:center; flex-wrap:wrap; }
+.panel { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:16px; min-width:300px; flex:1; max-width:480px; }
+.panel h3 { text-align:center; font-size:1.1rem; margin-bottom:8px; padding-bottom:6px; border-bottom:2px solid #e2e8f0; }
+.panel h3.bfs-title { color:#2563eb; border-color:#2563eb; }
+.panel h3.dfs-title { color:#dc2626; border-color:#dc2626; }
+
+.grid-container { position:relative; margin:0 auto; }
+.grid { display:grid; grid-template-columns:repeat(4,64px); grid-template-rows:repeat(4,64px); gap:3px;
+  margin:0 auto; width:fit-content; }
+.cell { width:64px; height:64px; border:2px solid #cbd5e1; border-radius:8px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; font-size:0.75rem; cursor:pointer; position:relative;
+  transition:all .25s; background:#fff; user-select:none; }
+.cell .coord { font-size:0.6rem; color:#94a3b8; position:absolute; top:2px; left:4px; }
+.cell .depth-num { font-size:1.1rem; font-weight:700; color:#2563eb; }
+.cell .visit-order { font-size:0.6rem; color:#64748b; position:absolute; bottom:2px; right:4px; }
+
+/* Cell states */
+.cell.start { background:#dbeafe; border-color:#2563eb; }
+.cell.end { background:#fef3c7; border-color:#f59e0b; }
+.cell.wall { background:#1e293b; border-color:#0f172a; cursor:pointer; }
+.cell.wall .coord { color:#64748b; }
+.cell.visiting { background:#bfdbfe; border-color:#3b82f6; animation:pulse .5s; }
+.cell.visited { background:#e0e7ff; border-color:#6366f1; }
+.cell.path-final { background:#bbf7d0; border-color:#16a34a; }
+.cell.current { box-shadow:0 0 0 3px #f59e0b; z-index:2; }
+.cell.no-path { background:#fee2e2; }
+@keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.08)} 100%{transform:scale(1)} }
+
+/* SVG overlay for arrows */
+.svg-overlay { position:absolute; top:0; left:0; pointer-events:none; }
+.arrow-line { stroke-width:2.5; fill:none; marker-end:url(#arrowHead); }
+.arrow-bfs { stroke:#2563eb; }
+.arrow-dfs { stroke:#dc2626; }
+.arrow-back { opacity:0.25; stroke-dasharray:4,3; }
+.arrow-final { stroke-width:3.5; opacity:1; }
+.arrow-final.arrow-bfs { stroke:#16a34a; marker-end:url(#arrowHeadGreen); }
+.arrow-final.arrow-dfs { stroke:#16a34a; marker-end:url(#arrowHeadGreen); }
+
+/* ── Info area ── */
+.info-area { margin-top:10px; padding:10px; background:#f8fafc; border-radius:8px; font-size:0.8rem; min-height:60px; }
+.info-area .label { font-weight:700; color:#475569; margin-bottom:4px; }
+.info-area .queue-state { font-family:'Consolas','Courier New',monospace; word-break:break-all; color:#2563eb; }
+.info-area .stack-state { font-family:'Consolas','Courier New',monospace; word-break:break-all; color:#dc2626; }
+.info-area .depth-info { font-weight:600; margin-top:4px; }
+.info-area .msg { margin-top:6px; padding:6px 10px; border-radius:6px; font-weight:600; text-align:center; }
+.msg-success { background:#dcfce7; color:#16a34a; }
+.msg-fail { background:#fee2e2; color:#dc2626; }
+
+/* ── Legend ── */
+.legend { display:flex; gap:12px; justify-content:center; padding:10px; flex-wrap:wrap; font-size:0.75rem; }
+.legend-item { display:flex; align-items:center; gap:4px; }
+.legend-box { width:18px; height:18px; border-radius:4px; border:2px solid #cbd5e1; }
+
+/* ── Tab2 specifics ── */
+.tab2-panels { display:flex; gap:16px; padding:16px; justify-content:center; flex-wrap:wrap; }
+.tab2-panel { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:16px; flex:1; min-width:300px; max-width:560px; }
+.path-list { max-height:220px; overflow-y:auto; font-family:'Consolas',monospace; font-size:0.75rem; padding:6px;
+  background:#f8fafc; border-radius:6px; margin-top:8px; }
+.path-list .path-item { padding:3px 6px; border-bottom:1px solid #e2e8f0; }
+.path-list .path-item:last-child { border:none; }
+.stats-box { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:10px; }
+.stat-card { background:#f1f5f9; border-radius:8px; padding:10px; text-align:center; }
+.stat-card .stat-val { font-size:1.3rem; font-weight:700; color:#2563eb; }
+.stat-card .stat-label { font-size:0.7rem; color:#64748b; }
+.warning-box { margin-top:10px; padding:10px; background:#fef3c7; border:1px solid #f59e0b; border-radius:8px;
+  font-size:0.8rem; color:#92400e; display:none; }
+.warning-box.show { display:block; }
+
+/* ── Responsive ── */
+@media (max-width:768px) {
+  .panels, .tab2-panels { flex-direction:column; align-items:center; }
+  .panel, .tab2-panel { max-width:100%; }
+  .grid { grid-template-columns:repeat(4,56px); grid-template-rows:repeat(4,56px); }
+  .cell { width:56px; height:56px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SVG defs for arrow markers -->
+<svg style="position:absolute;width:0;height:0;">
+  <defs>
+    <marker id="arrowHead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#6366f1"/>
+    </marker>
+    <marker id="arrowHeadBFS" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrowHeadDFS" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#dc2626"/>
+    </marker>
+    <marker id="arrowHeadGreen" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#16a34a"/>
+    </marker>
+  </defs>
+</svg>
+
+<div class="header" style="position:relative;">
+  <a href="../index.html" class="back-link">&#8592; 메인</a>
+  <h1>BFS vs DFS 비교 시뮬레이션</h1>
+  <p>4×4 격자에서 BFS와 DFS의 탐색 과정을 비교합니다</p>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab(0)">탭 1: 최단거리 비교</button>
+  <button class="tab-btn" onclick="switchTab(1)">탭 2: 모든 경로 탐색</button>
+</div>
+
+<!-- ===================== TAB 1 ===================== -->
+<div id="tab0" class="tab-content active">
+  <div class="controls">
+    <button class="btn-start" id="t1-start" onclick="tab1Start()">시작</button>
+    <button class="btn-reset" onclick="tab1Reset()">초기화</button>
+    <div class="speed-wrap">
+      <span>느리게</span>
+      <input type="range" id="t1-speed" min="1" max="10" value="5">
+      <span>빠르게</span>
+    </div>
+    <span style="font-size:0.78rem;color:#64748b;">셀 클릭 = 장애물 토글</span>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-box" style="background:#dbeafe;border-color:#2563eb;"></div>시작점</div>
+    <div class="legend-item"><div class="legend-box" style="background:#fef3c7;border-color:#f59e0b;"></div>끝점</div>
+    <div class="legend-item"><div class="legend-box" style="background:#1e293b;border-color:#0f172a;"></div>장애물</div>
+    <div class="legend-item"><div class="legend-box" style="background:#bfdbfe;border-color:#3b82f6;"></div>탐색 중</div>
+    <div class="legend-item"><div class="legend-box" style="background:#e0e7ff;border-color:#6366f1;"></div>방문 완료</div>
+    <div class="legend-item"><div class="legend-box" style="background:#bbf7d0;border-color:#16a34a;"></div>최종 경로</div>
+  </div>
+
+  <div class="panels">
+    <!-- BFS Panel -->
+    <div class="panel">
+      <h3 class="bfs-title">BFS (너비 우선 탐색)</h3>
+      <div class="grid-container" id="bfs-grid-container">
+        <div class="grid" id="bfs-grid"></div>
+      </div>
+      <div class="info-area" id="bfs-info">
+        <div class="label">큐 (Queue):</div>
+        <div class="queue-state" id="bfs-queue">[ ]</div>
+        <div class="depth-info" id="bfs-depth"></div>
+        <div id="bfs-msg"></div>
+      </div>
+    </div>
+    <!-- DFS Panel -->
+    <div class="panel">
+      <h3 class="dfs-title">DFS (깊이 우선 탐색)</h3>
+      <div class="grid-container" id="dfs-grid-container">
+        <div class="grid" id="dfs-grid"></div>
+      </div>
+      <div class="info-area" id="dfs-info">
+        <div class="label">스택 (Stack):</div>
+        <div class="stack-state" id="dfs-stack">[ ]</div>
+        <div class="depth-info" id="dfs-depth"></div>
+        <div id="dfs-msg"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TAB 2 ===================== -->
+<div id="tab1" class="tab-content">
+  <div class="controls">
+    <button class="btn-start" id="t2-dfs-btn" onclick="tab2RunDFS()" style="background:#dc2626;">DFS 모든 경로 탐색</button>
+    <button class="btn-start" id="t2-bfs-btn" onclick="tab2RunBFS()">BFS 모든 경로 탐색</button>
+    <button class="btn-reset" onclick="tab2Reset()">초기화</button>
+    <div class="speed-wrap">
+      <span>느리게</span>
+      <input type="range" id="t2-speed" min="1" max="10" value="5">
+      <span>빠르게</span>
+    </div>
+    <span style="font-size:0.78rem;color:#64748b;">셀 클릭 = 장애물 토글</span>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-box" style="background:#dbeafe;border-color:#2563eb;"></div>시작점</div>
+    <div class="legend-item"><div class="legend-box" style="background:#fef3c7;border-color:#f59e0b;"></div>끝점</div>
+    <div class="legend-item"><div class="legend-box" style="background:#1e293b;border-color:#0f172a;"></div>장애물</div>
+    <div class="legend-item"><div class="legend-box" style="background:#bfdbfe;border-color:#3b82f6;"></div>탐색 중</div>
+    <div class="legend-item"><div class="legend-box" style="background:#e0e7ff;border-color:#6366f1;"></div>방문 완료</div>
+    <div class="legend-item"><div class="legend-box" style="background:#bbf7d0;border-color:#16a34a;"></div>경로 발견</div>
+  </div>
+
+  <div class="tab2-panels">
+    <div class="tab2-panel">
+      <h3 class="dfs-title" style="border-bottom:2px solid #dc2626;">격자 & 탐색 시각화</h3>
+      <div class="grid-container" id="t2-grid-container">
+        <div class="grid" id="t2-grid"></div>
+      </div>
+      <div class="info-area" id="t2-info">
+        <div class="label" id="t2-ds-label">스택 / 큐:</div>
+        <div class="stack-state" id="t2-ds-state">[ ]</div>
+        <div class="depth-info" id="t2-depth"></div>
+        <div id="t2-msg"></div>
+      </div>
+    </div>
+    <div class="tab2-panel">
+      <h3 style="color:#475569;">발견된 경로 목록</h3>
+      <div class="path-list" id="t2-path-list"><span style="color:#94a3b8;">아직 탐색을 시작하지 않았습니다.</span></div>
+      <div class="stats-box">
+        <div class="stat-card"><div class="stat-val" id="t2-stat-paths">0</div><div class="stat-label">발견 경로 수</div></div>
+        <div class="stat-card"><div class="stat-val" id="t2-stat-visits">0</div><div class="stat-label">총 방문 횟수</div></div>
+        <div class="stat-card"><div class="stat-val" id="t2-stat-maxds">0</div><div class="stat-label">최대 스택/큐</div></div>
+      </div>
+      <div class="warning-box" id="t2-warning"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   공통 상수 & 유틸
+   ================================================================ */
+const ROWS=4, COLS=4;
+const START=[0,0], END=[3,3];
+const DR=[-1,1,0,0], DC=[0,0,-1,1]; // 상하좌우
+const CELL_SIZE=64, GAP=3;
+
+let walls = Array.from({length:ROWS},()=>Array(COLS).fill(false));
+let t1Running=false, t2Running=false;
+let t1Timer=null, t2Timer=null;
+
+function key(r,c){return r*COLS+c;}
+function rc(k){return [Math.floor(k/COLS), k%COLS];}
+function inBounds(r,c){return r>=0&&r<ROWS&&c>=0&&c<COLS;}
+function isStart(r,c){return r===START[0]&&c===START[1];}
+function isEnd(r,c){return r===END[0]&&c===END[1];}
+function speedMs(sliderId){
+  const v=document.getElementById(sliderId).value;
+  return 1100 - v*100; // 1=1000ms, 10=100ms
+}
+function coordStr(r,c){return `(${r},${c})`;}
+
+/* ================================================================
+   탭 전환
+   ================================================================ */
+function switchTab(idx){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  document.querySelectorAll('.tab-content').forEach((d,i)=>d.classList.toggle('active',i===idx));
+}
+
+/* ================================================================
+   격자 생성 (공통)
+   ================================================================ */
+function buildGrid(containerId, gridId, onClick){
+  const grid=document.getElementById(gridId);
+  grid.innerHTML='';
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const cell=document.createElement('div');
+      cell.className='cell';
+      cell.id=gridId+'-'+r+'-'+c;
+      cell.innerHTML=`<span class="coord">${r},${c}</span><span class="depth-num" id="${gridId}-d-${r}-${c}"></span><span class="visit-order" id="${gridId}-o-${r}-${c}"></span>`;
+      if(isStart(r,c)) cell.classList.add('start');
+      if(isEnd(r,c)) cell.classList.add('end');
+      if(walls[r][c]) cell.classList.add('wall');
+      cell.addEventListener('click',()=>onClick(r,c));
+      grid.appendChild(cell);
+    }
+  }
+  // SVG overlay
+  const container=document.getElementById(containerId);
+  let svg=container.querySelector('.svg-overlay');
+  if(svg) svg.remove();
+  svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('class','svg-overlay');
+  const w=COLS*CELL_SIZE+(COLS-1)*GAP;
+  const h=ROWS*CELL_SIZE+(ROWS-1)*GAP;
+  svg.setAttribute('width',w);
+  svg.setAttribute('height',h);
+  svg.innerHTML='';
+  container.style.position='relative';
+  container.style.width=w+'px';
+  container.style.height=h+'px';
+  container.style.margin='0 auto';
+  container.appendChild(svg);
+}
+
+function cellCenter(r,c){
+  const x=c*(CELL_SIZE+GAP)+CELL_SIZE/2;
+  const y=r*(CELL_SIZE+GAP)+CELL_SIZE/2;
+  return {x,y};
+}
+
+function drawArrow(svg, r1,c1, r2,c2, cls){
+  const p1=cellCenter(r1,c1), p2=cellCenter(r2,c2);
+  // shorten line so arrow tip doesn't overlap center
+  const dx=p2.x-p1.x, dy=p2.y-p1.y;
+  const len=Math.sqrt(dx*dx+dy*dy);
+  const shorten=14;
+  const sx=p1.x+dx/len*shorten, sy=p1.y+dy/len*shorten;
+  const ex=p2.x-dx/len*shorten, ey=p2.y-dy/len*shorten;
+  const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+  line.setAttribute('x1',sx); line.setAttribute('y1',sy);
+  line.setAttribute('x2',ex); line.setAttribute('y2',ey);
+  line.setAttribute('class','arrow-line '+cls);
+  // set marker based on class
+  if(cls.includes('arrow-final')){
+    line.setAttribute('marker-end','url(#arrowHeadGreen)');
+  } else if(cls.includes('arrow-bfs')){
+    line.setAttribute('marker-end','url(#arrowHeadBFS)');
+  } else if(cls.includes('arrow-dfs')){
+    line.setAttribute('marker-end','url(#arrowHeadDFS)');
+  }
+  svg.appendChild(line);
+  return line;
+}
+
+function clearSVG(containerId){
+  const svg=document.getElementById(containerId).querySelector('.svg-overlay');
+  if(svg) svg.innerHTML='';
+}
+
+function setCellState(gridId, r, c, state, depth, order){
+  const cell=document.getElementById(gridId+'-'+r+'-'+c);
+  if(!cell) return;
+  cell.classList.remove('visiting','visited','path-final','current','no-path');
+  if(state) cell.classList.add(state);
+  const dEl=document.getElementById(gridId+'-d-'+r+'-'+c);
+  const oEl=document.getElementById(gridId+'-o-'+r+'-'+c);
+  if(depth!==undefined&&depth!==null) dEl.textContent=depth;
+  if(order!==undefined&&order!==null) oEl.textContent='#'+order;
+}
+
+function resetCellStates(gridId){
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    const cell=document.getElementById(gridId+'-'+r+'-'+c);
+    if(!cell) continue;
+    cell.classList.remove('visiting','visited','path-final','current','no-path');
+    if(isStart(r,c)) cell.classList.add('start');
+    if(isEnd(r,c)) cell.classList.add('end');
+    document.getElementById(gridId+'-d-'+r+'-'+c).textContent='';
+    document.getElementById(gridId+'-o-'+r+'-'+c).textContent='';
+  }
+}
+
+/* ================================================================
+   장애물 토글
+   ================================================================ */
+function toggleWall(r,c){
+  if(isStart(r,c)||isEnd(r,c)) return;
+  if(t1Running||t2Running) return;
+  walls[r][c]=!walls[r][c];
+  refreshAllGrids();
+}
+
+function refreshAllGrids(){
+  // Tab1 grids
+  buildGrid('bfs-grid-container','bfs-grid',toggleWall);
+  buildGrid('dfs-grid-container','dfs-grid',toggleWall);
+  // Tab2 grid
+  buildGrid('t2-grid-container','t2-grid',toggleWall);
+}
+
+/* ================================================================
+   TAB 1: BFS vs DFS 최단거리 비교
+   ================================================================ */
+function tab1Start(){
+  if(t1Running) return;
+  t1Running=true;
+  document.getElementById('t1-start').disabled=true;
+
+  // Generate BFS steps
+  const bfsSteps=genBFSSteps();
+  // Generate DFS steps
+  const dfsSteps=genDFSSteps();
+
+  // Run both in parallel
+  let bi=0, di=0;
+  const bfsDone=()=>bi>=bfsSteps.length;
+  const dfsDone=()=>di>=dfsSteps.length;
+
+  function tick(){
+    if(!t1Running) return;
+    const ms=speedMs('t1-speed');
+    if(!bfsDone()) applyBFSStep(bfsSteps[bi++]);
+    if(!dfsDone()) applyDFSStep(dfsSteps[di++]);
+    if(bfsDone()&&dfsDone()){
+      t1Running=false;
+      document.getElementById('t1-start').disabled=false;
+      return;
+    }
+    t1Timer=setTimeout(tick, ms);
+  }
+  tick();
+}
+
+function tab1Reset(){
+  t1Running=false;
+  if(t1Timer) clearTimeout(t1Timer);
+  resetCellStates('bfs-grid');
+  resetCellStates('dfs-grid');
+  clearSVG('bfs-grid-container');
+  clearSVG('dfs-grid-container');
+  document.getElementById('bfs-queue').textContent='[ ]';
+  document.getElementById('dfs-stack').textContent='[ ]';
+  document.getElementById('bfs-depth').textContent='';
+  document.getElementById('dfs-depth').textContent='';
+  document.getElementById('bfs-msg').innerHTML='';
+  document.getElementById('dfs-msg').innerHTML='';
+  document.getElementById('t1-start').disabled=false;
+}
+
+/* ── BFS step generation ── */
+function genBFSSteps(){
+  const steps=[];
+  const visited=Array.from({length:ROWS},()=>Array(COLS).fill(false));
+  const depth=Array.from({length:ROWS},()=>Array(COLS).fill(-1));
+  const parent=Array.from({length:ROWS},()=>Array(COLS).fill(null));
+  const queue=[[START[0],START[1]]];
+  visited[START[0]][START[1]]=true;
+  depth[START[0]][START[1]]=0;
+  let order=1;
+  let found=false;
+
+  steps.push({type:'init', queue:[[...START]], visited:[[...START]], depth:0, order:1, cur:START});
+
+  while(queue.length>0){
+    const [r,c]=queue.shift();
+    steps.push({type:'dequeue', cur:[r,c], queue:queue.map(q=>[...q]), depth:depth[r][c], order:order});
+
+    if(isEnd(r,c)){
+      found=true;
+      // trace path
+      const path=[];
+      let cr=r, cc=c;
+      while(parent[cr][cc]!==null){
+        path.unshift([cr,cc]);
+        const p=parent[cr][cc];
+        cr=p[0]; cc=p[1];
+      }
+      path.unshift([START[0],START[1]]);
+      steps.push({type:'found', path, depth:depth[r][c]});
+      break;
+    }
+
+    for(let d=0;d<4;d++){
+      const nr=r+DR[d], nc=c+DC[d];
+      if(!inBounds(nr,nc)||walls[nr][nc]||visited[nr][nc]) continue;
+      visited[nr][nc]=true;
+      depth[nr][nc]=depth[r][c]+1;
+      parent[nr][nc]=[r,c];
+      queue.push([nr,nc]);
+      order++;
+      steps.push({type:'enqueue', cur:[r,c], next:[nr,nc], queue:queue.map(q=>[...q]), depth:depth[nr][nc], order});
+    }
+  }
+  if(!found) steps.push({type:'notfound'});
+  return steps;
+}
+
+/* ── DFS step generation (iterative with stack for shortest-path-like behavior, but actually recursive) ── */
+function genDFSSteps(){
+  const steps=[];
+  const visited=Array.from({length:ROWS},()=>Array(COLS).fill(false));
+  const depthArr=Array.from({length:ROWS},()=>Array(COLS).fill(-1));
+  const parent=Array.from({length:ROWS},()=>Array(COLS).fill(null));
+  let order=1;
+  let found=false;
+  let foundPath=null;
+
+  // Iterative DFS with explicit stack
+  const stack=[[START[0],START[1]]];
+  depthArr[START[0]][START[1]]=0;
+
+  steps.push({type:'init', stack:[[...START]], depth:0, order:1, cur:START});
+
+  while(stack.length>0){
+    const [r,c]=stack.pop();
+    if(visited[r][c]) continue;
+    visited[r][c]=true;
+    steps.push({type:'pop', cur:[r,c], parent:parent[r][c], stack:stack.map(s=>[...s]), depth:depthArr[r][c], order});
+    order++;
+
+    if(isEnd(r,c)){
+      found=true;
+      const path=[];
+      let cr=r, cc=c;
+      while(parent[cr][cc]!==null){
+        path.unshift([cr,cc]);
+        const p=parent[cr][cc];
+        cr=p[0]; cc=p[1];
+      }
+      path.unshift([START[0],START[1]]);
+      foundPath=path;
+      steps.push({type:'found', path, depth:depthArr[r][c]});
+      break;
+    }
+
+    // push neighbors in reverse order so first direction is explored first
+    for(let d=3;d>=0;d--){
+      const nr=r+DR[d], nc=c+DC[d];
+      if(!inBounds(nr,nc)||walls[nr][nc]||visited[nr][nc]) continue;
+      depthArr[nr][nc]=depthArr[r][c]+1;
+      parent[nr][nc]=[r,c];
+      stack.push([nr,nc]);
+      steps.push({type:'push', cur:[r,c], next:[nr,nc], stack:stack.map(s=>[...s]), depth:depthArr[nr][nc], order});
+    }
+  }
+  if(!found) steps.push({type:'notfound'});
+  return steps;
+}
+
+/* ── Apply steps visually ── */
+let bfsOrder=0;
+function applyBFSStep(step){
+  const gridId='bfs-grid';
+  const svg=document.getElementById('bfs-grid-container').querySelector('.svg-overlay');
+  switch(step.type){
+    case 'init':
+      bfsOrder=1;
+      setCellState(gridId,START[0],START[1],'visiting',0,bfsOrder);
+      break;
+    case 'dequeue':
+      setCellState(gridId,step.cur[0],step.cur[1],'current',step.depth,null);
+      document.getElementById('bfs-queue').textContent='[ '+step.queue.map(q=>coordStr(q[0],q[1])).join(', ')+' ]';
+      document.getElementById('bfs-depth').textContent='현재 depth: '+step.depth;
+      break;
+    case 'enqueue':
+      bfsOrder++;
+      setCellState(gridId,step.next[0],step.next[1],'visiting',step.depth,bfsOrder);
+      drawArrow(svg,step.cur[0],step.cur[1],step.next[0],step.next[1],'arrow-bfs');
+      document.getElementById('bfs-queue').textContent='[ '+step.queue.map(q=>coordStr(q[0],q[1])).join(', ')+' ]';
+      break;
+    case 'found':
+      // clear all arrows, draw final path
+      svg.innerHTML='';
+      for(let i=0;i<step.path.length-1;i++){
+        const [r1,c1]=step.path[i], [r2,c2]=step.path[i+1];
+        drawArrow(svg,r1,c1,r2,c2,'arrow-bfs arrow-final');
+      }
+      step.path.forEach(([r,c])=>setCellState(gridId,r,c,'path-final',null,null));
+      document.getElementById('bfs-msg').innerHTML='<div class="msg msg-success">최단 경로 발견! 길이: '+step.depth+'</div>';
+      break;
+    case 'notfound':
+      document.getElementById('bfs-msg').innerHTML='<div class="msg msg-fail">경로 없음</div>';
+      break;
+  }
+  // mark dequeued cell as visited (not current) after processing
+  if(step.type==='dequeue' || step.type==='enqueue'){
+    // update previously current cells
+    for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+      const cell=document.getElementById(gridId+'-'+r+'-'+c);
+      if(cell && cell.classList.contains('current') && !(r===step.cur[0]&&c===step.cur[1])){
+        cell.classList.remove('current');
+        cell.classList.add('visited');
+      }
+    }
+  }
+}
+
+let dfsOrder=0;
+function applyDFSStep(step){
+  const gridId='dfs-grid';
+  const svg=document.getElementById('dfs-grid-container').querySelector('.svg-overlay');
+  switch(step.type){
+    case 'init':
+      dfsOrder=0;
+      break;
+    case 'pop':
+      dfsOrder++;
+      // remove previous current
+      for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+        const cell=document.getElementById(gridId+'-'+r+'-'+c);
+        if(cell && cell.classList.contains('current')){
+          cell.classList.remove('current');
+          cell.classList.add('visited');
+        }
+      }
+      setCellState(gridId,step.cur[0],step.cur[1],'current',step.depth,dfsOrder);
+      // draw arrow from parent to current (only when actually visited)
+      if(step.parent){
+        drawArrow(svg,step.parent[0],step.parent[1],step.cur[0],step.cur[1],'arrow-dfs');
+      }
+      document.getElementById('dfs-stack').textContent='[ '+step.stack.map(s=>coordStr(s[0],s[1])).join(', ')+' ]';
+      document.getElementById('dfs-depth').textContent='현재 depth: '+step.depth;
+      break;
+    case 'push':
+      document.getElementById('dfs-stack').textContent='[ '+step.stack.map(s=>coordStr(s[0],s[1])).join(', ')+' ]';
+      break;
+    case 'found':
+      svg.innerHTML='';
+      for(let i=0;i<step.path.length-1;i++){
+        const [r1,c1]=step.path[i], [r2,c2]=step.path[i+1];
+        drawArrow(svg,r1,c1,r2,c2,'arrow-dfs arrow-final');
+      }
+      step.path.forEach(([r,c])=>setCellState(gridId,r,c,'path-final',null,null));
+      document.getElementById('dfs-msg').innerHTML='<div class="msg msg-success">경로 발견! 길이: '+step.depth+'</div>';
+      break;
+    case 'notfound':
+      document.getElementById('dfs-msg').innerHTML='<div class="msg msg-fail">경로 없음</div>';
+      break;
+  }
+}
+
+/* ================================================================
+   TAB 2: 모든 경로 탐색
+   ================================================================ */
+let t2PathCount=0, t2VisitCount=0, t2MaxDS=0;
+
+function tab2RunDFS(){
+  if(t2Running) return;
+  t2Running=true;
+  document.getElementById('t2-dfs-btn').disabled=true;
+  document.getElementById('t2-bfs-btn').disabled=true;
+
+  const steps=genAllPathsDFS();
+  let si=0;
+  t2PathCount=0; t2VisitCount=0; t2MaxDS=0;
+  document.getElementById('t2-path-list').innerHTML='';
+  document.getElementById('t2-ds-label').textContent='스택 (Stack):';
+  document.getElementById('t2-ds-state').className='stack-state';
+  document.getElementById('t2-warning').classList.remove('show');
+
+  function tick(){
+    if(!t2Running||si>=steps.length){
+      t2Running=false;
+      document.getElementById('t2-dfs-btn').disabled=false;
+      document.getElementById('t2-bfs-btn').disabled=false;
+      if(t2PathCount===0){
+        document.getElementById('t2-msg').innerHTML='<div class="msg msg-fail">경로 없음</div>';
+      } else {
+        document.getElementById('t2-msg').innerHTML='<div class="msg msg-success">탐색 완료! '+t2PathCount+'개 경로 발견</div>';
+      }
+      return;
+    }
+    applyTab2DFSStep(steps[si++]);
+    t2Timer=setTimeout(tick, speedMs('t2-speed'));
+  }
+  tick();
+}
+
+function genAllPathsDFS(){
+  const steps=[];
+  const visited=Array.from({length:ROWS},()=>Array(COLS).fill(false));
+  let visitCount=0, maxStack=0, pathCount=0;
+
+  function dfs(r,c,depth,path){
+    visited[r][c]=true;
+    visitCount++;
+    path.push([r,c]);
+    const stackSnap=path.map(p=>[...p]);
+    if(stackSnap.length>maxStack) maxStack=stackSnap.length;
+
+    steps.push({type:'visit', cur:[r,c], depth, path:[...path.map(p=>[...p])], stackSize:stackSnap.length,
+      visitCount, maxStack});
+
+    if(isEnd(r,c)){
+      pathCount++;
+      steps.push({type:'path-found', path:[...path.map(p=>[...p])], pathCount, visitCount, maxStack});
+    } else {
+      for(let d=0;d<4;d++){
+        const nr=r+DR[d], nc=c+DC[d];
+        if(!inBounds(nr,nc)||walls[nr][nc]||visited[nr][nc]) continue;
+        steps.push({type:'explore', cur:[r,c], next:[nr,nc], depth:depth+1});
+        dfs(nr,nc,depth+1,path);
+      }
+    }
+    // backtrack
+    visited[r][c]=false;
+    path.pop();
+    steps.push({type:'backtrack', cur:[r,c], depth, path:[...path.map(p=>[...p])], visitCount, maxStack});
+  }
+
+  dfs(START[0],START[1],0,[]);
+  steps.push({type:'done', pathCount, visitCount, maxStack});
+  return steps;
+}
+
+function applyTab2DFSStep(step){
+  const gridId='t2-grid';
+  const svg=document.getElementById('t2-grid-container').querySelector('.svg-overlay');
+
+  switch(step.type){
+    case 'visit':
+      t2VisitCount=step.visitCount;
+      if(step.stackSize>t2MaxDS) t2MaxDS=step.stackSize;
+      // clear previous current
+      document.querySelectorAll('#t2-grid .cell.current').forEach(c=>{ c.classList.remove('current'); c.classList.add('visited'); });
+      setCellState(gridId,step.cur[0],step.cur[1],'current',step.depth,step.visitCount);
+      // draw path arrows
+      svg.innerHTML='';
+      for(let i=0;i<step.path.length-1;i++){
+        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-dfs');
+      }
+      document.getElementById('t2-ds-state').textContent='[ '+step.path.map(p=>coordStr(p[0],p[1])).join(' → ')+' ]';
+      document.getElementById('t2-depth').textContent='현재 depth: '+step.depth;
+      updateTab2Stats();
+      break;
+
+    case 'path-found':
+      t2PathCount=step.pathCount;
+      // highlight path
+      step.path.forEach(([r,c])=>setCellState(gridId,r,c,'path-final',null,null));
+      svg.innerHTML='';
+      for(let i=0;i<step.path.length-1;i++){
+        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-dfs arrow-final');
+      }
+      // add to list
+      const pathStr=step.path.map(p=>coordStr(p[0],p[1])).join(' → ');
+      const listEl=document.getElementById('t2-path-list');
+      const item=document.createElement('div');
+      item.className='path-item';
+      item.textContent=`경로 ${step.pathCount}: ${pathStr} (길이: ${step.path.length-1})`;
+      listEl.appendChild(item);
+      listEl.scrollTop=listEl.scrollHeight;
+      updateTab2Stats();
+      break;
+
+    case 'backtrack':
+      // dim the cell being backtracked from
+      setCellState(gridId,step.cur[0],step.cur[1],'visited',null,null);
+      document.getElementById(gridId+'-'+step.cur[0]+'-'+step.cur[1]).classList.remove('current','path-final');
+      document.getElementById(gridId+'-'+step.cur[0]+'-'+step.cur[1]).classList.add('visited');
+      // redraw path
+      svg.innerHTML='';
+      for(let i=0;i<step.path.length-1;i++){
+        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-dfs');
+      }
+      if(step.path.length>0){
+        document.getElementById('t2-ds-state').textContent='[ '+step.path.map(p=>coordStr(p[0],p[1])).join(' → ')+' ]';
+      } else {
+        document.getElementById('t2-ds-state').textContent='[ ]';
+      }
+      break;
+
+    case 'done':
+      t2MaxDS=step.maxStack;
+      updateTab2Stats();
+      break;
+  }
+}
+
+function updateTab2Stats(){
+  document.getElementById('t2-stat-paths').textContent=t2PathCount;
+  document.getElementById('t2-stat-visits').textContent=t2VisitCount;
+  document.getElementById('t2-stat-maxds').textContent=t2MaxDS;
+}
+
+/* ── Tab2 BFS all paths ── */
+function tab2RunBFS(){
+  if(t2Running) return;
+  t2Running=true;
+  document.getElementById('t2-dfs-btn').disabled=true;
+  document.getElementById('t2-bfs-btn').disabled=true;
+  document.getElementById('t2-ds-label').textContent='큐 (Queue):';
+  document.getElementById('t2-ds-state').className='queue-state';
+  document.getElementById('t2-path-list').innerHTML='';
+  document.getElementById('t2-warning').classList.remove('show');
+  document.getElementById('t2-msg').innerHTML='';
+  t2PathCount=0; t2VisitCount=0; t2MaxDS=0;
+
+  const steps=genAllPathsBFS();
+  let si=0;
+
+  function tick(){
+    if(!t2Running||si>=steps.length){
+      t2Running=false;
+      document.getElementById('t2-dfs-btn').disabled=false;
+      document.getElementById('t2-bfs-btn').disabled=false;
+      if(t2PathCount===0){
+        document.getElementById('t2-msg').innerHTML='<div class="msg msg-fail">경로 없음</div>';
+      } else {
+        document.getElementById('t2-msg').innerHTML='<div class="msg msg-success">탐색 완료! '+t2PathCount+'개 경로 발견</div>';
+      }
+      return;
+    }
+    applyTab2BFSStep(steps[si++]);
+    t2Timer=setTimeout(tick, speedMs('t2-speed'));
+  }
+  tick();
+}
+
+function genAllPathsBFS(){
+  const steps=[];
+  // BFS with full path in each queue entry: [path]
+  const queue=[[[START[0],START[1]]]];
+  let visitCount=0, maxQ=1, pathCount=0;
+
+  steps.push({type:'init', queueSize:1});
+
+  while(queue.length>0){
+    const path=queue.shift();
+    const [r,c]=path[path.length-1];
+    visitCount++;
+
+    steps.push({type:'dequeue', cur:[r,c], path:[...path.map(p=>[...p])], queueSize:queue.length,
+      visitCount, maxQ, depth:path.length-1});
+
+    if(isEnd(r,c)){
+      pathCount++;
+      steps.push({type:'path-found', path:[...path.map(p=>[...p])], pathCount, visitCount, maxQ, queueSize:queue.length});
+      continue;
+    }
+
+    for(let d=0;d<4;d++){
+      const nr=r+DR[d], nc=c+DC[d];
+      if(!inBounds(nr,nc)||walls[nr][nc]) continue;
+      // check if already in path (no revisit)
+      if(path.some(p=>p[0]===nr&&p[1]===nc)) continue;
+      const newPath=[...path,[nr,nc]];
+      queue.push(newPath);
+    }
+
+    if(queue.length>maxQ) maxQ=queue.length;
+
+    // warning if queue gets large
+    if(queue.length>30){
+      steps.push({type:'warning', queueSize:queue.length, maxQ, visitCount,
+        msg:`큐 크기가 ${queue.length}개로 폭발적으로 증가하고 있습니다! BFS로 모든 경로를 탐색하면 큐의 각 원소에 경로 전체를 저장해야 하므로 메모리가 급격히 증가합니다.`});
+    }
+
+    steps.push({type:'expand', cur:[r,c], queueSize:queue.length, maxQ, visitCount});
+
+    // safety limit
+    if(queue.length>500){
+      steps.push({type:'abort', queueSize:queue.length, maxQ, visitCount, pathCount,
+        msg:'큐 크기가 500을 초과하여 탐색을 중단합니다. BFS로 모든 경로를 찾는 것은 비효율적입니다!'});
+      break;
+    }
+  }
+
+  steps.push({type:'done', pathCount, visitCount, maxQ});
+  return steps;
+}
+
+function applyTab2BFSStep(step){
+  const gridId='t2-grid';
+  const svg=document.getElementById('t2-grid-container').querySelector('.svg-overlay');
+
+  switch(step.type){
+    case 'init':
+      setCellState(gridId,START[0],START[1],'visiting',0,1);
+      break;
+
+    case 'dequeue':
+      t2VisitCount=step.visitCount;
+      if(step.queueSize+1>t2MaxDS) t2MaxDS=step.queueSize+1;
+      // clear previous
+      resetCellStates(gridId);
+      // highlight path being examined
+      step.path.forEach(([r,c],i)=>{
+        if(i===step.path.length-1) setCellState(gridId,r,c,'current',i,null);
+        else setCellState(gridId,r,c,'visiting',i,null);
+      });
+      svg.innerHTML='';
+      for(let i=0;i<step.path.length-1;i++){
+        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-bfs');
+      }
+      document.getElementById('t2-ds-state').textContent=`큐 크기: ${step.queueSize} | 현재 경로: ${step.path.map(p=>coordStr(p[0],p[1])).join(' → ')}`;
+      document.getElementById('t2-depth').textContent='현재 depth: '+step.depth;
+      updateTab2Stats();
+      break;
+
+    case 'path-found':
+      t2PathCount=step.pathCount;
+      resetCellStates(gridId);
+      step.path.forEach(([r,c])=>setCellState(gridId,r,c,'path-final',null,null));
+      svg.innerHTML='';
+      for(let i=0;i<step.path.length-1;i++){
+        drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-bfs arrow-final');
+      }
+      const pathStr=step.path.map(p=>coordStr(p[0],p[1])).join(' → ');
+      const listEl=document.getElementById('t2-path-list');
+      const item=document.createElement('div');
+      item.className='path-item';
+      item.textContent=`경로 ${step.pathCount}: ${pathStr} (길이: ${step.path.length-1})`;
+      listEl.appendChild(item);
+      listEl.scrollTop=listEl.scrollHeight;
+      updateTab2Stats();
+      break;
+
+    case 'warning':
+      const warn=document.getElementById('t2-warning');
+      warn.textContent=step.msg;
+      warn.classList.add('show');
+      t2MaxDS=step.maxQ;
+      updateTab2Stats();
+      break;
+
+    case 'expand':
+      t2MaxDS=step.maxQ;
+      updateTab2Stats();
+      break;
+
+    case 'abort':
+      t2PathCount=step.pathCount;
+      t2MaxDS=step.maxQ;
+      t2VisitCount=step.visitCount;
+      updateTab2Stats();
+      document.getElementById('t2-msg').innerHTML='<div class="msg msg-fail">'+step.msg+'</div>';
+      t2Running=false;
+      document.getElementById('t2-dfs-btn').disabled=false;
+      document.getElementById('t2-bfs-btn').disabled=false;
+      break;
+
+    case 'done':
+      t2PathCount=step.pathCount;
+      t2MaxDS=step.maxQ;
+      t2VisitCount=step.visitCount;
+      updateTab2Stats();
+      break;
+  }
+}
+
+function tab2Reset(){
+  t2Running=false;
+  if(t2Timer) clearTimeout(t2Timer);
+  resetCellStates('t2-grid');
+  clearSVG('t2-grid-container');
+  document.getElementById('t2-ds-state').textContent='[ ]';
+  document.getElementById('t2-depth').textContent='';
+  document.getElementById('t2-msg').innerHTML='';
+  document.getElementById('t2-path-list').innerHTML='<span style="color:#94a3b8;">아직 탐색을 시작하지 않았습니다.</span>';
+  document.getElementById('t2-warning').classList.remove('show');
+  t2PathCount=0; t2VisitCount=0; t2MaxDS=0;
+  updateTab2Stats();
+  document.getElementById('t2-dfs-btn').disabled=false;
+  document.getElementById('t2-bfs-btn').disabled=false;
+}
+
+/* ================================================================
+   초기화
+   ================================================================ */
+refreshAllGrids();
+</script>
+</body>
+</html>
