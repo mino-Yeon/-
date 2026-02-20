@@ -840,6 +840,7 @@ function tab2Run(mode){
 
 function tab2Reset(){
   t2Running=false;
+  prevQCards=null;
   if(t2Timer) clearTimeout(t2Timer);
   resetCellStates('t2-grid');
   clearSVG('t2-grid-container');
@@ -1135,6 +1136,7 @@ function renderQueueCards(qSnap, totalInQ){
   }
 }
 
+let prevQCards=null;
 function applyMode2Step(step){
   const gridId='t2-grid';
   const svg=document.getElementById('t2-grid-container').querySelector('.svg-overlay');
@@ -1158,7 +1160,9 @@ function applyMode2Step(step){
         drawArrow(svg,step.path[i][0],step.path[i][1],step.path[i+1][0],step.path[i+1][1],'arrow-bfs');
       document.getElementById('t2-ds-state').textContent=`큐 크기: ${step.totalInQ} | 현재: ${step.path.map(p=>coordStr(p[0],p[1])).join('→')}`;
       document.getElementById('t2-depth').textContent='현재 depth: '+step.depth;
-      renderQueueCards(step.qSnap, step.totalInQ);
+      if(prevQCards) renderQueueCards(prevQCards.qSnap, prevQCards.totalInQ);
+      else document.getElementById('t2-qcards').innerHTML='';
+      prevQCards={qSnap:step.qSnap, totalInQ:step.totalInQ};
       updateT2Stats();
       updateT2Counters();
       break;
