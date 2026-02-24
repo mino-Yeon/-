@@ -1,967 +1,922 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Block vs Inline 요소</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        font-family: "Segoe UI", sans-serif;
-        background: #f0f2f5;
-        color: #333;
-        font-size: 14px;
-      }
 
-      .page-header {
-        background: #1e272e;
-        color: #fff;
-        padding: 24px 32px;
-      }
-      .page-header h1 {
-        font-size: 22px;
-        margin-bottom: 6px;
-      }
-      .page-header p {
-        font-size: 13px;
-        color: #b2bec3;
-        line-height: 1.7;
-      }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Block vs Inline 요소</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-      .tab-bar {
-        background: #2d3436;
-        display: flex;
-        gap: 4px;
-        padding: 10px 20px 0;
-      }
-      .tab-btn {
-        padding: 10px 24px;
-        border: none;
-        border-radius: 8px 8px 0 0;
-        background: #3d4852;
-        color: #b2bec3;
-        font-size: 13px;
-        font-weight: bold;
-        cursor: pointer;
-        border-bottom: 3px solid transparent;
-        transition: all 0.2s;
-      }
-      .tab-btn:hover {
-        background: #4a5568;
-        color: #fff;
-      }
-      .tab-btn.active {
-        background: #f0f2f5;
-        color: #1e272e;
-        border-bottom-color: #f0f2f5;
-      }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      font-size: 14px;
+    }
 
-      .tab-panel {
-        display: none;
-        max-width: 960px;
-        margin: 28px auto;
-        padding: 0 20px 40px;
-      }
-      .tab-panel.active {
-        display: block;
-      }
+    .page-header {
+      background: #1e272e;
+      color: #fff;
+      padding: 24px 32px;
+    }
 
-      .card {
-        background: #fff;
-        border-radius: 10px;
-        padding: 24px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
-      }
-      .card-title {
-        font-size: 15px;
-        font-weight: bold;
-        color: #2d3436;
-        margin-bottom: 6px;
-      }
-      .card-desc {
-        font-size: 13px;
-        color: #636e72;
-        line-height: 1.8;
-        margin-bottom: 18px;
-      }
+    .page-header h1 {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
 
-      .traits {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 20px;
-      }
-      .trait {
-        border-radius: 8px;
-        padding: 10px 16px;
-        font-size: 12px;
-        line-height: 1.7;
-      }
-      .trait strong {
-        display: block;
-        font-size: 13px;
-        margin-bottom: 2px;
-      }
-      .trait-block {
-        background: #e8f4fd;
-        border-left: 4px solid #2980b9;
-      }
-      .trait-inline {
-        background: #fef9e7;
-        border-left: 4px solid #f39c12;
-      }
-      .trait-inlb {
-        background: #eafaf1;
-        border-left: 4px solid #27ae60;
-      }
-      .trait-no {
-        background: #fdedec;
-        border-left: 4px solid #e74c3c;
-      }
+    .page-header p {
+      font-size: 13px;
+      color: #b2bec3;
+      line-height: 1.7;
+    }
 
-      .tag-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 20px;
-      }
-      .tag-chip {
-        padding: 5px 14px;
-        border-radius: 20px;
-        font-family: monospace;
-        font-size: 13px;
-        font-weight: bold;
-      }
-      .chip-block {
-        background: #d6eaf8;
-        color: #1a5276;
-      }
-      .chip-inline {
-        background: #fdebd0;
-        color: #784212;
-      }
-      .chip-inlb {
-        background: #d5f5e3;
-        color: #1e8449;
-      }
+    .tab-bar {
+      background: #2d3436;
+      display: flex;
+      gap: 4px;
+      padding: 10px 20px 0;
+    }
 
-      .viz-label {
-        font-size: 11px;
-        font-weight: bold;
-        color: #888;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        margin-bottom: 8px;
-      }
-      .viz-wrap {
-        background: #f8f9fa;
-        border: 2px dashed #dee2e6;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 10px;
-      }
-      .viz-note {
-        font-size: 12px;
-        color: #636e72;
-        margin-top: 8px;
-        line-height: 1.7;
-      }
+    .tab-btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 8px 8px 0 0;
+      background: #3d4852;
+      color: #b2bec3;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all .2s;
+    }
 
-      /* block 요소 */
-      .demo-block {
-        display: block;
-        background: #d6eaf8;
-        border: 2px solid #2980b9;
-        padding: 10px 14px;
-        margin-bottom: 6px;
-        font-size: 13px;
-        color: #1a5276;
-        font-weight: bold;
-        border-radius: 4px;
-      }
-      .width-arrow {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 11px;
-        color: #2980b9;
-        margin-top: 4px;
-      }
-      .arrow-line {
-        flex: 1;
-        height: 2px;
-        background: #2980b9;
-        position: relative;
-      }
-      .arrow-line::before,
-      .arrow-line::after {
-        content: "";
-        position: absolute;
-        top: -4px;
-        width: 0;
-        height: 0;
-        border-top: 5px solid transparent;
-        border-bottom: 5px solid transparent;
-      }
-      .arrow-line::before {
-        left: 0;
-        border-right: 7px solid #2980b9;
-      }
-      .arrow-line::after {
-        right: 0;
-        border-left: 7px solid #2980b9;
-      }
+    .tab-btn:hover {
+      background: #4a5568;
+      color: #fff;
+    }
 
-      /* inline 요소 */
-      .demo-inline {
-        display: inline;
-        background: #fdebd0;
-        border: 2px solid #f39c12;
-        padding: 4px 8px;
-        font-size: 13px;
-        color: #784212;
-        font-weight: bold;
-        border-radius: 4px;
-      }
-      .inline-wrap {
-        line-height: 2.6;
-      }
+    .tab-btn.active {
+      background: #f0f2f5;
+      color: #1e272e;
+      border-bottom-color: #f0f2f5;
+    }
 
-      /* inline-block 요소 */
-      .demo-inlb {
-        display: inline-block;
-        background: #d5f5e3;
-        border: 2px solid #27ae60;
-        padding: 10px 16px;
-        font-size: 13px;
-        color: #1e8449;
-        font-weight: bold;
-        border-radius: 4px;
-        vertical-align: top;
-      }
+    .tab-panel {
+      display: none;
+      max-width: 960px;
+      margin: 28px auto;
+      padding: 0 20px 40px;
+    }
 
-      /* ── margin/padding 시각화 전용 ── */
+    .tab-panel.active {
+      display: block;
+    }
 
-      /* margin 영역 표시용 래퍼 */
-      .margin-box {
-        display: inline-block;
-        background: #fce4d6; /* 연한 주황 = margin 영역 */
-        border: 2px dashed #e67e22;
-      }
-      .margin-box-block {
-        display: block;
-        background: #fce4d6;
-        border: 2px dashed #e67e22;
-        margin-bottom: 4px;
-      }
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .07);
+    }
 
-      /* padding 영역은 요소 자체 배경으로 표현 */
-      .vis-block {
-        display: block;
-        background: #d6eaf8;
-        border: 2px solid #2980b9;
-        font-size: 13px;
-        color: #1a5276;
-        font-weight: bold;
-        border-radius: 2px;
-        text-align: center;
-      }
-      .vis-inline {
-        display: inline;
-        background: #fdebd0;
-        border: 2px solid #f39c12;
-        font-size: 13px;
-        color: #784212;
-        font-weight: bold;
-        border-radius: 2px;
-      }
-      .vis-inlb {
-        display: inline-block;
-        background: #d5f5e3;
-        border: 2px solid #27ae60;
-        font-size: 13px;
-        color: #1e8449;
-        font-weight: bold;
-        border-radius: 2px;
-        vertical-align: top;
-      }
+    .card-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #2d3436;
+      margin-bottom: 6px;
+    }
 
-      /* 범례 */
-      .legend-row {
-        display: flex;
-        gap: 16px;
-        flex-wrap: wrap;
-        margin-bottom: 14px;
-        font-size: 12px;
-      }
-      .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .legend-box {
-        width: 14px;
-        height: 14px;
-        border-radius: 2px;
-      }
+    .card-desc {
+      font-size: 13px;
+      color: #636e72;
+      line-height: 1.8;
+      margin-bottom: 18px;
+    }
 
-      /* 비교 그리드 */
-      .compare-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 14px;
-        margin-top: 4px;
-      }
-      .compare-col {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 14px;
-      }
-      .compare-col-title {
-        font-size: 12px;
-        font-weight: bold;
-        margin-bottom: 12px;
-        padding-bottom: 8px;
-        border-bottom: 2px solid #eee;
-      }
-      .col-block .compare-col-title {
-        color: #2980b9;
-        border-color: #2980b9;
-      }
-      .col-inline .compare-col-title {
-        color: #e67e22;
-        border-color: #e67e22;
-      }
-      .col-inlb .compare-col-title {
-        color: #27ae60;
-        border-color: #27ae60;
-      }
+    .traits {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
 
-      /* 코드 블록 */
-      .code {
-        background: #1e2130;
-        color: #cdd6f4;
-        border-radius: 6px;
-        padding: 14px 16px;
-        font-family: monospace;
-        font-size: 12px;
-        line-height: 1.8;
-        white-space: pre;
-        overflow-x: auto;
-        margin-top: 16px;
-      }
-      .kw {
-        color: #cba6f7;
-      }
-      .at {
-        color: #89dceb;
-      }
-      .val {
-        color: #a6e3a1;
-      }
-      .cm {
-        color: #6c7086;
-      }
+    .trait {
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 12px;
+      line-height: 1.7;
+    }
 
-      /* 비교표 */
-      .compare-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-      }
-      .compare-table th {
-        background: #2d3436;
-        color: #fff;
-        padding: 10px 14px;
-        text-align: left;
-      }
-      .compare-table td {
-        padding: 10px 14px;
-        border-bottom: 1px solid #eee;
-      }
-      .compare-table tr:nth-child(even) td {
-        background: #f8f9fa;
-      }
-      .o {
-        color: #27ae60;
-        font-weight: bold;
-      }
-      .x {
-        color: #e74c3c;
-        font-weight: bold;
-      }
-      .tr {
-        color: #f39c12;
-        font-weight: bold;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="page-header">
-      <h1>📦 Block / Inline / Inline-block 요소</h1>
-      <p>HTML 요소는 기본적으로 어떻게 공간을 차지하는지에 따라 block, inline, inline-block으로 구분됩니다.</p>
-    </div>
+    .trait strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
 
-    <div class="tab-bar">
-      <button class="tab-btn active" onclick="switchTab(0)">① Block 요소</button>
-      <button class="tab-btn" onclick="switchTab(1)">② Inline 요소</button>
-      <button class="tab-btn" onclick="switchTab(2)">③ Inline-block 요소</button>
-      <button class="tab-btn" onclick="switchTab(3)">④ 한눈에 비교</button>
-    </div>
+    .trait-block {
+      background: #e8f4fd;
+      border-left: 4px solid #2980b9;
+    }
 
-    <!-- ══════ 탭 1 : Block ══════ -->
-    <div class="tab-panel active" id="panel-0">
-      <div class="card">
-        <div class="card-title">Block 요소란?</div>
-        <div class="card-desc">
-          블록 요소는 <b>항상 새 줄에서 시작</b>하고, <b>가로 너비를 부모의 100%만큼 자동으로 차지</b>합니다. 쉽게 말해
-          "한 줄을 통째로 차지하는 박스"입니다.
-        </div>
+    .trait-inline {
+      background: #fef9e7;
+      border-left: 4px solid #f39c12;
+    }
 
-        <div class="traits">
-          <div class="trait trait-block"><strong>✅ 새 줄에서 시작</strong>앞뒤 요소와 줄이 바뀝니다</div>
-          <div class="trait trait-block"><strong>✅ 가로 100% 자동 차지</strong>부모 요소의 너비를 가득 채웁니다</div>
-          <div class="trait trait-block">
-            <strong>✅ width / height 지정 가능</strong>크기를 직접 설정할 수 있습니다
-          </div>
-          <div class="trait trait-block">
-            <strong>✅ margin / padding 전방향 적용</strong>상하좌우 모두 여백이 정상 동작합니다
-          </div>
-        </div>
+    .trait-inlb {
+      background: #eafaf1;
+      border-left: 4px solid #27ae60;
+    }
 
-        <div class="card-title" style="margin-bottom: 10px">대표적인 Block 태그</div>
-        <div class="tag-list">
-          <span class="tag-chip chip-block">&lt;div&gt;</span>
-          <span class="tag-chip chip-block">&lt;p&gt;</span>
-          <span class="tag-chip chip-block">&lt;h1&gt; ~ &lt;h6&gt;</span>
-          <span class="tag-chip chip-block">&lt;ul&gt;</span>
-          <span class="tag-chip chip-block">&lt;ol&gt;</span>
-          <span class="tag-chip chip-block">&lt;li&gt;</span>
-          <span class="tag-chip chip-block">&lt;header&gt;</span>
-          <span class="tag-chip chip-block">&lt;nav&gt;</span>
-          <span class="tag-chip chip-block">&lt;main&gt;</span>
-          <span class="tag-chip chip-block">&lt;section&gt;</span>
-          <span class="tag-chip chip-block">&lt;article&gt;</span>
-          <span class="tag-chip chip-block">&lt;aside&gt;</span>
-          <span class="tag-chip chip-block">&lt;footer&gt;</span>
-          <span class="tag-chip chip-block">&lt;form&gt;</span>
-        </div>
+    .trait-no {
+      background: #fdedec;
+      border-left: 4px solid #e74c3c;
+    }
 
-        <div class="viz-label">▶ 동작 시각화</div>
-        <div class="viz-wrap">
-          <div class="demo-block">&lt;div&gt; 첫 번째 블록 요소</div>
-          <div class="demo-block">&lt;div&gt; 두 번째 블록 요소</div>
-          <div class="demo-block">&lt;div&gt; 세 번째 블록 요소</div>
-          <div class="width-arrow">
-            <div class="arrow-line"></div>
-            <span>부모 너비 100% 자동 차지</span>
-            <div class="arrow-line"></div>
-          </div>
-        </div>
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
 
-        <div class="viz-label" style="margin-top: 20px">▶ margin / padding 시각화</div>
-        <div class="legend-row">
-          <div class="legend-item">
-            <div class="legend-box" style="background: #fce4d6; border: 2px dashed #e67e22"></div>
-            margin 영역
-          </div>
-          <div class="legend-item">
-            <div class="legend-box" style="background: #d6eaf8; border: 2px solid #2980b9"></div>
-            요소 + padding 영역
-          </div>
-        </div>
-        <div class="viz-wrap">
-          <p style="font-size: 12px; color: #888; margin-bottom: 10px">
-            위아래 요소 사이에 margin이 적용되어 간격이 생깁니다.
-          </p>
+    .tag-chip {
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: bold;
+    }
 
-          <div class="margin-box-block" style="padding: 8px">
-            <div class="vis-block" style="padding: 14px">&lt;div&gt; — padding: 14px (내부 여백)</div>
-          </div>
+    .chip-block {
+      background: #d6eaf8;
+      color: #1a5276;
+    }
 
-          <div style="height: 6px"></div>
-          <!-- margin 사이 공간을 눈에 띄게 -->
+    .chip-inline {
+      background: #fdebd0;
+      color: #784212;
+    }
 
-          <div class="margin-box-block" style="padding: 8px">
-            <div class="vis-block" style="padding: 14px">
-              &lt;div&gt; — margin: 8px (외부 여백), padding: 14px (내부 여백)
-            </div>
-          </div>
-        </div>
-        <div class="viz-note">
-          🟠 주황 점선 = margin 영역 (요소 바깥 여백) — 상하좌우 모두 정상 적용<br />
-          🔵 파란 실선 = 요소 자체 영역 (padding 포함) — 상하좌우 모두 정상 적용
-        </div>
+    .chip-inlb {
+      background: #d5f5e3;
+      color: #1e8449;
+    }
 
-        <div class="code">
-          <span class="cm">/* block 요소: margin, padding 전방향 모두 적용 */</span> <span class="kw">div</span> {
-          <span class="at">width</span>: <span class="val">300px</span>; <span class="at">height</span>:
-          <span class="val">60px</span>; <span class="at">margin</span>: <span class="val">20px</span>;
-          <span class="cm">/* ✅ 상하좌우 모두 적용 */</span> <span class="at">padding</span>:
-          <span class="val">14px</span>; <span class="cm">/* ✅ 상하좌우 모두 적용 */</span> }
+    .viz-label {
+      font-size: 11px;
+      font-weight: bold;
+      color: #888;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .viz-wrap {
+      background: #f8f9fa;
+      border: 2px dashed #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 10px;
+    }
+
+    .viz-note {
+      font-size: 12px;
+      color: #636e72;
+      margin-top: 8px;
+      line-height: 1.7;
+    }
+
+    /* block 요소 */
+    .demo-block {
+      display: block;
+      background: #d6eaf8;
+      border: 2px solid #2980b9;
+      padding: 10px 14px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: #1a5276;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+
+    .width-arrow {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #2980b9;
+      margin-top: 4px;
+    }
+
+    .arrow-line {
+      flex: 1;
+      height: 2px;
+      background: #2980b9;
+      position: relative;
+    }
+
+    .arrow-line::before,
+    .arrow-line::after {
+      content: '';
+      position: absolute;
+      top: -4px;
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+    }
+
+    .arrow-line::before {
+      left: 0;
+      border-right: 7px solid #2980b9;
+    }
+
+    .arrow-line::after {
+      right: 0;
+      border-left: 7px solid #2980b9;
+    }
+
+    /* inline 요소 */
+    .demo-inline {
+      display: inline;
+      background: #fdebd0;
+      border: 2px solid #f39c12;
+      padding: 4px 8px;
+      font-size: 13px;
+      color: #784212;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+
+    .inline-wrap {
+      line-height: 2.6;
+    }
+
+    /* inline-block 요소 */
+    .demo-inlb {
+      display: inline-block;
+      background: #d5f5e3;
+      border: 2px solid #27ae60;
+      padding: 10px 16px;
+      font-size: 13px;
+      color: #1e8449;
+      font-weight: bold;
+      border-radius: 4px;
+      vertical-align: top;
+    }
+
+    /* ── margin/padding 시각화 전용 ── */
+
+    /* margin 영역 표시용 래퍼 */
+    .margin-box {
+      display: inline-block;
+      background: #fce4d6;
+      /* 연한 주황 = margin 영역 */
+      border: 2px dashed #e67e22;
+    }
+
+    .margin-box-block {
+      display: block;
+      background: #fce4d6;
+      border: 2px dashed #e67e22;
+      margin-bottom: 4px;
+    }
+
+    /* padding 영역은 요소 자체 배경으로 표현 */
+    .vis-block {
+      display: block;
+      background: #d6eaf8;
+      border: 2px solid #2980b9;
+      font-size: 13px;
+      color: #1a5276;
+      font-weight: bold;
+      border-radius: 2px;
+      text-align: center;
+    }
+
+    .vis-inline {
+      display: inline;
+      background: #fdebd0;
+      border: 2px solid #f39c12;
+      font-size: 13px;
+      color: #784212;
+      font-weight: bold;
+      border-radius: 2px;
+    }
+
+    .vis-inlb {
+      display: inline-block;
+      background: #d5f5e3;
+      border: 2px solid #27ae60;
+      font-size: 13px;
+      color: #1e8449;
+      font-weight: bold;
+      border-radius: 2px;
+      vertical-align: top;
+    }
+
+    /* 범례 */
+    .legend-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+      font-size: 12px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-box {
+      width: 14px;
+      height: 14px;
+      border-radius: 2px;
+    }
+
+    /* 비교 그리드 */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-top: 4px;
+    }
+
+    .compare-col {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .compare-col-title {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #eee;
+    }
+
+    .col-block .compare-col-title {
+      color: #2980b9;
+      border-color: #2980b9;
+    }
+
+    .col-inline .compare-col-title {
+      color: #e67e22;
+      border-color: #e67e22;
+    }
+
+    .col-inlb .compare-col-title {
+      color: #27ae60;
+      border-color: #27ae60;
+    }
+
+    /* 코드 블록 */
+    .code {
+      background: #1e2130;
+      color: #cdd6f4;
+      border-radius: 6px;
+      padding: 14px 16px;
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.8;
+      white-space: pre;
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+
+    .kw {
+      color: #cba6f7;
+    }
+
+    .at {
+      color: #89dceb;
+    }
+
+    .val {
+      color: #a6e3a1;
+    }
+
+    .cm {
+      color: #6c7086;
+    }
+
+    /* 비교표 */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .compare-table th {
+      background: #2d3436;
+      color: #fff;
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    .compare-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .compare-table tr:nth-child(even) td {
+      background: #f8f9fa;
+    }
+
+    .o {
+      color: #27ae60;
+      font-weight: bold;
+    }
+
+    .x {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+
+    .tr {
+      color: #f39c12;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="page-header">
+    <h1>📦 Block / Inline / Inline-block 요소</h1>
+    <p>HTML 요소는 기본적으로 어떻게 공간을 차지하는지에 따라 block, inline, inline-block으로 구분됩니다.</p>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab(0)">① Block 요소</button>
+    <button class="tab-btn" onclick="switchTab(1)">② Inline 요소</button>
+    <button class="tab-btn" onclick="switchTab(2)">③ Inline-block 요소</button>
+    <button class="tab-btn" onclick="switchTab(3)">④ 한눈에 비교</button>
+  </div>
+
+
+  <!-- ══════ 탭 1 : Block ══════ -->
+  <div class="tab-panel active" id="panel-0">
+    <div class="card">
+      <div class="card-title">Block 요소란?</div>
+      <div class="card-desc">블록 요소는 <b>항상 새 줄에서 시작</b>하고, <b>가로 너비를 부모의 100%만큼 자동으로 차지</b>합니다. 쉽게 말해 "한 줄을 통째로 차지하는
+        박스"입니다.</div>
+
+      <div class="traits">
+        <div class="trait trait-block"><strong>✅ 새 줄에서 시작</strong>앞뒤 요소와 줄이 바뀝니다</div>
+        <div class="trait trait-block"><strong>✅ 가로 100% 자동 차지</strong>부모 요소의 너비를 가득 채웁니다</div>
+        <div class="trait trait-block"><strong>✅ width / height 지정 가능</strong>크기를 직접 설정할 수 있습니다</div>
+        <div class="trait trait-block"><strong>✅ margin / padding 전방향 적용</strong>상하좌우 모두 여백이 정상 동작합니다</div>
+      </div>
+
+      <div class="card-title" style="margin-bottom:10px;">대표적인 Block 태그</div>
+      <div class="tag-list">
+        <span class="tag-chip chip-block">&lt;div&gt;</span>
+        <span class="tag-chip chip-block">&lt;p&gt;</span>
+        <span class="tag-chip chip-block">&lt;h1&gt; ~ &lt;h6&gt;</span>
+        <span class="tag-chip chip-block">&lt;ul&gt;</span>
+        <span class="tag-chip chip-block">&lt;ol&gt;</span>
+        <span class="tag-chip chip-block">&lt;li&gt;</span>
+        <span class="tag-chip chip-block">&lt;header&gt;</span>
+        <span class="tag-chip chip-block">&lt;nav&gt;</span>
+        <span class="tag-chip chip-block">&lt;main&gt;</span>
+        <span class="tag-chip chip-block">&lt;section&gt;</span>
+        <span class="tag-chip chip-block">&lt;article&gt;</span>
+        <span class="tag-chip chip-block">&lt;aside&gt;</span>
+        <span class="tag-chip chip-block">&lt;footer&gt;</span>
+        <span class="tag-chip chip-block">&lt;form&gt;</span>
+      </div>
+
+      <div class="viz-label">▶ 동작 시각화</div>
+      <div class="viz-wrap">
+        <div class="demo-block">&lt;div&gt; 첫 번째 블록 요소</div>
+        <div class="demo-block">&lt;div&gt; 두 번째 블록 요소</div>
+        <div class="demo-block">&lt;div&gt; 세 번째 블록 요소</div>
+        <div class="width-arrow">
+          <div class="arrow-line"></div>
+          <span>부모 너비 100% 자동 차지</span>
+          <div class="arrow-line"></div>
         </div>
       </div>
+
+      <div class="viz-label" style="margin-top:20px;">▶ margin / padding 시각화</div>
+      <div class="legend-row">
+        <div class="legend-item">
+          <div class="legend-box" style="background:#fce4d6;border:2px dashed #e67e22;"></div> margin 영역
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="background:#d6eaf8;border:2px solid #2980b9;"></div> 요소 + padding 영역
+        </div>
+      </div>
+      <div class="viz-wrap">
+        <p style="font-size:12px;color:#888;margin-bottom:10px;">위아래 요소 사이에 margin이 적용되어 간격이 생깁니다.</p>
+
+        <div class="margin-box-block" style="padding: 8px;">
+          <div class="vis-block" style="padding: 14px;">
+            &lt;div&gt; — padding: 14px (내부 여백)
+          </div>
+        </div>
+
+        <div style="height:6px;"></div><!-- margin 사이 공간을 눈에 띄게 -->
+
+        <div class="margin-box-block" style="padding: 8px;">
+          <div class="vis-block" style="padding: 14px;">
+            &lt;div&gt; — margin: 8px (외부 여백), padding: 14px (내부 여백)
+          </div>
+        </div>
+      </div>
+      <div class="viz-note">
+        🟠 주황 점선 = margin 영역 (요소 바깥 여백) — 상하좌우 모두 정상 적용<br>
+        🔵 파란 실선 = 요소 자체 영역 (padding 포함) — 상하좌우 모두 정상 적용
+      </div>
+
+      <div class="code"><span class="cm">/* block 요소: margin, padding 전방향 모두 적용 */</span>
+        <span class="kw">div</span> {
+        <span class="at">width</span>: <span class="val">300px</span>;
+        <span class="at">height</span>: <span class="val">60px</span>;
+        <span class="at">margin</span>: <span class="val">20px</span>; <span class="cm">/* ✅ 상하좌우 모두 적용 */</span>
+        <span class="at">padding</span>: <span class="val">14px</span>; <span class="cm">/* ✅ 상하좌우 모두 적용 */</span>
+        }
+      </div>
     </div>
+  </div>
 
-    <!-- ══════ 탭 2 : Inline ══════ -->
-    <div class="tab-panel" id="panel-1">
-      <div class="card">
-        <div class="card-title">Inline 요소란?</div>
-        <div class="card-desc">
-          인라인 요소는 <b>새 줄로 바뀌지 않고 텍스트 흐름 안에서 나란히 배치</b>됩니다. 콘텐츠 크기만큼만 자리를
-          차지하며, width/height와 상하 margin이 적용되지 않습니다.
-        </div>
 
-        <div class="traits">
-          <div class="trait trait-inline"><strong>✅ 새 줄 없이 나란히 배치</strong>텍스트처럼 옆으로 이어집니다</div>
-          <div class="trait trait-inline">
-            <strong>✅ 콘텐츠 크기만큼만 차지</strong>내용의 너비만큼만 공간을 가집니다
-          </div>
-          <div class="trait trait-no">
-            <strong>❌ width / height 지정 불가</strong>크기를 설정해도 적용되지 않습니다
-          </div>
-          <div class="trait trait-no">
-            <strong>❌ 상하 margin 적용 안 됨</strong>좌우 margin은 되지만 상하는 레이아웃에 영향을 주지 않습니다
-          </div>
-          <div class="trait trait-no">
-            <strong>⚠ 상하 padding은 시각적으로만</strong>padding 값이 보이긴 하지만 주변 레이아웃(위아래 요소 간격)을
-            밀지 않습니다
-          </div>
-        </div>
+  <!-- ══════ 탭 2 : Inline ══════ -->
+  <div class="tab-panel" id="panel-1">
+    <div class="card">
+      <div class="card-title">Inline 요소란?</div>
+      <div class="card-desc">인라인 요소는 <b>새 줄로 바뀌지 않고 텍스트 흐름 안에서 나란히 배치</b>됩니다. 콘텐츠 크기만큼만 자리를 차지하며, width/height와 상하
+        margin이 적용되지 않습니다.</div>
 
-        <div class="card-title" style="margin-bottom: 10px">대표적인 Inline 태그</div>
-        <div class="tag-list">
-          <span class="tag-chip chip-inline">&lt;span&gt;</span>
-          <span class="tag-chip chip-inline">&lt;a&gt;</span>
-          <span class="tag-chip chip-inline">&lt;strong&gt;</span>
-          <span class="tag-chip chip-inline">&lt;em&gt;</span>
-          <span class="tag-chip chip-inline">&lt;b&gt;</span>
-          <span class="tag-chip chip-inline">&lt;i&gt;</span>
-          <span class="tag-chip chip-inline">&lt;u&gt;</span>
-          <span class="tag-chip chip-inline">&lt;label&gt;</span>
-          <span class="tag-chip chip-inline">&lt;code&gt;</span>
-          <span class="tag-chip chip-inline">&lt;br&gt;</span>
+      <div class="traits">
+        <div class="trait trait-inline"><strong>✅ 새 줄 없이 나란히 배치</strong>텍스트처럼 옆으로 이어집니다</div>
+        <div class="trait trait-inline"><strong>✅ 콘텐츠 크기만큼만 차지</strong>내용의 너비만큼만 공간을 가집니다</div>
+        <div class="trait trait-no"><strong>❌ width / height 지정 불가</strong>크기를 설정해도 적용되지 않습니다</div>
+        <div class="trait trait-no"><strong>❌ 상하 margin 적용 안 됨</strong>좌우 margin은 되지만 상하는 레이아웃에 영향을 주지 않습니다</div>
+        <div class="trait trait-no"><strong>⚠ 상하 padding은 시각적으로만</strong>padding 값이 보이긴 하지만 주변 레이아웃(위아래 요소 간격)을 밀지 않습니다
         </div>
+      </div>
 
-        <div class="viz-label">▶ 동작 시각화</div>
-        <div class="viz-wrap">
-          <div class="inline-wrap">
-            문장 안에서
-            <span class="demo-inline">&lt;span&gt; 인라인</span>
-            요소는
-            <span class="demo-inline">&lt;span&gt; 이렇게</span>
-            텍스트와 함께
-            <span class="demo-inline">&lt;span&gt; 나란히</span>
-            흐릅니다.
-          </div>
-        </div>
+      <div class="card-title" style="margin-bottom:10px;">대표적인 Inline 태그</div>
+      <div class="tag-list">
+        <span class="tag-chip chip-inline">&lt;span&gt;</span>
+        <span class="tag-chip chip-inline">&lt;a&gt;</span>
+        <span class="tag-chip chip-inline">&lt;strong&gt;</span>
+        <span class="tag-chip chip-inline">&lt;em&gt;</span>
+        <span class="tag-chip chip-inline">&lt;b&gt;</span>
+        <span class="tag-chip chip-inline">&lt;i&gt;</span>
+        <span class="tag-chip chip-inline">&lt;u&gt;</span>
+        <span class="tag-chip chip-inline">&lt;label&gt;</span>
+        <span class="tag-chip chip-inline">&lt;code&gt;</span>
+        <span class="tag-chip chip-inline">&lt;br&gt;</span>
+      </div>
 
-        <!-- margin 시각화 -->
-        <div class="viz-label" style="margin-top: 20px">▶ 상하 margin — 적용 안 됨</div>
-        <div class="legend-row">
-          <div class="legend-item">
-            <div class="legend-box" style="background: #fce4d6; border: 2px dashed #e67e22"></div>
-            margin 영역 (의도한 것)
-          </div>
-          <div class="legend-item">
-            <div class="legend-box" style="background: #fdebd0; border: 2px solid #f39c12"></div>
-            인라인 요소
-          </div>
-          <div class="legend-item">
-            <div class="legend-box" style="background: #eee; border: 2px solid #aaa"></div>
-            주변 블록 요소
-          </div>
+      <div class="viz-label">▶ 동작 시각화</div>
+      <div class="viz-wrap">
+        <div class="inline-wrap">
+          문장 안에서
+          <span class="demo-inline">&lt;span&gt; 인라인</span>
+          요소는
+          <span class="demo-inline">&lt;span&gt; 이렇게</span>
+          텍스트와 함께
+          <span class="demo-inline">&lt;span&gt; 나란히</span>
+          흐릅니다.
         </div>
-        <div class="viz-wrap">
-          <p style="font-size: 12px; color: #888; margin-bottom: 10px">
-            아래 &lt;span&gt;에 <code>margin-top: 30px</code>을 줬지만, 위 블록 요소와의 간격이 전혀 벌어지지 않습니다.
-          </p>
-          <div
-            style="
-              background: #e8e8e8;
-              border: 2px solid #aaa;
-              padding: 8px;
-              border-radius: 4px;
-              font-size: 12px;
-              color: #555;
-              margin-bottom: 0;
-            "
-          >
-            위쪽 블록 요소 &lt;div&gt;
-          </div>
-          <div style="background: #f8f9fa; padding: 10px 0; line-height: 2.2">
-            텍스트 중간에
-            <!-- margin-top: 30px 줬지만 상하 간격 변화 없음 -->
-            <span class="vis-inline" style="margin-top: 30px; margin-bottom: 30px; padding: 4px 8px">
-              margin-top/bottom: 30px 줬지만 위아래 간격 그대로
+      </div>
+
+      <!-- margin 시각화 -->
+      <div class="viz-label" style="margin-top:20px;">▶ 상하 margin — 적용 안 됨</div>
+      <div class="legend-row">
+        <div class="legend-item">
+          <div class="legend-box" style="background:#fce4d6;border:2px dashed #e67e22;"></div> margin 영역 (의도한 것)
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="background:#fdebd0;border:2px solid #f39c12;"></div> 인라인 요소
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="background:#eee;border:2px solid #aaa;"></div> 주변 블록 요소
+        </div>
+      </div>
+      <div class="viz-wrap">
+        <p style="font-size:12px;color:#888;margin-bottom:10px;">
+          아래 &lt;span&gt;에 <code>margin-top: 30px</code>을 줬지만, 위 블록 요소와의 간격이 전혀 벌어지지 않습니다.
+        </p>
+        <div
+          style="background:#e8e8e8;border:2px solid #aaa;padding:8px;border-radius:4px;font-size:12px;color:#555;margin-bottom:0;">
+          위쪽 블록 요소 &lt;div&gt;
+        </div>
+        <div style="background:#f8f9fa;padding:10px 0;line-height:2.2;">
+          텍스트 중간에
+          <!-- margin-top: 30px 줬지만 상하 간격 변화 없음 -->
+          <span class="vis-inline" style="margin-top:30px; margin-bottom:30px; padding:4px 8px;">
+            margin-top/bottom: 30px 줬지만 위아래 간격 그대로
+          </span>
+          이어지는 텍스트
+        </div>
+        <div
+          style="background:#e8e8e8;border:2px solid #aaa;padding:8px;border-radius:4px;font-size:12px;color:#555;margin-top:0;">
+          아래쪽 블록 요소 &lt;div&gt;
+        </div>
+      </div>
+      <div class="viz-note">
+        👆 상하 margin을 30px 줬지만 위아래 블록 요소와의 <b>간격이 전혀 벌어지지 않습니다.</b><br>
+        좌우 margin은 정상 적용되지만 <b>상하 margin은 인라인 요소에서 무시</b>됩니다.
+      </div>
+
+      <!-- padding 시각화 -->
+      <div class="viz-label" style="margin-top:20px;">▶ 상하 padding — 시각적으로만 보임 (레이아웃은 안 밀림)</div>
+      <div class="viz-wrap">
+        <p style="font-size:12px;color:#888;margin-bottom:10px;">
+          아래 &lt;span&gt;에 <code>padding-top/bottom: 20px</code>을 줬습니다.<br>
+          padding이 시각적으로 보이긴 하지만 위아래 블록 요소를 밀어내지 않아 겹쳐 보입니다.
+        </p>
+        <div style="background:#e8e8e8;border:2px solid #aaa;padding:8px;border-radius:4px;font-size:12px;color:#555;">
+          위쪽 블록 요소 &lt;div&gt;
+        </div>
+        <div style="background:#f8f9fa;padding:4px 0;line-height:1.6;">
+          텍스트 중간에
+          <span class="vis-inline"
+            style="padding-top:20px; padding-bottom:20px; padding-left:8px; padding-right:8px; background:#fdebd0; border:2px solid #f39c12;">
+            padding-top/bottom: 20px — 위아래로 튀어나오지만 블록은 안 밀림
+          </span>
+          이어지는 텍스트
+        </div>
+        <div style="background:#e8e8e8;border:2px solid #aaa;padding:8px;border-radius:4px;font-size:12px;color:#555;">
+          아래쪽 블록 요소 &lt;div&gt;
+        </div>
+      </div>
+      <div class="viz-note">
+        👆 상하 padding이 시각적으로 튀어나와 보이지만, 위아래 블록 요소를 <b>밀어내지 않아 겹쳐 보입니다.</b><br>
+        이것이 "시각적으로만 적용"되는 의미입니다.
+      </div>
+
+      <div class="code"><span class="cm">/* inline 요소의 margin/padding */</span>
+        <span class="kw">span</span> {
+        <span class="at">width</span>: <span class="val">200px</span>; <span class="cm">/* ❌ 무시됨 */</span>
+        <span class="at">height</span>: <span class="val">50px</span>; <span class="cm">/* ❌ 무시됨 */</span>
+
+        <span class="at">margin-left</span>: <span class="val">10px</span>; <span class="cm">/* ✅ 좌우 margin 적용 */</span>
+        <span class="at">margin-right</span>: <span class="val">10px</span>; <span class="cm">/* ✅ 좌우 margin 적용
+          */</span>
+        <span class="at">margin-top</span>: <span class="val">30px</span>; <span class="cm">/* ❌ 상하 margin 무시 */</span>
+        <span class="at">margin-bottom</span>: <span class="val">30px</span>; <span class="cm">/* ❌ 상하 margin 무시
+          */</span>
+
+        <span class="at">padding-left</span>: <span class="val">10px</span>; <span class="cm">/* ✅ 좌우 padding 적용
+          */</span>
+        <span class="at">padding-top</span>: <span class="val">20px</span>; <span class="cm">/* ⚠ 시각적으로만 — 레이아웃 안 밀림
+          */</span>
+        }
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════ 탭 3 : Inline-block ══════ -->
+  <div class="tab-panel" id="panel-2">
+    <div class="card">
+      <div class="card-title">Inline-block 요소란?</div>
+      <div class="card-desc">인라인처럼 <b>나란히 배치</b>되면서, 블록처럼 <b>width / height / 상하 margin·padding</b>을 모두 지정할 수 있는 요소입니다.
+        "나란히 놓을 수 있는 박스"라고 생각하면 됩니다.</div>
+
+      <div class="traits">
+        <div class="trait trait-inlb"><strong>✅ 나란히 배치</strong>인라인처럼 옆으로 이어집니다</div>
+        <div class="trait trait-inlb"><strong>✅ width / height 지정 가능</strong>블록처럼 크기를 직접 설정할 수 있습니다</div>
+        <div class="trait trait-inlb"><strong>✅ 상하 margin / padding 모두 적용</strong>상하좌우 여백이 모두 정상 동작합니다</div>
+        <div class="trait trait-no"><strong>❌ 가로 100% 자동 차지 안 함</strong>콘텐츠 크기만큼만 자리를 차지합니다</div>
+      </div>
+
+      <div class="card-title" style="margin-bottom:10px;">대표적인 Inline-block 태그</div>
+      <div class="tag-list">
+        <span class="tag-chip chip-inlb">&lt;img&gt;</span>
+        <span class="tag-chip chip-inlb">&lt;input&gt;</span>
+        <span class="tag-chip chip-inlb">&lt;button&gt;</span>
+        <span class="tag-chip chip-inlb">&lt;select&gt;</span>
+        <span class="tag-chip chip-inlb">&lt;textarea&gt;</span>
+      </div>
+
+      <div class="viz-label">▶ 동작 시각화 — 나란히 배치 + 크기 지정 가능</div>
+      <div class="viz-wrap">
+        <div style="line-height:1;">
+          <div class="demo-inlb" style="width:100px;height:60px;">100×60<br><small>크기 지정</small></div>
+          <div class="demo-inlb" style="width:140px;height:80px;">140×80<br><small>크기 지정</small></div>
+          <div class="demo-inlb" style="width:80px;height:50px;">80×50<br><small>크기 지정</small></div>
+        </div>
+      </div>
+
+      <div class="viz-label" style="margin-top:20px;">▶ margin / padding 시각화 — 상하좌우 모두 정상 적용</div>
+      <div class="legend-row">
+        <div class="legend-item">
+          <div class="legend-box" style="background:#fce4d6;border:2px dashed #e67e22;"></div> margin 영역
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="background:#d5f5e3;border:2px solid #27ae60;"></div> 요소 + padding 영역
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="background:#e8e8e8;border:2px solid #aaa;"></div> 주변 블록 요소
+        </div>
+      </div>
+      <div class="viz-wrap">
+        <p style="font-size:12px;color:#888;margin-bottom:10px;">
+          inline-block 요소는 <code>margin-top/bottom</code>을 주면 위아래 요소와의 간격이 실제로 벌어집니다.
+        </p>
+        <div style="background:#e8e8e8;border:2px solid #aaa;padding:8px;border-radius:4px;font-size:12px;color:#555;">
+          위쪽 블록 요소 &lt;div&gt;
+        </div>
+        <!-- margin 영역을 dashed로 표현 -->
+        <div
+          style="background:#fce4d6;border:2px dashed #e67e22;padding:16px 10px;margin:0;font-size:11px;color:#c0392b;text-align:center;">
+          margin-top: 16px
+          <div style="background:#fce4d6;padding:0 16px;">
+            <span class="vis-inlb" style="padding:14px 20px;margin:0;">
+              inline-block — padding: 14px
             </span>
-            이어지는 텍스트
           </div>
-          <div
-            style="
-              background: #e8e8e8;
-              border: 2px solid #aaa;
-              padding: 8px;
-              border-radius: 4px;
-              font-size: 12px;
-              color: #555;
-              margin-top: 0;
-            "
-          >
-            아래쪽 블록 요소 &lt;div&gt;
-          </div>
+          margin-bottom: 16px
         </div>
-        <div class="viz-note">
-          👆 상하 margin을 30px 줬지만 위아래 블록 요소와의 <b>간격이 전혀 벌어지지 않습니다.</b><br />
-          좌우 margin은 정상 적용되지만 <b>상하 margin은 인라인 요소에서 무시</b>됩니다.
+        <div style="background:#e8e8e8;border:2px solid #aaa;padding:8px;border-radius:4px;font-size:12px;color:#555;">
+          아래쪽 블록 요소 &lt;div&gt;
+        </div>
+      </div>
+      <div class="viz-note">
+        👆 inline처럼 나란히 배치되지만, 상하 margin이 위아래 요소를 <b>실제로 밀어냅니다.</b><br>
+        inline과 달리 padding도 레이아웃에 완전히 반영됩니다.
+      </div>
+
+      <div class="code"><span class="cm">/* inline-block: margin, padding 전방향 모두 정상 적용 */</span>
+        <span class="kw">span</span> {
+        <span class="at">display</span>: <span class="val">inline-block</span>;
+        <span class="at">width</span>: <span class="val">120px</span>; <span class="cm">/* ✅ 적용됨 */</span>
+        <span class="at">height</span>: <span class="val">60px</span>; <span class="cm">/* ✅ 적용됨 */</span>
+        <span class="at">margin-top</span>: <span class="val">20px</span>; <span class="cm">/* ✅ 실제로 위 요소를 밀어냄 */</span>
+        <span class="at">padding-top</span>: <span class="val">14px</span>; <span class="cm">/* ✅ 레이아웃에 완전히 반영 */</span>
+        }
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════ 탭 4 : 한눈에 비교 ══════ -->
+  <div class="tab-panel" id="panel-3">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:16px;">Block / Inline / Inline-block 특성 비교표</div>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>특성</th>
+            <th>Block</th>
+            <th>Inline</th>
+            <th>Inline-block</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>새 줄에서 시작</td>
+            <td class="o">✅ 항상</td>
+            <td class="x">❌ 나란히 배치</td>
+            <td class="x">❌ 나란히 배치</td>
+          </tr>
+          <tr>
+            <td>가로 너비 기본값</td>
+            <td class="o">부모의 100%</td>
+            <td>콘텐츠 크기만큼</td>
+            <td>콘텐츠 크기만큼</td>
+          </tr>
+          <tr>
+            <td>width / height 지정</td>
+            <td class="o">✅ 가능</td>
+            <td class="x">❌ 불가</td>
+            <td class="o">✅ 가능</td>
+          </tr>
+          <tr>
+            <td>상하 margin</td>
+            <td class="o">✅ 정상 적용</td>
+            <td class="x">❌ 무시됨</td>
+            <td class="o">✅ 정상 적용</td>
+          </tr>
+          <tr>
+            <td>좌우 margin</td>
+            <td class="o">✅ 정상 적용</td>
+            <td class="o">✅ 정상 적용</td>
+            <td class="o">✅ 정상 적용</td>
+          </tr>
+          <tr>
+            <td>상하 padding</td>
+            <td class="o">✅ 정상 적용</td>
+            <td class="tr">⚠ 시각적으로만<br><small style="font-weight:normal;">(레이아웃 안 밀림)</small></td>
+            <td class="o">✅ 정상 적용</td>
+          </tr>
+          <tr>
+            <td>대표 태그</td>
+            <td>div, p, h1~h6,<br>ul, li, section…</td>
+            <td>span, a, strong,<br>em, code, br…</td>
+            <td>img, input,<br>button, select…</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:6px;">▶ margin / padding 적용 비교 — 한눈에</div>
+      <div class="card-desc">세 가지 요소에 동일하게 <code>margin: 16px / padding: 14px</code>을 준 결과입니다.</div>
+
+      <div class="legend-row">
+        <div class="legend-item">
+          <div class="legend-box" style="background:#fce4d6;border:2px dashed #e67e22;"></div> margin 영역
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="background:#d6eaf8;border:2px solid #2980b9;"></div> block 요소
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="background:#fdebd0;border:2px solid #f39c12;"></div> inline 요소
+        </div>
+        <div class="legend-item">
+          <div class="legend-box" style="background:#d5f5e3;border:2px solid #27ae60;"></div> inline-block 요소
+        </div>
+      </div>
+
+      <div class="compare-grid">
+        <!-- Block -->
+        <div class="compare-col col-block">
+          <div class="compare-col-title">Block — 전방향 정상 적용</div>
+          <div style="background:#f0f0f0;padding:4px;border-radius:4px;">
+            <div style="background:#fce4d6;border:2px dashed #e67e22;padding:16px;">
+              <div class="vis-block" style="padding:14px;">
+                &lt;div&gt;
+              </div>
+            </div>
+          </div>
+          <p style="font-size:11px;color:#555;margin-top:8px;">상하 margin이 위아래 공간을 밀어냄 ✅</p>
         </div>
 
-        <!-- padding 시각화 -->
-        <div class="viz-label" style="margin-top: 20px">▶ 상하 padding — 시각적으로만 보임 (레이아웃은 안 밀림)</div>
-        <div class="viz-wrap">
-          <p style="font-size: 12px; color: #888; margin-bottom: 10px">
-            아래 &lt;span&gt;에 <code>padding-top/bottom: 20px</code>을 줬습니다.<br />
-            padding이 시각적으로 보이긴 하지만 위아래 블록 요소를 밀어내지 않아 겹쳐 보입니다.
-          </p>
-          <div
-            style="
-              background: #e8e8e8;
-              border: 2px solid #aaa;
-              padding: 8px;
-              border-radius: 4px;
-              font-size: 12px;
-              color: #555;
-            "
-          >
-            위쪽 블록 요소 &lt;div&gt;
+        <!-- Inline -->
+        <div class="compare-col col-inline">
+          <div class="compare-col-title">Inline — 상하 margin 무시</div>
+          <div style="background:#f0f0f0;padding:4px;border-radius:4px;">
+            <div style="font-size:12px;color:#555;padding:4px 0;line-height:1.4;">위쪽 요소</div>
+            <div style="line-height:1.2;padding:2px 0;">
+              텍스트
+              <span class="vis-inline" style="margin:16px 4px;padding:14px 8px;">
+                &lt;span&gt;
+              </span>
+              텍스트
+            </div>
+            <div style="font-size:12px;color:#555;padding:4px 0;line-height:1.4;">아래쪽 요소</div>
           </div>
-          <div style="background: #f8f9fa; padding: 4px 0; line-height: 1.6">
-            텍스트 중간에
-            <span
-              class="vis-inline"
-              style="
-                padding-top: 20px;
-                padding-bottom: 20px;
-                padding-left: 8px;
-                padding-right: 8px;
-                background: #fdebd0;
-                border: 2px solid #f39c12;
-              "
-            >
-              padding-top/bottom: 20px — 위아래로 튀어나오지만 블록은 안 밀림
-            </span>
-            이어지는 텍스트
-          </div>
-          <div
-            style="
-              background: #e8e8e8;
-              border: 2px solid #aaa;
-              padding: 8px;
-              border-radius: 4px;
-              font-size: 12px;
-              color: #555;
-            "
-          >
-            아래쪽 블록 요소 &lt;div&gt;
-          </div>
-        </div>
-        <div class="viz-note">
-          👆 상하 padding이 시각적으로 튀어나와 보이지만, 위아래 블록 요소를 <b>밀어내지 않아 겹쳐 보입니다.</b><br />
-          이것이 "시각적으로만 적용"되는 의미입니다.
+          <p style="font-size:11px;color:#e74c3c;margin-top:8px;">상하 margin 무시, 상하 padding 시각적으로만 ❌</p>
         </div>
 
-        <div class="code">
-          <span class="cm">/* inline 요소의 margin/padding */</span> <span class="kw">span</span> {
-          <span class="at">width</span>: <span class="val">200px</span>; <span class="cm">/* ❌ 무시됨 */</span>
-          <span class="at">height</span>: <span class="val">50px</span>; <span class="cm">/* ❌ 무시됨 */</span>
-
-          <span class="at">margin-left</span>: <span class="val">10px</span>;
-          <span class="cm">/* ✅ 좌우 margin 적용 */</span> <span class="at">margin-right</span>:
-          <span class="val">10px</span>; <span class="cm">/* ✅ 좌우 margin 적용 */</span>
-          <span class="at">margin-top</span>: <span class="val">30px</span>;
-          <span class="cm">/* ❌ 상하 margin 무시 */</span> <span class="at">margin-bottom</span>:
-          <span class="val">30px</span>; <span class="cm">/* ❌ 상하 margin 무시 */</span>
-
-          <span class="at">padding-left</span>: <span class="val">10px</span>;
-          <span class="cm">/* ✅ 좌우 padding 적용 */</span> <span class="at">padding-top</span>:
-          <span class="val">20px</span>; <span class="cm">/* ⚠ 시각적으로만 — 레이아웃 안 밀림 */</span> }
+        <!-- Inline-block -->
+        <div class="compare-col col-inlb">
+          <div class="compare-col-title">Inline-block — 전방향 정상 적용</div>
+          <div style="background:#f0f0f0;padding:4px;border-radius:4px;">
+            <div style="font-size:12px;color:#555;padding:4px 0;">위쪽 요소</div>
+            <div style="background:#fce4d6;border:2px dashed #e67e22;padding:16px;">
+              <span class="vis-inlb" style="padding:14px 10px;">
+                &lt;span&gt;
+              </span>
+            </div>
+            <div style="font-size:12px;color:#555;padding:4px 0;">아래쪽 요소</div>
+          </div>
+          <p style="font-size:11px;color:#555;margin-top:8px;">상하 margin이 실제로 밀어냄 ✅</p>
         </div>
       </div>
     </div>
 
-    <!-- ══════ 탭 3 : Inline-block ══════ -->
-    <div class="tab-panel" id="panel-2">
-      <div class="card">
-        <div class="card-title">Inline-block 요소란?</div>
-        <div class="card-desc">
-          인라인처럼 <b>나란히 배치</b>되면서, 블록처럼 <b>width / height / 상하 margin·padding</b>을 모두 지정할 수
-          있는 요소입니다. "나란히 놓을 수 있는 박스"라고 생각하면 됩니다.
-        </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px;">display 속성으로 언제든 바꿀 수 있습니다</div>
+      <div class="card-desc">HTML 태그의 기본 display 값은 CSS로 자유롭게 변경할 수 있습니다.</div>
+      <div class="code"><span class="cm">/* 기본이 inline인 span을 block으로 */</span>
+        <span class="kw">span</span> { <span class="at">display</span>: <span class="val">block</span>; }
 
-        <div class="traits">
-          <div class="trait trait-inlb"><strong>✅ 나란히 배치</strong>인라인처럼 옆으로 이어집니다</div>
-          <div class="trait trait-inlb">
-            <strong>✅ width / height 지정 가능</strong>블록처럼 크기를 직접 설정할 수 있습니다
-          </div>
-          <div class="trait trait-inlb">
-            <strong>✅ 상하 margin / padding 모두 적용</strong>상하좌우 여백이 모두 정상 동작합니다
-          </div>
-          <div class="trait trait-no">
-            <strong>❌ 가로 100% 자동 차지 안 함</strong>콘텐츠 크기만큼만 자리를 차지합니다
-          </div>
-        </div>
+        <span class="cm">/* 기본이 block인 div를 inline으로 */</span>
+        <span class="kw">div</span> { <span class="at">display</span>: <span class="val">inline</span>; }
 
-        <div class="card-title" style="margin-bottom: 10px">대표적인 Inline-block 태그</div>
-        <div class="tag-list">
-          <span class="tag-chip chip-inlb">&lt;img&gt;</span>
-          <span class="tag-chip chip-inlb">&lt;input&gt;</span>
-          <span class="tag-chip chip-inlb">&lt;button&gt;</span>
-          <span class="tag-chip chip-inlb">&lt;select&gt;</span>
-          <span class="tag-chip chip-inlb">&lt;textarea&gt;</span>
-        </div>
-
-        <div class="viz-label">▶ 동작 시각화 — 나란히 배치 + 크기 지정 가능</div>
-        <div class="viz-wrap">
-          <div style="line-height: 1">
-            <div class="demo-inlb" style="width: 100px; height: 60px">100×60<br /><small>크기 지정</small></div>
-            <div class="demo-inlb" style="width: 140px; height: 80px">140×80<br /><small>크기 지정</small></div>
-            <div class="demo-inlb" style="width: 80px; height: 50px">80×50<br /><small>크기 지정</small></div>
-          </div>
-        </div>
-
-        <div class="viz-label" style="margin-top: 20px">▶ margin / padding 시각화 — 상하좌우 모두 정상 적용</div>
-        <div class="legend-row">
-          <div class="legend-item">
-            <div class="legend-box" style="background: #fce4d6; border: 2px dashed #e67e22"></div>
-            margin 영역
-          </div>
-          <div class="legend-item">
-            <div class="legend-box" style="background: #d5f5e3; border: 2px solid #27ae60"></div>
-            요소 + padding 영역
-          </div>
-          <div class="legend-item">
-            <div class="legend-box" style="background: #e8e8e8; border: 2px solid #aaa"></div>
-            주변 블록 요소
-          </div>
-        </div>
-        <div class="viz-wrap">
-          <p style="font-size: 12px; color: #888; margin-bottom: 10px">
-            inline-block 요소는 <code>margin-top/bottom</code>을 주면 위아래 요소와의 간격이 실제로 벌어집니다.
-          </p>
-          <div
-            style="
-              background: #e8e8e8;
-              border: 2px solid #aaa;
-              padding: 8px;
-              border-radius: 4px;
-              font-size: 12px;
-              color: #555;
-            "
-          >
-            위쪽 블록 요소 &lt;div&gt;
-          </div>
-          <!-- margin 영역을 dashed로 표현 -->
-          <div
-            style="
-              background: #fce4d6;
-              border: 2px dashed #e67e22;
-              padding: 16px 10px;
-              margin: 0;
-              font-size: 11px;
-              color: #c0392b;
-              text-align: center;
-            "
-          >
-            margin-top: 16px
-            <div style="background: #fce4d6; padding: 0 16px">
-              <span class="vis-inlb" style="padding: 14px 20px; margin: 0"> inline-block — padding: 14px </span>
-            </div>
-            margin-bottom: 16px
-          </div>
-          <div
-            style="
-              background: #e8e8e8;
-              border: 2px solid #aaa;
-              padding: 8px;
-              border-radius: 4px;
-              font-size: 12px;
-              color: #555;
-            "
-          >
-            아래쪽 블록 요소 &lt;div&gt;
-          </div>
-        </div>
-        <div class="viz-note">
-          👆 inline처럼 나란히 배치되지만, 상하 margin이 위아래 요소를 <b>실제로 밀어냅니다.</b><br />
-          inline과 달리 padding도 레이아웃에 완전히 반영됩니다.
-        </div>
-
-        <div class="code">
-          <span class="cm">/* inline-block: margin, padding 전방향 모두 정상 적용 */</span>
-          <span class="kw">span</span> { <span class="at">display</span>: <span class="val">inline-block</span>;
-          <span class="at">width</span>: <span class="val">120px</span>; <span class="cm">/* ✅ 적용됨 */</span>
-          <span class="at">height</span>: <span class="val">60px</span>; <span class="cm">/* ✅ 적용됨 */</span>
-          <span class="at">margin-top</span>: <span class="val">20px</span>;
-          <span class="cm">/* ✅ 실제로 위 요소를 밀어냄 */</span> <span class="at">padding-top</span>:
-          <span class="val">14px</span>; <span class="cm">/* ✅ 레이아웃에 완전히 반영 */</span> }
-        </div>
+        <span class="cm">/* 어떤 요소든 inline-block으로 */</span>
+        <span class="kw">span</span> { <span class="at">display</span>: <span class="val">inline-block</span>; }
+        <span class="kw">a</span> { <span class="at">display</span>: <span class="val">inline-block</span>; }
       </div>
     </div>
+  </div>
 
-    <!-- ══════ 탭 4 : 한눈에 비교 ══════ -->
-    <div class="tab-panel" id="panel-3">
-      <div class="card">
-        <div class="card-title" style="margin-bottom: 16px">Block / Inline / Inline-block 특성 비교표</div>
-        <table class="compare-table">
-          <thead>
-            <tr>
-              <th>특성</th>
-              <th>Block</th>
-              <th>Inline</th>
-              <th>Inline-block</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>새 줄에서 시작</td>
-              <td class="o">✅ 항상</td>
-              <td class="x">❌ 나란히 배치</td>
-              <td class="x">❌ 나란히 배치</td>
-            </tr>
-            <tr>
-              <td>가로 너비 기본값</td>
-              <td class="o">부모의 100%</td>
-              <td>콘텐츠 크기만큼</td>
-              <td>콘텐츠 크기만큼</td>
-            </tr>
-            <tr>
-              <td>width / height 지정</td>
-              <td class="o">✅ 가능</td>
-              <td class="x">❌ 불가</td>
-              <td class="o">✅ 가능</td>
-            </tr>
-            <tr>
-              <td>상하 margin</td>
-              <td class="o">✅ 정상 적용</td>
-              <td class="x">❌ 무시됨</td>
-              <td class="o">✅ 정상 적용</td>
-            </tr>
-            <tr>
-              <td>좌우 margin</td>
-              <td class="o">✅ 정상 적용</td>
-              <td class="o">✅ 정상 적용</td>
-              <td class="o">✅ 정상 적용</td>
-            </tr>
-            <tr>
-              <td>상하 padding</td>
-              <td class="o">✅ 정상 적용</td>
-              <td class="tr">⚠ 시각적으로만<br /><small style="font-weight: normal">(레이아웃 안 밀림)</small></td>
-              <td class="o">✅ 정상 적용</td>
-            </tr>
-            <tr>
-              <td>대표 태그</td>
-              <td>div, p, h1~h6,<br />ul, li, section…</td>
-              <td>span, a, strong,<br />em, code, br…</td>
-              <td>img, input,<br />button, select…</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  <script>
+    function switchTab(idx) {
+      document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+      document.querySelectorAll('.tab-panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+    }
+  </script>
+</body>
 
-      <div class="card">
-        <div class="card-title" style="margin-bottom: 6px">▶ margin / padding 적용 비교 — 한눈에</div>
-        <div class="card-desc">세 가지 요소에 동일하게 <code>margin: 16px / padding: 14px</code>을 준 결과입니다.</div>
-
-        <div class="legend-row">
-          <div class="legend-item">
-            <div class="legend-box" style="background: #fce4d6; border: 2px dashed #e67e22"></div>
-            margin 영역
-          </div>
-          <div class="legend-item">
-            <div class="legend-box" style="background: #d6eaf8; border: 2px solid #2980b9"></div>
-            block 요소
-          </div>
-          <div class="legend-item">
-            <div class="legend-box" style="background: #fdebd0; border: 2px solid #f39c12"></div>
-            inline 요소
-          </div>
-          <div class="legend-item">
-            <div class="legend-box" style="background: #d5f5e3; border: 2px solid #27ae60"></div>
-            inline-block 요소
-          </div>
-        </div>
-
-        <div class="compare-grid">
-          <!-- Block -->
-          <div class="compare-col col-block">
-            <div class="compare-col-title">Block — 전방향 정상 적용</div>
-            <div style="background: #f0f0f0; padding: 4px; border-radius: 4px">
-              <div style="background: #fce4d6; border: 2px dashed #e67e22; padding: 16px">
-                <div class="vis-block" style="padding: 14px">&lt;div&gt;</div>
-              </div>
-            </div>
-            <p style="font-size: 11px; color: #555; margin-top: 8px">상하 margin이 위아래 공간을 밀어냄 ✅</p>
-          </div>
-
-          <!-- Inline -->
-          <div class="compare-col col-inline">
-            <div class="compare-col-title">Inline — 상하 margin 무시</div>
-            <div style="background: #f0f0f0; padding: 4px; border-radius: 4px">
-              <div style="font-size: 12px; color: #555; padding: 4px 0; line-height: 1.4">위쪽 요소</div>
-              <div style="line-height: 1.2; padding: 2px 0">
-                텍스트
-                <span class="vis-inline" style="margin: 16px 4px; padding: 14px 8px"> &lt;span&gt; </span>
-                텍스트
-              </div>
-              <div style="font-size: 12px; color: #555; padding: 4px 0; line-height: 1.4">아래쪽 요소</div>
-            </div>
-            <p style="font-size: 11px; color: #e74c3c; margin-top: 8px">
-              상하 margin 무시, 상하 padding 시각적으로만 ❌
-            </p>
-          </div>
-
-          <!-- Inline-block -->
-          <div class="compare-col col-inlb">
-            <div class="compare-col-title">Inline-block — 전방향 정상 적용</div>
-            <div style="background: #f0f0f0; padding: 4px; border-radius: 4px">
-              <div style="font-size: 12px; color: #555; padding: 4px 0">위쪽 요소</div>
-              <div style="background: #fce4d6; border: 2px dashed #e67e22; padding: 16px">
-                <span class="vis-inlb" style="padding: 14px 10px"> &lt;span&gt; </span>
-              </div>
-              <div style="font-size: 12px; color: #555; padding: 4px 0">아래쪽 요소</div>
-            </div>
-            <p style="font-size: 11px; color: #555; margin-top: 8px">상하 margin이 실제로 밀어냄 ✅</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title" style="margin-bottom: 10px">display 속성으로 언제든 바꿀 수 있습니다</div>
-        <div class="card-desc">HTML 태그의 기본 display 값은 CSS로 자유롭게 변경할 수 있습니다.</div>
-        <div class="code">
-          <span class="cm">/* 기본이 inline인 span을 block으로 */</span> <span class="kw">span</span> {
-          <span class="at">display</span>: <span class="val">block</span>; }
-
-          <span class="cm">/* 기본이 block인 div를 inline으로 */</span>
-          <span class="kw">div</span> { <span class="at">display</span>: <span class="val">inline</span>; }
-
-          <span class="cm">/* 어떤 요소든 inline-block으로 */</span>
-          <span class="kw">span</span> { <span class="at">display</span>: <span class="val">inline-block</span>; }
-          <span class="kw">a</span> { <span class="at">display</span>: <span class="val">inline-block</span>; }
-        </div>
-      </div>
-    </div>
-
-    <script>
-      function switchTab(idx) {
-        document.querySelectorAll(".tab-btn").forEach((b, i) => b.classList.toggle("active", i === idx));
-        document.querySelectorAll(".tab-panel").forEach((p, i) => p.classList.toggle("active", i === idx));
-      }
-    </script>
-  </body>
 </html>
