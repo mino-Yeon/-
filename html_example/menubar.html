@@ -1,421 +1,304 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nav 메뉴바 구조 예제</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        font-family: "Segoe UI", sans-serif;
-        background: #f0f2f5;
-        color: #333;
-      }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nav 메뉴바 구조 예제</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; }
 
-      /* ── 탭 UI ── */
-      .tab-bar {
-        position: sticky;
-        top: 0;
-        z-index: 300;
-        background: #1e272e;
-        display: flex;
-        gap: 4px;
-        padding: 10px 20px 0;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-      }
-      .tab-btn {
-        padding: 10px 22px;
-        background: #2d3436;
-        color: #b2bec3;
-        border: none;
-        border-radius: 8px 8px 0 0;
-        font-size: 13px;
-        font-weight: bold;
-        cursor: pointer;
-        border-bottom: 3px solid transparent;
-        transition: all 0.2s;
-      }
-      .tab-btn:hover {
-        background: #3d4852;
-        color: #fff;
-      }
-      .tab-btn.active {
-        background: #f0f2f5;
-        color: #1e272e;
-        border-bottom-color: #f0f2f5;
-      }
+    /* ── 탭 UI ── */
+    .tab-bar {
+      position: sticky; top: 0; z-index: 300;
+      background: #1e272e;
+      display: flex; gap: 4px; padding: 10px 20px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+    .tab-btn {
+      padding: 10px 22px;
+      background: #2d3436; color: #b2bec3;
+      border: none; border-radius: 8px 8px 0 0;
+      font-size: 13px; font-weight: bold; cursor: pointer;
+      border-bottom: 3px solid transparent; transition: all .2s;
+    }
+    .tab-btn:hover { background: #3d4852; color: #fff; }
+    .tab-btn.active { background: #f0f2f5; color: #1e272e; border-bottom-color: #f0f2f5; }
 
-      .tab-panel {
-        display: none;
-        padding: 30px 20px;
-        max-width: 960px;
-        margin: 0 auto;
-      }
-      .tab-panel.active {
-        display: block;
-      }
+    .tab-panel { display: none; padding: 30px 20px; max-width: 960px; margin: 0 auto; }
+    .tab-panel.active { display: block; }
 
-      /* ── 공통 설명 ── */
-      .ex-title {
-        font-size: 18px;
-        font-weight: bold;
-        color: #2d3436;
-        margin-bottom: 6px;
-      }
-      .ex-desc {
-        font-size: 13px;
-        color: #636e72;
-        line-height: 1.7;
-        margin-bottom: 20px;
-      }
-      .preview-label {
-        font-size: 11px;
-        font-weight: bold;
-        color: #888;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 10px;
-      }
-      .structure-note {
-        background: #fff;
-        border-left: 4px solid #667eea;
-        border-radius: 0 6px 6px 0;
-        padding: 12px 16px;
-        font-size: 12px;
-        color: #444;
-        line-height: 2;
-        margin-bottom: 20px;
-      }
-      .structure-note strong {
-        color: #667eea;
-      }
-      .code-block {
-        background: #1e2130;
-        color: #cdd6f4;
-        border-radius: 8px;
-        padding: 16px 20px;
-        font-family: monospace;
-        font-size: 13px;
-        line-height: 1.8;
-        margin-top: 24px;
-        overflow-x: auto;
-        white-space: pre;
-      }
-      .kw {
-        color: #cba6f7;
-      }
-      .at {
-        color: #89dceb;
-      }
-      .val {
-        color: #a6e3a1;
-      }
-      .cm {
-        color: #6c7086;
-      }
+    /* ── 공통 설명 ── */
+    .ex-title { font-size: 18px; font-weight: bold; color: #2d3436; margin-bottom: 6px; }
+    .ex-desc  { font-size: 13px; color: #636e72; line-height: 1.7; margin-bottom: 20px; }
+    .preview-label {
+      font-size: 11px; font-weight: bold; color: #888;
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
+    }
+    .structure-note {
+      background: #fff; border-left: 4px solid #667eea;
+      border-radius: 0 6px 6px 0; padding: 12px 16px;
+      font-size: 12px; color: #444; line-height: 2;
+      margin-bottom: 20px;
+    }
+    .structure-note strong { color: #667eea; }
+    .code-block {
+      background: #1e2130; color: #cdd6f4;
+      border-radius: 8px; padding: 16px 20px;
+      font-family: monospace; font-size: 13px; line-height: 1.8;
+      margin-top: 24px; overflow-x: auto; white-space: pre;
+    }
+    .kw  { color: #cba6f7; }
+    .at  { color: #89dceb; }
+    .val { color: #a6e3a1; }
+    .cm  { color: #6c7086; }
 
-      /* ══════════════════════
+    /* ══════════════════════
        예제 1 : 가로형 nav
     ══════════════════════ */
-      .nav1 {
-        background: #2c3e50;
-        padding: 0 24px;
-        border-radius: 8px;
-      }
-      .nav1 ul {
-        display: flex; /* ← 가로 배치 핵심 */
-        list-style: none;
-      }
-      .nav1 ul li a {
-        display: block; /* ← 클릭 영역 확보 */
-        padding: 14px 20px;
-        color: #ecf0f1;
-        text-decoration: none;
-        font-size: 14px;
-        border-bottom: 3px solid transparent;
-        transition: all 0.2s;
-      }
-      .nav1 ul li a:hover {
-        color: #fff;
-        background: rgba(255, 255, 255, 0.07);
-      }
-      .nav1 ul li.active > a {
-        border-bottom-color: #3498db;
-        color: #3498db;
-      }
+    .nav1 {
+      background: #2c3e50;
+      padding: 0 24px;
+      border-radius: 8px;
+    }
+    .nav1 ul {
+      display: flex;       /* ← 가로 배치 핵심 */
+      list-style: none;
+    }
+    .nav1 ul li a {
+      display: block;      /* ← 클릭 영역 확보 */
+      padding: 14px 20px;
+      color: #ecf0f1;
+      text-decoration: none;
+      font-size: 14px;
+      border-bottom: 3px solid transparent;
+      transition: all .2s;
+    }
+    .nav1 ul li a:hover       { color: #fff; background: rgba(255,255,255,.07); }
+    .nav1 ul li.active > a    { border-bottom-color: #3498db; color: #3498db; }
 
-      /* ══════════════════════════════════
+
+    /* ══════════════════════════════════
        예제 2 : 세로형 사이드바 nav
     ══════════════════════════════════ */
-      /* 페이지 전체 레이아웃 */
-      .sidebar-layout {
-        display: flex;
-        gap: 0;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        min-height: 380px;
-      }
+    /* 페이지 전체 레이아웃 */
+    .sidebar-layout {
+      display: flex;
+      gap: 0;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,.1);
+      min-height: 380px;
+    }
 
-      /* 사이드바 nav */
-      .nav2 {
-        width: 200px;
-        flex-shrink: 0;
-        background: #1a1a2e;
-        display: flex;
-        flex-direction: column; /* ← 세로 배치 핵심 */
-        padding: 20px 0;
-      }
-      .nav2 .nav2-logo {
-        font-size: 16px;
-        font-weight: bold;
-        color: #fff;
-        padding: 0 20px 20px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        margin-bottom: 10px;
-      }
-      .nav2 ul {
-        list-style: none;
-        display: flex;
-        flex-direction: column; /* ← ul도 세로 */
-      }
-      .nav2 ul li a {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 20px;
-        color: #a0aec0;
-        text-decoration: none;
-        font-size: 14px;
-        transition: all 0.2s;
-        border-left: 3px solid transparent; /* ← 좌측 액티브 인디케이터 */
-      }
-      .nav2 ul li a:hover {
-        color: #fff;
-        background: rgba(255, 255, 255, 0.06);
-      }
-      .nav2 ul li.active > a {
-        color: #fff;
-        background: rgba(255, 255, 255, 0.1);
-        border-left-color: #6c5ce7; /* ← 가로형의 border-bottom과 대응 */
-      }
-      .nav2 ul li a .icon {
-        font-size: 16px;
-      }
+    /* 사이드바 nav */
+    .nav2 {
+      width: 200px;
+      flex-shrink: 0;
+      background: #1a1a2e;
+      display: flex;
+      flex-direction: column; /* ← 세로 배치 핵심 */
+      padding: 20px 0;
+    }
+    .nav2 .nav2-logo {
+      font-size: 16px; font-weight: bold;
+      color: #fff; padding: 0 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      margin-bottom: 10px;
+    }
+    .nav2 ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column; /* ← ul도 세로 */
+    }
+    .nav2 ul li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      color: #a0aec0;
+      text-decoration: none;
+      font-size: 14px;
+      transition: all .2s;
+      border-left: 3px solid transparent; /* ← 좌측 액티브 인디케이터 */
+    }
+    .nav2 ul li a:hover   { color: #fff; background: rgba(255,255,255,.06); }
+    .nav2 ul li.active > a {
+      color: #fff;
+      background: rgba(255,255,255,.1);
+      border-left-color: #6c5ce7; /* ← 가로형의 border-bottom과 대응 */
+    }
+    .nav2 ul li a .icon { font-size: 16px; }
 
-      /* nav 옆 콘텐츠 영역 (구조 설명용) */
-      .sidebar-content {
-        flex: 1;
-        background: #fff;
-        padding: 28px;
-      }
-      .sidebar-content h3 {
-        font-size: 16px;
-        color: #2d3436;
-        margin-bottom: 10px;
-      }
-      .sidebar-content p {
-        font-size: 13px;
-        color: #636e72;
-        line-height: 1.8;
-      }
-      .sidebar-content .tag-row {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-top: 14px;
-      }
-      .tag {
-        background: #f0eeff;
-        color: #6c5ce7;
-        border-radius: 20px;
-        padding: 4px 12px;
-        font-size: 12px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="tab-bar">
-      <button class="tab-btn active" onclick="switchTab(0)">① 가로형 수평 nav</button>
-      <button class="tab-btn" onclick="switchTab(1)">② 세로형 사이드바 nav</button>
-    </div>
+    /* nav 옆 콘텐츠 영역 (구조 설명용) */
+    .sidebar-content {
+      flex: 1;
+      background: #fff;
+      padding: 28px;
+    }
+    .sidebar-content h3 { font-size: 16px; color: #2d3436; margin-bottom: 10px; }
+    .sidebar-content p  { font-size: 13px; color: #636e72; line-height: 1.8; }
+    .sidebar-content .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+    .tag { background: #f0eeff; color: #6c5ce7; border-radius: 20px; padding: 4px 12px; font-size: 12px; }
+  </style>
+</head>
+<body>
 
-    <!-- ══════════════════════════════
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab(0)">① 가로형 수평 nav</button>
+  <button class="tab-btn" onclick="switchTab(1)">② 세로형 사이드바 nav</button>
+</div>
+
+
+<!-- ══════════════════════════════
      탭 1 : 가로형 수평 nav
 ══════════════════════════════ -->
-    <div class="tab-panel active" id="panel-0">
-      <p class="ex-title">① 가로형 수평 nav</p>
-      <p class="ex-desc">
-        가장 기본적인 내비게이션 구조입니다. <code>ul</code>에 <code>display: flex</code>를 적용해 메뉴를 가로로
-        나열합니다.
-      </p>
+<div class="tab-panel active" id="panel-0">
+  <p class="ex-title">① 가로형 수평 nav</p>
+  <p class="ex-desc">
+    가장 기본적인 내비게이션 구조입니다. <code>ul</code>에 <code>display: flex</code>를 적용해 메뉴를 가로로 나열합니다.
+  </p>
 
-      <div class="structure-note">
-        <strong>구조 포인트</strong><br />
-        <code>&lt;nav&gt;</code> — 내비게이션 의미 부여<br />
-        <code>&lt;ul&gt;</code> — 메뉴 목록 (순서 없는 리스트)<br />
-        <code>&lt;li&gt;</code> — 각 메뉴 항목<br />
-        <code>&lt;a&gt;</code> — 실제 링크. <strong>padding은 반드시 a에</strong> 줘야 클릭 영역이 넓어집니다<br />
-        활성 메뉴 표시 — <code>border-bottom</code>으로 하단 인디케이터
-      </div>
+  <div class="structure-note">
+    <strong>구조 포인트</strong><br>
+    <code>&lt;nav&gt;</code> — 내비게이션 의미 부여<br>
+    <code>&lt;ul&gt;</code> — 메뉴 목록 (순서 없는 리스트)<br>
+    <code>&lt;li&gt;</code> — 각 메뉴 항목<br>
+    <code>&lt;a&gt;</code> — 실제 링크. <strong>padding은 반드시 a에</strong> 줘야 클릭 영역이 넓어집니다<br>
+    활성 메뉴 표시 — <code>border-bottom</code>으로 하단 인디케이터
+  </div>
 
-      <p class="preview-label">▶ 미리보기</p>
-      <nav class="nav1">
-        <ul>
-          <li class="active"><a href="#">홈</a></li>
-          <li><a href="#">소개</a></li>
-          <li><a href="#">서비스</a></li>
-          <li><a href="#">포트폴리오</a></li>
-          <li><a href="#">문의</a></li>
-        </ul>
-      </nav>
+  <p class="preview-label">▶ 미리보기</p>
+  <nav class="nav1">
+    <ul>
+      <li class="active"><a href="#">홈</a></li>
+      <li><a href="#">소개</a></li>
+      <li><a href="#">서비스</a></li>
+      <li><a href="#">포트폴리오</a></li>
+      <li><a href="#">문의</a></li>
+    </ul>
+  </nav>
 
-      <div class="code-block">
-        <span class="cm">&lt;!-- HTML --&gt;</span> &lt;<span class="kw">nav</span>&gt; &lt;<span class="kw">ul</span
-        >&gt; &lt;<span class="kw">li</span> <span class="at">class</span>=<span class="val">"active"</span
-        >&gt;&lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"#"</span>&gt;홈&lt;/<span
-          class="kw"
-          >a</span
-        >&gt;&lt;/<span class="kw">li</span>&gt; &lt;<span class="kw">li</span>&gt;&lt;<span class="kw">a</span>
-        <span class="at">href</span>=<span class="val">"#"</span>&gt;소개&lt;/<span class="kw">a</span>&gt;&lt;/<span
-          class="kw"
-          >li</span
-        >&gt; &lt;<span class="kw">li</span>&gt;&lt;<span class="kw">a</span> <span class="at">href</span>=<span
-          class="val"
-          >"#"</span
-        >&gt;서비스&lt;/<span class="kw">a</span>&gt;&lt;/<span class="kw">li</span>&gt; &lt;<span class="kw">li</span
-        >&gt;&lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"#"</span
-        >&gt;포트폴리오&lt;/<span class="kw">a</span>&gt;&lt;/<span class="kw">li</span>&gt; &lt;<span class="kw"
-          >li</span
-        >&gt;&lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"#"</span>&gt;문의&lt;/<span
-          class="kw"
-          >a</span
-        >&gt;&lt;/<span class="kw">li</span>&gt; &lt;/<span class="kw">ul</span>&gt; &lt;/<span class="kw">nav</span
-        >&gt;
+  <div class="code-block"><span class="cm">&lt;!-- HTML --&gt;</span>
+&lt;<span class="kw">nav</span>&gt;
+  &lt;<span class="kw">ul</span>&gt;
+    &lt;<span class="kw">li</span> <span class="at">class</span>=<span class="val">"active"</span>&gt;&lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"#"</span>&gt;홈&lt;/<span class="kw">a</span>&gt;&lt;/<span class="kw">li</span>&gt;
+    &lt;<span class="kw">li</span>&gt;&lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"#"</span>&gt;소개&lt;/<span class="kw">a</span>&gt;&lt;/<span class="kw">li</span>&gt;
+    &lt;<span class="kw">li</span>&gt;&lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"#"</span>&gt;서비스&lt;/<span class="kw">a</span>&gt;&lt;/<span class="kw">li</span>&gt;
+    &lt;<span class="kw">li</span>&gt;&lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"#"</span>&gt;포트폴리오&lt;/<span class="kw">a</span>&gt;&lt;/<span class="kw">li</span>&gt;
+    &lt;<span class="kw">li</span>&gt;&lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"#"</span>&gt;문의&lt;/<span class="kw">a</span>&gt;&lt;/<span class="kw">li</span>&gt;
+  &lt;/<span class="kw">ul</span>&gt;
+&lt;/<span class="kw">nav</span>&gt;
 
-        <span class="cm">/* CSS 핵심 */</span>
-        <span class="kw">nav ul</span> { <span class="at">display</span>: <span class="val">flex</span>;
-        <span class="cm">/* 가로 배치 */</span> <span class="at">list-style</span>: <span class="val">none</span>; }
-        <span class="kw">nav ul li a</span> { <span class="at">display</span>: <span class="val">block</span>;
-        <span class="cm">/* 클릭 영역 확보 */</span> <span class="at">padding</span>:
-        <span class="val">14px 20px</span>; <span class="cm">/* padding은 a에! */</span>
-        }
-        <span class="kw">nav ul li.active a</span> { <span class="at">border-bottom</span>:
-        <span class="val">3px solid #3498db</span>; <span class="cm">/* 활성 메뉴 표시 */</span> }
-      </div>
-    </div>
+<span class="cm">/* CSS 핵심 */</span>
+<span class="kw">nav ul</span> {
+  <span class="at">display</span>: <span class="val">flex</span>;        <span class="cm">/* 가로 배치 */</span>
+  <span class="at">list-style</span>: <span class="val">none</span>;
+}
+<span class="kw">nav ul li a</span> {
+  <span class="at">display</span>: <span class="val">block</span>;      <span class="cm">/* 클릭 영역 확보 */</span>
+  <span class="at">padding</span>: <span class="val">14px 20px</span>; <span class="cm">/* padding은 a에! */</span>
+}
+<span class="kw">nav ul li.active a</span> {
+  <span class="at">border-bottom</span>: <span class="val">3px solid #3498db</span>; <span class="cm">/* 활성 메뉴 표시 */</span>
+}</div>
+</div>
 
-    <!-- ══════════════════════════════
+
+<!-- ══════════════════════════════
      탭 2 : 세로형 사이드바 nav
 ══════════════════════════════ -->
-    <div class="tab-panel" id="panel-1">
-      <p class="ex-title">② 세로형 사이드바 nav</p>
-      <p class="ex-desc">
-        관리자 페이지나 대시보드에서 자주 쓰이는 패턴입니다. <code>flex-direction: column</code>으로 메뉴를 세로로
-        나열하고, 활성 메뉴는 <code>border-bottom</code> 대신 <code>border-left</code>로 표시합니다.
+<div class="tab-panel" id="panel-1">
+  <p class="ex-title">② 세로형 사이드바 nav</p>
+  <p class="ex-desc">
+    관리자 페이지나 대시보드에서 자주 쓰이는 패턴입니다. <code>flex-direction: column</code>으로 메뉴를 세로로 나열하고,
+    활성 메뉴는 <code>border-bottom</code> 대신 <code>border-left</code>로 표시합니다.
+  </p>
+
+  <div class="structure-note">
+    <strong>구조 포인트</strong><br>
+    <code>&lt;nav&gt;</code> — 사이드바 전체를 감싸는 내비게이션 태그<br>
+    <code>&lt;div class="logo"&gt;</code> — 로고·브랜드명 영역. nav 안 첫 번째 자식으로 배치<br>
+    <code>&lt;ul&gt; &gt; &lt;li&gt; &gt; &lt;a&gt;</code> — 메뉴 목록. 가로형과 동일한 HTML 구조<br>
+    <code>flex-direction: column</code> — nav와 ul 모두에 적용해 세로 배치<br>
+    활성 메뉴 표시 — 가로형의 <code>border-bottom</code> → 사이드바는 <code>border-left</code><br>
+    페이지 레이아웃 — nav를 고정 너비, 콘텐츠를 <code>flex: 1</code>로 나란히 배치
+  </div>
+
+  <p class="preview-label">▶ 미리보기</p>
+  <div class="sidebar-layout">
+    <nav class="nav2">
+      <div class="nav2-logo">🌐 MyApp</div>
+      <ul>
+        <li class="active"><a href="#"><span class="icon">🏠</span> 홈</a></li>
+        <li><a href="#"><span class="icon">👤</span> 프로필</a></li>
+        <li><a href="#"><span class="icon">📊</span> 대시보드</a></li>
+        <li><a href="#"><span class="icon">📁</span> 프로젝트</a></li>
+        <li><a href="#"><span class="icon">⚙️</span> 설정</a></li>
+      </ul>
+    </nav>
+    <div class="sidebar-content">
+      <h3>📌 사이드바 nav의 핵심은 flex-direction: column</h3>
+      <p>
+        HTML 구조는 가로형 nav와 완전히 동일합니다.<br>
+        차이는 CSS 단 한 줄 — <code>flex-direction: column</code>.<br><br>
+        활성 메뉴 인디케이터도 방향에 맞게 바뀝니다.<br>
+        가로형 → <code>border-bottom</code> / 세로형 → <code>border-left</code>
       </p>
-
-      <div class="structure-note">
-        <strong>구조 포인트</strong><br />
-        <code>&lt;nav&gt;</code> — 사이드바 전체를 감싸는 내비게이션 태그<br />
-        <code>&lt;div class="logo"&gt;</code> — 로고·브랜드명 영역. nav 안 첫 번째 자식으로 배치<br />
-        <code>&lt;ul&gt; &gt; &lt;li&gt; &gt; &lt;a&gt;</code> — 메뉴 목록. 가로형과 동일한 HTML 구조<br />
-        <code>flex-direction: column</code> — nav와 ul 모두에 적용해 세로 배치<br />
-        활성 메뉴 표시 — 가로형의 <code>border-bottom</code> → 사이드바는 <code>border-left</code><br />
-        페이지 레이아웃 — nav를 고정 너비, 콘텐츠를 <code>flex: 1</code>로 나란히 배치
-      </div>
-
-      <p class="preview-label">▶ 미리보기</p>
-      <div class="sidebar-layout">
-        <nav class="nav2">
-          <div class="nav2-logo">🌐 MyApp</div>
-          <ul>
-            <li class="active">
-              <a href="#"><span class="icon">🏠</span> 홈</a>
-            </li>
-            <li>
-              <a href="#"><span class="icon">👤</span> 프로필</a>
-            </li>
-            <li>
-              <a href="#"><span class="icon">📊</span> 대시보드</a>
-            </li>
-            <li>
-              <a href="#"><span class="icon">📁</span> 프로젝트</a>
-            </li>
-            <li>
-              <a href="#"><span class="icon">⚙️</span> 설정</a>
-            </li>
-          </ul>
-        </nav>
-        <div class="sidebar-content">
-          <h3>📌 사이드바 nav의 핵심은 flex-direction: column</h3>
-          <p>
-            HTML 구조는 가로형 nav와 완전히 동일합니다.<br />
-            차이는 CSS 단 한 줄 — <code>flex-direction: column</code>.<br /><br />
-            활성 메뉴 인디케이터도 방향에 맞게 바뀝니다.<br />
-            가로형 → <code>border-bottom</code> / 세로형 → <code>border-left</code>
-          </p>
-          <div class="tag-row">
-            <span class="tag">flex-direction: column</span>
-            <span class="tag">border-left (active)</span>
-            <span class="tag">관리자 페이지</span>
-            <span class="tag">대시보드</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="code-block">
-        <span class="cm">&lt;!-- HTML : nav 안에 로고 div + ul --&gt;</span> &lt;<span class="kw">nav</span>&gt;
-        &lt;<span class="kw">div</span> <span class="at">class</span>=<span class="val">"logo"</span>&gt;🌐
-        MyApp&lt;/<span class="kw">div</span>&gt; <span class="cm">&lt;!-- 브랜드명 영역 --&gt;</span> &lt;<span
-          class="kw"
-          >ul</span
-        >&gt; &lt;<span class="kw">li</span> <span class="at">class</span>=<span class="val">"active"</span
-        >&gt;&lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"#"</span>&gt;🏠 홈&lt;/<span
-          class="kw"
-          >a</span
-        >&gt;&lt;/<span class="kw">li</span>&gt; &lt;<span class="kw">li</span>&gt;&lt;<span class="kw">a</span>
-        <span class="at">href</span>=<span class="val">"#"</span>&gt;👤 프로필&lt;/<span class="kw">a</span
-        >&gt;&lt;/<span class="kw">li</span>&gt; &lt;<span class="kw">li</span>&gt;&lt;<span class="kw">a</span>
-        <span class="at">href</span>=<span class="val">"#"</span>&gt;📊 대시보드&lt;/<span class="kw">a</span
-        >&gt;&lt;/<span class="kw">li</span>&gt; &lt;<span class="kw">li</span>&gt;&lt;<span class="kw">a</span>
-        <span class="at">href</span>=<span class="val">"#"</span>&gt;⚙️ 설정&lt;/<span class="kw">a</span>&gt;&lt;/<span
-          class="kw"
-          >li</span
-        >&gt; &lt;/<span class="kw">ul</span>&gt; &lt;/<span class="kw">nav</span>&gt;
-
-        <span class="cm">/* CSS 핵심 — 가로형과 비교 */</span>
-        <span class="kw">nav</span> { <span class="at">width</span>: <span class="val">200px</span>;
-        <span class="at">display</span>: <span class="val">flex</span>; <span class="at">flex-direction</span>:
-        <span class="val">column</span>; <span class="cm">/* ← 가로형과의 차이 */</span>
-        }
-        <span class="kw">nav ul</span> { <span class="at">display</span>: <span class="val">flex</span>;
-        <span class="at">flex-direction</span>: <span class="val">column</span>;
-        <span class="cm">/* ← ul도 세로 */</span> <span class="at">list-style</span>: <span class="val">none</span>; }
-        <span class="kw">nav ul li a</span> { <span class="at">display</span>: <span class="val">block</span>;
-        <span class="at">padding</span>: <span class="val">12px 20px</span>; <span class="at">border-left</span>:
-        <span class="val">3px solid transparent</span>; <span class="cm">/* 인디케이터 준비 */</span>
-        }
-        <span class="kw">nav ul li.active a</span> { <span class="at">border-left-color</span>:
-        <span class="val">#6c5ce7</span>; <span class="cm">/* 가로형 border-bottom → border-left */</span>
-        }
-
-        <span class="cm">/* 페이지 레이아웃: nav + 콘텐츠 나란히 */</span>
-        <span class="kw">.page</span> { <span class="at">display</span>: <span class="val">flex</span>; }
-        <span class="kw">.content</span> { <span class="at">flex</span>: <span class="val">1</span>;
-        <span class="cm">/* nav 제외한 나머지 공간 차지 */</span> }
+      <div class="tag-row">
+        <span class="tag">flex-direction: column</span>
+        <span class="tag">border-left (active)</span>
+        <span class="tag">관리자 페이지</span>
+        <span class="tag">대시보드</span>
       </div>
     </div>
+  </div>
 
-    <script>
-      function switchTab(idx) {
-        document.querySelectorAll(".tab-btn").forEach((b, i) => b.classList.toggle("active", i === idx));
-        document.querySelectorAll(".tab-panel").forEach((p, i) => p.classList.toggle("active", i === idx));
-      }
-    </script>
-  </body>
+  <div class="code-block"><span class="cm">&lt;!-- HTML : nav 안에 로고 div + ul --&gt;</span>
+&lt;<span class="kw">nav</span>&gt;
+  &lt;<span class="kw">div</span> <span class="at">class</span>=<span class="val">"logo"</span>&gt;🌐 MyApp&lt;/<span class="kw">div</span>&gt; <span class="cm">&lt;!-- 브랜드명 영역 --&gt;</span>
+  &lt;<span class="kw">ul</span>&gt;
+    &lt;<span class="kw">li</span> <span class="at">class</span>=<span class="val">"active"</span>&gt;&lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"#"</span>&gt;🏠 홈&lt;/<span class="kw">a</span>&gt;&lt;/<span class="kw">li</span>&gt;
+    &lt;<span class="kw">li</span>&gt;&lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"#"</span>&gt;👤 프로필&lt;/<span class="kw">a</span>&gt;&lt;/<span class="kw">li</span>&gt;
+    &lt;<span class="kw">li</span>&gt;&lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"#"</span>&gt;📊 대시보드&lt;/<span class="kw">a</span>&gt;&lt;/<span class="kw">li</span>&gt;
+    &lt;<span class="kw">li</span>&gt;&lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"#"</span>&gt;⚙️ 설정&lt;/<span class="kw">a</span>&gt;&lt;/<span class="kw">li</span>&gt;
+  &lt;/<span class="kw">ul</span>&gt;
+&lt;/<span class="kw">nav</span>&gt;
+
+<span class="cm">/* CSS 핵심 — 가로형과 비교 */</span>
+<span class="kw">nav</span> {
+  <span class="at">width</span>: <span class="val">200px</span>;
+  <span class="at">display</span>: <span class="val">flex</span>;
+  <span class="at">flex-direction</span>: <span class="val">column</span>; <span class="cm">/* ← 가로형과의 차이 */</span>
+}
+<span class="kw">nav ul</span> {
+  <span class="at">display</span>: <span class="val">flex</span>;
+  <span class="at">flex-direction</span>: <span class="val">column</span>; <span class="cm">/* ← ul도 세로 */</span>
+  <span class="at">list-style</span>: <span class="val">none</span>;
+}
+<span class="kw">nav ul li a</span> {
+  <span class="at">display</span>: <span class="val">block</span>;
+  <span class="at">padding</span>: <span class="val">12px 20px</span>;
+  <span class="at">border-left</span>: <span class="val">3px solid transparent</span>; <span class="cm">/* 인디케이터 준비 */</span>
+}
+<span class="kw">nav ul li.active a</span> {
+  <span class="at">border-left-color</span>: <span class="val">#6c5ce7</span>; <span class="cm">/* 가로형 border-bottom → border-left */</span>
+}
+
+<span class="cm">/* 페이지 레이아웃: nav + 콘텐츠 나란히 */</span>
+<span class="kw">.page</span> {
+  <span class="at">display</span>: <span class="val">flex</span>;
+}
+<span class="kw">.content</span> {
+  <span class="at">flex</span>: <span class="val">1</span>; <span class="cm">/* nav 제외한 나머지 공간 차지 */</span>
+}</div>
+</div>
+
+<script>
+  function switchTab(idx) {
+    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+    document.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+  }
+</script>
+</body>
 </html>

@@ -1,465 +1,246 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>a vs button 구분 예제</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        font-family: "Segoe UI", sans-serif;
-        background: #f0f2f5;
-        color: #333;
-        font-size: 14px;
-      }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>a vs button 구분 예제</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; font-size: 14px; }
 
-      .page-header {
-        background: #1e272e;
-        color: #fff;
-        padding: 24px 32px;
-      }
-      .page-header h1 {
-        font-size: 22px;
-        margin-bottom: 6px;
-      }
-      .page-header p {
-        font-size: 13px;
-        color: #b2bec3;
-        line-height: 1.7;
-      }
+    .page-header { background: #1e272e; color: #fff; padding: 24px 32px; }
+    .page-header h1 { font-size: 22px; margin-bottom: 6px; }
+    .page-header p  { font-size: 13px; color: #b2bec3; line-height: 1.7; }
 
-      .rule-banner {
-        background: #fff;
-        border-bottom: 2px solid #dfe6e9;
-        padding: 16px 32px;
-        display: flex;
-        gap: 24px;
-        flex-wrap: wrap;
-      }
-      .rule-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        flex: 1;
-        min-width: 220px;
-        padding-left: 10px;
-      }
-      .rule-a {
-        border-left: 4px solid #2980b9;
-      }
-      .rule-button {
-        border-left: 4px solid #e17055;
-      }
-      .rule-icon {
-        font-size: 22px;
-        flex-shrink: 0;
-      }
-      .rule-text strong {
-        display: block;
-        font-size: 13px;
-        margin-bottom: 2px;
-      }
-      .rule-text span {
-        font-size: 12px;
-        color: #636e72;
-        line-height: 1.6;
-      }
+    .rule-banner {
+      background: #fff; border-bottom: 2px solid #dfe6e9;
+      padding: 16px 32px; display: flex; gap: 24px; flex-wrap: wrap;
+    }
+    .rule-item { display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 220px; padding-left: 10px; }
+    .rule-a      { border-left: 4px solid #2980b9; }
+    .rule-button { border-left: 4px solid #e17055; }
+    .rule-icon { font-size: 22px; flex-shrink: 0; }
+    .rule-text strong { display: block; font-size: 13px; margin-bottom: 2px; }
+    .rule-text span   { font-size: 12px; color: #636e72; line-height: 1.6; }
 
-      main {
-        max-width: 960px;
-        margin: 28px auto;
-        padding: 0 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-      }
+    main { max-width: 960px; margin: 28px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 24px; }
 
-      .case-card {
-        background: #fff;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
-      }
-      .case-header {
-        padding: 14px 22px;
-        background: #f8f9fa;
-        border-bottom: 1px solid #eee;
-      }
-      .case-header h2 {
-        font-size: 15px;
-        color: #2d3436;
-      }
-      .case-header p {
-        font-size: 12px;
-        color: #888;
-        margin-top: 3px;
-        line-height: 1.6;
-      }
+    .case-card { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.07); }
+    .case-header { padding: 14px 22px; background: #f8f9fa; border-bottom: 1px solid #eee; }
+    .case-header h2 { font-size: 15px; color: #2d3436; }
+    .case-header p  { font-size: 12px; color: #888; margin-top: 3px; line-height: 1.6; }
 
-      .case-body {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-      }
-      .panel {
-        padding: 18px 22px;
-      }
-      .panel-bad {
-        border-right: 1px solid #eee;
-        background: #fff8f7;
-      }
-      .panel-good {
-        background: #f7fff9;
-      }
+    .case-body { display: grid; grid-template-columns: 1fr 1fr; }
+    .panel { padding: 18px 22px; }
+    .panel-bad  { border-right: 1px solid #eee; background: #fff8f7; }
+    .panel-good { background: #f7fff9; }
 
-      .panel-label {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 11px;
-        font-weight: bold;
-        letter-spacing: 0.5px;
-        padding: 3px 10px;
-        border-radius: 20px;
-        margin-bottom: 12px;
-      }
-      .label-bad {
-        background: #ffe0dc;
-        color: #c0392b;
-      }
-      .label-good {
-        background: #d4efdf;
-        color: #1e8449;
-      }
+    .panel-label {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: bold; letter-spacing: .5px;
+      padding: 3px 10px; border-radius: 20px; margin-bottom: 12px;
+    }
+    .label-bad  { background: #ffe0dc; color: #c0392b; }
+    .label-good { background: #d4efdf; color: #1e8449; }
 
-      .code {
-        background: #1e2130;
-        color: #cdd6f4;
-        border-radius: 6px;
-        padding: 12px 14px;
-        font-family: monospace;
-        font-size: 12px;
-        line-height: 1.8;
-        white-space: pre;
-        overflow-x: auto;
-      }
-      .kw {
-        color: #cba6f7;
-      }
-      .at {
-        color: #89dceb;
-      }
-      .val {
-        color: #a6e3a1;
-      }
-      .cm {
-        color: #6c7086;
-      }
-      .hi-bad {
-        color: #f38ba8;
-        font-weight: bold;
-      }
-      .hi-good {
-        color: #a6e3a1;
-        font-weight: bold;
-      }
+    .code {
+      background: #1e2130; color: #cdd6f4;
+      border-radius: 6px; padding: 12px 14px;
+      font-family: monospace; font-size: 12px; line-height: 1.8;
+      white-space: pre; overflow-x: auto;
+    }
+    .kw  { color: #cba6f7; }
+    .at  { color: #89dceb; }
+    .val { color: #a6e3a1; }
+    .cm  { color: #6c7086; }
+    .hi-bad  { color: #f38ba8; font-weight: bold; }
+    .hi-good { color: #a6e3a1; font-weight: bold; }
 
-      .why {
-        margin-top: 10px;
-        font-size: 12px;
-        line-height: 1.7;
-        padding: 8px 12px;
-        border-radius: 5px;
-      }
-      .why-bad {
-        background: #ffe8e6;
-        color: #922b21;
-      }
-      .why-good {
-        background: #d5f5e3;
-        color: #1e8449;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="page-header">
-      <h1>🔍 &lt;a&gt; vs &lt;button&gt; — 언제 무엇을 써야 할까?</h1>
-      <p>생긴 게 같아도 목적이 다르면 태그도 달라야 합니다. 4가지 케이스를 잘못된 예 vs 올바른 예로 비교합니다.</p>
+    .why {
+      margin-top: 10px; font-size: 12px; line-height: 1.7;
+      padding: 8px 12px; border-radius: 5px;
+    }
+    .why-bad  { background: #ffe8e6; color: #922b21; }
+    .why-good { background: #d5f5e3; color: #1e8449; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>🔍 &lt;a&gt; vs &lt;button&gt; — 언제 무엇을 써야 할까?</h1>
+  <p>생긴 게 같아도 목적이 다르면 태그도 달라야 합니다. 4가지 케이스를 잘못된 예 vs 올바른 예로 비교합니다.</p>
+</div>
+
+<div class="rule-banner">
+  <div class="rule-item rule-a">
+    <div class="rule-icon">🔗</div>
+    <div class="rule-text">
+      <strong>&lt;a&gt; 를 쓰는 기준</strong>
+      <span>클릭 후 <b>URL이 바뀌거나 페이지가 이동</b>하는가?<br>→ 그렇다면 &lt;a href="..."&gt;</span>
     </div>
+  </div>
+  <div class="rule-item rule-button">
+    <div class="rule-icon">🖱</div>
+    <div class="rule-text">
+      <strong>&lt;button&gt; 을 쓰는 기준</strong>
+      <span>클릭 후 <b>페이지 안에서 무언가 동작</b>하는가?<br>→ 그렇다면 &lt;button&gt;</span>
+    </div>
+  </div>
+</div>
 
-    <div class="rule-banner">
-      <div class="rule-item rule-a">
-        <div class="rule-icon">🔗</div>
-        <div class="rule-text">
-          <strong>&lt;a&gt; 를 쓰는 기준</strong>
-          <span>클릭 후 <b>URL이 바뀌거나 페이지가 이동</b>하는가?<br />→ 그렇다면 &lt;a href="..."&gt;</span>
-        </div>
+<main>
+
+  <!-- 케이스 1 -->
+  <div class="case-card">
+    <div class="case-header">
+      <h2>케이스 1 — 다른 페이지로 이동하는 경우</h2>
+      <p>버튼처럼 생겼어도 클릭 후 URL이 바뀐다면 → <b>&lt;a&gt;</b></p>
+    </div>
+    <div class="case-body">
+      <div class="panel panel-bad">
+        <span class="panel-label label-bad">❌ 잘못된 예</span>
+        <div class="code">&lt;<span class="kw hi-bad">button</span>&gt;
+  시작하기
+&lt;/<span class="kw hi-bad">button</span>&gt;
+
+<span class="cm">/* 이동이 목적인데
+   button을 사용 */</span></div>
+        <div class="why why-bad">button은 이동 기능이 없습니다. 우클릭 새 탭 열기 불가, 검색엔진이 링크로 인식하지 못합니다.</div>
       </div>
-      <div class="rule-item rule-button">
-        <div class="rule-icon">🖱</div>
-        <div class="rule-text">
-          <strong>&lt;button&gt; 을 쓰는 기준</strong>
-          <span>클릭 후 <b>페이지 안에서 무언가 동작</b>하는가?<br />→ 그렇다면 &lt;button&gt;</span>
-        </div>
+      <div class="panel panel-good">
+        <span class="panel-label label-good">✅ 올바른 예</span>
+        <div class="code">&lt;<span class="kw hi-good">a</span> <span class="at">href</span>=<span class="val">"/start"</span>&gt;
+  시작하기
+&lt;/<span class="kw hi-good">a</span>&gt;
+
+<span class="cm">/* 이동이 목적
+   → a + href 사용 */</span></div>
+        <div class="why why-good">href 덕분에 우클릭 새 탭 열기 가능, 검색엔진이 링크로 인식, 스크린리더가 "링크"로 올바르게 읽습니다.</div>
       </div>
     </div>
+  </div>
 
-    <main>
-      <!-- 케이스 1 -->
-      <div class="case-card">
-        <div class="case-header">
-          <h2>케이스 1 — 다른 페이지로 이동하는 경우</h2>
-          <p>버튼처럼 생겼어도 클릭 후 URL이 바뀐다면 → <b>&lt;a&gt;</b></p>
-        </div>
-        <div class="case-body">
-          <div class="panel panel-bad">
-            <span class="panel-label label-bad">❌ 잘못된 예</span>
-            <div class="code">
-              &lt;<span class="kw hi-bad">button</span>&gt; 시작하기 &lt;/<span class="kw hi-bad">button</span>&gt;
+  <!-- 케이스 2 -->
+  <div class="case-card">
+    <div class="case-header">
+      <h2>케이스 2 — 페이지 안에서 동작하는 경우</h2>
+      <p>링크처럼 생겼어도 클릭해도 URL이 바뀌지 않는다면 → <b>&lt;button&gt;</b></p>
+    </div>
+    <div class="case-body">
+      <div class="panel panel-bad">
+        <span class="panel-label label-bad">❌ 잘못된 예</span>
+        <div class="code">&lt;<span class="kw hi-bad">a</span> <span class="at hi-bad">href</span>=<span class="val hi-bad">"#"</span>&gt;
+  최신순 정렬
+&lt;/<span class="kw hi-bad">a</span>&gt;
 
-              <span class="cm">/* 이동이 목적인데 button을 사용 */</span>
-            </div>
-            <div class="why why-bad">
-              button은 이동 기능이 없습니다. 우클릭 새 탭 열기 불가, 검색엔진이 링크로 인식하지 못합니다.
-            </div>
-          </div>
-          <div class="panel panel-good">
-            <span class="panel-label label-good">✅ 올바른 예</span>
-            <div class="code">
-              &lt;<span class="kw hi-good">a</span> <span class="at">href</span>=<span class="val">"/start"</span>&gt;
-              시작하기 &lt;/<span class="kw hi-good">a</span>&gt;
-
-              <span class="cm">/* 이동이 목적 → a + href 사용 */</span>
-            </div>
-            <div class="why why-good">
-              href 덕분에 우클릭 새 탭 열기 가능, 검색엔진이 링크로 인식, 스크린리더가 "링크"로 올바르게 읽습니다.
-            </div>
-          </div>
-        </div>
+<span class="cm">/* 동작이 목적인데
+   a href="#" 사용 */</span></div>
+        <div class="why why-bad">href="#" 는 클릭 시 스크롤을 맨 위로 올리는 부작용이 있습니다. 이동 없는 동작에 &lt;a&gt;는 부적절합니다.</div>
       </div>
+      <div class="panel panel-good">
+        <span class="panel-label label-good">✅ 올바른 예</span>
+        <div class="code">&lt;<span class="kw hi-good">button</span>&gt;
+  최신순 정렬
+&lt;/<span class="kw hi-good">button</span>&gt;
 
-      <!-- 케이스 2 -->
-      <div class="case-card">
-        <div class="case-header">
-          <h2>케이스 2 — 페이지 안에서 동작하는 경우</h2>
-          <p>링크처럼 생겼어도 클릭해도 URL이 바뀌지 않는다면 → <b>&lt;button&gt;</b></p>
-        </div>
-        <div class="case-body">
-          <div class="panel panel-bad">
-            <span class="panel-label label-bad">❌ 잘못된 예</span>
-            <div class="code">
-              &lt;<span class="kw hi-bad">a</span> <span class="at hi-bad">href</span>=<span class="val hi-bad"
-                >"#"</span
-              >&gt; 최신순 정렬 &lt;/<span class="kw hi-bad">a</span>&gt;
-
-              <span class="cm">/* 동작이 목적인데 a href="#" 사용 */</span>
-            </div>
-            <div class="why why-bad">
-              href="#" 는 클릭 시 스크롤을 맨 위로 올리는 부작용이 있습니다. 이동 없는 동작에 &lt;a&gt;는 부적절합니다.
-            </div>
-          </div>
-          <div class="panel panel-good">
-            <span class="panel-label label-good">✅ 올바른 예</span>
-            <div class="code">
-              &lt;<span class="kw hi-good">button</span>&gt; 최신순 정렬 &lt;/<span class="kw hi-good">button</span>&gt;
-
-              <span class="cm">/* 동작이 목적 → button 사용 */</span>
-            </div>
-            <div class="why why-good">
-              href 부작용 없음. 스크린리더가 "버튼"으로 올바르게 읽고, 키보드 Enter / Space 모두 작동합니다.
-            </div>
-          </div>
-        </div>
+<span class="cm">/* 동작이 목적
+   → button 사용 */</span></div>
+        <div class="why why-good">href 부작용 없음. 스크린리더가 "버튼"으로 올바르게 읽고, 키보드 Enter / Space 모두 작동합니다.</div>
       </div>
+    </div>
+  </div>
 
-      <!-- 케이스 3 -->
-      <div class="case-card">
-        <div class="case-header">
-          <h2>케이스 3 — 폼 제출 버튼</h2>
-          <p>폼을 제출하는 버튼은 → <b>&lt;button type="submit"&gt;</b></p>
-        </div>
-        <div class="case-body">
-          <div class="panel panel-bad">
-            <span class="panel-label label-bad">❌ 잘못된 예</span>
-            <div class="code">
-              &lt;<span class="kw">form</span>&gt; &lt;<span class="kw">input</span> <span class="at">type</span>=<span
-                class="val"
-                >"text"</span
-              >&gt; &lt;<span class="kw hi-bad">a</span> <span class="at hi-bad">href</span>=<span class="val hi-bad"
-                >"#"</span
-              >&gt; 제출하기 &lt;/<span class="kw hi-bad">a</span>&gt; &lt;/<span class="kw">form</span>&gt;
+  <!-- 케이스 3 -->
+  <div class="case-card">
+    <div class="case-header">
+      <h2>케이스 3 — 폼 제출 버튼</h2>
+      <p>폼을 제출하는 버튼은 → <b>&lt;button type="submit"&gt;</b></p>
+    </div>
+    <div class="case-body">
+      <div class="panel panel-bad">
+        <span class="panel-label label-bad">❌ 잘못된 예</span>
+        <div class="code">&lt;<span class="kw">form</span>&gt;
+  &lt;<span class="kw">input</span> <span class="at">type</span>=<span class="val">"text"</span>&gt;
+  &lt;<span class="kw hi-bad">a</span> <span class="at hi-bad">href</span>=<span class="val hi-bad">"#"</span>&gt;
+    제출하기
+  &lt;/<span class="kw hi-bad">a</span>&gt;
+&lt;/<span class="kw">form</span>&gt;
 
-              <span class="cm">/* a 태그로 폼 제출 시도 */</span>
-            </div>
-            <div class="why why-bad">
-              &lt;a&gt;는 form과 연결되지 않아 Enter 키 제출 불가, required 등 브라우저 유효성 검사가 동작하지 않습니다.
-            </div>
-          </div>
-          <div class="panel panel-good">
-            <span class="panel-label label-good">✅ 올바른 예</span>
-            <div class="code">
-              &lt;<span class="kw">form</span>&gt; &lt;<span class="kw">input</span> <span class="at">type</span>=<span
-                class="val"
-                >"text"</span
-              >&gt; &lt;<span class="kw hi-good">button</span> <span class="at hi-good">type</span>=<span
-                class="val hi-good"
-                >"submit"</span
-              >&gt; 제출하기 &lt;/<span class="kw hi-good">button</span>&gt; &lt;/<span class="kw">form</span>&gt;
-
-              <span class="cm">/* button type="submit" 사용 */</span>
-            </div>
-            <div class="why why-good">
-              Enter 키로 제출 가능, required·pattern 등 브라우저 유효성 검사 자동 동작, 스크린리더가 "제출 버튼"으로
-              읽습니다.
-            </div>
-          </div>
-        </div>
+<span class="cm">/* a 태그로 폼 제출 시도 */</span></div>
+        <div class="why why-bad">&lt;a&gt;는 form과 연결되지 않아 Enter 키 제출 불가, required 등 브라우저 유효성 검사가 동작하지 않습니다.</div>
       </div>
+      <div class="panel panel-good">
+        <span class="panel-label label-good">✅ 올바른 예</span>
+        <div class="code">&lt;<span class="kw">form</span>&gt;
+  &lt;<span class="kw">input</span> <span class="at">type</span>=<span class="val">"text"</span>&gt;
+  &lt;<span class="kw hi-good">button</span> <span class="at hi-good">type</span>=<span class="val hi-good">"submit"</span>&gt;
+    제출하기
+  &lt;/<span class="kw hi-good">button</span>&gt;
+&lt;/<span class="kw">form</span>&gt;
 
-      <!-- 케이스 4 -->
-      <div class="case-card">
-        <div class="case-header">
-          <h2>케이스 4 — 드롭다운 메뉴 열기</h2>
-          <p>
-            드롭다운이란 버튼을 클릭하면 아래로 메뉴가 펼쳐지는 UI입니다. 메뉴를 <b>여는 버튼</b>과 메뉴
-            <b>안의 항목</b>은 목적이 달라 태그도 달라집니다.
-          </p>
-        </div>
-
-        <!-- 동작 미리보기 -->
-        <div style="padding: 18px 22px; border-bottom: 1px solid #eee; background: #f0f4ff">
-          <div style="font-size: 11px; font-weight: bold; color: #667eea; letter-spacing: 0.5px; margin-bottom: 12px">
-            ▶ 드롭다운 동작 미리보기 (버튼을 클릭해보세요)
-          </div>
-          <div style="position: relative; display: inline-block">
-            <button
-              onclick="
-                var m = document.getElementById('dd');
-                m.style.display = m.style.display === 'block' ? 'none' : 'block';
-              "
-              style="
-                padding: 8px 18px;
-                background: #667eea;
-                color: #fff;
-                border: none;
-                border-radius: 6px;
-                font-size: 13px;
-                cursor: pointer;
-                font-weight: bold;
-              "
-            >
-              내 계정 ▾
-            </button>
-            <ul
-              id="dd"
-              style="
-                display: none;
-                position: absolute;
-                top: 110%;
-                left: 0;
-                background: #fff;
-                border-radius: 6px;
-                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.13);
-                min-width: 130px;
-                list-style: none;
-                overflow: hidden;
-                z-index: 10;
-              "
-            >
-              <li>
-                <a
-                  href="#"
-                  style="
-                    display: block;
-                    padding: 10px 16px;
-                    color: #333;
-                    text-decoration: none;
-                    font-size: 13px;
-                    border-bottom: 1px solid #f0f0f0;
-                  "
-                  >프로필</a
-                >
-              </li>
-              <li>
-                <a
-                  href="#"
-                  style="
-                    display: block;
-                    padding: 10px 16px;
-                    color: #333;
-                    text-decoration: none;
-                    font-size: 13px;
-                    border-bottom: 1px solid #f0f0f0;
-                  "
-                  >설정</a
-                >
-              </li>
-              <li>
-                <a
-                  href="#"
-                  style="display: block; padding: 10px 16px; color: #333; text-decoration: none; font-size: 13px"
-                  >로그아웃</a
-                >
-              </li>
-            </ul>
-          </div>
-          <p style="margin-top: 12px; font-size: 12px; color: #555">
-            👆 "내 계정 ▾" 버튼 → <b>페이지 이동 없이 메뉴가 펼쳐짐</b> → <b>button</b> 사용<br />
-            "프로필", "설정" 항목 → <b>클릭하면 해당 페이지로 이동</b> → <b>a</b> 사용
-          </p>
-        </div>
-
-        <div class="case-body">
-          <div class="panel panel-bad">
-            <span class="panel-label label-bad">❌ 잘못된 예</span>
-            <div class="code">
-              <span class="cm">&lt;!-- 열기 버튼도 a 사용 --&gt;</span> &lt;<span class="kw hi-bad">a</span>
-              <span class="at hi-bad">href</span>=<span class="val hi-bad">"#"</span>&gt;내 계정 ▾&lt;/<span
-                class="kw hi-bad"
-                >a</span
-              >&gt; &lt;<span class="kw">ul</span>&gt; &lt;<span class="kw">li</span>&gt;&lt;<span class="kw hi-bad"
-                >a</span
-              >
-              <span class="at hi-bad">href</span>=<span class="val hi-bad">"#"</span>&gt;프로필&lt;/<span
-                class="kw hi-bad"
-                >a</span
-              >&gt;&lt;/<span class="kw">li</span>&gt; &lt;<span class="kw">li</span>&gt;&lt;<span class="kw hi-bad"
-                >a</span
-              >
-              <span class="at hi-bad">href</span>=<span class="val hi-bad">"#"</span>&gt;설정&lt;/<span
-                class="kw hi-bad"
-                >a</span
-              >&gt;&lt;/<span class="kw">li</span>&gt; &lt;/<span class="kw">ul</span>&gt;
-            </div>
-            <div class="why why-bad">
-              열기 버튼은 이동이 없는 동작인데 a href="#" 사용 → 스크롤 맨 위로 이동하는 부작용, 스크린리더 혼란
-            </div>
-          </div>
-          <div class="panel panel-good">
-            <span class="panel-label label-good">✅ 올바른 예</span>
-            <div class="code">
-              <span class="cm">&lt;!-- 열기: 동작 목적 → button --&gt;</span> &lt;<span class="kw hi-good">button</span
-              >&gt;내 계정 ▾&lt;/<span class="kw hi-good">button</span>&gt; &lt;<span class="kw">ul</span>&gt;
-              <span class="cm">&lt;!-- 항목: 이동 목적 → a --&gt;</span>
-              &lt;<span class="kw">li</span>&gt; &lt;<span class="kw hi-good">a</span>
-              <span class="at">href</span>=<span class="val">"/profile"</span>&gt;프로필&lt;/<span class="kw hi-good"
-                >a</span
-              >&gt; &lt;/<span class="kw">li</span>&gt; &lt;<span class="kw">li</span>&gt; &lt;<span class="kw hi-good"
-                >a</span
-              >
-              <span class="at">href</span>=<span class="val">"/settings"</span>&gt;설정&lt;/<span class="kw hi-good"
-                >a</span
-              >&gt; &lt;/<span class="kw">li</span>&gt; &lt;/<span class="kw">ul</span>&gt;
-            </div>
-            <div class="why why-good">
-              같은 컴포넌트 안에서도 목적에 따라 태그가 달라집니다 — 열기(동작) → button / 항목(이동) → a
-            </div>
-          </div>
-        </div>
+<span class="cm">/* button type="submit" 사용 */</span></div>
+        <div class="why why-good">Enter 키로 제출 가능, required·pattern 등 브라우저 유효성 검사 자동 동작, 스크린리더가 "제출 버튼"으로 읽습니다.</div>
       </div>
-    </main>
-  </body>
+    </div>
+  </div>
+
+  <!-- 케이스 4 -->
+  <div class="case-card">
+    <div class="case-header">
+      <h2>케이스 4 — 드롭다운 메뉴 열기</h2>
+      <p>드롭다운이란 버튼을 클릭하면 아래로 메뉴가 펼쳐지는 UI입니다. 메뉴를 <b>여는 버튼</b>과 메뉴 <b>안의 항목</b>은 목적이 달라 태그도 달라집니다.</p>
+    </div>
+
+    <!-- 동작 미리보기 -->
+    <div style="padding:18px 22px; border-bottom:1px solid #eee; background:#f0f4ff;">
+      <div style="font-size:11px;font-weight:bold;color:#667eea;letter-spacing:.5px;margin-bottom:12px;">▶ 드롭다운 동작 미리보기 (버튼을 클릭해보세요)</div>
+      <div style="position:relative;display:inline-block;">
+        <button
+          onclick="var m=document.getElementById('dd'); m.style.display = m.style.display==='block' ? 'none' : 'block';"
+          style="padding:8px 18px;background:#667eea;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-weight:bold;">
+          내 계정 ▾
+        </button>
+        <ul id="dd" style="display:none;position:absolute;top:110%;left:0;background:#fff;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.13);min-width:130px;list-style:none;overflow:hidden;z-index:10;">
+          <li><a href="#" style="display:block;padding:10px 16px;color:#333;text-decoration:none;font-size:13px;border-bottom:1px solid #f0f0f0;">프로필</a></li>
+          <li><a href="#" style="display:block;padding:10px 16px;color:#333;text-decoration:none;font-size:13px;border-bottom:1px solid #f0f0f0;">설정</a></li>
+          <li><a href="#" style="display:block;padding:10px 16px;color:#333;text-decoration:none;font-size:13px;">로그아웃</a></li>
+        </ul>
+      </div>
+      <p style="margin-top:12px;font-size:12px;color:#555;">
+        👆 "내 계정 ▾" 버튼 → <b>페이지 이동 없이 메뉴가 펼쳐짐</b> → <b>button</b> 사용<br>
+        "프로필", "설정" 항목 → <b>클릭하면 해당 페이지로 이동</b> → <b>a</b> 사용
+      </p>
+    </div>
+
+    <div class="case-body">
+      <div class="panel panel-bad">
+        <span class="panel-label label-bad">❌ 잘못된 예</span>
+        <div class="code"><span class="cm">&lt;!-- 열기 버튼도 a 사용 --&gt;</span>
+&lt;<span class="kw hi-bad">a</span> <span class="at hi-bad">href</span>=<span class="val hi-bad">"#"</span>&gt;내 계정 ▾&lt;/<span class="kw hi-bad">a</span>&gt;
+&lt;<span class="kw">ul</span>&gt;
+  &lt;<span class="kw">li</span>&gt;&lt;<span class="kw hi-bad">a</span> <span class="at hi-bad">href</span>=<span class="val hi-bad">"#"</span>&gt;프로필&lt;/<span class="kw hi-bad">a</span>&gt;&lt;/<span class="kw">li</span>&gt;
+  &lt;<span class="kw">li</span>&gt;&lt;<span class="kw hi-bad">a</span> <span class="at hi-bad">href</span>=<span class="val hi-bad">"#"</span>&gt;설정&lt;/<span class="kw hi-bad">a</span>&gt;&lt;/<span class="kw">li</span>&gt;
+&lt;/<span class="kw">ul</span>&gt;</div>
+        <div class="why why-bad">열기 버튼은 이동이 없는 동작인데 a href="#" 사용 → 스크롤 맨 위로 이동하는 부작용, 스크린리더 혼란</div>
+      </div>
+      <div class="panel panel-good">
+        <span class="panel-label label-good">✅ 올바른 예</span>
+        <div class="code"><span class="cm">&lt;!-- 열기: 동작 목적 → button --&gt;</span>
+&lt;<span class="kw hi-good">button</span>&gt;내 계정 ▾&lt;/<span class="kw hi-good">button</span>&gt;
+&lt;<span class="kw">ul</span>&gt;
+  <span class="cm">&lt;!-- 항목: 이동 목적 → a --&gt;</span>
+  &lt;<span class="kw">li</span>&gt;
+    &lt;<span class="kw hi-good">a</span> <span class="at">href</span>=<span class="val">"/profile"</span>&gt;프로필&lt;/<span class="kw hi-good">a</span>&gt;
+  &lt;/<span class="kw">li</span>&gt;
+  &lt;<span class="kw">li</span>&gt;
+    &lt;<span class="kw hi-good">a</span> <span class="at">href</span>=<span class="val">"/settings"</span>&gt;설정&lt;/<span class="kw hi-good">a</span>&gt;
+  &lt;/<span class="kw">li</span>&gt;
+&lt;/<span class="kw">ul</span>&gt;</div>
+        <div class="why why-good">같은 컴포넌트 안에서도 목적에 따라 태그가 달라집니다 — 열기(동작) → button / 항목(이동) → a</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</body>
 </html>
