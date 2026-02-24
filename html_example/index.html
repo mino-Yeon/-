@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML 기초 학습</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #f0f2f5;
+        color: #333;
+      }
+
+      header {
+        background: #1e272e;
+        color: #fff;
+        padding: 40px 32px;
+        text-align: center;
+      }
+      header h1 {
+        font-size: 26px;
+        margin-bottom: 10px;
+      }
+      header p {
+        font-size: 14px;
+        color: #b2bec3;
+        line-height: 1.7;
+      }
+
+      main {
+        max-width: 860px;
+        margin: 40px auto;
+        padding: 0 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 28px 24px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        text-decoration: none;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        border-top: 5px solid #ccc;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      }
+
+      .card:nth-child(1) {
+        border-top-color: #2980b9;
+      }
+      .card:nth-child(2) {
+        border-top-color: #27ae60;
+      }
+      .card:nth-child(3) {
+        border-top-color: #8e44ad;
+      }
+      .card:nth-child(4) {
+        border-top-color: #e17055;
+      }
+
+      .card-step {
+        font-size: 11px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        color: #aaa;
+        text-transform: uppercase;
+      }
+      .card-icon {
+        font-size: 36px;
+      }
+      .card-title {
+        font-size: 17px;
+        font-weight: bold;
+        color: #2d3436;
+      }
+      .card-file {
+        font-family: monospace;
+        font-size: 12px;
+        color: #aaa;
+      }
+      .card-desc {
+        font-size: 13px;
+        color: #636e72;
+        line-height: 1.7;
+        margin-top: 4px;
+      }
+
+      .card-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+      }
+      .tag {
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        background: #f0f2f5;
+        color: #555;
+        font-family: monospace;
+      }
+
+      footer {
+        text-align: center;
+        padding: 30px;
+        font-size: 12px;
+        color: #aaa;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>📘 HTML 기초 학습</h1>
+      <p>아래 항목을 순서대로 학습하세요.<br />각 카드를 클릭하면 해당 예제 페이지로 이동합니다.</p>
+    </header>
+
+    <main>
+      <a class="card" href="semanticLayout.html">
+        <span class="card-step">Step 1</span>
+        <span class="card-icon">🏗</span>
+        <span class="card-title">시맨틱 레이아웃</span>
+        <span class="card-file">semanticLayout.html</span>
+        <p class="card-desc">
+          HTML 문서의 큰 구조를 잡는 시맨틱 태그를 배웁니다. header, nav, main, article, section, aside, footer, figure
+          등을 3가지 레이아웃 패턴으로 비교합니다.
+        </p>
+        <div class="card-tags">
+          <span class="tag">&lt;header&gt;</span>
+          <span class="tag">&lt;nav&gt;</span>
+          <span class="tag">&lt;main&gt;</span>
+          <span class="tag">&lt;section&gt;</span>
+          <span class="tag">&lt;article&gt;</span>
+          <span class="tag">&lt;aside&gt;</span>
+          <span class="tag">&lt;figure&gt;</span>
+        </div>
+      </a>
+
+      <a class="card" href="inline_block.html">
+        <span class="card-step">Step 2</span>
+        <span class="card-icon">📦</span>
+        <span class="card-title">Block / Inline 요소</span>
+        <span class="card-file">inline_block.html</span>
+        <p class="card-desc">
+          HTML 요소가 공간을 차지하는 방식을 배웁니다. block, inline, inline-block의 특성과 대표 태그, 실제 동작을
+          시각화로 비교합니다.
+        </p>
+        <div class="card-tags">
+          <span class="tag">block</span>
+          <span class="tag">inline</span>
+          <span class="tag">inline-block</span>
+          <span class="tag">display</span>
+        </div>
+      </a>
+
+      <a class="card" href="menubar.html">
+        <span class="card-step">Step 3</span>
+        <span class="card-icon">🧭</span>
+        <span class="card-title">메뉴바 구조</span>
+        <span class="card-file">menubar.html</span>
+        <p class="card-desc">
+          nav 태그로 메뉴바를 만드는 기본 구조를 배웁니다. 가로형 수평 nav와 세로형 사이드바 nav 두 가지 패턴을 코드와
+          함께 비교합니다.
+        </p>
+        <div class="card-tags">
+          <span class="tag">&lt;nav&gt;</span>
+          <span class="tag">&lt;ul&gt;</span>
+          <span class="tag">&lt;li&gt;</span>
+          <span class="tag">&lt;a&gt;</span>
+          <span class="tag">flex</span>
+        </div>
+      </a>
+
+      <a class="card" href="avsbutton.html">
+        <span class="card-step">Step 4</span>
+        <span class="card-icon">🔍</span>
+        <span class="card-title">a vs button</span>
+        <span class="card-file">avsbutton.html</span>
+        <p class="card-desc">
+          언제 &lt;a&gt;를 쓰고 언제 &lt;button&gt;을 써야 하는지 4가지 케이스를 잘못된 예 vs 올바른 예로 나란히
+          비교합니다.
+        </p>
+        <div class="card-tags">
+          <span class="tag">&lt;a&gt;</span>
+          <span class="tag">&lt;button&gt;</span>
+          <span class="tag">href</span>
+          <span class="tag">type="submit"</span>
+        </div>
+      </a>
+    </main>
+
+    <footer>
+      <p>HTML 기초 학습 자료 | 총 4개 챕터</p>
+    </footer>
+  </body>
+</html>

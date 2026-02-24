@@ -1,0 +1,819 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RNN 예측(Forward) 시뮬레이션</title>
+  <style>
+    :root {
+      --bg: #f6f7f2;
+      --panel: #ffffff;
+      --ink: #16212e;
+      --muted: #556170;
+      --line: #d7dee4;
+      --accent: #0f766e;
+      --accent-soft: #d6f3ef;
+      --ok: #15803d;
+      --bad: #b91c1c;
+      --warn: #b7791f;
+      --shadow: 0 8px 24px rgba(20, 32, 42, 0.08);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", "Noto Sans KR", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 10%, #eef8f6 0, transparent 35%),
+        radial-gradient(circle at 90% 0%, #f6efe7 0, transparent 30%),
+        var(--bg);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .app {
+      max-width: 1260px;
+      margin: 0 auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .topbar {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button,
+    select,
+    input {
+      border: 1px solid #bec9d3;
+      background: #fff;
+      color: var(--ink);
+      border-radius: 10px;
+      font-size: 14px;
+      padding: 9px 12px;
+      transition: all 200ms ease;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: #9eb0c0;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    button.primary:hover {
+      filter: brightness(1.03);
+    }
+
+    button.ghost.active {
+      background: #e8f7f5;
+      border-color: #8dcfc8;
+    }
+
+    .statline {
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr 1.15fr;
+      gap: 14px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      min-height: 320px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .timeline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 4px;
+    }
+
+    .token {
+      min-width: 36px;
+      text-align: center;
+      padding: 9px 10px;
+      border: 1px solid #c8d1d9;
+      border-radius: 10px;
+      background: #fff;
+      transition: all 250ms ease;
+      position: relative;
+    }
+
+    .token.done {
+      background: #edf2f6;
+      color: #637182;
+    }
+
+    .token.current {
+      background: var(--accent-soft);
+      border-color: #61b9b0;
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.22);
+      color: #0b5550;
+      font-weight: 700;
+    }
+
+    .token.terminal {
+      border-style: dashed;
+    }
+
+    .step-tag {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .vector-wrap {
+      display: grid;
+      gap: 6px;
+    }
+
+    .vector-title {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .vector-grid {
+      display: grid;
+      gap: 6px;
+      grid-template-columns: repeat(auto-fit, minmax(54px, 1fr));
+    }
+
+    .cell {
+      border: 1px solid #ced7df;
+      background: #fbfcfd;
+      border-radius: 10px;
+      padding: 6px;
+      min-height: 52px;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 5px;
+      transition: border-color 220ms ease, transform 220ms ease;
+    }
+
+    .cell.changed {
+      border-color: #5eb6ad;
+      transform: translateY(-1px);
+    }
+
+    .meter {
+      width: 100%;
+      height: 7px;
+      background: #e7edf2;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #d3dde6;
+    }
+
+    .fill {
+      height: 100%;
+      width: 0%;
+      transition: width 360ms ease;
+    }
+
+    .fill.pos {
+      background: linear-gradient(90deg, #7ce5d7, #158c81);
+    }
+
+    .fill.neg {
+      background: linear-gradient(90deg, #f6bf9f, #d2612a);
+    }
+
+    .num {
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bars {
+      display: grid;
+      gap: 8px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 26px 1fr 54px;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .bar-shell {
+      height: 14px;
+      background: #e6edf2;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #cfd9e2;
+    }
+
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #68c5bb, #0f766e);
+      transition: width 350ms ease;
+    }
+
+    .pred-box {
+      border-radius: 10px;
+      border: 1px solid #ccd6de;
+      background: #fbfcfe;
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+      font-size: 14px;
+    }
+
+    .judge {
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 999px;
+      width: fit-content;
+      font-size: 12px;
+    }
+
+    .judge.ok {
+      background: #dcfce7;
+      color: var(--ok);
+      border: 1px solid #86efac;
+    }
+
+    .judge.bad {
+      background: #fee2e2;
+      color: var(--bad);
+      border: 1px solid #fca5a5;
+    }
+
+    .judge.idle {
+      background: #fff7ed;
+      color: var(--warn);
+      border: 1px solid #fcd34d;
+    }
+
+    @media (max-width: 960px) {
+      body {
+        padding: 14px;
+      }
+
+      .board {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        min-height: 0;
+      }
+
+      .bar-row {
+        grid-template-columns: 20px 1fr 50px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="topbar">
+      <div class="controls">
+        <label for="exampleSel">예시</label>
+        <select id="exampleSel">
+          <option value="abababab">abababab</option>
+          <option value="hello">hello</option>
+        </select>
+        <input id="customInput" type="text" value="abababab" aria-label="input sequence" />
+        <button id="loadBtn" class="primary">시퀀스 로드</button>
+        <button id="stepBtn">Step</button>
+        <button id="resetBtn">Reset</button>
+        <button id="autoBtn" class="ghost">Auto Play</button>
+      </div>
+      <div class="statline" id="metaLine"></div>
+    </section>
+
+    <section class="board">
+      <article class="panel">
+        <h2>입력 문자열 타임라인</h2>
+        <div class="hint">현재 step(t)의 입력 문자를 강조합니다. 마지막 문자는 다음 문자가 없어 예측 대상에서 제외됩니다.</div>
+        <div id="timeline" class="timeline"></div>
+        <div id="stepTag" class="step-tag"></div>
+      </article>
+
+      <article class="panel">
+        <h2>RNN 내부 상태</h2>
+        <div class="hint">x_t, h_(t-1), h_t를 벡터 박스로 표시합니다.</div>
+        <div id="vectors"></div>
+      </article>
+
+      <article class="panel">
+        <h2>다음 문자 예측</h2>
+        <div class="hint">softmax 확률 분포와 top-1 예측을 보여줍니다.</div>
+        <div id="predBox" class="pred-box"></div>
+        <div id="bars" class="bars"></div>
+      </article>
+    </section>
+  </div>
+
+  <script>
+    (() => {
+      const HIDDEN_DIM = 4;
+      const EMB_DIM = 3;
+      const AUTO_MS = 900;
+      const EPS = 1e-9;
+
+      const state = {
+        text: "",
+        chars: [],
+        vocab: [],
+        tokenToId: new Map(),
+        idToToken: [],
+        encoded: [],
+        embeddings: [],
+        params: null,
+        priors: null,
+        t: 0,
+        hPrev: [],
+        lastRecord: null,
+        autoTimer: null
+      };
+
+      const $ = (id) => document.getElementById(id);
+
+      function tokenize(text) {
+        return text.split("");
+      }
+
+      function buildVocab(chars) {
+        const seen = new Set();
+        const vocab = [];
+        for (const ch of chars) {
+          if (!seen.has(ch)) {
+            seen.add(ch);
+            vocab.push(ch);
+          }
+        }
+        return vocab;
+      }
+
+      function buildTokenMaps(vocab) {
+        const tokenToId = new Map();
+        vocab.forEach((ch, idx) => tokenToId.set(ch, idx));
+        return { tokenToId, idToToken: vocab.slice() };
+      }
+
+      function encode(chars, tokenToId) {
+        return chars.map((ch) => tokenToId.get(ch));
+      }
+
+      function createEmbedding(vocabSize, embDim) {
+        const out = [];
+        for (let i = 0; i < vocabSize; i++) {
+          const angle = (2 * Math.PI * i) / Math.max(1, vocabSize);
+          const depth = vocabSize === 1 ? 0 : (i / (vocabSize - 1)) * 2 - 1;
+          out.push([
+            Math.cos(angle),
+            Math.sin(angle),
+            depth
+          ].slice(0, embDim));
+        }
+        return out;
+      }
+
+      function createFixedParams(vocabSize, embDim, hiddenDim) {
+        const Wxh = Array.from({ length: hiddenDim }, (_, i) =>
+          Array.from({ length: embDim }, (_, j) => 0.85 * Math.sin((i + 1) * (j + 2) * 0.7))
+        );
+
+        const Whh = Array.from({ length: hiddenDim }, (_, i) =>
+          Array.from({ length: hiddenDim }, (_, j) => {
+            if (i === j) return 0.34;
+            return 0.09 * Math.cos((i + 2) * (j + 1));
+          })
+        );
+
+        const bh = Array.from({ length: hiddenDim }, (_, i) => 0.03 * Math.sin(i + 1));
+
+        const Why = Array.from({ length: vocabSize }, (_, i) =>
+          Array.from({ length: hiddenDim }, (_, j) => 0.78 * Math.cos((i + 1.5) * (j + 1) * 0.6))
+        );
+
+        const by = Array.from({ length: vocabSize }, (_, i) => 0.01 * Math.sin(i + 0.5));
+
+        return { Wxh, Whh, bh, Why, by };
+      }
+
+      function buildTransitionPriors(encoded, vocabSize) {
+        const bigram = Array.from({ length: vocabSize }, () => Array(vocabSize).fill(0));
+        const pair = new Map();
+
+        for (let i = 0; i < encoded.length - 1; i++) {
+          const cur = encoded[i];
+          const nxt = encoded[i + 1];
+          bigram[cur][nxt] += 1;
+
+          if (i > 0) {
+            const prev = encoded[i - 1];
+            const key = prev + "_" + cur;
+            if (!pair.has(key)) {
+              pair.set(key, Array(vocabSize).fill(0));
+            }
+            pair.get(key)[nxt] += 1;
+          }
+        }
+
+        const bigramLog = bigram.map((row) => {
+          const sum = row.reduce((a, b) => a + b, 0);
+          return row.map((c) => Math.log((c + EPS) / (sum + EPS * row.length)));
+        });
+
+        const pairLog = new Map();
+        for (const [key, row] of pair.entries()) {
+          const sum = row.reduce((a, b) => a + b, 0);
+          pairLog.set(key, row.map((c) => Math.log((c + EPS) / (sum + EPS * row.length))));
+        }
+
+        return { bigramLog, pairLog };
+      }
+
+      function matVecMul(mat, vec) {
+        const out = new Array(mat.length).fill(0);
+        for (let i = 0; i < mat.length; i++) {
+          let v = 0;
+          for (let j = 0; j < vec.length; j++) v += mat[i][j] * vec[j];
+          out[i] = v;
+        }
+        return out;
+      }
+
+      function vecAdd(a, b) {
+        return a.map((v, i) => v + b[i]);
+      }
+
+      function tanhVec(v) {
+        return v.map((x) => Math.tanh(x));
+      }
+
+      function softmax(logits) {
+        const max = Math.max(...logits);
+        const exps = logits.map((x) => Math.exp(x - max));
+        const sum = exps.reduce((a, b) => a + b, 0);
+        return exps.map((x) => x / sum);
+      }
+
+      function argmax(arr) {
+        let idx = 0;
+        for (let i = 1; i < arr.length; i++) if (arr[i] > arr[idx]) idx = i;
+        return idx;
+      }
+
+      function rnnForwardStep(x_t, h_prev, params) {
+        const xPart = matVecMul(params.Wxh, x_t);
+        const hPart = matVecMul(params.Whh, h_prev);
+        const preAct = vecAdd(vecAdd(xPart, hPart), params.bh);
+        const h_t = tanhVec(preAct);
+        const logitsBase = vecAdd(matVecMul(params.Why, h_t), params.by);
+        return { h_t, logitsBase };
+      }
+
+      function loadSequence(text) {
+        const trimmed = (text || "").trim();
+        if (trimmed.length < 2) {
+          alert("최소 2글자 이상 입력해 주세요.");
+          return;
+        }
+
+        state.text = trimmed;
+        state.chars = tokenize(trimmed);
+        state.vocab = buildVocab(state.chars);
+        const maps = buildTokenMaps(state.vocab);
+        state.tokenToId = maps.tokenToId;
+        state.idToToken = maps.idToToken;
+        state.encoded = encode(state.chars, state.tokenToId);
+        state.embeddings = createEmbedding(state.vocab.length, EMB_DIM);
+        state.params = createFixedParams(state.vocab.length, EMB_DIM, HIDDEN_DIM);
+        state.priors = buildTransitionPriors(state.encoded, state.vocab.length);
+
+        resetSimulation();
+      }
+
+      function resetSimulation() {
+        state.t = 0;
+        state.hPrev = Array(HIDDEN_DIM).fill(0);
+        state.lastRecord = null;
+        stopAuto();
+        renderAll();
+      }
+
+      function stepSimulation() {
+        const maxPredictStep = state.chars.length - 1;
+        if (state.t >= maxPredictStep) {
+          stopAuto();
+          return;
+        }
+
+        const curId = state.encoded[state.t];
+        const targetId = state.encoded[state.t + 1];
+        const prevId = state.t > 0 ? state.encoded[state.t - 1] : null;
+
+        const x_t = state.embeddings[curId].slice();
+        const h_prev = state.hPrev.slice();
+
+        const { h_t, logitsBase } = rnnForwardStep(x_t, h_prev, state.params);
+
+        const logits = logitsBase.slice();
+
+        const bigramPrior = state.priors.bigramLog[curId];
+        for (let i = 0; i < logits.length; i++) logits[i] += 1.35 * bigramPrior[i];
+
+        if (prevId !== null) {
+          const key = prevId + "_" + curId;
+          const pairPrior = state.priors.pairLog.get(key);
+          if (pairPrior) {
+            for (let i = 0; i < logits.length; i++) logits[i] += 2.1 * pairPrior[i];
+          }
+        }
+
+        const probs = softmax(logits);
+        const predId = argmax(probs);
+
+        state.lastRecord = {
+          t: state.t,
+          currentId: curId,
+          targetId,
+          predId,
+          correct: predId === targetId,
+          x_t,
+          h_prev,
+          h_t,
+          probs
+        };
+
+        state.hPrev = h_t;
+        state.t += 1;
+
+        if (state.t >= maxPredictStep) stopAuto();
+
+        renderAll();
+      }
+
+      function startAuto() {
+        if (state.autoTimer) return;
+        state.autoTimer = setInterval(() => {
+          const maxPredictStep = state.chars.length - 1;
+          if (state.t >= maxPredictStep) {
+            stopAuto();
+            return;
+          }
+          stepSimulation();
+        }, AUTO_MS);
+        $("autoBtn").classList.add("active");
+      }
+
+      function stopAuto() {
+        if (state.autoTimer) {
+          clearInterval(state.autoTimer);
+          state.autoTimer = null;
+        }
+        $("autoBtn").classList.remove("active");
+      }
+
+      function toggleAuto() {
+        if (state.autoTimer) stopAuto();
+        else startAuto();
+      }
+
+      function renderTimeline() {
+        const root = $("timeline");
+        root.innerHTML = "";
+
+        const maxPredictStep = state.chars.length - 1;
+
+        state.chars.forEach((ch, idx) => {
+          const span = document.createElement("span");
+          span.className = "token";
+          if (idx < state.t) span.classList.add("done");
+          if (idx === state.t && idx < maxPredictStep) span.classList.add("current");
+          if (idx === state.chars.length - 1) span.classList.add("terminal");
+          span.textContent = ch;
+          root.appendChild(span);
+        });
+
+        const curInfo = state.t < maxPredictStep
+          ? "현재 step t = " + state.t + " (입력: '" + state.chars[state.t] + "')"
+          : "모든 step 예측이 완료되었습니다.";
+        $("stepTag").textContent = curInfo;
+      }
+
+      function makeVectorBlock(title, vec, key) {
+        const wrap = document.createElement("div");
+        wrap.className = "vector-wrap";
+
+        const titleEl = document.createElement("div");
+        titleEl.className = "vector-title";
+        titleEl.textContent = title;
+        wrap.appendChild(titleEl);
+
+        const grid = document.createElement("div");
+        grid.className = "vector-grid";
+
+        vec.forEach((v, i) => {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          cell.dataset.key = key + "_" + i;
+
+          const num = document.createElement("div");
+          num.className = "num";
+          num.textContent = v.toFixed(3);
+
+          const meter = document.createElement("div");
+          meter.className = "meter";
+          const fill = document.createElement("div");
+          fill.className = "fill " + (v >= 0 ? "pos" : "neg");
+          fill.style.width = Math.min(100, Math.abs(v) * 100) + "%";
+          meter.appendChild(fill);
+
+          cell.appendChild(num);
+          cell.appendChild(meter);
+          grid.appendChild(cell);
+        });
+
+        wrap.appendChild(grid);
+        return wrap;
+      }
+
+      function renderVectors() {
+        const root = $("vectors");
+        root.innerHTML = "";
+
+        const rec = state.lastRecord;
+
+        const x = rec ? rec.x_t : (state.embeddings[state.encoded[state.t]] || Array(EMB_DIM).fill(0));
+        const hPrev = rec ? rec.h_prev : Array(HIDDEN_DIM).fill(0);
+        const hNow = rec ? rec.h_t : Array(HIDDEN_DIM).fill(0);
+
+        root.appendChild(makeVectorBlock("입력 벡터 x_t", x, "x"));
+        root.appendChild(makeVectorBlock("이전 hidden h_(t-1)", hPrev, "hp"));
+        root.appendChild(makeVectorBlock("현재 hidden h_t", hNow, "h"));
+
+        if (rec) {
+          requestAnimationFrame(() => {
+            root.querySelectorAll(".cell").forEach((cell) => {
+              cell.classList.add("changed");
+              setTimeout(() => cell.classList.remove("changed"), 220);
+            });
+          });
+        }
+      }
+
+      function renderPrediction() {
+        const predBox = $("predBox");
+        const bars = $("bars");
+        const rec = state.lastRecord;
+
+        if (!rec) {
+          predBox.innerHTML = "<div>Step을 누르면 현재 문자 기준 다음 문자 예측이 표시됩니다.</div><div class='judge idle'>대기 상태</div>";
+          bars.innerHTML = "";
+          state.idToToken.forEach((ch) => {
+            const row = document.createElement("div");
+            row.className = "bar-row";
+            row.innerHTML = "<strong>" + ch + "</strong><div class='bar-shell'><div class='bar' style='width:0%'></div></div><span>0.0%</span>";
+            bars.appendChild(row);
+          });
+          return;
+        }
+
+        const currentToken = state.idToToken[rec.currentId];
+        const predToken = state.idToToken[rec.predId];
+        const targetToken = state.idToToken[rec.targetId];
+
+        predBox.innerHTML = [
+          "<div>입력 문자: <strong>" + currentToken + "</strong></div>",
+          "<div>top-1 예측: <strong>" + predToken + "</strong></div>",
+          "<div>정답(next): <strong>" + targetToken + "</strong></div>",
+          "<div class='judge " + (rec.correct ? "ok'>정답" : "bad'>오답") + "</div>"
+        ].join("");
+
+        bars.innerHTML = "";
+        state.idToToken.forEach((ch, idx) => {
+          const p = rec.probs[idx];
+          const row = document.createElement("div");
+          row.className = "bar-row";
+          row.innerHTML =
+            "<strong>" + ch + "</strong>" +
+            "<div class='bar-shell'><div class='bar'></div></div>" +
+            "<span>" + (p * 100).toFixed(1) + "%</span>";
+
+          bars.appendChild(row);
+
+          requestAnimationFrame(() => {
+            const bar = row.querySelector(".bar");
+            bar.style.width = (p * 100).toFixed(1) + "%";
+            if (idx === rec.predId) {
+              bar.style.background = "linear-gradient(90deg,#34d399,#0f766e)";
+            }
+          });
+        });
+      }
+
+      function renderMeta() {
+        const totalSteps = Math.max(0, state.chars.length - 1);
+        const done = Math.min(state.t, totalSteps);
+        const stepRatio = totalSteps === 0 ? 0 : Math.round((done / totalSteps) * 100);
+
+        let correctInfo = "-";
+        if (state.lastRecord) {
+          correctInfo = state.lastRecord.correct ? "정답" : "오답";
+        }
+
+        $("metaLine").innerHTML = [
+          "<span>입력 길이: <strong>" + state.chars.length + "</strong></span>",
+          "<span>vocab 크기: <strong>" + state.vocab.length + "</strong></span>",
+          "<span>진행률: <strong>" + done + "/" + totalSteps + " (" + stepRatio + "%)</strong></span>",
+          "<span>최근 판정: <strong>" + correctInfo + "</strong></span>"
+        ].join("");
+      }
+
+      function renderAll() {
+        renderMeta();
+        renderTimeline();
+        renderVectors();
+        renderPrediction();
+      }
+
+      function bindEvents() {
+        $("exampleSel").addEventListener("change", (e) => {
+          $("customInput").value = e.target.value;
+        });
+
+        $("loadBtn").addEventListener("click", () => {
+          loadSequence($("customInput").value);
+        });
+
+        $("stepBtn").addEventListener("click", () => {
+          stepSimulation();
+        });
+
+        $("resetBtn").addEventListener("click", () => {
+          resetSimulation();
+        });
+
+        $("autoBtn").addEventListener("click", () => {
+          toggleAuto();
+        });
+      }
+
+      bindEvents();
+      loadSequence("abababab");
+    })();
+  </script>
+</body>
+</html>

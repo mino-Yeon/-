@@ -1,0 +1,1147 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Semantic HTML Layout 교육 예제</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #f0f2f5;
+        color: #333;
+        font-size: 14px;
+      }
+
+      /* ── 탭 UI ── */
+      .tab-bar {
+        position: sticky;
+        top: 0;
+        z-index: 200;
+        background: #1e272e;
+        display: flex;
+        gap: 4px;
+        padding: 10px 20px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+      .tab-btn {
+        padding: 10px 22px;
+        background: #2d3436;
+        color: #b2bec3;
+        border: none;
+        border-radius: 8px 8px 0 0;
+        font-size: 13px;
+        font-weight: bold;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+      }
+      .tab-btn:hover {
+        background: #3d4852;
+        color: #fff;
+      }
+      .tab-btn.active {
+        background: #f0f2f5;
+        color: #1e272e;
+        border-bottom-color: #f0f2f5;
+      }
+
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+
+      /* ── 범례 ── */
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        background: #fff;
+        padding: 10px 20px;
+        border-bottom: 2px solid #dfe6e9;
+      }
+      .legend-title {
+        font-weight: bold;
+        font-size: 12px;
+        color: #636e72;
+        margin-right: 6px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        font-family: monospace;
+        color: #2d3436;
+      }
+      .legend-box {
+        width: 13px;
+        height: 13px;
+        border-radius: 3px;
+        flex-shrink: 0;
+      }
+
+      /* ── 태그 레이블 ── */
+      .tl {
+        display: inline-block;
+        font-family: monospace;
+        font-size: 11px;
+        font-weight: bold;
+        padding: 2px 8px;
+        border-radius: 4px;
+        color: #fff;
+        margin-bottom: 5px;
+      }
+      .tl-header {
+        background: #e74c3c;
+      }
+      .tl-nav {
+        background: #e67e22;
+      }
+      .tl-main {
+        background: #27ae60;
+      }
+      .tl-article {
+        background: #2980b9;
+      }
+      .tl-section {
+        background: #8e44ad;
+      }
+      .tl-aside {
+        background: #16a085;
+      }
+      .tl-footer {
+        background: #c0392b;
+      }
+      .tl-figure {
+        background: #d35400;
+      }
+      .tl-figcaption {
+        background: #b7770d;
+      }
+
+      /* ── 설명 박스 ── */
+      .desc {
+        background: #fffbe6;
+        border: 1px solid #f9ca24;
+        border-radius: 5px;
+        padding: 8px 12px;
+        font-size: 12px;
+        color: #6c5a00;
+        line-height: 1.6;
+        margin: 4px 0 8px;
+      }
+      .desc strong {
+        color: #b8860b;
+      }
+
+      /* ── 시맨틱 태그 테두리 색상 ── */
+      [data-tag="header"] {
+        outline: 3px solid #e74c3c;
+      }
+      [data-tag="nav"] {
+        outline: 3px solid #e67e22;
+      }
+      [data-tag="main"] {
+        outline: 3px solid #27ae60;
+      }
+      [data-tag="article"] {
+        outline: 3px solid #2980b9;
+      }
+      [data-tag="section"] {
+        outline: 3px solid #8e44ad;
+      }
+      [data-tag="aside"] {
+        outline: 3px solid #16a085;
+      }
+      [data-tag="footer"] {
+        outline: 3px solid #c0392b;
+      }
+      [data-tag="figure"] {
+        outline: 3px solid #d35400;
+      }
+      [data-tag="figcaption"] {
+        outline: 2px dashed #d35400;
+      }
+
+      /* ── figure 공통 ── */
+      .fig {
+        background: #fafafa;
+        border-radius: 6px;
+        padding: 10px;
+        margin: 12px 0 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+      }
+      .fig-img {
+        width: 100%;
+        height: 110px;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+      }
+      figcaption.fc {
+        font-size: 11px;
+        color: #636e72;
+        text-align: center;
+        background: #efefef;
+        border-radius: 4px;
+        padding: 4px 8px;
+        width: 100%;
+      }
+      .fig-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      .fig-row .fig {
+        flex: 1;
+        min-width: 140px;
+      }
+
+      /* ── 구조 배너 ── */
+      .structure-banner {
+        background: #2d3436;
+        color: #dfe6e9;
+        padding: 10px 20px;
+        font-size: 12px;
+        font-family: monospace;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .structure-banner span {
+        color: #fdcb6e;
+        font-weight: bold;
+      }
+      .structure-banner .arr {
+        color: #74b9ff;
+      }
+
+      /* ════════════
+       패턴 1
+    ════════════ */
+      .p1-header {
+        background: #2c3e50;
+        color: #fff;
+        padding: 0 24px;
+      }
+      .p1-header-top {
+        padding: 16px 0 10px;
+      }
+      .p1-header h1 {
+        font-size: 22px;
+      }
+      .p1-header p {
+        font-size: 12px;
+        color: #aaa;
+        margin-top: 2px;
+      }
+      .p1-nav {
+        background: #34495e;
+        margin: 0 -24px;
+        padding: 0 24px;
+      }
+      .p1-nav ul {
+        display: flex;
+        list-style: none;
+      }
+      .p1-nav ul li a {
+        display: block;
+        padding: 10px 16px;
+        color: #ecf0f1;
+        text-decoration: none;
+        font-size: 13px;
+        border-bottom: 3px solid transparent;
+      }
+      .p1-nav ul li a:hover,
+      .p1-nav ul li.on a {
+        color: #fff;
+        border-bottom-color: #e67e22;
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .p1-container {
+        display: grid;
+        grid-template-columns: 1fr 260px;
+        gap: 20px;
+        max-width: 1000px;
+        margin: 20px auto;
+        padding: 0 16px;
+      }
+      .p1-main {
+        background: #fff;
+        border-radius: 8px;
+        padding: 18px;
+      }
+      .p1-article {
+        background: #f0f4ff;
+        border-radius: 6px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      .p1-article h2 {
+        font-size: 16px;
+        margin: 6px 0 4px;
+        color: #2c3e50;
+      }
+      .p1-article .meta {
+        font-size: 11px;
+        color: #999;
+        margin-bottom: 8px;
+      }
+      .p1-article p {
+        font-size: 13px;
+        line-height: 1.7;
+        color: #555;
+      }
+      .p1-section {
+        background: #fdf6ff;
+        border-radius: 5px;
+        padding: 12px;
+        margin-top: 10px;
+      }
+      .p1-section h3 {
+        font-size: 14px;
+        color: #8e44ad;
+        margin: 4px 0 6px;
+      }
+      .p1-section p {
+        font-size: 13px;
+        line-height: 1.6;
+        color: #666;
+      }
+      .p1-aside {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        align-self: start;
+      }
+      .p1-aside-box {
+        background: #fff;
+        border-radius: 8px;
+        padding: 14px;
+      }
+      .p1-aside-box h4 {
+        font-size: 13px;
+        color: #16a085;
+        margin: 6px 0 8px;
+      }
+      .p1-aside-box ul {
+        list-style: none;
+      }
+      .p1-aside-box ul li {
+        font-size: 12px;
+        padding: 5px 0;
+        border-bottom: 1px solid #eee;
+        color: #555;
+      }
+      .p1-aside-box ul li:last-child {
+        border-bottom: none;
+      }
+      .p1-aside-box ul li::before {
+        content: "→ ";
+        color: #16a085;
+      }
+      .p1-footer {
+        background: #2c3e50;
+        color: #aaa;
+        text-align: center;
+        padding: 16px;
+        font-size: 12px;
+        margin-top: 20px;
+      }
+
+      /* ════════════
+       패턴 2
+    ════════════ */
+      .p2-header {
+        background: #1a1a2e;
+        color: #fff;
+        padding: 16px 24px;
+      }
+      .p2-header h1 {
+        font-size: 22px;
+      }
+      .p2-header p {
+        font-size: 12px;
+        color: #aaa;
+        margin-top: 2px;
+      }
+      .p2-nav {
+        background: #16213e;
+        padding: 0 24px;
+      }
+      .p2-nav ul {
+        display: flex;
+        list-style: none;
+      }
+      .p2-nav ul li a {
+        display: block;
+        padding: 10px 16px;
+        color: #a0aec0;
+        text-decoration: none;
+        font-size: 13px;
+      }
+      .p2-nav ul li a:hover,
+      .p2-nav ul li.on a {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .p2-main {
+        max-width: 900px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      .p2-section {
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .p2-section > h2 {
+        font-size: 18px;
+        color: #1a1a2e;
+        margin: 8px 0 14px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #eee;
+      }
+      .p2-articles-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .p2-article {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 14px;
+      }
+      .p2-article h3 {
+        font-size: 14px;
+        color: #2d3436;
+        margin: 6px 0 6px;
+      }
+      .p2-article .meta {
+        font-size: 11px;
+        color: #aaa;
+        margin-bottom: 6px;
+      }
+      .p2-article p {
+        font-size: 12px;
+        line-height: 1.6;
+        color: #636e72;
+      }
+      .p2-footer {
+        background: #1a1a2e;
+        color: #aaa;
+        text-align: center;
+        padding: 16px;
+        font-size: 12px;
+      }
+
+      /* ════════════
+       패턴 3
+    ════════════ */
+      .p3-header {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        padding: 0 24px;
+      }
+      .p3-header-top {
+        padding: 16px 0 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .p3-header h1 {
+        font-size: 22px;
+      }
+      .p3-header p {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.7);
+        margin-top: 2px;
+      }
+      .p3-header-search input {
+        padding: 7px 14px;
+        border-radius: 20px;
+        border: none;
+        font-size: 13px;
+        width: 200px;
+        outline: none;
+      }
+      .p3-nav {
+        background: rgba(0, 0, 0, 0.2);
+        margin: 0 -24px;
+        padding: 0 24px;
+      }
+      .p3-nav ul {
+        display: flex;
+        list-style: none;
+      }
+      .p3-nav ul li a {
+        display: block;
+        padding: 10px 16px;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        font-size: 13px;
+      }
+      .p3-nav ul li a:hover,
+      .p3-nav ul li.on a {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .p3-container {
+        display: grid;
+        grid-template-columns: 200px 1fr 230px;
+        gap: 18px;
+        max-width: 1060px;
+        margin: 20px auto;
+        padding: 0 16px;
+      }
+      .p3-left-aside {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-self: start;
+      }
+      .p3-aside-box {
+        background: #fff;
+        border-radius: 8px;
+        padding: 14px;
+      }
+      .p3-aside-box h4 {
+        font-size: 13px;
+        color: #667eea;
+        margin: 6px 0 8px;
+      }
+      .p3-aside-box ul {
+        list-style: none;
+      }
+      .p3-aside-box ul li {
+        font-size: 12px;
+        padding: 5px 0;
+        border-bottom: 1px solid #eee;
+        color: #555;
+        cursor: pointer;
+      }
+      .p3-aside-box ul li:last-child {
+        border-bottom: none;
+      }
+      .p3-aside-box ul li.on {
+        color: #667eea;
+        font-weight: bold;
+      }
+
+      .p3-main {
+        background: #fff;
+        border-radius: 8px;
+        padding: 18px;
+      }
+      .p3-main > h2 {
+        font-size: 17px;
+        color: #2d3436;
+        margin: 6px 0 14px;
+      }
+      .p3-section {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 14px;
+        margin-bottom: 16px;
+      }
+      .p3-section > h3 {
+        font-size: 15px;
+        color: #8e44ad;
+        margin: 4px 0 10px;
+      }
+      .p3-article {
+        background: #fff;
+        border-radius: 5px;
+        padding: 12px;
+        margin-bottom: 10px;
+        border-left: 4px solid #2980b9;
+      }
+      .p3-article h4 {
+        font-size: 13px;
+        color: #2980b9;
+        margin: 4px 0 5px;
+      }
+      .p3-article p {
+        font-size: 12px;
+        line-height: 1.6;
+        color: #636e72;
+      }
+      .p3-inner-section {
+        background: #f0e6ff;
+        border-radius: 4px;
+        padding: 10px;
+        margin-top: 8px;
+      }
+      .p3-inner-section h5 {
+        font-size: 12px;
+        color: #8e44ad;
+        margin-bottom: 5px;
+      }
+      .p3-inner-section p {
+        font-size: 12px;
+        color: #555;
+      }
+
+      .p3-right-aside {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-self: start;
+      }
+      .p3-right-aside .p3-aside-box h4 {
+        color: #16a085;
+      }
+      .tag-chip {
+        display: inline-block;
+        background: #eaf4f2;
+        color: #16a085;
+        border-radius: 20px;
+        padding: 3px 9px;
+        font-size: 11px;
+        margin: 2px;
+      }
+      .p3-right-aside .p3-aside-box ul li::before {
+        content: "→ ";
+        color: #16a085;
+      }
+      .p3-footer {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: rgba(255, 255, 255, 0.7);
+        text-align: center;
+        padding: 16px;
+        font-size: 12px;
+        margin-top: 20px;
+      }
+
+      /* figure float (패턴3용) */
+      .fig-float {
+        float: right;
+        margin: 0 0 10px 14px;
+        min-width: 130px;
+        max-width: 160px;
+      }
+      .clearfix::after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+
+      /* blockquote figure */
+      .fig-quote {
+        align-items: flex-start;
+      }
+      .bq {
+        border-left: 4px solid #d35400;
+        padding: 10px 14px;
+        background: #fff8f4;
+        font-style: italic;
+        font-size: 13px;
+        color: #444;
+        border-radius: 0 5px 5px 0;
+        width: 100%;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab(0)">① header 안에 nav</button>
+      <button class="tab-btn" onclick="switchTab(1)">② section 안에 article</button>
+      <button class="tab-btn" onclick="switchTab(2)">③ 복합 중첩 구조</button>
+    </div>
+
+    <div class="legend">
+      <span class="legend-title">🎨 태그 색상 범례:</span>
+      <div class="legend-item">
+        <div class="legend-box" style="background: #e74c3c"></div>
+        &lt;header&gt;
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="background: #e67e22"></div>
+        &lt;nav&gt;
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="background: #27ae60"></div>
+        &lt;main&gt;
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="background: #2980b9"></div>
+        &lt;article&gt;
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="background: #8e44ad"></div>
+        &lt;section&gt;
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="background: #16a085"></div>
+        &lt;aside&gt;
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="background: #c0392b"></div>
+        &lt;footer&gt;
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="background: #d35400"></div>
+        &lt;figure&gt;
+      </div>
+      <div class="legend-item">
+        <div class="legend-box" style="background: #b7770d; outline: 2px dashed #d35400"></div>
+        &lt;figcaption&gt;
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+     탭 1 : header 안에 nav
+══════════════════════════════════════════ -->
+    <div class="tab-panel active" id="panel-0">
+      <div class="structure-banner">
+        📐 구조: <span>&lt;header&gt;</span> <span class="arr">▶</span> <span>&lt;nav&gt;</span>
+        <span class="arr">|</span> <span>&lt;main&gt;</span> <span class="arr">▶</span> <span>&lt;article&gt;</span>
+        <span class="arr">▶</span> <span>&lt;figure&gt;</span> / <span>&lt;section&gt;</span> <span class="arr">|</span>
+        <span>&lt;aside&gt;</span> <span class="arr">|</span> <span>&lt;footer&gt;</span>
+      </div>
+
+      <header data-tag="header" class="p1-header">
+        <span class="tl tl-header">&lt;header&gt;</span>
+        <div class="desc">
+          <strong>header</strong> — 사이트 전체의 대표 헤더.
+          <strong>nav를 header 안에 포함하는 것은 매우 일반적인 패턴</strong>입니다.
+        </div>
+        <div class="p1-header-top">
+          <div>
+            <h1>📰 Semantic HTML 뉴스</h1>
+            <p>header 안에 nav가 포함된 구조</p>
+          </div>
+        </div>
+        <nav data-tag="nav" class="p1-nav">
+          <span class="tl tl-nav">&lt;nav&gt;</span>
+          <div class="desc"><strong>nav</strong> — 주요 탐색 링크 묶음. header 안에 위치해도 완전히 유효합니다.</div>
+          <ul>
+            <li class="on"><a href="#">홈</a></li>
+            <li><a href="#">기술</a></li>
+            <li><a href="#">디자인</a></li>
+            <li><a href="#">튜토리얼</a></li>
+          </ul>
+        </nav>
+      </header>
+
+      <div class="p1-container">
+        <main data-tag="main" class="p1-main">
+          <span class="tl tl-main">&lt;main&gt;</span>
+          <div class="desc"><strong>main</strong> — 페이지 핵심 콘텐츠. 페이지당 단 하나만 사용.</div>
+
+          <article data-tag="article" class="p1-article">
+            <span class="tl tl-article">&lt;article&gt;</span>
+            <div class="desc">
+              <strong>article</strong> — 독립적으로 배포·공유 가능한 콘텐츠 단위. 이 안에 figure로 이미지를 삽입하는
+              것이 일반적입니다.
+            </div>
+            <h2>한강 야경 사진전 — 2025 봄 특집</h2>
+            <p class="meta">작성자: 김코딩 | 2025-02-24</p>
+            <p>서울의 봄을 담은 사진 세 장을 소개합니다. 각 이미지는 figure + figcaption으로 마크업했습니다.</p>
+
+            <!-- figure 3개 나란히 -->
+            <div class="fig-row">
+              <figure data-tag="figure" class="fig">
+                <span class="tl tl-figure">&lt;figure&gt;</span>
+                <div class="fig-img" style="background: linear-gradient(135deg, #667eea, #764ba2)">🌉</div>
+                <figcaption data-tag="figcaption" class="fc">
+                  <span class="tl tl-figcaption">&lt;figcaption&gt;</span>
+                  그림 1. 한강대교 야경 — alt는 이미지 대체 텍스트, figcaption은 화면에 보이는 캡션
+                </figcaption>
+              </figure>
+              <figure data-tag="figure" class="fig">
+                <span class="tl tl-figure">&lt;figure&gt;</span>
+                <div class="fig-img" style="background: linear-gradient(135deg, #f093fb, #f5576c)">🌸</div>
+                <figcaption data-tag="figcaption" class="fc">
+                  <span class="tl tl-figcaption">&lt;figcaption&gt;</span>
+                  그림 2. 여의도 벚꽃 — 출처: 서울시청
+                </figcaption>
+              </figure>
+              <figure data-tag="figure" class="fig">
+                <span class="tl tl-figure">&lt;figure&gt;</span>
+                <div class="fig-img" style="background: linear-gradient(135deg, #4facfe, #00f2fe)">🌙</div>
+                <figcaption data-tag="figcaption" class="fc">
+                  <span class="tl tl-figcaption">&lt;figcaption&gt;</span>
+                  그림 3. 달빛 비친 한강 © 박사진
+                </figcaption>
+              </figure>
+            </div>
+
+            <section data-tag="section" class="p1-section">
+              <span class="tl tl-section">&lt;section&gt;</span>
+              <div class="desc">
+                <strong>section</strong> — article 내 주제별 구획. 반드시 제목(h태그)을 가져야 합니다.
+              </div>
+              <h3>📌 figure를 쓰는 이유</h3>
+              <p>
+                이미지를 &lt;div&gt;로 감싸면 캡션과의 관계가 의미적으로 불명확합니다. &lt;figure&gt;는 이미지와 캡션이
+                하나의 독립 단위임을 브라우저·스크린리더·검색엔진에 명확히 전달합니다.
+              </p>
+            </section>
+          </article>
+
+          <article data-tag="article" class="p1-article">
+            <span class="tl tl-article">&lt;article&gt;</span>
+            <h2>두 번째 기사 — 텍스트와 figure 혼합</h2>
+            <p class="meta">작성자: 이웹개 | 2025-02-23</p>
+            <p>각 article은 RSS로 단독 배포해도 의미가 통하는 콘텐츠여야 합니다.</p>
+            <section data-tag="section" class="p1-section">
+              <span class="tl tl-section">&lt;section&gt;</span>
+              <h3>section은 article 안팎 어디든</h3>
+              <p>section은 article 내부뿐 아니라 main 바로 아래, 혹은 페이지의 독립된 구획으로도 사용할 수 있습니다.</p>
+            </section>
+          </article>
+        </main>
+
+        <aside data-tag="aside" class="p1-aside">
+          <div class="p1-aside-box" data-tag="aside">
+            <span class="tl tl-aside">&lt;aside&gt;</span>
+            <div class="desc"><strong>aside</strong> — 본문과 관련 있지만 분리돼도 무방한 부가 콘텐츠.</div>
+            <h4>📎 관련 아티클</h4>
+            <ul>
+              <li>CSS Grid 완전 정복</li>
+              <li>접근성 체크리스트 10선</li>
+              <li>SEO를 위한 HTML 작성법</li>
+            </ul>
+          </div>
+          <div class="p1-aside-box" data-tag="aside">
+            <span class="tl tl-aside">&lt;aside&gt;</span>
+            <h4>✍️ 인기 작성자</h4>
+            <ul>
+              <li>김코딩 (글 12편)</li>
+              <li>이웹개 (글 8편)</li>
+              <li>박마크업 (글 5편)</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+
+      <footer data-tag="footer" class="p1-footer">
+        <span class="tl tl-footer">&lt;footer&gt;</span>
+        <div class="desc" style="max-width: 600px; margin: 0 auto 8px">
+          <strong>footer</strong> — 저작권·연락처·사이트맵 등 하단 정보.
+        </div>
+        <p>© 2025 Semantic HTML 뉴스 | 개인정보처리방침 | 문의: contact@example.com</p>
+      </footer>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+     탭 2 : section 안에 article
+══════════════════════════════════════════ -->
+    <div class="tab-panel" id="panel-1">
+      <div class="structure-banner">
+        📐 구조: <span>&lt;header&gt;</span> + <span>&lt;nav&gt;</span>(분리) <span class="arr">|</span>
+        <span>&lt;main&gt;</span> <span class="arr">▶</span> <span>&lt;section&gt;</span> <span class="arr">▶</span>
+        <span>&lt;article&gt;</span> <span class="arr">▶</span> <span>&lt;figure&gt;</span> <span class="arr">|</span>
+        <span>&lt;footer&gt;</span>
+        &nbsp;— 카테고리(section)별로 여러 글(article)을 묶는 패턴
+      </div>
+
+      <header data-tag="header" class="p2-header">
+        <span class="tl tl-header">&lt;header&gt;</span>
+        <div class="desc"><strong>header</strong> — 이 패턴에서는 header와 nav를 분리. 브랜드 영역만 header에.</div>
+        <h1>📚 Tech Magazine</h1>
+        <p>section 안에 article이 있는 구조</p>
+      </header>
+
+      <nav data-tag="nav" class="p2-nav">
+        <span class="tl tl-nav">&lt;nav&gt;</span>
+        <div class="desc"><strong>nav</strong> — header 밖에 독립적으로 위치. header 안/밖 모두 올바른 HTML입니다.</div>
+        <ul>
+          <li class="on"><a href="#">전체</a></li>
+          <li><a href="#">프론트엔드</a></li>
+          <li><a href="#">백엔드</a></li>
+          <li><a href="#">데브옵스</a></li>
+        </ul>
+      </nav>
+
+      <main data-tag="main" class="p2-main">
+        <span class="tl tl-main">&lt;main&gt;</span>
+        <div class="desc"><strong>main</strong> — 이 패턴에서는 aside 없이 main이 전체 폭을 사용합니다.</div>
+
+        <section data-tag="section" class="p2-section">
+          <span class="tl tl-section">&lt;section&gt;</span>
+          <div class="desc">
+            <strong>section</strong> — "프론트엔드" 카테고리 구획. section 안에 여러 article을 담는 일반적인 패턴입니다.
+          </div>
+          <h2>🖥 프론트엔드</h2>
+          <div class="p2-articles-grid">
+            <article data-tag="article" class="p2-article">
+              <span class="tl tl-article">&lt;article&gt;</span>
+              <div class="desc">
+                <strong>article</strong> — section 안에 있어도 독립성 유지. figure로 대표 이미지를 포함합니다.
+              </div>
+              <!-- figure: 썸네일 이미지 -->
+              <figure data-tag="figure" class="fig">
+                <span class="tl tl-figure">&lt;figure&gt;</span>
+                <div
+                  class="fig-img"
+                  style="background: linear-gradient(135deg, #43e97b, #38f9d7); height: 80px; font-size: 28px"
+                >
+                  📦
+                </div>
+                <figcaption data-tag="figcaption" class="fc">
+                  <span class="tl tl-figcaption">&lt;figcaption&gt;</span>
+                  그림 1. CSS Container Queries 동작 구조도
+                </figcaption>
+              </figure>
+              <h3 style="margin-top: 10px">CSS Container Queries 실전 가이드</h3>
+              <p class="meta">김코딩 · 2025-02-24</p>
+              <p>컨테이너 쿼리를 이용하면 부모 요소 크기에 반응하는 컴포넌트를 만들 수 있습니다.</p>
+            </article>
+
+            <article data-tag="article" class="p2-article">
+              <span class="tl tl-article">&lt;article&gt;</span>
+              <figure data-tag="figure" class="fig">
+                <span class="tl tl-figure">&lt;figure&gt;</span>
+                <div
+                  class="fig-img"
+                  style="background: linear-gradient(135deg, #fa709a, #fee140); height: 80px; font-size: 28px"
+                >
+                  🧩
+                </div>
+                <figcaption data-tag="figcaption" class="fc">
+                  <span class="tl tl-figcaption">&lt;figcaption&gt;</span>
+                  그림 2. Web Components 구성 요소 — Shadow DOM, Custom Elements, Templates
+                </figcaption>
+              </figure>
+              <h3 style="margin-top: 10px">Web Components로 재사용 UI 만들기</h3>
+              <p class="meta">이웹개 · 2025-02-22</p>
+              <p>Shadow DOM, Custom Elements, HTML Templates 세 가지 기술을 조합합니다.</p>
+            </article>
+          </div>
+        </section>
+
+        <section data-tag="section" class="p2-section">
+          <span class="tl tl-section">&lt;section&gt;</span>
+          <div class="desc">
+            <strong>section</strong> — "백엔드" 카테고리. 같은 main 안에 여러 section이 각자 다른 주제를 담습니다.
+          </div>
+          <h2>⚙️ 백엔드</h2>
+          <div class="p2-articles-grid">
+            <article data-tag="article" class="p2-article">
+              <span class="tl tl-article">&lt;article&gt;</span>
+              <figure data-tag="figure" class="fig">
+                <span class="tl tl-figure">&lt;figure&gt;</span>
+                <div
+                  class="fig-img"
+                  style="background: linear-gradient(135deg, #4facfe, #00f2fe); height: 80px; font-size: 28px"
+                >
+                  🌊
+                </div>
+                <figcaption data-tag="figcaption" class="fc">
+                  <span class="tl tl-figcaption">&lt;figcaption&gt;</span>
+                  그림 3. Node.js 스트림 흐름도
+                </figcaption>
+              </figure>
+              <h3 style="margin-top: 10px">Node.js 스트림 완전 이해</h3>
+              <p class="meta">박서버 · 2025-02-20</p>
+              <p>Readable, Writable, Transform 스트림의 차이와 실전 활용법을 알아봅니다.</p>
+            </article>
+
+            <article data-tag="article" class="p2-article">
+              <span class="tl tl-article">&lt;article&gt;</span>
+              <figure data-tag="figure" class="fig">
+                <span class="tl tl-figure">&lt;figure&gt;</span>
+                <div
+                  class="fig-img"
+                  style="background: linear-gradient(135deg, #a18cd1, #fbc2eb); height: 80px; font-size: 28px"
+                >
+                  🗃
+                </div>
+                <figcaption data-tag="figcaption" class="fc">
+                  <span class="tl tl-figcaption">&lt;figcaption&gt;</span>
+                  그림 4. B-tree 인덱스 구조 — 출처: PostgreSQL 공식 문서
+                </figcaption>
+              </figure>
+              <h3 style="margin-top: 10px">PostgreSQL 인덱스 전략</h3>
+              <p class="meta">최디비 · 2025-02-18</p>
+              <p>B-tree, GIN, GiST 인덱스를 언제 어떻게 써야 하는지 실제 쿼리와 함께 설명합니다.</p>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer data-tag="footer" class="p2-footer">
+        <span class="tl tl-footer">&lt;footer&gt;</span>
+        <p>© 2025 Tech Magazine | 모든 글의 저작권은 각 작성자에게 있습니다.</p>
+      </footer>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+     탭 3 : 복합 중첩 구조
+══════════════════════════════════════════ -->
+    <div class="tab-panel" id="panel-2">
+      <div class="structure-banner">
+        📐 구조: <span>&lt;header&gt;</span>(nav포함) <span class="arr">|</span> <span>&lt;aside&gt;</span>(좌) +
+        <span>&lt;main&gt;</span> <span class="arr">▶</span> <span>&lt;section&gt;</span> <span class="arr">▶</span>
+        <span>&lt;article&gt;</span> <span class="arr">▶</span> <span>&lt;figure&gt;</span> +
+        <span>&lt;section&gt;</span>(내부) <span class="arr">|</span> <span>&lt;aside&gt;</span>(우)
+        <span class="arr">|</span> <span>&lt;footer&gt;</span>
+      </div>
+
+      <header data-tag="header" class="p3-header">
+        <span class="tl tl-header">&lt;header&gt;</span>
+        <div class="desc"><strong>header &gt; nav 포함 패턴</strong> — 로고·검색창·nav를 하나의 header 안에 통합.</div>
+        <div class="p3-header-top">
+          <div>
+            <h1>🌐 Dev Portal</h1>
+            <p>복합 중첩 구조</p>
+          </div>
+          <div class="p3-header-search"><input type="text" placeholder="🔍  검색어를 입력하세요" /></div>
+        </div>
+        <nav data-tag="nav" class="p3-nav">
+          <span class="tl tl-nav">&lt;nav&gt;</span>
+          <ul>
+            <li class="on"><a href="#">홈</a></li>
+            <li><a href="#">문서</a></li>
+            <li><a href="#">튜토리얼</a></li>
+            <li><a href="#">커뮤니티</a></li>
+          </ul>
+        </nav>
+      </header>
+
+      <div class="p3-container">
+        <aside data-tag="aside" class="p3-left-aside">
+          <div class="p3-aside-box">
+            <span class="tl tl-aside">&lt;aside&gt;</span>
+            <div class="desc"><strong>aside (좌)</strong> — 카테고리 메뉴 등 보조 탐색 콘텐츠.</div>
+            <h4>📂 카테고리</h4>
+            <ul>
+              <li class="on">HTML / 시맨틱</li>
+              <li>CSS / 레이아웃</li>
+              <li>JavaScript</li>
+              <li>접근성 (A11y)</li>
+              <li>성능 최적화</li>
+            </ul>
+          </div>
+        </aside>
+
+        <main data-tag="main" class="p3-main">
+          <span class="tl tl-main">&lt;main&gt;</span>
+          <div class="desc"><strong>main</strong> — 3단 레이아웃의 중앙. aside가 양쪽에 있어도 main은 단 하나.</div>
+          <h2>HTML 시맨틱 태그 가이드</h2>
+
+          <section data-tag="section" class="p3-section">
+            <span class="tl tl-section">&lt;section&gt;</span>
+            <div class="desc"><strong>section</strong> — "기초 개념" 주제 구획. 이 안에 여러 article을 담습니다.</div>
+            <h3>📖 기초 개념</h3>
+
+            <article data-tag="article" class="p3-article">
+              <span class="tl tl-article">&lt;article&gt;</span>
+              <div class="desc">
+                <strong>article</strong> — 독립적으로 완결되는 콘텐츠 단위. 안에 figure로 이미지를 포함합니다.
+              </div>
+
+              <figure data-tag="figure" class="fig">
+                <span class="tl tl-figure">&lt;figure&gt;</span>
+                <div class="fig-img" style="background: linear-gradient(135deg, #667eea, #764ba2); font-size: 24px">
+                  🏗
+                </div>
+                <figcaption data-tag="figcaption" class="fc">
+                  <span class="tl tl-figcaption">&lt;figcaption&gt;</span>
+                  그림 1. 시맨틱 HTML 구조도
+                </figcaption>
+              </figure>
+
+              <h4 style="margin-top: 10px">시맨틱 태그란 무엇인가?</h4>
+              <p>
+                태그 이름 자체가 콘텐츠의 의미를 나타내는 HTML 요소입니다. &lt;div&gt;와 달리 구조와 의미를 동시에
+                전달합니다.
+              </p>
+
+              <section data-tag="section" class="p3-inner-section">
+                <span class="tl tl-section">&lt;section&gt; (article 내부)</span>
+                <h5>🔍 왜 중요한가?</h5>
+                <p>SEO, 접근성, 유지보수 세 측면 모두에서 시맨틱 태그는 &lt;div&gt;보다 명확한 이점을 제공합니다.</p>
+              </section>
+            </article>
+          </section>
+
+          <section data-tag="section" class="p3-section">
+            <span class="tl tl-section">&lt;section&gt;</span>
+            <div class="desc"><strong>section</strong> — "실전 패턴" 주제 구획.</div>
+            <h3>🛠 실전 패턴</h3>
+
+            <article data-tag="article" class="p3-article">
+              <span class="tl tl-article">&lt;article&gt;</span>
+              <h4>header 안 nav vs 밖 nav — 어느 쪽이 맞나?</h4>
+              <p>둘 다 유효한 HTML입니다. 디자인·팀 컨벤션에 따라 선택하세요. 중요한 건 일관성입니다.</p>
+            </article>
+
+            <article data-tag="article" class="p3-article">
+              <span class="tl tl-article">&lt;article&gt;</span>
+              <h4>figure + figcaption — alt와 무엇이 다른가?</h4>
+              <p>
+                alt 속성은 이미지 로드 실패 시 대체 텍스트입니다. figcaption은 항상 화면에 표시되는
+                캡션·출처·크레딧입니다. 둘은 역할이 다르므로 함께 사용합니다.
+              </p>
+            </article>
+          </section>
+        </main>
+
+        <aside data-tag="aside" class="p3-right-aside">
+          <div class="p3-aside-box">
+            <span class="tl tl-aside">&lt;aside&gt;</span>
+            <div class="desc"><strong>aside (우)</strong> — 태그 클라우드·관련 링크 등 부가 정보.</div>
+            <h4>🏷️ 태그 클라우드</h4>
+            <div>
+              <span class="tag-chip">HTML5</span>
+              <span class="tag-chip">Semantic</span>
+              <span class="tag-chip">CSS</span>
+              <span class="tag-chip">접근성</span>
+              <span class="tag-chip">SEO</span>
+              <span class="tag-chip">figure</span>
+            </div>
+          </div>
+          <div class="p3-aside-box">
+            <span class="tl tl-aside">&lt;aside&gt;</span>
+            <h4>📎 관련 문서</h4>
+            <ul>
+              <li>MDN — HTML 요소 참조</li>
+              <li>W3C HTML 명세</li>
+              <li>WHATWG Living Standard</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+
+      <footer data-tag="footer" class="p3-footer">
+        <span class="tl tl-footer">&lt;footer&gt;</span>
+        <div class="desc" style="max-width: 600px; margin: 0 auto 8px">
+          <strong>footer</strong> — 사이트 전체 하단 정보. article·section 각각에도 footer를 넣을 수 있습니다.
+        </div>
+        <p>© 2025 Dev Portal | 시맨틱 HTML을 사랑하는 개발자들이 만듭니다.</p>
+      </footer>
+    </div>
+
+    <script>
+      function switchTab(idx) {
+        document.querySelectorAll(".tab-btn").forEach((b, i) => b.classList.toggle("active", i === idx));
+        document.querySelectorAll(".tab-panel").forEach((p, i) => p.classList.toggle("active", i === idx));
+      }
+    </script>
+  </body>
+</html>
