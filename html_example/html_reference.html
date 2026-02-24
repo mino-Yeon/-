@@ -1,725 +1,420 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HTML 핵심 정리</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      body {
-        font-family: "Segoe UI", sans-serif;
-        background: #f0f2f5;
-        color: #333;
-        font-size: 14px;
-        line-height: 1.7;
-      }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML 핵심 정리</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; font-size: 14px; line-height: 1.7; }
 
-      /* ── 헤더 ── */
-      .page-header {
-        background: #1e272e;
-        color: #fff;
-        padding: 28px 32px;
-      }
-      .page-header h1 {
-        font-size: 22px;
-        margin-bottom: 6px;
-      }
-      .page-header p {
-        font-size: 13px;
-        color: #b2bec3;
-      }
+    /* ── 헤더 ── */
+    .page-header { background: #1e272e; color: #fff; padding: 28px 32px; }
+    .page-header h1 { font-size: 22px; margin-bottom: 6px; }
+    .page-header p  { font-size: 13px; color: #b2bec3; }
 
-      /* ── 레이아웃 ── */
-      .layout {
-        display: flex;
-        max-width: 1040px;
-        margin: 28px auto;
-        padding: 0 20px;
-        gap: 24px;
-        align-items: flex-start;
-      }
+    /* ── 레이아웃 ── */
+    .layout { display: flex; max-width: 1040px; margin: 28px auto; padding: 0 20px; gap: 24px; align-items: flex-start; }
 
-      /* ── 사이드 목차 ── */
-      .toc {
-        width: 200px;
-        flex-shrink: 0;
-        background: #fff;
-        border-radius: 10px;
-        padding: 16px;
-        position: sticky;
-        top: 20px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
-      }
-      .toc-title {
-        font-size: 11px;
-        font-weight: bold;
-        color: #aaa;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        margin-bottom: 10px;
-      }
-      .toc ul {
-        list-style: none;
-      }
-      .toc ul li a {
-        display: block;
-        padding: 5px 8px;
-        font-size: 12px;
-        color: #555;
-        text-decoration: none;
-        border-radius: 4px;
-        transition: all 0.15s;
-      }
-      .toc ul li a:hover {
-        background: #f0f2f5;
-        color: #2d3436;
-      }
+    /* ── 사이드 목차 ── */
+    .toc {
+      width: 200px; flex-shrink: 0;
+      background: #fff; border-radius: 10px;
+      padding: 16px; position: sticky; top: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.07);
+    }
+    .toc-title { font-size: 11px; font-weight: bold; color: #aaa; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+    .toc ul { list-style: none; }
+    .toc ul li a {
+      display: block; padding: 5px 8px;
+      font-size: 12px; color: #555; text-decoration: none;
+      border-radius: 4px; transition: all .15s;
+    }
+    .toc ul li a:hover { background: #f0f2f5; color: #2d3436; }
 
-      /* ── 본문 ── */
-      .content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-      }
+    /* ── 본문 ── */
+    .content { flex: 1; display: flex; flex-direction: column; gap: 16px; }
 
-      /* ── 섹션 카드 ── */
-      .card {
-        background: #fff;
-        border-radius: 10px;
-        padding: 22px 24px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
-        scroll-margin-top: 20px;
-      }
-      .card-num {
-        font-size: 11px;
-        font-weight: bold;
-        color: #aaa;
-        letter-spacing: 1px;
-        margin-bottom: 4px;
-      }
-      .card-title {
-        font-size: 16px;
-        font-weight: bold;
-        color: #2d3436;
-        margin-bottom: 10px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #f0f2f5;
-      }
-      .card p {
-        font-size: 13px;
-        color: #555;
-        margin-bottom: 8px;
-      }
-      .card p:last-child {
-        margin-bottom: 0;
-      }
+    /* ── 섹션 카드 ── */
+    .card { background: #fff; border-radius: 10px; padding: 22px 24px; box-shadow: 0 2px 10px rgba(0,0,0,.07); scroll-margin-top: 20px; }
+    .card-num  { font-size: 11px; font-weight: bold; color: #aaa; letter-spacing: 1px; margin-bottom: 4px; }
+    .card-title { font-size: 16px; font-weight: bold; color: #2d3436; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 2px solid #f0f2f5; }
+    .card p { font-size: 13px; color: #555; margin-bottom: 8px; }
+    .card p:last-child { margin-bottom: 0; }
 
-      /* ── 속성 목록 ── */
-      .attr-list {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        margin-top: 10px;
-      }
-      .attr-item {
-        background: #f8f9fa;
-        border-radius: 6px;
-        padding: 8px 12px;
-        font-size: 12px;
-      }
-      .attr-item code {
-        background: #e8eaf0;
-        padding: 1px 6px;
-        border-radius: 3px;
-        font-family: monospace;
-        font-size: 12px;
-        color: #6c3483;
-      }
-      .attr-item .attr-desc {
-        color: #636e72;
-        margin-top: 2px;
-      }
+    /* ── 속성 목록 ── */
+    .attr-list { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+    .attr-item { background: #f8f9fa; border-radius: 6px; padding: 8px 12px; font-size: 12px; }
+    .attr-item code { background: #e8eaf0; padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 12px; color: #6c3483; }
+    .attr-item .attr-desc { color: #636e72; margin-top: 2px; }
 
-      /* ── 태그 칩 ── */
-      .tag-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 10px;
-      }
-      .tag-chip {
-        background: #eaf0fb;
-        color: #1a5276;
-        border-radius: 20px;
-        padding: 4px 12px;
-        font-family: monospace;
-        font-size: 12px;
-        font-weight: bold;
-      }
+    /* ── 태그 칩 ── */
+    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .tag-chip { background: #eaf0fb; color: #1a5276; border-radius: 20px; padding: 4px 12px; font-family: monospace; font-size: 12px; font-weight: bold; }
 
-      /* ── 코드 블록 ── */
-      .code {
-        background: #1e2130;
-        color: #cdd6f4;
-        border-radius: 6px;
-        padding: 14px 16px;
-        font-family: monospace;
-        font-size: 12px;
-        line-height: 1.8;
-        white-space: pre;
-        overflow-x: auto;
-        margin-top: 12px;
-      }
-      .kw {
-        color: #cba6f7;
-      }
-      .at {
-        color: #89dceb;
-      }
-      .val {
-        color: #a6e3a1;
-      }
-      .cm {
-        color: #6c7086;
-      }
+    /* ── 코드 블록 ── */
+    .code {
+      background: #1e2130; color: #cdd6f4;
+      border-radius: 6px; padding: 14px 16px;
+      font-family: monospace; font-size: 12px; line-height: 1.8;
+      white-space: pre; overflow-x: auto; margin-top: 12px;
+    }
+    .kw  { color: #cba6f7; }
+    .at  { color: #89dceb; }
+    .val { color: #a6e3a1; }
+    .cm  { color: #6c7086; }
 
-      /* ── 노트 박스 ── */
-      .note {
-        background: #fffbe6;
-        border-left: 4px solid #f9ca24;
-        border-radius: 0 6px 6px 0;
-        padding: 10px 14px;
-        font-size: 12px;
-        color: #6c5a00;
-        margin-top: 10px;
-        line-height: 1.7;
-      }
+    /* ── 노트 박스 ── */
+    .note { background: #fffbe6; border-left: 4px solid #f9ca24; border-radius: 0 6px 6px 0; padding: 10px 14px; font-size: 12px; color: #6c5a00; margin-top: 10px; line-height: 1.7; }
 
-      /* ── 비교 테이블 ── */
-      .cmp-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 12px;
-        margin-top: 12px;
-      }
-      .cmp-table th {
-        background: #2d3436;
-        color: #fff;
-        padding: 8px 12px;
-        text-align: left;
-      }
-      .cmp-table td {
-        padding: 8px 12px;
-        border-bottom: 1px solid #eee;
-        color: #444;
-        vertical-align: top;
-      }
-      .cmp-table tr:nth-child(even) td {
-        background: #f8f9fa;
-      }
-      .o {
-        color: #27ae60;
-        font-weight: bold;
-      }
-      .x {
-        color: #e74c3c;
-        font-weight: bold;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="page-header">
-      <h1>📄 HTML 핵심 정리</h1>
-      <p>꼭 알아야 할 HTML 태그와 개념만 모았습니다.</p>
+    /* ── 비교 테이블 ── */
+    .cmp-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px; }
+    .cmp-table th { background: #2d3436; color: #fff; padding: 8px 12px; text-align: left; }
+    .cmp-table td { padding: 8px 12px; border-bottom: 1px solid #eee; color: #444; vertical-align: top; }
+    .cmp-table tr:nth-child(even) td { background: #f8f9fa; }
+    .o { color: #27ae60; font-weight: bold; }
+    .x { color: #e74c3c; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>📄 HTML 핵심 정리</h1>
+  <p>꼭 알아야 할 HTML 태그와 개념만 모았습니다.</p>
+</div>
+
+<div class="layout">
+
+  <!-- 목차 -->
+  <nav class="toc">
+    <div class="toc-title">목차</div>
+    <ul>
+      <li><a href="#s0">0. 용어 정리</a></li>
+      <li><a href="#s1">1. 기본 문서 구조</a></li>
+      <li><a href="#s2">2. 주요 공통 속성</a></li>
+      <li><a href="#s3">3. 주석 / 특수문자</a></li>
+      <li><a href="#s4">4. &lt;link&gt; / &lt;meta&gt;</a></li>
+      <li><a href="#s5">5. block / inline</a></li>
+      <li><a href="#s6">6. 목록 태그</a></li>
+      <li><a href="#s7">7. 테이블 태그</a></li>
+      <li><a href="#s8">8. &lt;img&gt;</a></li>
+      <li><a href="#s9">9. &lt;a&gt;</a></li>
+      <li><a href="#s10">10. &lt;button&gt;</a></li>
+      <li><a href="#s11">11. 폼 관련 태그</a></li>
+      <li><a href="#s12">12. &lt;div&gt; / &lt;span&gt;</a></li>
+      <li><a href="#s13">13. &lt;pre&gt;</a></li>
+    </ul>
+  </nav>
+
+  <!-- 본문 -->
+  <main class="content">
+
+    <!-- 0. 용어 정리 -->
+    <div class="card" id="s0">
+      <div class="card-num">00</div>
+      <div class="card-title">용어 정리</div>
+      <p style="margin-bottom:12px;">태그 = 엘리먼트 = 요소 — 모두 같은 말입니다.</p>
+      <div class="code">&lt;a href="https://example.com"&gt;링크 텍스트&lt;/a&gt;</div>
+      <table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;">
+        <thead>
+          <tr style="background:#2d3436;color:#fff;">
+            <th style="padding:8px 12px;text-align:left;">용어</th>
+            <th style="padding:8px 12px;text-align:left;">예시</th>
+            <th style="padding:8px 12px;text-align:left;">설명</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:bold;">태그명</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;font-family:monospace;color:#6c3483;">a</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#555;">&lt;a&gt; 에서 꺽쇠를 제외한 이름</td>
+          </tr>
+          <tr style="background:#f8f9fa;">
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:bold;">속성 (attribute)</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;font-family:monospace;color:#6c3483;">href="https://example.com"</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#555;">태그에 추가 정보를 부여하는 것. 속성명 + 속성값으로 구성됩니다.</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;font-weight:bold;">속성명</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;font-family:monospace;color:#6c3483;">href</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#555;">속성의 이름</td>
+          </tr>
+          <tr style="background:#f8f9fa;">
+            <td style="padding:8px 12px;font-weight:bold;">속성값</td>
+            <td style="padding:8px 12px;font-family:monospace;color:#6c3483;">"https://example.com"</td>
+            <td style="padding:8px 12px;color:#555;">속성에 할당된 값. 큰따옴표로 감쌉니다.</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <div class="layout">
-      <!-- 목차 -->
-      <nav class="toc">
-        <div class="toc-title">목차</div>
-        <ul>
-          <li><a href="#s0">0. 용어 정리</a></li>
-          <li><a href="#s1">1. 기본 문서 구조</a></li>
-          <li><a href="#s2">2. 주요 공통 속성</a></li>
-          <li><a href="#s3">3. 주석 / 특수문자</a></li>
-          <li><a href="#s4">4. &lt;link&gt; / &lt;meta&gt;</a></li>
-          <li><a href="#s5">5. block / inline</a></li>
-          <li><a href="#s6">6. 목록 태그</a></li>
-          <li><a href="#s7">7. 테이블 태그</a></li>
-          <li><a href="#s8">8. &lt;img&gt;</a></li>
-          <li><a href="#s9">9. &lt;a&gt;</a></li>
-          <li><a href="#s10">10. &lt;button&gt;</a></li>
-          <li><a href="#s11">11. 폼 관련 태그</a></li>
-          <li><a href="#s12">12. &lt;div&gt; / &lt;span&gt;</a></li>
-          <li><a href="#s13">13. &lt;pre&gt;</a></li>
-        </ul>
-      </nav>
+    <!-- 1. 기본 문서 구조 -->
+    <div class="card" id="s1">
+      <div class="card-num">01</div>
+      <div class="card-title">기본 문서 구조</div>
+      <p>모든 HTML 파일은 아래 뼈대로 시작합니다. 반드시 외워두세요.</p>
+      <div class="code">&lt;!<span class="kw">DOCTYPE</span> <span class="val">html</span>&gt;          <span class="cm">&lt;!-- HTML5 문서임을 선언 --&gt;</span>
+&lt;<span class="kw">html</span> <span class="at">lang</span>=<span class="val">"ko"</span>&gt;            <span class="cm">&lt;!-- 문서 언어 설정 --&gt;</span>
+  &lt;<span class="kw">head</span>&gt;                   <span class="cm">&lt;!-- 브라우저에게 전달하는 문서 정보 --&gt;</span>
+    &lt;<span class="kw">meta</span> <span class="at">charset</span>=<span class="val">"UTF-8"</span>&gt;
+    &lt;<span class="kw">title</span>&gt;페이지 제목&lt;/<span class="kw">title</span>&gt; <span class="cm">&lt;!-- 탭에 표시되는 제목 --&gt;</span>
+  &lt;/<span class="kw">head</span>&gt;
+  &lt;<span class="kw">body</span>&gt;                   <span class="cm">&lt;!-- 화면에 실제로 보이는 내용 --&gt;</span>
 
-      <!-- 본문 -->
-      <main class="content">
-        <!-- 0. 용어 정리 -->
-        <div class="card" id="s0">
-          <div class="card-num">00</div>
-          <div class="card-title">용어 정리</div>
-          <p style="margin-bottom: 12px">태그 = 엘리먼트 = 요소 — 모두 같은 말입니다.</p>
-          <div class="code">&lt;a href="https://example.com"&gt;링크 텍스트&lt;/a&gt;</div>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 12px">
-            <thead>
-              <tr style="background: #2d3436; color: #fff">
-                <th style="padding: 8px 12px; text-align: left">용어</th>
-                <th style="padding: 8px 12px; text-align: left">예시</th>
-                <th style="padding: 8px 12px; text-align: left">설명</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-weight: bold">태그명</td>
-                <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-family: monospace; color: #6c3483">
-                  a
-                </td>
-                <td style="padding: 8px 12px; border-bottom: 1px solid #eee; color: #555">
-                  &lt;a&gt; 에서 꺽쇠를 제외한 이름
-                </td>
-              </tr>
-              <tr style="background: #f8f9fa">
-                <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-weight: bold">속성 (attribute)</td>
-                <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-family: monospace; color: #6c3483">
-                  href="https://example.com"
-                </td>
-                <td style="padding: 8px 12px; border-bottom: 1px solid #eee; color: #555">
-                  태그에 추가 정보를 부여하는 것. 속성명 + 속성값으로 구성됩니다.
-                </td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-weight: bold">속성명</td>
-                <td style="padding: 8px 12px; border-bottom: 1px solid #eee; font-family: monospace; color: #6c3483">
-                  href
-                </td>
-                <td style="padding: 8px 12px; border-bottom: 1px solid #eee; color: #555">속성의 이름</td>
-              </tr>
-              <tr style="background: #f8f9fa">
-                <td style="padding: 8px 12px; font-weight: bold">속성값</td>
-                <td style="padding: 8px 12px; font-family: monospace; color: #6c3483">"https://example.com"</td>
-                <td style="padding: 8px 12px; color: #555">속성에 할당된 값. 큰따옴표로 감쌉니다.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- 1. 기본 문서 구조 -->
-        <div class="card" id="s1">
-          <div class="card-num">01</div>
-          <div class="card-title">기본 문서 구조</div>
-          <p>모든 HTML 파일은 아래 뼈대로 시작합니다. 반드시 외워두세요.</p>
-          <div class="code">
-            &lt;!<span class="kw">DOCTYPE</span> <span class="val">html</span>&gt;
-            <span class="cm">&lt;!-- HTML5 문서임을 선언 --&gt;</span> &lt;<span class="kw">html</span>
-            <span class="at">lang</span>=<span class="val">"ko"</span>&gt;
-            <span class="cm">&lt;!-- 문서 언어 설정 --&gt;</span> &lt;<span class="kw">head</span>&gt;
-            <span class="cm">&lt;!-- 브라우저에게 전달하는 문서 정보 --&gt;</span> &lt;<span class="kw">meta</span>
-            <span class="at">charset</span>=<span class="val">"UTF-8"</span>&gt; &lt;<span class="kw">title</span
-            >&gt;페이지 제목&lt;/<span class="kw">title</span>&gt;
-            <span class="cm">&lt;!-- 탭에 표시되는 제목 --&gt;</span> &lt;/<span class="kw">head</span>&gt; &lt;<span
-              class="kw"
-              >body</span
-            >&gt; <span class="cm">&lt;!-- 화면에 실제로 보이는 내용 --&gt;</span>
-
-            &lt;/<span class="kw">body</span>&gt; &lt;/<span class="kw">html</span>&gt;
-          </div>
-        </div>
-
-        <!-- 2. 주요 공통 속성 -->
-        <div class="card" id="s2">
-          <div class="card-num">02</div>
-          <div class="card-title">주요 공통 속성</div>
-          <p>거의 모든 태그에 사용할 수 있는 속성들입니다.</p>
-          <div class="attr-list">
-            <div class="attr-item">
-              <code>id="값"</code>
-              <div class="attr-desc">
-                요소의 고유 식별자. 페이지 안에서 중복 불가. Java의 변수명처럼 유일해야 합니다.
-              </div>
-            </div>
-            <div class="attr-item">
-              <code>class="값"</code>
-              <div class="attr-desc">여러 요소를 그룹화. 중복 사용 가능. 공통 스타일링을 적용할 때 사용합니다.</div>
-            </div>
-            <div class="attr-item">
-              <code>style="CSS속성: 값"</code>
-              <div class="attr-desc">해당 요소에만 인라인 스타일 적용. 외부 CSS보다 우선 적용됩니다.</div>
-            </div>
-          </div>
-          <div class="code">
-            <span class="cm">&lt;!-- id: 페이지 안에서 하나만 --&gt;</span> &lt;<span class="kw">div</span>
-            <span class="at">id</span>=<span class="val">"header"</span>&gt;...&lt;/<span class="kw">div</span>&gt;
-
-            <span class="cm">&lt;!-- class: 여러 요소에 동일하게 --&gt;</span>
-            &lt;<span class="kw">p</span> <span class="at">class</span>=<span class="val">"highlight"</span>&gt;첫
-            번째&lt;/<span class="kw">p</span>&gt; &lt;<span class="kw">p</span> <span class="at">class</span>=<span
-              class="val"
-              >"highlight"</span
-            >&gt;두 번째&lt;/<span class="kw">p</span>&gt;
-          </div>
-        </div>
-
-        <!-- 3. 주석 / 특수문자 -->
-        <div class="card" id="s3">
-          <div class="card-num">03</div>
-          <div class="card-title">주석 / 특수문자</div>
-          <div class="attr-list">
-            <div class="attr-item">
-              <code>&lt;!-- 내용 --&gt;</code>
-              <div class="attr-desc">주석. 브라우저에 표시되지 않습니다.</div>
-            </div>
-            <div class="attr-item">
-              <code>&lt;br&gt;</code>
-              <div class="attr-desc">줄바꿈</div>
-            </div>
-            <div class="attr-item">
-              <code>&amp;nbsp;</code>
-              <div class="attr-desc">공백 (Non-Breaking Space)</div>
-            </div>
-            <div class="attr-item">
-              <code>&amp;lt;</code> / <code>&amp;gt;</code>
-              <div class="attr-desc">&lt; / &gt; 기호 출력 (태그로 인식되지 않게)</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4. link / meta -->
-        <div class="card" id="s4">
-          <div class="card-num">04</div>
-          <div class="card-title">&lt;link&gt; / &lt;meta&gt;</div>
-          <p>
-            <code>&lt;link&gt;</code> — 외부 CSS 파일을 연결할 때 사용합니다. <code>&lt;head&gt;</code> 안에 작성합니다.
-          </p>
-          <p style="margin-top: 8px">
-            <code>&lt;meta&gt;</code> — 문서 정보(인코딩, 반응형 설정 등)를 브라우저에 전달합니다.
-          </p>
-          <div class="code">
-            <span class="cm">&lt;!-- 외부 CSS 파일 연결 --&gt;</span> &lt;<span class="kw">link</span>
-            <span class="at">rel</span>=<span class="val">"stylesheet"</span> <span class="at">href</span>=<span
-              class="val"
-              >"index.css"</span
-            >&gt;
-
-            <span class="cm">&lt;!-- 문자 인코딩 설정 (한글 깨짐 방지) --&gt;</span>
-            &lt;<span class="kw">meta</span> <span class="at">charset</span>=<span class="val">"UTF-8"</span>&gt;
-
-            <span class="cm">&lt;!-- 모바일 반응형 기본 설정 --&gt;</span>
-            &lt;<span class="kw">meta</span> <span class="at">name</span>=<span class="val">"viewport"</span>
-            <span class="at">content</span>=<span class="val">"width=device-width, initial-scale=1.0"</span>&gt;
-          </div>
-        </div>
-
-        <!-- 5. block / inline -->
-        <div class="card" id="s5">
-          <div class="card-num">05</div>
-          <div class="card-title">block / inline / inline-block 요소</div>
-          <table class="cmp-table">
-            <thead>
-              <tr>
-                <th>구분</th>
-                <th>배치</th>
-                <th>크기 지정</th>
-                <th>상하 margin</th>
-                <th>대표 태그</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>block</strong></td>
-                <td>항상 새 줄, 가로 100% 차지</td>
-                <td class="o">✅ 가능</td>
-                <td class="o">✅ 적용</td>
-                <td>
-                  <code>&lt;div&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;h1~6&gt;</code>, <code>&lt;ul&gt;</code>,
-                  <code>&lt;li&gt;</code>
-                </td>
-              </tr>
-              <tr>
-                <td><strong>inline</strong></td>
-                <td>나란히, 콘텐츠 크기만큼만</td>
-                <td class="x">❌ 불가</td>
-                <td class="x">❌ 무시</td>
-                <td>
-                  <code>&lt;a&gt;</code>, <code>&lt;span&gt;</code>, <code>&lt;strong&gt;</code>,
-                  <code>&lt;em&gt;</code>
-                </td>
-              </tr>
-              <tr>
-                <td><strong>inline-block</strong></td>
-                <td>나란히 배치</td>
-                <td class="o">✅ 가능</td>
-                <td class="o">✅ 적용</td>
-                <td>
-                  <code>&lt;button&gt;</code>, <code>&lt;input&gt;</code>, <code>&lt;select&gt;</code>,
-                  <code>&lt;img&gt;</code>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="note">
-            💡 CSS <code>display</code> 속성으로 언제든 바꿀 수 있습니다.<br />
-            <code>span { display: block; }</code> &nbsp;/&nbsp; <code>div { display: inline-block; }</code>
-          </div>
-        </div>
-
-        <!-- 6. 목록 태그 -->
-        <div class="card" id="s6">
-          <div class="card-num">06</div>
-          <div class="card-title">목록 태그</div>
-          <div class="attr-list">
-            <div class="attr-item">
-              <code>&lt;ul&gt;</code>
-              <div class="attr-desc">순서 없는 목록 (bullet point)</div>
-            </div>
-            <div class="attr-item">
-              <code>&lt;ol&gt;</code>
-              <div class="attr-desc">순서 있는 목록 (1, 2, 3…)</div>
-            </div>
-            <div class="attr-item">
-              <code>&lt;li&gt;</code>
-              <div class="attr-desc">목록의 각 항목. ul 또는 ol 안에 사용합니다.</div>
-            </div>
-          </div>
-          <div class="code">
-            &lt;<span class="kw">ul</span>&gt; &lt;<span class="kw">li</span>&gt;사과&lt;/<span class="kw">li</span>&gt;
-            &lt;<span class="kw">li</span>&gt;바나나&lt;/<span class="kw">li</span>&gt; &lt;/<span class="kw">ul</span
-            >&gt; &lt;<span class="kw">ol</span>&gt; &lt;<span class="kw">li</span>&gt;첫 번째&lt;/<span class="kw"
-              >li</span
-            >&gt; &lt;<span class="kw">li</span>&gt;두 번째&lt;/<span class="kw">li</span>&gt; &lt;/<span class="kw"
-              >ol</span
-            >&gt;
-          </div>
-        </div>
-
-        <!-- 7. 테이블 태그 -->
-        <div class="card" id="s7">
-          <div class="card-num">07</div>
-          <div class="card-title">테이블 태그 &lt;table&gt;</div>
-          <p>하나의 데이터가 여러 속성을 가질 때 표 형태로 나열합니다.</p>
-          <div class="attr-list" style="margin-top: 10px">
-            <div class="attr-item">
-              <code>&lt;table&gt;</code>
-              <div class="attr-desc">표 전체를 감싸는 태그</div>
-            </div>
-            <div class="attr-item">
-              <code>&lt;thead&gt;</code> / <code>&lt;tbody&gt;</code>
-              <div class="attr-desc">표의 머리(제목 행)와 본문을 의미적으로 구분. 접근성·스타일링에 유리합니다.</div>
-            </div>
-            <div class="attr-item">
-              <code>&lt;tr&gt;</code>
-              <div class="attr-desc">행 (table row)</div>
-            </div>
-            <div class="attr-item">
-              <code>&lt;th&gt;</code>
-              <div class="attr-desc">제목 셀. 기본적으로 굵게 + 가운데 정렬됩니다.</div>
-            </div>
-            <div class="attr-item">
-              <code>&lt;td&gt;</code>
-              <div class="attr-desc">데이터 셀</div>
-            </div>
-          </div>
-          <div class="code">
-            &lt;<span class="kw">table</span>&gt; &lt;<span class="kw">thead</span>&gt; &lt;<span class="kw">tr</span
-            >&gt; &lt;<span class="kw">th</span>&gt;이름&lt;/<span class="kw">th</span>&gt;&lt;<span class="kw">th</span
-            >&gt;나이&lt;/<span class="kw">th</span>&gt;&lt;<span class="kw">th</span>&gt;직업&lt;/<span class="kw"
-              >th</span
-            >&gt; &lt;/<span class="kw">tr</span>&gt; &lt;/<span class="kw">thead</span>&gt; &lt;<span class="kw"
-              >tbody</span
-            >&gt; &lt;<span class="kw">tr</span>&gt; &lt;<span class="kw">td</span>&gt;홍길동&lt;/<span class="kw"
-              >td</span
-            >&gt;&lt;<span class="kw">td</span>&gt;28&lt;/<span class="kw">td</span>&gt;&lt;<span class="kw">td</span
-            >&gt;개발자&lt;/<span class="kw">td</span>&gt; &lt;/<span class="kw">tr</span>&gt; &lt;/<span class="kw"
-              >tbody</span
-            >&gt; &lt;/<span class="kw">table</span>&gt;
-          </div>
-        </div>
-
-        <!-- 8. img -->
-        <div class="card" id="s8">
-          <div class="card-num">08</div>
-          <div class="card-title">&lt;img&gt;</div>
-          <p>이미지를 출력합니다. 닫는 태그가 없는 빈 태그입니다.</p>
-          <div class="attr-list" style="margin-top: 10px">
-            <div class="attr-item">
-              <code>src="이미지 url"</code>
-              <div class="attr-desc">출력할 이미지의 경로 또는 URL</div>
-            </div>
-            <div class="attr-item">
-              <code>alt="문구"</code>
-              <div class="attr-desc">이미지 로드 실패 시 대체 텍스트. 스크린리더가 읽어줘 접근성에 중요합니다.</div>
-            </div>
-          </div>
-          <div class="code">
-            &lt;<span class="kw">img</span> <span class="at">src</span>=<span class="val">"photo.jpg"</span>
-            <span class="at">alt</span>=<span class="val">"프로필 사진"</span>&gt;
-          </div>
-          <div class="note">
-            💡 <code>&lt;img&gt;</code>는 inline-block 요소라 예외적으로 width/height 지정이 가능합니다.
-          </div>
-        </div>
-
-        <!-- 9. a -->
-        <div class="card" id="s9">
-          <div class="card-num">09</div>
-          <div class="card-title">&lt;a&gt; — 링크</div>
-          <p>다른 페이지로 이동하거나, 같은 페이지 내 특정 위치로 이동하는 링크를 만듭니다.</p>
-          <div class="attr-list" style="margin-top: 10px">
-            <div class="attr-item">
-              <code>href="URL"</code>
-              <div class="attr-desc">
-                이동할 페이지 주소. <code>href="#id명"</code>으로 같은 페이지 내 이동도 가능합니다.
-              </div>
-            </div>
-            <div class="attr-item">
-              <code>target="_blank"</code>
-              <div class="attr-desc">새 탭에서 열기. <code>_self</code>는 현재 탭(기본값).</div>
-            </div>
-          </div>
-          <div class="code">
-            <span class="cm">&lt;!-- 외부 페이지, 새 탭으로 열기 --&gt;</span> &lt;<span class="kw">a</span>
-            <span class="at">href</span>=<span class="val">"https://example.com"</span>
-            <span class="at">target</span>=<span class="val">"_blank"</span>&gt;바로가기&lt;/<span class="kw">a</span
-            >&gt;
-
-            <span class="cm">&lt;!-- 같은 페이지 내 이동 (id로 연결) --&gt;</span>
-            &lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"#section1"</span>&gt;섹션1로
-            이동&lt;/<span class="kw">a</span>&gt; ... &lt;<span class="kw">h2</span> <span class="at">id</span>=<span
-              class="val"
-              >"section1"</span
-            >&gt;섹션1&lt;/<span class="kw">h2</span>&gt;
-          </div>
-        </div>
-
-        <!-- 10. button -->
-        <div class="card" id="s10">
-          <div class="card-num">10</div>
-          <div class="card-title">&lt;button&gt;</div>
-          <p>클릭 시 페이지 이동이 아닌 <b>동작(기능)이 실행</b>될 때 사용합니다.</p>
-          <div class="attr-list" style="margin-top: 10px">
-            <div class="attr-item">
-              <code>type="button"</code>
-              <div class="attr-desc">일반 버튼. 기본 동작 없음. JS와 연결해 사용합니다.</div>
-            </div>
-            <div class="attr-item">
-              <code>type="submit"</code>
-              <div class="attr-desc">
-                폼 제출 버튼. &lt;form&gt; 안에서 Enter 키 제출과 유효성 검사를 자동 처리합니다.
-              </div>
-            </div>
-          </div>
-          <div class="code">
-            &lt;<span class="kw">button</span> <span class="at">type</span>=<span class="val">"button"</span
-            >&gt;클릭&lt;/<span class="kw">button</span>&gt; &lt;<span class="kw">form</span>&gt; &lt;<span class="kw"
-              >input</span
-            >
-            <span class="at">type</span>=<span class="val">"text"</span>&gt; &lt;<span class="kw">button</span>
-            <span class="at">type</span>=<span class="val">"submit"</span>&gt;제출&lt;/<span class="kw">button</span
-            >&gt; &lt;/<span class="kw">form</span>&gt;
-          </div>
-          <div class="note">
-            💡 <b>이동이 목적</b>이면 <code>&lt;a&gt;</code>, <b>동작이 목적</b>이면 <code>&lt;button&gt;</code>을
-            사용하세요.
-          </div>
-        </div>
-
-        <!-- 11. 폼 관련 태그 -->
-        <div class="card" id="s11">
-          <div class="card-num">11</div>
-          <div class="card-title">폼 관련 태그 &lt;form&gt; / &lt;input&gt; / &lt;textarea&gt; / &lt;select&gt;</div>
-          <p>사용자로부터 값을 입력받는 태그들입니다.</p>
-          <div class="attr-list" style="margin-top: 10px">
-            <div class="attr-item">
-              <code>&lt;form&gt;</code>
-              <div class="attr-desc">입력 요소들을 감싸는 컨테이너. 입력값을 묶어서 전송합니다.</div>
-            </div>
-            <div class="attr-item">
-              <code>&lt;input type="text"&gt;</code>
-              <div class="attr-desc">
-                한 줄 텍스트 입력. <code>value</code>로 기본값, <code>placeholder</code>로 안내 문구를 설정합니다.
-              </div>
-            </div>
-            <div class="attr-item">
-              <code>&lt;textarea&gt;</code>
-              <div class="attr-desc">여러 줄 텍스트 입력.</div>
-            </div>
-            <div class="attr-item">
-              <code>&lt;select&gt;</code> + <code>&lt;option&gt;</code>
-              <div class="attr-desc">드롭다운 메뉴. option 태그로 각 항목을 추가합니다.</div>
-            </div>
-          </div>
-          <div class="code">
-            &lt;<span class="kw">form</span>&gt; &lt;<span class="kw">input</span> <span class="at">type</span>=<span
-              class="val"
-              >"text"</span
-            >
-            <span class="at">placeholder</span>=<span class="val">"이름 입력"</span>&gt; &lt;<span class="kw"
-              >textarea</span
-            >
-            <span class="at">placeholder</span>=<span class="val">"내용을 입력하세요"</span>&gt;&lt;/<span class="kw"
-              >textarea</span
-            >&gt; &lt;<span class="kw">select</span>&gt; &lt;<span class="kw">option</span>&gt;서울&lt;/<span class="kw"
-              >option</span
-            >&gt; &lt;<span class="kw">option</span>&gt;부산&lt;/<span class="kw">option</span>&gt; &lt;/<span
-              class="kw"
-              >select</span
-            >&gt; &lt;<span class="kw">button</span> <span class="at">type</span>=<span class="val">"submit"</span
-            >&gt;제출&lt;/<span class="kw">button</span>&gt; &lt;/<span class="kw">form</span>&gt;
-          </div>
-        </div>
-
-        <!-- 12. div / span -->
-        <div class="card" id="s12">
-          <div class="card-num">12</div>
-          <div class="card-title">&lt;div&gt; / &lt;span&gt;</div>
-          <div class="attr-list" style="margin-top: 6px">
-            <div class="attr-item">
-              <code>&lt;div&gt;</code> — block 요소
-              <div class="attr-desc">공간(영역)을 나누는 컨테이너. 레이아웃을 구성할 때 가장 많이 사용합니다.</div>
-            </div>
-            <div class="attr-item">
-              <code>&lt;span&gt;</code> — inline 요소
-              <div class="attr-desc">
-                텍스트 중 일부 범위만 스타일링할 때 사용합니다. 줄바꿈 없이 텍스트 안에 삽입됩니다.
-              </div>
-            </div>
-          </div>
-          <div class="code">
-            <span class="cm">&lt;!-- div: 영역 분할 --&gt;</span> &lt;<span class="kw">div</span>
-            <span class="at">class</span>=<span class="val">"card"</span>&gt; &lt;<span class="kw">p</span>&gt;카드 안의
-            내용&lt;/<span class="kw">p</span>&gt; &lt;/<span class="kw">div</span>&gt;
-
-            <span class="cm">&lt;!-- span: 텍스트 일부 스타일링 --&gt;</span>
-            &lt;<span class="kw">p</span>&gt;가격은 &lt;<span class="kw">span</span> <span class="at">style</span>=<span
-              class="val"
-              >"color:red"</span
-            >&gt;1,000원&lt;/<span class="kw">span</span>&gt; 입니다.&lt;/<span class="kw">p</span>&gt;
-          </div>
-        </div>
-
-        <!-- 13. pre -->
-        <div class="card" id="s13">
-          <div class="card-num">13</div>
-          <div class="card-title">&lt;pre&gt;</div>
-          <p>작성한 여백(들여쓰기)과 줄바꿈을 그대로 브라우저에 출력합니다. 코드 예시를 보여줄 때 주로 사용합니다.</p>
-          <div class="code">
-            &lt;<span class="kw">pre</span>&gt; function hello() { console.log("안녕하세요"); } &lt;/<span class="kw"
-              >pre</span
-            >&gt;
-          </div>
-          <div class="note">
-            💡 <code>&lt;pre&gt;</code> 안의 내용은 작성한 공백과 줄바꿈이 그대로 출력됩니다. 일반
-            <code>&lt;p&gt;</code>는 공백·줄바꿈을 무시합니다.
-          </div>
-        </div>
-      </main>
+  &lt;/<span class="kw">body</span>&gt;
+&lt;/<span class="kw">html</span>&gt;</div>
     </div>
-  </body>
+
+    <!-- 2. 주요 공통 속성 -->
+    <div class="card" id="s2">
+      <div class="card-num">02</div>
+      <div class="card-title">주요 공통 속성</div>
+      <p>거의 모든 태그에 사용할 수 있는 속성들입니다.</p>
+      <div class="attr-list">
+        <div class="attr-item">
+          <code>id="값"</code>
+          <div class="attr-desc">요소의 고유 식별자. 페이지 안에서 중복 불가. Java의 변수명처럼 유일해야 합니다.</div>
+        </div>
+        <div class="attr-item">
+          <code>class="값"</code>
+          <div class="attr-desc">여러 요소를 그룹화. 중복 사용 가능. 공통 스타일링을 적용할 때 사용합니다.</div>
+        </div>
+        <div class="attr-item">
+          <code>style="CSS속성: 값"</code>
+          <div class="attr-desc">해당 요소에만 인라인 스타일 적용. 외부 CSS보다 우선 적용됩니다.</div>
+        </div>
+      </div>
+      <div class="code"><span class="cm">&lt;!-- id: 페이지 안에서 하나만 --&gt;</span>
+&lt;<span class="kw">div</span> <span class="at">id</span>=<span class="val">"header"</span>&gt;...&lt;/<span class="kw">div</span>&gt;
+
+<span class="cm">&lt;!-- class: 여러 요소에 동일하게 --&gt;</span>
+&lt;<span class="kw">p</span> <span class="at">class</span>=<span class="val">"highlight"</span>&gt;첫 번째&lt;/<span class="kw">p</span>&gt;
+&lt;<span class="kw">p</span> <span class="at">class</span>=<span class="val">"highlight"</span>&gt;두 번째&lt;/<span class="kw">p</span>&gt;</div>
+    </div>
+
+    <!-- 3. 주석 / 특수문자 -->
+    <div class="card" id="s3">
+      <div class="card-num">03</div>
+      <div class="card-title">주석 / 특수문자</div>
+      <div class="attr-list">
+        <div class="attr-item"><code>&lt;!-- 내용 --&gt;</code><div class="attr-desc">주석. 브라우저에 표시되지 않습니다.</div></div>
+        <div class="attr-item"><code>&lt;br&gt;</code><div class="attr-desc">줄바꿈</div></div>
+        <div class="attr-item"><code>&amp;nbsp;</code><div class="attr-desc">공백 (Non-Breaking Space)</div></div>
+        <div class="attr-item"><code>&amp;lt;</code> / <code>&amp;gt;</code><div class="attr-desc">&lt; / &gt; 기호 출력 (태그로 인식되지 않게)</div></div>
+      </div>
+    </div>
+
+    <!-- 4. link / meta -->
+    <div class="card" id="s4">
+      <div class="card-num">04</div>
+      <div class="card-title">&lt;link&gt; / &lt;meta&gt;</div>
+      <p><code>&lt;link&gt;</code> — 외부 CSS 파일을 연결할 때 사용합니다. <code>&lt;head&gt;</code> 안에 작성합니다.</p>
+      <p style="margin-top:8px;"><code>&lt;meta&gt;</code> — 문서 정보(인코딩, 반응형 설정 등)를 브라우저에 전달합니다.</p>
+      <div class="code"><span class="cm">&lt;!-- 외부 CSS 파일 연결 --&gt;</span>
+&lt;<span class="kw">link</span> <span class="at">rel</span>=<span class="val">"stylesheet"</span> <span class="at">href</span>=<span class="val">"index.css"</span>&gt;
+
+<span class="cm">&lt;!-- 문자 인코딩 설정 (한글 깨짐 방지) --&gt;</span>
+&lt;<span class="kw">meta</span> <span class="at">charset</span>=<span class="val">"UTF-8"</span>&gt;
+
+<span class="cm">&lt;!-- 모바일 반응형 기본 설정 --&gt;</span>
+&lt;<span class="kw">meta</span> <span class="at">name</span>=<span class="val">"viewport"</span> <span class="at">content</span>=<span class="val">"width=device-width, initial-scale=1.0"</span>&gt;</div>
+    </div>
+
+    <!-- 5. block / inline -->
+    <div class="card" id="s5">
+      <div class="card-num">05</div>
+      <div class="card-title">block / inline / inline-block 요소</div>
+      <table class="cmp-table">
+        <thead>
+          <tr><th>구분</th><th>배치</th><th>크기 지정</th><th>상하 margin</th><th>대표 태그</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>block</strong></td>
+            <td>항상 새 줄, 가로 100% 차지</td>
+            <td class="o">✅ 가능</td>
+            <td class="o">✅ 적용</td>
+            <td><code>&lt;div&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;h1~6&gt;</code>, <code>&lt;ul&gt;</code>, <code>&lt;li&gt;</code></td>
+          </tr>
+          <tr>
+            <td><strong>inline</strong></td>
+            <td>나란히, 콘텐츠 크기만큼만</td>
+            <td class="x">❌ 불가</td>
+            <td class="x">❌ 무시</td>
+            <td><code>&lt;a&gt;</code>, <code>&lt;span&gt;</code>, <code>&lt;strong&gt;</code>, <code>&lt;em&gt;</code></td>
+          </tr>
+          <tr>
+            <td><strong>inline-block</strong></td>
+            <td>나란히 배치</td>
+            <td class="o">✅ 가능</td>
+            <td class="o">✅ 적용</td>
+            <td><code>&lt;button&gt;</code>, <code>&lt;input&gt;</code>, <code>&lt;select&gt;</code>, <code>&lt;img&gt;</code></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">💡 CSS <code>display</code> 속성으로 언제든 바꿀 수 있습니다.<br>
+        <code>span { display: block; }</code> &nbsp;/&nbsp; <code>div { display: inline-block; }</code>
+      </div>
+    </div>
+
+    <!-- 6. 목록 태그 -->
+    <div class="card" id="s6">
+      <div class="card-num">06</div>
+      <div class="card-title">목록 태그</div>
+      <div class="attr-list">
+        <div class="attr-item"><code>&lt;ul&gt;</code><div class="attr-desc">순서 없는 목록 (bullet point)</div></div>
+        <div class="attr-item"><code>&lt;ol&gt;</code><div class="attr-desc">순서 있는 목록 (1, 2, 3…)</div></div>
+        <div class="attr-item"><code>&lt;li&gt;</code><div class="attr-desc">목록의 각 항목. ul 또는 ol 안에 사용합니다.</div></div>
+      </div>
+      <div class="code">&lt;<span class="kw">ul</span>&gt;
+  &lt;<span class="kw">li</span>&gt;사과&lt;/<span class="kw">li</span>&gt;
+  &lt;<span class="kw">li</span>&gt;바나나&lt;/<span class="kw">li</span>&gt;
+&lt;/<span class="kw">ul</span>&gt;
+
+&lt;<span class="kw">ol</span>&gt;
+  &lt;<span class="kw">li</span>&gt;첫 번째&lt;/<span class="kw">li</span>&gt;
+  &lt;<span class="kw">li</span>&gt;두 번째&lt;/<span class="kw">li</span>&gt;
+&lt;/<span class="kw">ol</span>&gt;</div>
+    </div>
+
+    <!-- 7. 테이블 태그 -->
+    <div class="card" id="s7">
+      <div class="card-num">07</div>
+      <div class="card-title">테이블 태그 &lt;table&gt;</div>
+      <p>하나의 데이터가 여러 속성을 가질 때 표 형태로 나열합니다.</p>
+      <div class="attr-list" style="margin-top:10px;">
+        <div class="attr-item"><code>&lt;table&gt;</code><div class="attr-desc">표 전체를 감싸는 태그</div></div>
+        <div class="attr-item"><code>&lt;thead&gt;</code> / <code>&lt;tbody&gt;</code><div class="attr-desc">표의 머리(제목 행)와 본문을 의미적으로 구분. 접근성·스타일링에 유리합니다.</div></div>
+        <div class="attr-item"><code>&lt;tr&gt;</code><div class="attr-desc">행 (table row)</div></div>
+        <div class="attr-item"><code>&lt;th&gt;</code><div class="attr-desc">제목 셀. 기본적으로 굵게 + 가운데 정렬됩니다.</div></div>
+        <div class="attr-item"><code>&lt;td&gt;</code><div class="attr-desc">데이터 셀</div></div>
+      </div>
+      <div class="code">&lt;<span class="kw">table</span>&gt;
+  &lt;<span class="kw">thead</span>&gt;
+    &lt;<span class="kw">tr</span>&gt;
+      &lt;<span class="kw">th</span>&gt;이름&lt;/<span class="kw">th</span>&gt;&lt;<span class="kw">th</span>&gt;나이&lt;/<span class="kw">th</span>&gt;&lt;<span class="kw">th</span>&gt;직업&lt;/<span class="kw">th</span>&gt;
+    &lt;/<span class="kw">tr</span>&gt;
+  &lt;/<span class="kw">thead</span>&gt;
+  &lt;<span class="kw">tbody</span>&gt;
+    &lt;<span class="kw">tr</span>&gt;
+      &lt;<span class="kw">td</span>&gt;홍길동&lt;/<span class="kw">td</span>&gt;&lt;<span class="kw">td</span>&gt;28&lt;/<span class="kw">td</span>&gt;&lt;<span class="kw">td</span>&gt;개발자&lt;/<span class="kw">td</span>&gt;
+    &lt;/<span class="kw">tr</span>&gt;
+  &lt;/<span class="kw">tbody</span>&gt;
+&lt;/<span class="kw">table</span>&gt;</div>
+    </div>
+
+    <!-- 8. img -->
+    <div class="card" id="s8">
+      <div class="card-num">08</div>
+      <div class="card-title">&lt;img&gt;</div>
+      <p>이미지를 출력합니다. 닫는 태그가 없는 빈 태그입니다.</p>
+      <div class="attr-list" style="margin-top:10px;">
+        <div class="attr-item"><code>src="이미지 url"</code><div class="attr-desc">출력할 이미지의 경로 또는 URL</div></div>
+        <div class="attr-item"><code>alt="문구"</code><div class="attr-desc">이미지 로드 실패 시 대체 텍스트. 스크린리더가 읽어줘 접근성에 중요합니다.</div></div>
+      </div>
+      <div class="code">&lt;<span class="kw">img</span> <span class="at">src</span>=<span class="val">"photo.jpg"</span> <span class="at">alt</span>=<span class="val">"프로필 사진"</span>&gt;</div>
+      <div class="note">💡 <code>&lt;img&gt;</code>는 inline-block 요소라 예외적으로 width/height 지정이 가능합니다.</div>
+    </div>
+
+    <!-- 9. a -->
+    <div class="card" id="s9">
+      <div class="card-num">09</div>
+      <div class="card-title">&lt;a&gt; — 링크</div>
+      <p>다른 페이지로 이동하거나, 같은 페이지 내 특정 위치로 이동하는 링크를 만듭니다.</p>
+      <div class="attr-list" style="margin-top:10px;">
+        <div class="attr-item"><code>href="URL"</code><div class="attr-desc">이동할 페이지 주소. <code>href="#id명"</code>으로 같은 페이지 내 이동도 가능합니다.</div></div>
+        <div class="attr-item"><code>target="_blank"</code><div class="attr-desc">새 탭에서 열기. <code>_self</code>는 현재 탭(기본값).</div></div>
+      </div>
+      <div class="code"><span class="cm">&lt;!-- 외부 페이지, 새 탭으로 열기 --&gt;</span>
+&lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"https://example.com"</span> <span class="at">target</span>=<span class="val">"_blank"</span>&gt;바로가기&lt;/<span class="kw">a</span>&gt;
+
+<span class="cm">&lt;!-- 같은 페이지 내 이동 (id로 연결) --&gt;</span>
+&lt;<span class="kw">a</span> <span class="at">href</span>=<span class="val">"#section1"</span>&gt;섹션1로 이동&lt;/<span class="kw">a</span>&gt;
+...
+&lt;<span class="kw">h2</span> <span class="at">id</span>=<span class="val">"section1"</span>&gt;섹션1&lt;/<span class="kw">h2</span>&gt;</div>
+    </div>
+
+    <!-- 10. button -->
+    <div class="card" id="s10">
+      <div class="card-num">10</div>
+      <div class="card-title">&lt;button&gt;</div>
+      <p>클릭 시 페이지 이동이 아닌 <b>동작(기능)이 실행</b>될 때 사용합니다.</p>
+      <div class="attr-list" style="margin-top:10px;">
+        <div class="attr-item"><code>type="button"</code><div class="attr-desc">일반 버튼. 기본 동작 없음. JS와 연결해 사용합니다.</div></div>
+        <div class="attr-item"><code>type="submit"</code><div class="attr-desc">폼 제출 버튼. &lt;form&gt; 안에서 Enter 키 제출과 유효성 검사를 자동 처리합니다.</div></div>
+      </div>
+      <div class="code">&lt;<span class="kw">button</span> <span class="at">type</span>=<span class="val">"button"</span>&gt;클릭&lt;/<span class="kw">button</span>&gt;
+
+&lt;<span class="kw">form</span>&gt;
+  &lt;<span class="kw">input</span> <span class="at">type</span>=<span class="val">"text"</span>&gt;
+  &lt;<span class="kw">button</span> <span class="at">type</span>=<span class="val">"submit"</span>&gt;제출&lt;/<span class="kw">button</span>&gt;
+&lt;/<span class="kw">form</span>&gt;</div>
+      <div class="note">💡 <b>이동이 목적</b>이면 <code>&lt;a&gt;</code>, <b>동작이 목적</b>이면 <code>&lt;button&gt;</code>을 사용하세요.</div>
+    </div>
+
+    <!-- 11. 폼 관련 태그 -->
+    <div class="card" id="s11">
+      <div class="card-num">11</div>
+      <div class="card-title">폼 관련 태그 &lt;form&gt; / &lt;input&gt; / &lt;textarea&gt; / &lt;select&gt;</div>
+      <p>사용자로부터 값을 입력받는 태그들입니다.</p>
+      <div class="attr-list" style="margin-top:10px;">
+        <div class="attr-item"><code>&lt;form&gt;</code><div class="attr-desc">입력 요소들을 감싸는 컨테이너. 입력값을 묶어서 전송합니다.</div></div>
+        <div class="attr-item"><code>&lt;input type="text"&gt;</code><div class="attr-desc">한 줄 텍스트 입력. <code>value</code>로 기본값, <code>placeholder</code>로 안내 문구를 설정합니다.</div></div>
+        <div class="attr-item"><code>&lt;textarea&gt;</code><div class="attr-desc">여러 줄 텍스트 입력.</div></div>
+        <div class="attr-item"><code>&lt;select&gt;</code> + <code>&lt;option&gt;</code><div class="attr-desc">드롭다운 메뉴. option 태그로 각 항목을 추가합니다.</div></div>
+      </div>
+      <div class="code">&lt;<span class="kw">form</span>&gt;
+  &lt;<span class="kw">input</span> <span class="at">type</span>=<span class="val">"text"</span> <span class="at">placeholder</span>=<span class="val">"이름 입력"</span>&gt;
+
+  &lt;<span class="kw">textarea</span> <span class="at">placeholder</span>=<span class="val">"내용을 입력하세요"</span>&gt;&lt;/<span class="kw">textarea</span>&gt;
+
+  &lt;<span class="kw">select</span>&gt;
+    &lt;<span class="kw">option</span>&gt;서울&lt;/<span class="kw">option</span>&gt;
+    &lt;<span class="kw">option</span>&gt;부산&lt;/<span class="kw">option</span>&gt;
+  &lt;/<span class="kw">select</span>&gt;
+
+  &lt;<span class="kw">button</span> <span class="at">type</span>=<span class="val">"submit"</span>&gt;제출&lt;/<span class="kw">button</span>&gt;
+&lt;/<span class="kw">form</span>&gt;</div>
+    </div>
+
+    <!-- 12. div / span -->
+    <div class="card" id="s12">
+      <div class="card-num">12</div>
+      <div class="card-title">&lt;div&gt; / &lt;span&gt;</div>
+      <div class="attr-list" style="margin-top:6px;">
+        <div class="attr-item">
+          <code>&lt;div&gt;</code> — block 요소
+          <div class="attr-desc">공간(영역)을 나누는 컨테이너. 레이아웃을 구성할 때 가장 많이 사용합니다.</div>
+        </div>
+        <div class="attr-item">
+          <code>&lt;span&gt;</code> — inline 요소
+          <div class="attr-desc">텍스트 중 일부 범위만 스타일링할 때 사용합니다. 줄바꿈 없이 텍스트 안에 삽입됩니다.</div>
+        </div>
+      </div>
+      <div class="code"><span class="cm">&lt;!-- div: 영역 분할 --&gt;</span>
+&lt;<span class="kw">div</span> <span class="at">class</span>=<span class="val">"card"</span>&gt;
+  &lt;<span class="kw">p</span>&gt;카드 안의 내용&lt;/<span class="kw">p</span>&gt;
+&lt;/<span class="kw">div</span>&gt;
+
+<span class="cm">&lt;!-- span: 텍스트 일부 스타일링 --&gt;</span>
+&lt;<span class="kw">p</span>&gt;가격은 &lt;<span class="kw">span</span> <span class="at">style</span>=<span class="val">"color:red"</span>&gt;1,000원&lt;/<span class="kw">span</span>&gt; 입니다.&lt;/<span class="kw">p</span>&gt;</div>
+    </div>
+
+    <!-- 13. pre -->
+    <div class="card" id="s13">
+      <div class="card-num">13</div>
+      <div class="card-title">&lt;pre&gt;</div>
+      <p>작성한 여백(들여쓰기)과 줄바꿈을 그대로 브라우저에 출력합니다. 코드 예시를 보여줄 때 주로 사용합니다.</p>
+      <div class="code">&lt;<span class="kw">pre</span>&gt;
+  function hello() {
+    console.log("안녕하세요");
+  }
+&lt;/<span class="kw">pre</span>&gt;</div>
+      <div class="note">💡 <code>&lt;pre&gt;</code> 안의 내용은 작성한 공백과 줄바꿈이 그대로 출력됩니다. 일반 <code>&lt;p&gt;</code>는 공백·줄바꿈을 무시합니다.</div>
+    </div>
+
+  </main>
+</div>
+
+</body>
 </html>
