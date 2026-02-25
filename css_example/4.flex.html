@@ -399,62 +399,103 @@
       <button class="opt-btn" onclick="setNavScene('mobile',this)">모바일형</button>
     </div>
     <div id="nav-demo" style="border-radius:10px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px"></div>
-    <div class="code-block" id="nav-code"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="code-block" id="nav-code"></div>
+      <div class="code-block" id="nav-html-code"></div>
+    </div>
   </div>
 
   <div class="card">
     <h2>카드 그리드</h2>
     <p><code>flex-wrap: wrap</code>과 <code>flex-basis</code>를 활용한 반응형 카드 레이아웃입니다.</p>
     <div style="display:flex;flex-wrap:wrap;gap:12px;padding:4px 0;margin-bottom:12px">
-      <div style="flex:1 1 200px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px">
+      <div style="flex:1 1 200px;background:var(--bg3);border:1px solid var(--accent);border-radius:10px;padding:16px;position:relative">
+        <span style="position:absolute;top:-11px;left:8px;font-size:10px;font-family:'Segoe UI',sans-serif;font-weight:600;color:var(--accent);background:var(--bg2);padding:0 5px">.card</span>
         <div style="width:100%;height:60px;background:#4cc9f018;border-radius:6px;margin-bottom:12px;border:1px solid #4cc9f033"></div>
         <div style="font-size:13px;font-weight:700;color:#ddd;margin-bottom:4px">카드 제목 1</div>
         <div style="font-size:12px;color:var(--muted)">flex: 1 1 200px</div>
       </div>
-      <div style="flex:1 1 200px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px">
+      <div style="flex:1 1 200px;background:var(--bg3);border:1px solid var(--accent);border-radius:10px;padding:16px;position:relative">
+        <span style="position:absolute;top:-11px;left:8px;font-size:10px;font-family:'Segoe UI',sans-serif;font-weight:600;color:var(--accent);background:var(--bg2);padding:0 5px">.card</span>
         <div style="width:100%;height:60px;background:#90be6d18;border-radius:6px;margin-bottom:12px;border:1px solid #90be6d33"></div>
         <div style="font-size:13px;font-weight:700;color:#ddd;margin-bottom:4px">카드 제목 2</div>
         <div style="font-size:12px;color:var(--muted)">창 크기를 줄여보세요</div>
       </div>
-      <div style="flex:1 1 200px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px">
+      <div style="flex:1 1 200px;background:var(--bg3);border:1px solid var(--accent);border-radius:10px;padding:16px;position:relative">
+        <span style="position:absolute;top:-11px;left:8px;font-size:10px;font-family:'Segoe UI',sans-serif;font-weight:600;color:var(--accent);background:var(--bg2);padding:0 5px">.card</span>
         <div style="width:100%;height:60px;background:#c77dff18;border-radius:6px;margin-bottom:12px;border:1px solid #c77dff33"></div>
         <div style="font-size:13px;font-weight:700;color:#ddd;margin-bottom:4px">카드 제목 3</div>
         <div style="font-size:12px;color:var(--muted)">반응형으로 줄바꿈</div>
       </div>
     </div>
-    <div class="code-block"><span class="sel">.card-grid</span> {
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="code-block"><span class="sel">.card-grid</span> {
   <span class="prop">display</span>: <span class="val">flex</span>;
   <span class="prop">flex-wrap</span>: <span class="val">wrap</span>;
   <span class="prop">gap</span>: <span class="val">12px</span>;
 }
 <span class="sel">.card</span> {
-  <span class="prop">flex</span>: <span class="val">1 1 200px</span>; <span class="cm">/* 200px 이하로 줄면 줄바꿈 */</span>
+  <span class="prop">flex</span>: <span class="val">1 1 200px</span>;
 }</div>
+      <div class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="attrval">"card-grid"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="attrval">"card"</span><span class="tag">&gt;</span>카드 1<span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="attrval">"card"</span><span class="tag">&gt;</span>카드 2<span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="attrval">"card"</span><span class="tag">&gt;</span>카드 3<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></div>
+    </div>
   </div>
 
   <div class="card">
     <h2>완벽한 중앙 정렬</h2>
     <p>Flexbox로 수평/수직 동시 중앙 정렬하는 가장 간단한 방법입니다.</p>
-    <div style="display:flex;justify-content:center;align-items:center;height:120px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);margin-bottom:12px">
-      <div style="background:#4cc9f022;border:2px solid var(--accent);border-radius:10px;padding:14px 24px;font-size:14px;font-weight:700;color:var(--accent)">완벽한 중앙 ✦</div>
+    <div style="display:flex;justify-content:center;align-items:center;height:120px;background:var(--bg3);border-radius:10px;border:1px solid var(--accent);margin-bottom:12px;position:relative">
+      <span style="position:absolute;top:-11px;left:8px;font-size:10px;font-family:'Segoe UI',sans-serif;font-weight:600;color:var(--accent);background:var(--bg2);padding:0 5px">.container</span>
+      <div style="background:#4cc9f022;border:2px solid var(--accent);border-radius:10px;padding:14px 24px;font-size:14px;font-weight:700;color:var(--accent);position:relative">
+        <span style="position:absolute;top:-11px;left:8px;font-size:10px;font-family:'Segoe UI',sans-serif;font-weight:600;color:var(--accent);background:var(--bg3);padding:0 5px">.item</span>
+        완벽한 중앙 ✦
+      </div>
     </div>
-    <div class="code-block"><span class="sel">.container</span> {
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="code-block"><span class="sel">.container</span> {
   <span class="prop">display</span>: <span class="val">flex</span>;
-  <span class="prop">justify-content</span>: <span class="val">center</span>; <span class="cm">/* 수평 중앙 */</span>
-  <span class="prop">align-items</span>: <span class="val">center</span>;    <span class="cm">/* 수직 중앙 */</span>
+  <span class="prop">justify-content</span>: <span class="val">center</span>;
+  <span class="prop">align-items</span>: <span class="val">center</span>;
 }</div>
+      <div class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="attrval">"container"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="attrval">"item"</span><span class="tag">&gt;</span>
+    중앙 콘텐츠
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/div&gt;</span></div>
+    </div>
   </div>
 
   <div class="card">
     <h2>사이드바 레이아웃</h2>
     <p>사이드바는 고정 너비, 콘텐츠 영역은 남은 공간을 차지하는 전형적인 레이아웃입니다.</p>
-    <div style="display:flex;gap:12px;height:120px;margin-bottom:12px">
-      <div style="width:120px;flex-shrink:0;background:#f3722c18;border:1px solid #f3722c44;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--orange);font-family:monospace;text-align:center">사이드바<br><span style="font-size:10px;opacity:.7">flex-shrink: 0</span></div>
-      <div style="flex:1;background:#4cc9f018;border:1px solid #4cc9f044;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--accent);font-family:monospace;text-align:center">콘텐츠 영역<br><span style="font-size:10px;opacity:.7">flex: 1</span></div>
+    <div style="display:flex;gap:12px;height:120px;margin-bottom:12px;border:1px solid var(--accent);border-radius:10px;padding:12px;position:relative">
+      <span style="position:absolute;top:-11px;left:8px;font-size:10px;font-family:'Segoe UI',sans-serif;font-weight:600;color:var(--accent);background:var(--bg2);padding:0 5px">.layout</span>
+      <div style="width:120px;flex-shrink:0;background:#f3722c18;border:1px solid #f3722c44;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--orange);font-family:monospace;text-align:center;position:relative">
+        <span style="position:absolute;top:-11px;left:6px;font-size:10px;font-family:'Segoe UI',sans-serif;font-weight:600;color:var(--orange);background:#f3722c18;padding:0 4px">.sidebar</span>
+        사이드바<br><span style="font-size:10px;opacity:.7">flex-shrink: 0</span>
+      </div>
+      <div style="flex:1;background:#4cc9f018;border:1px solid #4cc9f044;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--accent);font-family:monospace;text-align:center;position:relative">
+        <span style="position:absolute;top:-11px;left:6px;font-size:10px;font-family:'Segoe UI',sans-serif;font-weight:600;color:var(--accent);background:#4cc9f018;padding:0 4px">.content</span>
+        콘텐츠 영역<br><span style="font-size:10px;opacity:.7">flex: 1</span>
+      </div>
     </div>
-    <div class="code-block"><span class="sel">.layout</span>  { <span class="prop">display</span>: <span class="val">flex</span>; <span class="prop">gap</span>: <span class="val">12px</span>; }
-<span class="sel">.sidebar</span> { <span class="prop">width</span>: <span class="val">240px</span>; <span class="prop">flex-shrink</span>: <span class="val">0</span>; } <span class="cm">/* 너비 고정 */</span>
-<span class="sel">.content</span> { <span class="prop">flex</span>: <span class="val">1</span>; }              <span class="cm">/* 나머지 공간 차지 */</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="code-block"><span class="sel">.layout</span>  { <span class="prop">display</span>: <span class="val">flex</span>; <span class="prop">gap</span>: <span class="val">12px</span>; }
+<span class="sel">.sidebar</span> { <span class="prop">width</span>: <span class="val">240px</span>; <span class="prop">flex-shrink</span>: <span class="val">0</span>; }
+<span class="sel">.content</span> { <span class="prop">flex</span>: <span class="val">1</span>; }</div>
+      <div class="code-block"><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="attrval">"layout"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;aside</span> <span class="attr">class</span>=<span class="attrval">"sidebar"</span><span class="tag">&gt;</span>
+    사이드바
+  <span class="tag">&lt;/aside&gt;</span>
+  <span class="tag">&lt;main</span> <span class="attr">class</span>=<span class="attrval">"content"</span><span class="tag">&gt;</span>
+    콘텐츠
+  <span class="tag">&lt;/main&gt;</span>
+<span class="tag">&lt;/div&gt;</span></div>
+    </div>
   </div>
 </div>
 
@@ -762,57 +803,29 @@ updateShrink();
 // ── ⑥ NAV SCENES ──
 const navScenes = {
   basic: {
-    html: `<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:#1a1a2e;border-bottom:1px solid var(--border)">
-      <div style="font-size:14px;font-weight:800;color:var(--accent)">Logo</div>
-      <div style="display:flex;gap:24px;align-items:center">
-        <span style="font-size:13px;color:#aaa;cursor:pointer">홈</span>
-        <span style="font-size:13px;color:#aaa;cursor:pointer">소개</span>
-        <span style="font-size:13px;color:#aaa;cursor:pointer">서비스</span>
-        <div style="padding:6px 16px;background:var(--accent);color:#000;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">시작하기</div>
-      </div>
-    </div>
-    <div style="padding:16px 20px;font-size:13px;color:#555">페이지 콘텐츠...</div>`,
-    code: `.navbar {\n  display: flex;\n  justify-content: space-between; /* 로고 ↔ 메뉴 */\n  align-items: center;\n}\n.menu {\n  display: flex;\n  gap: 24px;\n  align-items: center;\n}`
+    css: `.navbar {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n.menu {\n  display: flex;\n  gap: 24px;\n  align-items: center;\n}`,
+    html: `<span class="tag">&lt;nav</span> <span class="attr">class</span>=<span class="attrval">"navbar"</span><span class="tag">&gt;</span>\n  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="attrval">"logo"</span><span class="tag">&gt;</span>Logo<span class="tag">&lt;/div&gt;</span>\n  <span class="tag">&lt;ul</span> <span class="attr">class</span>=<span class="attrval">"menu"</span><span class="tag">&gt;</span>\n    <span class="tag">&lt;li&gt;</span>홈<span class="tag">&lt;/li&gt;</span>\n    <span class="tag">&lt;li&gt;</span>소개<span class="tag">&lt;/li&gt;</span>\n    <span class="tag">&lt;li&gt;</span>서비스<span class="tag">&lt;/li&gt;</span>\n    <span class="tag">&lt;li&gt;&lt;button&gt;</span>시작하기<span class="tag">&lt;/button&gt;&lt;/li&gt;</span>\n  <span class="tag">&lt;/ul&gt;</span>\n<span class="tag">&lt;/nav&gt;</span>`,
+    demo: `<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:#1a1a2e;border-bottom:1px solid var(--border)"><div style="font-size:14px;font-weight:800;color:var(--accent)">Logo</div><div style="display:flex;gap:24px;align-items:center"><span style="font-size:13px;color:#aaa;cursor:pointer">홈</span><span style="font-size:13px;color:#aaa;cursor:pointer">소개</span><span style="font-size:13px;color:#aaa;cursor:pointer">서비스</span><div style="padding:6px 16px;background:var(--accent);color:#000;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">시작하기</div></div></div><div style="padding:16px 20px;font-size:13px;color:#555">페이지 콘텐츠...</div>`
   },
   center: {
-    html: `<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:#1a1a2e;border-bottom:1px solid var(--border);position:relative">
-      <div style="display:flex;gap:20px">
-        <span style="font-size:13px;color:#aaa;cursor:pointer">홈</span>
-        <span style="font-size:13px;color:#aaa;cursor:pointer">소개</span>
-      </div>
-      <div style="position:absolute;left:50%;transform:translateX(-50%);font-size:15px;font-weight:800;color:var(--accent)">Logo</div>
-      <div style="display:flex;gap:20px">
-        <span style="font-size:13px;color:#aaa;cursor:pointer">서비스</span>
-        <span style="font-size:13px;color:#aaa;cursor:pointer">연락</span>
-      </div>
-    </div>
-    <div style="padding:16px 20px;font-size:13px;color:#555">페이지 콘텐츠...</div>`,
-    code: `.navbar {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  position: relative;\n}\n.logo {\n  position: absolute; /* flex + absolute 조합 */\n  left: 50%;\n  transform: translateX(-50%);\n}`
+    css: `.navbar {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  position: relative;\n}\n.logo {\n  position: absolute;\n  left: 50%;\n  transform: translateX(-50%);\n}`,
+    html: `<span class="tag">&lt;nav</span> <span class="attr">class</span>=<span class="attrval">"navbar"</span><span class="tag">&gt;</span>\n  <span class="tag">&lt;ul</span> <span class="attr">class</span>=<span class="attrval">"menu-left"</span><span class="tag">&gt;</span>\n    <span class="tag">&lt;li&gt;</span>홈<span class="tag">&lt;/li&gt;</span>\n    <span class="tag">&lt;li&gt;</span>소개<span class="tag">&lt;/li&gt;</span>\n  <span class="tag">&lt;/ul&gt;</span>\n  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="attrval">"logo"</span><span class="tag">&gt;</span>Logo<span class="tag">&lt;/div&gt;</span>\n  <span class="tag">&lt;ul</span> <span class="attr">class</span>=<span class="attrval">"menu-right"</span><span class="tag">&gt;</span>\n    <span class="tag">&lt;li&gt;</span>서비스<span class="tag">&lt;/li&gt;</span>\n    <span class="tag">&lt;li&gt;</span>연락<span class="tag">&lt;/li&gt;</span>\n  <span class="tag">&lt;/ul&gt;</span>\n<span class="tag">&lt;/nav&gt;</span>`,
+    demo: `<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:#1a1a2e;border-bottom:1px solid var(--border);position:relative"><div style="display:flex;gap:20px"><span style="font-size:13px;color:#aaa;cursor:pointer">홈</span><span style="font-size:13px;color:#aaa;cursor:pointer">소개</span></div><div style="position:absolute;left:50%;transform:translateX(-50%);font-size:15px;font-weight:800;color:var(--accent)">Logo</div><div style="display:flex;gap:20px"><span style="font-size:13px;color:#aaa;cursor:pointer">서비스</span><span style="font-size:13px;color:#aaa;cursor:pointer">연락</span></div></div><div style="padding:16px 20px;font-size:13px;color:#555">페이지 콘텐츠...</div>`
   },
   mobile: {
-    html: `<div style="display:flex;flex-direction:column;background:#1a1a2e;border-bottom:1px solid var(--border)">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px">
-        <div style="font-size:14px;font-weight:800;color:var(--accent)">Logo</div>
-        <div style="display:flex;flex-direction:column;gap:4px;cursor:pointer">
-          <div style="width:20px;height:2px;background:#aaa;border-radius:2px"></div>
-          <div style="width:20px;height:2px;background:#aaa;border-radius:2px"></div>
-          <div style="width:20px;height:2px;background:#aaa;border-radius:2px"></div>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;border-top:1px solid var(--border)">
-        <span style="padding:12px 20px;font-size:13px;color:#aaa;border-bottom:1px solid #1e1e38;cursor:pointer">홈</span>
-        <span style="padding:12px 20px;font-size:13px;color:#aaa;border-bottom:1px solid #1e1e38;cursor:pointer">소개</span>
-        <span style="padding:12px 20px;font-size:13px;color:#aaa;cursor:pointer">서비스</span>
-      </div>
-    </div>`,
-    code: `.navbar {\n  display: flex;\n  flex-direction: column; /* 세로 배치 */\n}\n.navbar-top {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n.menu {\n  display: flex;\n  flex-direction: column; /* 메뉴 세로 나열 */\n}`
+    css: `.navbar {\n  display: flex;\n  flex-direction: column;\n}\n.navbar-top {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n.menu {\n  display: flex;\n  flex-direction: column;\n}`,
+    html: `<span class="tag">&lt;nav</span> <span class="attr">class</span>=<span class="attrval">"navbar"</span><span class="tag">&gt;</span>\n  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="attrval">"navbar-top"</span><span class="tag">&gt;</span>\n    <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="attrval">"logo"</span><span class="tag">&gt;</span>Logo<span class="tag">&lt;/div&gt;</span>\n    <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="attrval">"hamburger"</span><span class="tag">&gt;</span>☰<span class="tag">&lt;/button&gt;</span>\n  <span class="tag">&lt;/div&gt;</span>\n  <span class="tag">&lt;ul</span> <span class="attr">class</span>=<span class="attrval">"menu"</span><span class="tag">&gt;</span>\n    <span class="tag">&lt;li&gt;</span>홈<span class="tag">&lt;/li&gt;</span>\n    <span class="tag">&lt;li&gt;</span>소개<span class="tag">&lt;/li&gt;</span>\n    <span class="tag">&lt;li&gt;</span>서비스<span class="tag">&lt;/li&gt;</span>\n  <span class="tag">&lt;/ul&gt;</span>\n<span class="tag">&lt;/nav&gt;</span>`,
+    demo: `<div style="display:flex;flex-direction:column;background:#1a1a2e;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px"><div style="font-size:14px;font-weight:800;color:var(--accent)">Logo</div><div style="display:flex;flex-direction:column;gap:4px;cursor:pointer"><div style="width:20px;height:2px;background:#aaa;border-radius:2px"></div><div style="width:20px;height:2px;background:#aaa;border-radius:2px"></div><div style="width:20px;height:2px;background:#aaa;border-radius:2px"></div></div></div><div style="display:flex;flex-direction:column;border-top:1px solid var(--border)"><span style="padding:12px 20px;font-size:13px;color:#aaa;border-bottom:1px solid #1e1e38;cursor:pointer">홈</span><span style="padding:12px 20px;font-size:13px;color:#aaa;border-bottom:1px solid #1e1e38;cursor:pointer">소개</span><span style="padding:12px 20px;font-size:13px;color:#aaa;cursor:pointer">서비스</span></div></div>`
   }
 };
+
 function setNavScene(key, btn) {
   document.querySelectorAll('#tab-practice .opt-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('nav-demo').innerHTML = navScenes[key].html;
-  document.getElementById('nav-code').textContent = navScenes[key].code;
+  const s = navScenes[key];
+  document.getElementById('nav-demo').innerHTML = s.demo;
+  document.getElementById('nav-code').textContent = s.css;
+  document.getElementById('nav-html-code').innerHTML = s.html;
 }
 setNavScene('basic', document.querySelector('#tab-practice .opt-btn'));
 </script>
