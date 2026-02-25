@@ -42,7 +42,7 @@
   @media(max-width:640px) { .two-col { grid-template-columns: 1fr; } }
 
   /* CODE BLOCK */
-  .code-block { background: #0a0a18; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.9; overflow-x: auto; }
+  .code-block { background: #0a0a18; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.9; overflow-x: auto; white-space: pre; }
   .tag { color: #f8766d; } .prop { color: #ebcb8b; } .val { color: #a3be8c; } .cm { color: #555; } .sel { color: #4cc9f0; }
 
   /* DEMO */
@@ -80,7 +80,7 @@
   #text-preview { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; font-size: 16px; line-height: 1.6; transition: all .2s; }
 
   /* SHADOW DEMO */
-  .shadow-preview { width: 100%; height: 80px; background: var(--bg2); border-radius: 10px; margin-top: 14px; transition: box-shadow .2s; }
+  .shadow-preview { width: 100%; height: 80px; background: #2a2a4a; border-radius: 10px; margin-top: 14px; transition: box-shadow .2s; }
 
   /* DISPLAY DEMO */
   .disp-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
@@ -310,7 +310,7 @@
     <div class="slider-row"><label style="min-width:100px;font-size:12px;color:var(--muted)">수직거리</label><input type="range" min="-30" max="30" value="4" id="sh-y" oninput="updateShadow()"><span id="sh-yv">4px</span></div>
     <div class="slider-row"><label style="min-width:100px;font-size:12px;color:var(--muted)">흐림반경</label><input type="range" min="0" max="50" value="10" id="sh-b" oninput="updateShadow()"><span id="sh-bv">10px</span></div>
     <div class="slider-row"><label style="min-width:100px;font-size:12px;color:var(--muted)">투명도</label><input type="range" min="0" max="100" value="30" id="sh-a" oninput="updateShadow()"><span id="sh-av">0.3</span></div>
-    <div class="shadow-preview" id="shadow-preview"></div>
+    <div class="shadow-preview" id="shadow-preview" style="display:flex;align-items:center;justify-content:center;color:#ddd;font-size:14px;font-weight:600">그림자가 적용되는 박스</div>
     <div class="code-block" style="margin-top:12px" id="shadow-code"></div>
   </div>
 
@@ -407,7 +407,7 @@
       <button class="of-btn" onclick="setOf('scroll',this)">scroll</button>
       <button class="of-btn" onclick="setOf('auto',this)">auto</button>
     </div>
-    <div id="of-box">Lorem ipsum dolor sit amet consectetur adipisicing elit. Porro a iusto pariatur facilis voluptate unde! Numquam voluptatem maiores tenetur ut saepe ex mollitia. Quae fuga dolorem nulla tenetur quo a. Ea vero excepturi nesciunt eligendi nihil facilis officia molestias.</div>
+    <div id="of-box">Lorem ipsum dolor sit amet consectetur adipisicing elit. Porro a iusto pariatur facilis voluptate unde! Numquam voluptatem maiores tenetur ut saepe ex mollitia. Quae fuga dolorem nulla tenetur quo a. Ea vero excepturi nesciunt eligendi nihil facilis officia molestias nobis quam culpa recusandae enim, iste porro unde at nostrum delectus! Id sapiente nostrum nulla a quibusdam nisi? Dicta, quibusdam ex! Hic, dolor odio fuga maxime alias tempore magni officia in doloremque autem voluptatem, corporis minima illo sit ullam!</div>
     <div class="code-block" style="margin-top:12px" id="of-code"></div>
   </div>
 
@@ -446,7 +446,7 @@
   <span class="cm">/* --font-size-base: 16px; */</span>
 }
 
-<span class="sel">*</span> {
+<span class="sel">*, *::before, *::after</span> {
   <span class="prop">box-sizing</span>: <span class="val">border-box</span>; <span class="cm">/* 크기 기준을 border로 */</span>
   <span class="prop">margin</span>: <span class="val">0</span>;
   <span class="prop">padding</span>: <span class="val">0</span>;
@@ -490,7 +490,7 @@
     <table class="init-table">
       <thead><tr><th>선택자 / 속성</th><th>이유</th></tr></thead>
       <tbody>
-        <tr><td>* { box-sizing: border-box }</td><td>padding/border를 추가해도 전체 크기가 변하지 않아 레이아웃 계산이 직관적</td></tr>
+        <tr><td>*, *::before, *::after { box-sizing: border-box }</td><td>padding/border를 추가해도 전체 크기가 변하지 않아 레이아웃 계산이 직관적. 가상 요소(::before, ::after)에도 동일하게 적용</td></tr>
         <tr><td>* { margin: 0; padding: 0 }</td><td>브라우저마다 h1, p, ul 등에 기본 margin/padding이 달라 통일</td></tr>
         <tr><td>body { line-height: 1.6 }</td><td>기본값(1.2)은 줄 간격이 너무 좁아 가독성이 낮음</td></tr>
         <tr><td>a { color: inherit }</td><td>기본 파란색 링크 색상을 부모 색으로 통일</td></tr>
@@ -583,11 +583,13 @@ updateShadow();
 function setDisplay(val, btn) {
   document.querySelectorAll('.disp-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  const ibWidths = ['80px', '140px', '100px'];
+  const ibHeights = ['40px', '60px', '50px'];
   ['disp-box1','disp-box2','disp-box3'].forEach((id, i) => {
     const el = document.getElementById(id);
     el.style.display = val;
-    el.style.width = (val === 'block' || val === 'inline-block') ? '120px' : '';
-    el.style.height = (val === 'block' || val === 'inline-block') ? '40px' : '';
+    el.style.width = val === 'block' ? '100%' : val === 'inline-block' ? ibWidths[i] : '';
+    el.style.height = val === 'block' ? '40px' : val === 'inline-block' ? ibHeights[i] : '';
   });
   if (val === 'none') document.getElementById('disp-box1').style.display = 'none';
   document.getElementById('disp-code').textContent = `.box { display: ${val}; }`;
