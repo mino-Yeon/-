@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>pseudo-element box-sizing</title>
+<style>
+  /* ✅ 전역 border-box 설정 */
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0f0; padding: 40px 24px; }
+  h2 { font-size: 16px; color: #888; font-weight: 500; margin-bottom: 6px; }
+  .desc { font-size: 13px; color: #666; margin-bottom: 20px; font-family: monospace; }
+  section { margin-bottom: 52px; }
+
+  /* ── 예시 1: 아이콘 달린 버튼 ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    background: #4cc9f0;
+    color: #000;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    position: relative;
+    /* 버튼 너비를 딱 160px로 고정 */
+    width: 160px;
+    justify-content: center;
+  }
+  /* ::before로 왼쪽 아이콘 영역 만들기 */
+  .btn::before {
+    content: '✉';
+    width: 28px;         /* 딱 28px 차지하길 원함 */
+    padding: 0 4px;      /* 내부 여백 포함해서 28px */
+    border-right: 2px solid #0099cc;
+    margin-right: 10px;
+    font-size: 14px;
+    text-align: center;
+    /* border-box 덕분에 width 28px = padding + border 포함 */
+  }
+
+  /* ── 예시 2: 체크리스트 ── */
+  .checklist { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .checklist li {
+    position: relative;
+    padding-left: 32px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  /* ::before로 체크박스 흉내 */
+  .checklist li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 1px;
+    width: 20px;         /* 20px 박스 */
+    height: 20px;
+    border: 2px solid #90be6d;
+    border-radius: 4px;
+    padding: 2px;        /* border-box니까 20px 안에서 처리됨 */
+    background: #90be6d22;
+  }
+  .checklist li.done::before {
+    content: '✓';
+    background: #90be6d;
+    color: #001;
+    font-weight: 900;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .checklist li.done { color: #666; text-decoration: line-through; }
+
+  /* ── 예시 3: content-box였다면? ── */
+  .compare { display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; }
+  .compare-item { }
+  .compare-item p { font-size: 12px; color: #888; margin-bottom: 8px; font-family: monospace; }
+  .tag {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 6px;
+    background: #1a1a2e;
+    color: #ccc;
+    position: relative;
+    /* 너비를 120px로 고정하고 싶음 */
+    width: 120px;
+    text-align: center;
+  }
+  /* ::before로 왼쪽 컬러 바 */
+  .tag::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 6px;          /* 딱 6px짜리 바 */
+    border-radius: 6px 0 0 6px;
+    padding: 0 1px;      /* border-box → 6px 안에서 처리 */
+    background: #f3722c;
+  }
+  .tag-cb {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 6px;
+    background: #1a1a2e;
+    color: #ccc;
+    position: relative;
+    width: 120px;
+    text-align: center;
+    /* 이 요소만 content-box로 되돌림 */
+    box-sizing: content-box;
+  }
+  .tag-cb::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 6px;
+    border-radius: 6px 0 0 6px;
+    padding: 0 1px;
+    background: #f3722c;
+    /* ::before도 content-box → padding이 6px 바깥으로 튀어나옴 */
+    box-sizing: content-box;
+  }
+
+  .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; font-weight: 700; }
+  .badge.ok { background: #1a3026; color: #90be6d; }
+  .badge.ng { background: #301a1a; color: #f88; }
+</style>
+</head>
+<body>
+
+<section>
+  <h2>예시 1 — 아이콘 달린 버튼</h2>
+  <p class="desc">.btn::before { width: 28px; padding: 0 4px; border-right: 2px solid; }</p>
+  <button class="btn">메일 보내기</button>
+  <p style="font-size:12px;color:#666;margin-top:10px">
+    ::before의 width: 28px 안에 padding + border가 포함되어 버튼 레이아웃이 정확히 맞아떨어집니다.
+  </p>
+</section>
+
+<section>
+  <h2>예시 2 — 체크리스트 아이콘</h2>
+  <p class="desc">.checklist li::before { width: 20px; height: 20px; border: 2px solid; padding: 2px; }</p>
+  <ul class="checklist">
+    <li class="done">box-sizing 개념 이해하기</li>
+    <li class="done">content-box vs border-box 차이 파악</li>
+    <li>전역 border-box 설정 적용해보기</li>
+    <li>::before / ::after도 박스를 가진다는 것 기억하기</li>
+  </ul>
+  <p style="font-size:12px;color:#666;margin-top:10px">
+    체크박스 크기를 20×20px로 딱 맞게 유지합니다. border + padding이 내부에서 처리됩니다.
+  </p>
+</section>
+
+<section>
+  <h2>예시 3 — border-box vs content-box 직접 비교</h2>
+  <p class="desc">::before { width: 6px; padding: 0 1px; } 를 적용했을 때</p>
+  <div class="compare">
+    <div class="compare-item">
+      <span class="badge ok">✅ border-box</span>
+      <p>전체 width: 120px 유지됨</p>
+      <div class="tag">CSS 학습</div>
+    </div>
+    <div class="compare-item">
+      <span class="badge ng">❌ content-box</span>
+      <p>::before의 padding이 밖으로 튀어나옴</p>
+      <div class="tag-cb">CSS 학습</div>
+    </div>
+  </div>
+  <p style="font-size:12px;color:#666;margin-top:14px">
+    content-box에서는 ::before의 padding 1px이 지정한 6px 바깥으로 더해져서<br>왼쪽 컬러 바가 의도보다 살짝 삐져나옵니다.
+  </p>
+</section>
+
+</body>
+</html>
