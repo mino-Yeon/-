@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS 학습 센터</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f0f1a; --bg2: #13132a; --bg3: #1a1a2e;
+    --border: #2d2d50; --text: #e0e0f0; --muted: #777;
+    --accent: #4cc9f0; --green: #90be6d; --orange: #f3722c; --yellow: #f9c74f; --purple: #c77dff;
+  }
+  body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  header { text-align: center; padding: 64px 20px 48px; }
+  header h1 { font-size: 36px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; }
+  header h1 span { color: var(--accent); }
+  header p { color: var(--muted); font-size: 15px; line-height: 1.7; }
+
+  /* GRID */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; max-width: 1040px; margin: 0 auto; padding: 0 20px 80px; }
+
+  /* CARD */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; padding: 28px 24px; text-decoration: none; color: var(--text); display: flex; flex-direction: column; gap: 16px; transition: transform .2s, border-color .2s, box-shadow .2s; position: relative; overflow: hidden; }
+  .card::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity .2s; border-radius: 16px; }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px #00000044; }
+
+  .card-1 { --c: var(--accent); }
+  .card-2 { --c: var(--green); }
+  .card-3 { --c: var(--yellow); }
+  .card-4 { --c: var(--purple); }
+
+  .card:hover { border-color: var(--c); box-shadow: 0 12px 32px color-mix(in srgb, var(--c) 20%, transparent); }
+
+  .card-icon { font-size: 36px; width: 60px; height: 60px; background: var(--bg3); border-radius: 14px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border); }
+  .card-num { position: absolute; top: 20px; right: 20px; font-size: 11px; font-weight: 700; color: var(--muted); font-family: monospace; background: var(--bg3); padding: 3px 8px; border-radius: 20px; border: 1px solid var(--border); }
+  .card h2 { font-size: 18px; font-weight: 700; }
+  .card p { font-size: 13px; color: var(--muted); line-height: 1.7; flex: 1; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; font-family: monospace; }
+  .tag-accent { background: #4cc9f018; color: var(--accent); border: 1px solid #4cc9f044; }
+  .tag-green  { background: #90be6d18; color: var(--green);  border: 1px solid #90be6d44; }
+  .tag-yellow { background: #f9c74f18; color: var(--yellow); border: 1px solid #f9c74f44; }
+  .tag-purple { background: #c77dff18; color: var(--purple); border: 1px solid #c77dff44; }
+  .card-arrow { font-size: 18px; color: var(--muted); align-self: flex-end; transition: transform .2s, color .2s; }
+  .card:hover .card-arrow { transform: translateX(4px); color: var(--c); }
+
+  /* COMING SOON */
+  .card.soon { opacity: .5; pointer-events: none; cursor: default; }
+  .card.soon:hover { transform: none; box-shadow: none; }
+  .soon-badge { font-size: 11px; font-weight: 700; color: var(--muted); background: var(--bg3); border: 1px solid var(--border); padding: 3px 10px; border-radius: 20px; align-self: flex-start; }
+
+  /* PROGRESS */
+  .progress-bar-wrap { max-width: 1040px; margin: 0 auto 40px; padding: 0 20px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .progress-label span:last-child { color: var(--accent); font-weight: 700; }
+  .progress-bg { background: var(--bg3); border-radius: 99px; height: 6px; border: 1px solid var(--border); overflow: hidden; }
+  .progress-fill { height: 100%; width: 50%; background: linear-gradient(90deg, var(--accent), var(--green)); border-radius: 99px; transition: width .6s ease; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CSS <span>학습 센터</span></h1>
+  <p>핵심 CSS 개념을 인터랙티브하게 학습하세요.<br>각 챕터를 클릭해서 시작해보세요.</p>
+</header>
+
+<div class="progress-bar-wrap">
+  <div class="progress-label">
+    <span>학습 진행도</span>
+    <span>2 / 4 챕터 완성</span>
+  </div>
+  <div class="progress-bg">
+    <div class="progress-fill"></div>
+  </div>
+</div>
+
+<div class="grid">
+
+  <a class="card card-1" href="1.box_model.html">
+    <span class="card-num">01</span>
+    <div class="card-icon">📦</div>
+    <h2>Box Model</h2>
+    <p>모든 HTML 요소를 감싸는 박스 구조를 이해합니다. margin, border, padding, content의 관계를 학습하세요.</p>
+    <div class="card-tags">
+      <span class="tag tag-accent">margin</span>
+      <span class="tag tag-accent">padding</span>
+      <span class="tag tag-accent">border</span>
+    </div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a class="card card-2" href="2.css_selector.html">
+    <span class="card-num">02</span>
+    <div class="card-icon">🎯</div>
+    <h2>CSS 선택자</h2>
+    <p>기본 선택자부터 결합자, 속성 선택자, 가상 클래스, 명시도(Specificity)까지 단계별로 학습하세요.</p>
+    <div class="card-tags">
+      <span class="tag tag-green">선택자</span>
+      <span class="tag tag-green">가상 클래스</span>
+      <span class="tag tag-green">Specificity</span>
+    </div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <div class="card card-3 soon">
+    <span class="card-num">03</span>
+    <div class="card-icon">📌</div>
+    <h2>CSS Position</h2>
+    <p>static, relative, absolute, fixed, sticky의 차이를 이해하고 레이아웃 배치를 마스터하세요.</p>
+    <div class="card-tags">
+      <span class="tag tag-yellow">relative</span>
+      <span class="tag tag-yellow">absolute</span>
+      <span class="tag tag-yellow">sticky</span>
+    </div>
+    <span class="soon-badge">🚧 준비 중</span>
+  </div>
+
+  <div class="card card-4 soon">
+    <span class="card-num">04</span>
+    <div class="card-icon">🧩</div>
+    <h2>Flexbox</h2>
+    <p>1차원 레이아웃 시스템인 Flexbox를 학습합니다. 정렬과 배치를 자유자재로 다뤄보세요.</p>
+    <div class="card-tags">
+      <span class="tag tag-purple">flex-direction</span>
+      <span class="tag tag-purple">align-items</span>
+      <span class="tag tag-purple">justify</span>
+    </div>
+    <span class="soon-badge">🚧 준비 중</span>
+  </div>
+
+</div>
+
+</body>
+</html>
