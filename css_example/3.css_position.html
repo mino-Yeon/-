@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Position</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f0f1a; --bg2: #13132a; --bg3: #1a1a2e;
+    --border: #2d2d50; --text: #e0e0f0; --muted: #777;
+    --accent: #4cc9f0; --green: #90be6d; --orange: #f3722c; --yellow: #f9c74f; --purple: #c77dff;
+  }
+  body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  nav { display: flex; background: var(--bg3); border-bottom: 2px solid var(--border); position: sticky; top: 0; z-index: 100; overflow-x: auto; }
+  nav::-webkit-scrollbar { height: 0; }
+  nav button { flex-shrink: 0; padding: 13px 14px; background: none; border: none; border-bottom: 3px solid transparent; color: #888; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+  nav button:hover:not(.active) { background: #ffffff06; color: #ddd; }
+
+  .section { display: none; max-width: 1040px; margin: 0 auto; padding: 32px 20px 60px; }
+  .section.active { display: block; }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .subtitle { color: var(--muted); font-size: 13px; line-height: 1.7; margin-bottom: 28px; }
+
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .card h2 { font-size: 15px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .card h2 code { font-family: 'Courier New', monospace; color: var(--accent); font-size: 13px; background: #0a0a18; padding: 2px 8px; border-radius: 4px; }
+  .card p { font-size: 13px; color: #bbb; line-height: 1.7; margin-bottom: 10px; }
+  .card p:last-child { margin-bottom: 0; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:640px) { .two-col { grid-template-columns: 1fr; } }
+
+  .code-block { background: #0a0a18; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.9; overflow-x: auto; white-space: pre; }
+  .prop { color: #ebcb8b; } .val { color: #a3be8c; } .cm { color: #555; } .sel { color: #4cc9f0; }
+
+  .demo-area { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; position: relative; overflow: hidden; }
+  .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .slider-row label { font-size: 12px; color: var(--muted); min-width: 50px; font-family: monospace; }
+  .slider-row input[type=range] { flex: 1; accent-color: var(--accent); }
+  .slider-row span { font-size: 12px; font-family: monospace; color: #ddd; min-width: 48px; text-align: right; }
+
+  .scene-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .scene-btn { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); color: #aaa; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .scene-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .info-box { padding: 12px 14px; border-radius: 8px; font-size: 12px; line-height: 1.8; border: 1px solid var(--border); background: var(--bg3); color: var(--muted); margin-top: 12px; }
+  .info-box strong { color: #ddd; }
+  .info-box code { font-family: monospace; color: var(--accent); background: #0a0a18; padding: 1px 5px; border-radius: 3px; }
+
+  .cmp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cmp-table th { text-align: left; padding: 10px 14px; font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
+  .cmp-table td { padding: 10px 14px; border-bottom: 1px solid #1e1e38; color: #bbb; vertical-align: top; line-height: 1.7; }
+  .cmp-table tr:last-child td { border-bottom: none; }
+  .cmp-table td:first-child { font-family: monospace; color: var(--accent); white-space: nowrap; }
+
+  /* STICKY */
+  .sticky-scroll { height: 300px; overflow-y: scroll; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; }
+  .sticky-scroll::-webkit-scrollbar { width: 6px; }
+  .sticky-scroll::-webkit-scrollbar-track { background: var(--bg3); }
+  .sticky-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .sticky-inner { padding: 0 20px 20px; position: relative; }
+  .sticky-header { position: sticky; top: 0; background: #2a2a4a; border-bottom: 1px solid var(--border); padding: 10px 0; font-size: 13px; font-weight: 700; color: var(--accent); font-family: monospace; z-index: 10; }
+  .sticky-content-item { padding: 14px 0; border-bottom: 1px solid #1e1e38; font-size: 13px; color: #aaa; line-height: 1.7; }
+  .sticky-content-item:last-child { border-bottom: none; }
+
+  /* FIXED 실제 적용 요소 */
+  #fixed-navbar { position: fixed; top: 0; left: 0; right: 0; background: #1a2a3a; border-bottom: 2px solid var(--accent); padding: 12px 24px; display: none; align-items: center; justify-content: space-between; z-index: 999; }
+  #fixed-fab { position: fixed; bottom: 32px; right: 32px; width: 52px; height: 52px; background: var(--accent); border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 24px; color: #000; font-weight: 700; z-index: 999; box-shadow: 0 4px 20px #4cc9f055; cursor: pointer; }
+  #fixed-toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%); background: #1a3026; border: 1px solid var(--green); border-radius: 8px; padding: 12px 24px; font-size: 13px; color: var(--green); font-weight: 600; display: none; z-index: 999; white-space: nowrap; }
+  .fixed-active-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--green); background: #1a3026; border: 1px solid var(--green); border-radius: 20px; padding: 3px 10px; }
+  .fixed-off-btn { padding: 4px 12px; border-radius: 6px; border: 1px solid var(--orange); background: transparent; color: var(--orange); font-size: 11px; font-weight: 700; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- FIXED 실제 요소들 -->
+<div id="fixed-navbar">
+  <span style="font-size:13px;font-weight:700;color:var(--accent)">📌 fixed navbar — 스크롤해도 고정!</span>
+  <button class="fixed-off-btn" onclick="removeFixed('navbar')">닫기</button>
+</div>
+<div id="fixed-fab" onclick="removeFixed('fab')">+</div>
+<div id="fixed-toast" id="fixed-toast">✅ 저장되었습니다</div>
+
+<nav>
+  <button class="active" onclick="tab('static',this)">① static & relative</button>
+  <button onclick="tab('absolute',this)">② absolute</button>
+  <button onclick="tab('fixed',this)">③ fixed</button>
+  <button onclick="tab('sticky',this)">④ sticky</button>
+  <button onclick="tab('zindex',this)">⑤ z-index</button>
+</nav>
+
+<!-- ① static & relative -->
+<div id="tab-static" class="section active">
+  <h1>① static & relative</h1>
+  <p class="subtitle"><code>static</code>은 기본값으로 위치 변경이 불가합니다. <code>relative</code>는 원래 자리를 기준으로 위치를 이동할 수 있습니다.</p>
+
+  <div class="two-col">
+    <div class="card">
+      <h2><code>static</code></h2>
+      <p>기본 배치 방식. <code>top/left/right/bottom</code>을 설정해도 <strong>무시</strong>됩니다.</p>
+      <div class="demo-area" style="height:120px;padding:16px;display:flex;align-items:flex-start;gap:8px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:80px;height:50px;background:#4cc9f022;border:1px solid #4cc9f066;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:monospace;color:var(--accent)">Box 1</div>
+          <span style="font-size:10px;color:var(--accent);font-family:monospace">static</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:80px;height:50px;background:#4cc9f022;border:1px dashed #4cc9f066;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:monospace;color:var(--accent)">Box 2</div>
+          <span style="font-size:10px;color:var(--muted);font-family:monospace">top:999px 무시</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:80px;height:50px;background:#4cc9f022;border:1px solid #4cc9f066;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:monospace;color:var(--accent)">Box 3</div>
+          <span style="font-size:10px;color:var(--accent);font-family:monospace">static</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><code>relative</code> — 원래 자리 기준</h2>
+      <p>원래 있던 자리를 기준으로 이동합니다. <strong>원래 자리는 빈 공간으로 유지</strong>됩니다.</p>
+      <div class="demo-area" style="height:140px;padding:16px;display:flex;align-items:flex-start;gap:8px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:80px;height:50px;background:#90be6d22;border:1px solid #90be6d66;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:monospace;color:var(--green)">Box 1</div>
+          <span style="font-size:10px;color:var(--green);font-family:monospace">static</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;position:relative">
+          <div id="rel-box" style="width:80px;height:50px;background:#4cc9f033;border:2px solid var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:monospace;color:var(--accent);position:relative;transition:all .2s">Box 2</div>
+          <span style="font-size:10px;color:var(--accent);font-family:monospace">relative</span>
+          <div id="rel-ghost" style="position:absolute;top:0;left:0;width:80px;height:50px;border:1px dashed #4cc9f033;border-radius:6px;pointer-events:none"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:80px;height:50px;background:#90be6d22;border:1px solid #90be6d66;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:monospace;color:var(--green)">Box 3</div>
+          <span style="font-size:10px;color:var(--green);font-family:monospace">static</span>
+        </div>
+      </div>
+      <div class="slider-row"><label>top</label><input type="range" min="-40" max="40" value="0" id="rel-top" oninput="updateRel()"><span id="rel-top-v">0px</span></div>
+      <div class="slider-row"><label>left</label><input type="range" min="-40" max="40" value="0" id="rel-left" oninput="updateRel()"><span id="rel-left-v">0px</span></div>
+      <div class="code-block" id="rel-code"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>비교 요약</h2>
+    <table class="cmp-table">
+      <thead><tr><th>값</th><th>위치 기준</th><th>top/left 적용</th><th>원래 자리</th></tr></thead>
+      <tbody>
+        <tr><td>static</td><td>일반 흐름</td><td style="color:var(--orange)">❌ 무시됨</td><td>—</td></tr>
+        <tr><td>relative</td><td>원래 있던 자리</td><td style="color:var(--green)">✅ 적용</td><td>빈 공간으로 유지됨</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ② absolute -->
+<div id="tab-absolute" class="section">
+  <h1>② absolute</h1>
+  <p class="subtitle"><strong>static이 아닌 가장 가까운 부모</strong>를 기준으로 위치를 지정합니다. 그런 부모가 없으면 <code>&lt;body&gt;</code>가 기준이 됩니다.</p>
+
+  <div class="card">
+    <h2>부모 기준 데모</h2>
+    <p>부모의 <code>position</code>을 토글하면 absolute 박스의 기준이 어떻게 바뀌는지 확인하세요.</p>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <span style="font-size:13px;color:var(--muted)">부모에 <code style="font-family:monospace;color:var(--accent);background:#0a0a18;padding:1px 6px;border-radius:3px">position: relative</code></span>
+      <button id="parent-toggle" onclick="toggleParent()" style="padding:6px 18px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:#aaa;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s">OFF — 기준 없음</button>
+    </div>
+
+    <div class="demo-area" style="height:240px;padding:20px">
+      <!-- 부모 박스 -->
+      <div id="abs-parent" style="width:100%;height:200px;border-radius:8px;border:2px dashed #555;position:static;transition:all .3s;display:flex;align-items:center;justify-content:center">
+        <div id="parent-hint" style="font-size:11px;color:#444;font-family:monospace;text-align:center;pointer-events:none;transition:all .3s">
+          부모 (position: static)<br>
+          <span style="color:#333">absolute 박스의 기준이 아님</span>
+        </div>
+        <!-- absolute 박스 -->
+        <div id="abs-box" style="width:110px;height:60px;background:#4cc9f0ee;border:2px solid var(--accent);border-radius:6px;position:absolute;top:0px;left:0px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:monospace;color:#000;transition:all .3s;z-index:10">absolute</div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px">
+      <div class="slider-row">
+        <button id="toggle-tb" onclick="toggleTB()" style="padding:4px 10px;border-radius:6px;border:1px solid var(--accent);background:#1a2a3a;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;min-width:52px">top ↕</button>
+        <input type="range" min="0" max="140" value="0" id="abs-top" oninput="updateAbs()">
+        <span id="abs-top-v">0px</span>
+      </div>
+      <div class="slider-row">
+        <button id="toggle-lr" onclick="toggleLR()" style="padding:4px 10px;border-radius:6px;border:1px solid var(--accent);background:#1a2a3a;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;min-width:52px">left ↔</button>
+        <input type="range" min="0" max="240" value="0" id="abs-left" oninput="updateAbs()">
+        <span id="abs-left-v">0px</span>
+      </div>
+    </div>
+    <div class="code-block" id="abs-code" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card">
+    <h2>실전 예시</h2>
+    <div class="scene-btns">
+      <button class="scene-btn active" onclick="setAbsScene('badge',this)">알림 뱃지</button>
+      <button class="scene-btn" onclick="setAbsScene('center',this)">중앙 오버레이</button>
+      <button class="scene-btn" onclick="setAbsScene('corner',this)">우하단 버튼</button>
+    </div>
+    <div class="demo-area" style="height:180px" id="abs-scene"></div>
+    <div class="code-block" style="margin-top:12px" id="abs-scene-code"></div>
+  </div>
+
+  <div class="info-box">
+    💡 <strong>핵심 패턴</strong> — 부모에 <code>position: relative</code>, 자식에 <code>position: absolute</code><br>
+    absolute를 쓸 때는 항상 기준이 될 부모에 <code>relative</code>를 먼저 설정하세요.
+  </div>
+</div>
+
+<!-- ③ fixed -->
+<div id="tab-fixed" class="section">
+  <h1>③ fixed</h1>
+  <p class="subtitle"><strong>viewport(현재 화면)</strong>를 기준으로 고정됩니다. 스크롤해도 항상 같은 자리에 머뭅니다. 아래 버튼을 눌러 <strong>이 페이지에 직접 적용</strong>해보세요.</p>
+
+  <div class="card">
+    <h2>직접 체험 — 이 페이지에 fixed 요소를 붙여보세요</h2>
+    <p>버튼을 누르면 실제로 화면에 fixed 요소가 나타납니다. 스크롤을 내려도 고정되어 있는 걸 확인하세요.</p>
+
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#ddd;margin-bottom:2px">상단 네비게이션 바</div>
+          <div style="font-size:12px;color:var(--muted)">top: 0 — 화면 상단에 고정</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="navbar-status" style="font-size:11px;color:var(--muted)">미적용</span>
+          <button id="navbar-btn" onclick="applyFixed('navbar')" style="padding:6px 16px;border-radius:6px;border:1px solid var(--accent);background:#1a2a3a;color:var(--accent);font-size:12px;font-weight:700;cursor:pointer">적용</button>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#ddd;margin-bottom:2px">플로팅 버튼 (FAB)</div>
+          <div style="font-size:12px;color:var(--muted)">bottom: 32px / right: 32px — 우하단 고정</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="fab-status" style="font-size:11px;color:var(--muted)">미적용</span>
+          <button id="fab-btn" onclick="applyFixed('fab')" style="padding:6px 16px;border-radius:6px;border:1px solid var(--accent);background:#1a2a3a;color:var(--accent);font-size:12px;font-weight:700;cursor:pointer">적용</button>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 16px;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#ddd;margin-bottom:2px">토스트 알림</div>
+          <div style="font-size:12px;color:var(--muted)">bottom: 32px / left: 50% — 하단 중앙, 3초 후 사라짐</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="toast-status" style="font-size:11px;color:var(--muted)">미적용</span>
+          <button id="toast-btn" onclick="applyFixed('toast')" style="padding:6px 16px;border-radius:6px;border:1px solid var(--accent);background:#1a2a3a;color:var(--accent);font-size:12px;font-weight:700;cursor:pointer">적용</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box" style="margin-top:14px">
+      💡 요소를 적용한 뒤 <strong>페이지를 스크롤</strong>하면 고정되어 있는 걸 바로 확인할 수 있어요.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>적용 중인 코드</h2>
+    <div class="code-block" id="fixed-code">/* 위에서 요소를 적용하면 코드가 표시됩니다 */</div>
+  </div>
+
+  <div class="card">
+    <h2>fixed vs absolute 차이</h2>
+    <table class="cmp-table">
+      <thead><tr><th>값</th><th>기준</th><th>스크롤 시</th><th>주요 용도</th></tr></thead>
+      <tbody>
+        <tr><td>absolute</td><td>가장 가까운 non-static 부모</td><td>같이 스크롤됨</td><td>뱃지, 툴팁, 오버레이</td></tr>
+        <tr><td>fixed</td><td>viewport (브라우저 화면)</td><td>고정 (안 움직임)</td><td>헤더, FAB, 토스트</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ④ sticky -->
+<div id="tab-sticky" class="section">
+  <h1>④ sticky</h1>
+  <p class="subtitle">평소엔 일반 흐름대로 있다가, 스크롤이 지정한 위치에 도달하면 <strong>그 자리에 고정</strong>됩니다. <code>top</code> 값을 반드시 설정해야 동작합니다.</p>
+
+  <div class="card">
+    <h2>스크롤 데모 — 섹션 헤더가 sticky</h2>
+    <p>아래 영역을 스크롤해보세요. 각 섹션 제목이 상단에 달라붙습니다.</p>
+    <div class="sticky-scroll">
+      <div class="sticky-inner">
+        <div class="sticky-header">🔵 섹션 1 — position: sticky; top: 0</div>
+        <div class="sticky-content-item">내용 1-1: Lorem ipsum dolor sit amet consectetur adipisicing elit.</div>
+        <div class="sticky-content-item">내용 1-2: Porro a iusto pariatur facilis voluptate unde numquam.</div>
+        <div class="sticky-content-item">내용 1-3: Quae fuga dolorem nulla tenetur quo a ea vero.</div>
+        <div class="sticky-header">🟢 섹션 2 — position: sticky; top: 0</div>
+        <div class="sticky-content-item">내용 2-1: Numquam voluptatem maiores tenetur ut saepe ex mollitia.</div>
+        <div class="sticky-content-item">내용 2-2: Debitis perspiciatis voluptatum molestiae quam nesciunt.</div>
+        <div class="sticky-content-item">내용 2-3: Id sapiente nostrum nulla a quibusdam nisi dicta.</div>
+        <div class="sticky-header">🟡 섹션 3 — position: sticky; top: 0</div>
+        <div class="sticky-content-item">내용 3-1: Hic dolor odio fuga maxime alias tempore magni.</div>
+        <div class="sticky-content-item">내용 3-2: Fuga eum voluptatem asperiores vel consequuntur modi.</div>
+        <div class="sticky-content-item">내용 3-3: Assumenda facilis praesentium a iusto debitis perspiciatis.</div>
+        <div class="sticky-header">🟣 섹션 4 — position: sticky; top: 0</div>
+        <div class="sticky-content-item">내용 4-1: Ea vero excepturi nesciunt eligendi nihil facilis officia.</div>
+        <div class="sticky-content-item">내용 4-2: Molestias nobis quam culpa recusandae enim iste porro.</div>
+        <div class="sticky-content-item">내용 4-3: Unde at nostrum delectus id sapiente nulla quibusdam.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>코드</h2>
+    <div class="code-block"><span class="sel">.sticky-header</span> {
+  <span class="prop">position</span>: <span class="val">sticky</span>;
+  <span class="prop">top</span>: <span class="val">0</span>; <span class="cm">/* 이 값이 없으면 동작 안 함! */</span>
+}</div>
+  </div>
+
+  <div class="card">
+    <h2>sticky vs fixed 차이</h2>
+    <table class="cmp-table">
+      <thead><tr><th>값</th><th>평소</th><th>스크롤 후</th><th>부모 영역 벗어나면</th></tr></thead>
+      <tbody>
+        <tr><td>fixed</td><td>항상 고정</td><td>항상 고정</td><td>계속 고정</td></tr>
+        <tr><td>sticky</td><td>일반 흐름대로</td><td>지정 위치에 고정</td><td>같이 사라짐</td></tr>
+      </tbody>
+    </table>
+    <div class="info-box" style="margin-top:12px">
+      💡 <strong>sticky가 동작하지 않는 흔한 원인</strong><br>
+      · <code>top</code> 값을 설정하지 않은 경우<br>
+      · 부모 요소에 <code>overflow: hidden</code>이 설정된 경우<br>
+      · 부모 요소의 높이가 sticky 요소보다 작은 경우
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ z-index -->
+<div id="tab-zindex" class="section">
+  <h1>⑤ z-index</h1>
+  <p class="subtitle">요소가 겹칠 때 <strong>어떤 요소가 위에 올라올지</strong> 결정합니다. 숫자가 클수록 위에 표시됩니다. <code>position</code>이 <code>static</code>이 아닌 요소에만 적용됩니다.</p>
+
+  <div class="card">
+    <h2>라이브 데모 — 슬라이더로 z-index 조절</h2>
+    <div class="demo-area" style="height:200px">
+      <div id="z-box1" style="position:absolute;width:130px;height:90px;background:#1a3a4a;border:2px solid var(--accent);border-radius:8px;top:30px;left:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:monospace;color:var(--accent);z-index:1">Box A<br><span style="font-size:11px;margin-top:4px;opacity:.8">z-index: 1</span></div>
+      <div id="z-box2" style="position:absolute;width:130px;height:90px;background:#3a1a1a;border:2px solid var(--orange);border-radius:8px;top:70px;left:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:monospace;color:var(--orange);z-index:1;text-align:center">Box B<br><span style="font-size:11px;margin-top:4px;opacity:.8">z-index: 1</span></div>
+      <div id="z-box3" style="position:absolute;width:130px;height:90px;background:#2a1a3a;border:2px solid var(--purple);border-radius:8px;top:50px;left:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:monospace;color:var(--purple);z-index:1;text-align:center">Box C<br><span style="font-size:11px;margin-top:4px;opacity:.8">z-index: 1</span></div>
+    </div>
+    <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
+      <div class="slider-row"><label style="color:var(--accent)">Box A</label><input type="range" min="-5" max="10" value="1" id="za" oninput="updateZ()"><span id="za-v" style="color:var(--accent)">1</span></div>
+      <div class="slider-row"><label style="color:var(--orange)">Box B</label><input type="range" min="-5" max="10" value="1" id="zb" oninput="updateZ()"><span id="zb-v" style="color:var(--orange)">1</span></div>
+      <div class="slider-row"><label style="color:var(--purple)">Box C</label><input type="range" min="-5" max="10" value="1" id="zc" oninput="updateZ()"><span id="zc-v" style="color:var(--purple)">1</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>실전 예시 — z-index 레이어 구조</h2>
+    <div class="scene-btns">
+      <button class="scene-btn active" onclick="setZScene('modal',this)">모달</button>
+      <button class="scene-btn" onclick="setZScene('dropdown',this)">드롭다운</button>
+      <button class="scene-btn" onclick="setZScene('tooltip',this)">툴팁</button>
+    </div>
+    <div class="demo-area" style="height:180px;overflow:hidden" id="z-scene"></div>
+    <div class="code-block" style="margin-top:12px" id="z-scene-code"></div>
+  </div>
+
+  <div class="card">
+    <h2>주의사항</h2>
+    <table class="cmp-table">
+      <thead><tr><th>규칙</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td>position 필요</td><td>static인 요소는 z-index가 적용되지 않음</td></tr>
+        <tr><td>기본값 auto</td><td>auto는 부모의 쌓임 맥락을 따름</td></tr>
+        <tr><td>음수 가능</td><td>z-index: -1 로 배경 뒤로 보낼 수 있음</td></tr>
+        <tr><td>쌓임 맥락</td><td>부모가 z-index를 가지면 자식은 그 안에서만 경쟁함</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// ── TABS ──
+function tab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── RELATIVE ──
+function updateRel() {
+  const t = document.getElementById('rel-top').value;
+  const l = document.getElementById('rel-left').value;
+  document.getElementById('rel-top-v').textContent = t + 'px';
+  document.getElementById('rel-left-v').textContent = l + 'px';
+  document.getElementById('rel-box').style.top = t + 'px';
+  document.getElementById('rel-box').style.left = l + 'px';
+  document.getElementById('rel-code').textContent =
+`.box {\n  position: relative;\n  top: ${t}px;\n  left: ${l}px;\n}`;
+}
+updateRel();
+
+// ── ABSOLUTE ──
+let parentIsRelative = false;
+let usesBottom = false;
+let usesRight = false;
+
+function toggleTB() {
+  usesBottom = !usesBottom;
+  document.getElementById('toggle-tb').textContent = (usesBottom ? 'bottom' : 'top') + ' ↕';
+  document.getElementById('abs-top').value = 0;
+  updateAbs();
+}
+function toggleLR() {
+  usesRight = !usesRight;
+  document.getElementById('toggle-lr').textContent = (usesRight ? 'right' : 'left') + ' ↔';
+  document.getElementById('abs-left').value = 0;
+  updateAbs();
+}
+function toggleParent() {
+  parentIsRelative = !parentIsRelative;
+  const parent = document.getElementById('abs-parent');
+  const btn = document.getElementById('parent-toggle');
+  const hint = document.getElementById('parent-hint');
+  if (parentIsRelative) {
+    parent.style.position = 'relative';
+    parent.style.border = '2px solid var(--green)';
+    parent.style.background = '#1a2a1a';
+    btn.textContent = 'ON — 이 부모가 기준!';
+    btn.style.borderColor = 'var(--green)';
+    btn.style.color = 'var(--green)';
+    btn.style.background = '#1a2a1a';
+    hint.innerHTML = '부모 (position: <strong style="color:var(--green)">relative</strong>)<br><span style="color:var(--green)">✅ absolute 박스의 기준!</span>';
+  } else {
+    parent.style.position = 'static';
+    parent.style.border = '2px dashed #555';
+    parent.style.background = 'transparent';
+    btn.textContent = 'OFF — 기준 없음';
+    btn.style.borderColor = 'var(--border)';
+    btn.style.color = '#aaa';
+    btn.style.background = 'var(--bg3)';
+    hint.innerHTML = '부모 (position: <strong style="color:#555">static</strong>)<br><span style="color:#444">absolute 박스의 기준이 아님</span>';
+  }
+  updateAbs();
+}
+function updateAbs() {
+  const v1 = document.getElementById('abs-top').value;
+  const v2 = document.getElementById('abs-left').value;
+  const prop1 = usesBottom ? 'bottom' : 'top';
+  const prop2 = usesRight ? 'right' : 'left';
+  document.getElementById('abs-top-v').textContent = v1 + 'px';
+  document.getElementById('abs-left-v').textContent = v2 + 'px';
+  const box = document.getElementById('abs-box');
+  box.style.top = box.style.bottom = box.style.left = box.style.right = '';
+  box.style[prop1] = v1 + 'px';
+  box.style[prop2] = v2 + 'px';
+  document.getElementById('abs-code').textContent =
+`.parent {\n  position: ${parentIsRelative ? 'relative' : 'static'};\n}\n.box {\n  position: absolute;\n  ${prop1}: ${v1}px;\n  ${prop2}: ${v2}px;\n}`;
+}
+updateAbs();
+
+// ── ABSOLUTE SCENES ──
+const absScenes = {
+  badge: {
+    html: `<div style="position:relative;width:60px;height:60px;background:#2a2a4a;border-radius:12px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;margin:40px auto 0">
+      🔔
+      <span style="position:absolute;top:-6px;right:-6px;background:#f3722c;color:#fff;border-radius:99px;font-size:10px;font-weight:700;padding:2px 6px;font-family:monospace">3</span>
+    </div>`,
+    code: `.icon { position: relative; }\n.badge {\n  position: absolute;\n  top: -6px;\n  right: -6px;\n}`
+  },
+  center: {
+    html: `<div style="position:relative;width:100%;height:100%;background:#0a0a18aa">
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1a2e;border:1px solid var(--accent);border-radius:10px;padding:20px 32px;text-align:center">
+        <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:6px">모달 타이틀</div>
+        <div style="font-size:12px;color:#aaa">중앙 정렬된 오버레이</div>
+      </div>
+    </div>`,
+    code: `.overlay { position: relative; }\n.modal {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n}`
+  },
+  corner: {
+    html: `<div style="position:relative;width:100%;height:100%">
+      <div style="position:absolute;bottom:16px;right:16px;width:44px;height:44px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;box-shadow:0 4px 12px #4cc9f044">+</div>
+    </div>`,
+    code: `.container { position: relative; }\n.fab {\n  position: absolute;\n  bottom: 16px;\n  right: 16px;\n}`
+  }
+};
+function setAbsScene(key, btn) {
+  document.querySelectorAll('#tab-absolute .scene-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('abs-scene').innerHTML = absScenes[key].html;
+  document.getElementById('abs-scene-code').textContent = absScenes[key].code;
+}
+setAbsScene('badge', document.querySelector('#tab-absolute .scene-btn'));
+
+// ── FIXED ──
+const fixedCodes = {
+  navbar: `.navbar {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  z-index: 999;\n}`,
+  fab:    `.fab {\n  position: fixed;\n  bottom: 32px;\n  right: 32px;\n  z-index: 999;\n}`,
+  toast:  `.toast {\n  position: fixed;\n  bottom: 32px;\n  left: 50%;\n  transform: translateX(-50%);\n  z-index: 999;\n}`
+};
+const fixedActive = { navbar: false, fab: false, toast: false };
+let toastTimer = null;
+
+function applyFixed(type) {
+  if (fixedActive[type]) {
+    removeFixed(type);
+    return;
+  }
+  fixedActive[type] = true;
+  const el = document.getElementById('fixed-' + type);
+  const btn = document.getElementById(type + '-btn');
+  const status = document.getElementById(type + '-status');
+  el.style.display = 'flex';
+  btn.textContent = '제거';
+  btn.style.borderColor = 'var(--orange)';
+  btn.style.color = 'var(--orange)';
+  btn.style.background = '#2a1a1a';
+  status.innerHTML = `<span style="color:var(--green);font-weight:700">● 적용 중</span>`;
+  document.getElementById('fixed-code').textContent = fixedCodes[type];
+  if (type === 'toast') {
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => removeFixed('toast'), 3000);
+  }
+}
+function removeFixed(type) {
+  fixedActive[type] = false;
+  const el = document.getElementById('fixed-' + type);
+  const btn = document.getElementById(type + '-btn');
+  const status = document.getElementById(type + '-status');
+  el.style.display = 'none';
+  btn.textContent = '적용';
+  btn.style.borderColor = 'var(--accent)';
+  btn.style.color = 'var(--accent)';
+  btn.style.background = '#1a2a3a';
+  status.innerHTML = `<span style="color:var(--muted)">미적용</span>`;
+}
+
+// ── Z-INDEX ──
+function updateZ() {
+  const a = document.getElementById('za').value;
+  const b = document.getElementById('zb').value;
+  const c = document.getElementById('zc').value;
+  document.getElementById('za-v').textContent = a;
+  document.getElementById('zb-v').textContent = b;
+  document.getElementById('zc-v').textContent = c;
+  const b1 = document.getElementById('z-box1');
+  const b2 = document.getElementById('z-box2');
+  const b3 = document.getElementById('z-box3');
+  b1.style.zIndex = a; b1.querySelector('span').textContent = `z-index: ${a}`;
+  b2.style.zIndex = b; b2.querySelector('span').textContent = `z-index: ${b}`;
+  b3.style.zIndex = c; b3.querySelector('span').textContent = `z-index: ${c}`;
+}
+
+// ── Z-INDEX SCENES ──
+const zScenes = {
+  modal: {
+    html: `<div style="position:relative;width:100%;height:100%">
+      <div style="position:absolute;inset:0;background:#00000088;z-index:10;display:flex;align-items:center;justify-content:center">
+        <div style="background:#1a1a2e;border:1px solid var(--accent);border-radius:10px;padding:16px 28px;text-align:center;z-index:20">
+          <div style="font-size:13px;font-weight:700;color:var(--accent)">모달 (z-index: 20)</div>
+        </div>
+      </div>
+      <div style="position:absolute;top:16px;left:16px;font-size:12px;color:#aaa">콘텐츠 (z-index: 1)</div>
+    </div>`,
+    code: `.overlay { z-index: 10; } /* 어두운 배경 */\n.modal   { z-index: 20; } /* 모달 박스 */\n.content { z-index: 1;  } /* 일반 콘텐츠 */`
+  },
+  dropdown: {
+    html: `<div style="position:relative;padding:16px">
+      <div style="display:inline-block;position:relative">
+        <div style="background:#2a2a4a;border:1px solid var(--border);border-radius:6px;padding:8px 16px;font-size:12px;font-weight:700;color:#ddd;cursor:pointer">메뉴 ▾</div>
+        <div style="position:absolute;top:100%;left:0;background:#1a1a2e;border:1px solid var(--border);border-radius:6px;z-index:50;min-width:120px;margin-top:4px">
+          <div style="padding:8px 14px;font-size:12px;color:#aaa;border-bottom:1px solid #1e1e38">항목 1</div>
+          <div style="padding:8px 14px;font-size:12px;color:#aaa;border-bottom:1px solid #1e1e38">항목 2</div>
+          <div style="padding:8px 14px;font-size:12px;color:#aaa">항목 3</div>
+        </div>
+      </div>
+    </div>`,
+    code: `.dropdown-menu {\n  position: absolute;\n  z-index: 50;\n}`
+  },
+  tooltip: {
+    html: `<div style="position:relative;padding:60px 20px;text-align:center">
+      <div style="display:inline-block;position:relative">
+        <div style="background:#2a2a4a;border:1px solid var(--border);border-radius:6px;padding:8px 16px;font-size:12px;color:#ddd;cursor:pointer">마우스 올리면 툴팁</div>
+        <div style="position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#2a2a4a;border:1px solid var(--border);color:#ddd;font-size:11px;padding:6px 12px;border-radius:6px;white-space:nowrap;z-index:100">
+          툴팁 내용입니다 (z-index: 100)
+        </div>
+      </div>
+    </div>`,
+    code: `.tooltip {\n  position: absolute;\n  z-index: 100;\n}`
+  }
+};
+function setZScene(key, btn) {
+  document.querySelectorAll('#tab-zindex .scene-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('z-scene').innerHTML = zScenes[key].html;
+  document.getElementById('z-scene-code').textContent = zScenes[key].code;
+}
+setZScene('modal', document.querySelector('#tab-zindex .scene-btn'));
+</script>
+</body>
+</html>
