@@ -27,6 +27,7 @@
   .card::before { content: ''; position: absolute; inset: 0; opacity: 0; transition: opacity .2s; border-radius: 16px; }
   .card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px #00000044; }
 
+  .card-0 { --c: var(--orange); }
   .card-1 { --c: var(--accent); }
   .card-2 { --c: var(--green); }
   .card-3 { --c: var(--yellow); }
@@ -64,6 +65,19 @@
 
 
 <div class="grid">
+
+  <a class="card card-0" href="0.css_basics.html">
+    <span class="card-num">00</span>
+    <div class="card-icon">🎨</div>
+    <h2>CSS 기초</h2>
+    <p>색상, 단위, 텍스트, 배경, 그림자, display, overflow까지 CSS의 핵심 기초를 한 곳에서 학습하세요.</p>
+    <div class="card-tags">
+      <span class="tag tag-accent">색상</span>
+      <span class="tag tag-accent">단위</span>
+      <span class="tag tag-accent">display</span>
+    </div>
+    <span class="card-arrow">→</span>
+  </a>
 
   <a class="card card-1" href="1.box_model.html">
     <span class="card-num">01</span>

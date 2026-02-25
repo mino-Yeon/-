@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS 기초</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f0f1a; --bg2: #13132a; --bg3: #1a1a2e;
+    --border: #2d2d50; --text: #e0e0f0; --muted: #777;
+    --accent: #4cc9f0; --green: #90be6d; --orange: #f3722c; --yellow: #f9c74f; --purple: #c77dff;
+    --hl: #4cc9f044; --hl-border: #4cc9f0;
+  }
+  body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* NAV */
+  nav { display: flex; background: var(--bg3); border-bottom: 2px solid var(--border); position: sticky; top: 0; z-index: 100; overflow-x: auto; }
+  nav::-webkit-scrollbar { height: 0; }
+  nav button { flex-shrink: 0; padding: 13px 14px; background: none; border: none; border-bottom: 3px solid transparent; color: #888; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+  nav button:hover:not(.active) { background: #ffffff06; color: #ddd; }
+  .nav-group { display: flex; border-right: 1px solid var(--border); }
+  .nav-group:last-child { border-right: none; }
+  .nav-label { padding: 0 10px; font-size: 10px; font-weight: 700; color: #444; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; }
+
+  /* SECTION */
+  .section { display: none; max-width: 1040px; margin: 0 auto; padding: 32px 20px 60px; }
+  .section.active { display: block; }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .subtitle { color: var(--muted); font-size: 13px; line-height: 1.7; margin-bottom: 28px; }
+
+  /* CARDS */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .card h2 { font-size: 15px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .card h2 code { font-family: 'Courier New', monospace; color: var(--accent); font-size: 13px; background: #0a0a18; padding: 2px 8px; border-radius: 4px; }
+  .card p { font-size: 13px; color: #bbb; line-height: 1.7; margin-bottom: 10px; }
+  .card p:last-child { margin-bottom: 0; }
+
+  /* TWO-COL */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:640px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* CODE BLOCK */
+  .code-block { background: #0a0a18; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.9; overflow-x: auto; }
+  .tag { color: #f8766d; } .prop { color: #ebcb8b; } .val { color: #a3be8c; } .cm { color: #555; } .sel { color: #4cc9f0; }
+
+  /* DEMO */
+  .demo-wrap { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+  .demo-label { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+
+  /* COLOR SWATCHES */
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+  .swatch { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); min-width: 100px; }
+  .swatch-color { height: 48px; }
+  .swatch-label { padding: 6px 10px; font-size: 11px; font-family: monospace; color: var(--muted); background: var(--bg2); }
+
+  /* SLIDER DEMO */
+  .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .slider-row label { font-size: 12px; color: var(--muted); min-width: 14px; font-family: monospace; }
+  .slider-row input[type=range] { flex: 1; accent-color: var(--accent); }
+  .slider-row span { font-size: 12px; font-family: monospace; color: #ddd; min-width: 36px; text-align: right; }
+  .color-preview { width: 100%; height: 60px; border-radius: 8px; border: 1px solid var(--border); margin-top: 10px; transition: background .1s; }
+
+  /* UNIT DEMO */
+  .unit-rows { display: flex; flex-direction: column; gap: 8px; }
+  .unit-row { display: flex; align-items: center; gap: 12px; }
+  .unit-row .u-label { font-size: 12px; font-family: monospace; color: var(--accent); min-width: 40px; }
+  .unit-bar-wrap { flex: 1; background: var(--bg); border-radius: 4px; overflow: hidden; height: 28px; }
+  .unit-bar { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; transition: width .3s; }
+  .unit-row .u-desc { font-size: 12px; color: var(--muted); min-width: 120px; }
+
+  /* TEXT DEMO */
+  .text-controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .ctrl-row { display: flex; align-items: center; gap: 12px; }
+  .ctrl-row label { font-size: 12px; color: var(--muted); min-width: 110px; font-family: monospace; }
+  .ctrl-row select, .ctrl-row input[type=range] { flex: 1; accent-color: var(--accent); }
+  .ctrl-row select { background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 8px; font-size: 12px; }
+  .ctrl-row span { font-size: 12px; font-family: monospace; color: #ddd; min-width: 36px; text-align: right; }
+  #text-preview { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; font-size: 16px; line-height: 1.6; transition: all .2s; }
+
+  /* SHADOW DEMO */
+  .shadow-preview { width: 100%; height: 80px; background: var(--bg2); border-radius: 10px; margin-top: 14px; transition: box-shadow .2s; }
+
+  /* DISPLAY DEMO */
+  .disp-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .disp-btn { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); color: #aaa; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .disp-btn.active { background: #1a2a3a; border-color: var(--accent); color: var(--accent); }
+  .disp-area { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; min-height: 80px; }
+  .disp-box { background: #4cc9f033; border: 1px solid var(--accent); color: var(--accent); font-size: 12px; font-weight: 700; font-family: monospace; padding: 8px 14px; border-radius: 4px; transition: all .3s; }
+
+  /* OVERFLOW DEMO */
+  .of-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .of-btn { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); color: #aaa; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .of-btn.active { background: #1a2a3a; border-color: var(--green); color: var(--green); }
+  #of-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; height: 80px; font-size: 13px; color: #aaa; line-height: 1.7; transition: overflow .2s; }
+
+  /* INIT TABLE */
+  .init-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .init-table th { text-align: left; padding: 10px 14px; font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
+  .init-table td { padding: 10px 14px; border-bottom: 1px solid #1e1e38; vertical-align: top; line-height: 1.7; }
+  .init-table tr:last-child td { border-bottom: none; }
+  .init-table code { font-family: monospace; color: var(--accent); font-size: 12px; background: #0a0a18; padding: 1px 6px; border-radius: 3px; }
+  .init-table td:first-child { color: #ebcb8b; font-family: monospace; font-size: 12px; white-space: nowrap; }
+  .init-table td:last-child { color: #bbb; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-group">
+    <span class="nav-label">스타일 기초</span>
+    <button class="active" onclick="tab('color',this)">① 색상</button>
+    <button onclick="tab('unit',this)">② 단위</button>
+    <button onclick="tab('text',this)">③ 텍스트</button>
+    <button onclick="tab('bg',this)">④ 배경</button>
+    <button onclick="tab('shadow',this)">⑤ 그림자</button>
+    <button onclick="tab('etc',this)">⑥ 기타</button>
+  </div>
+  <div class="nav-group">
+    <span class="nav-label">레이아웃</span>
+    <button onclick="tab('display',this)">⑦ display</button>
+    <button onclick="tab('overflow',this)">⑧ overflow</button>
+  </div>
+  <div class="nav-group">
+    <span class="nav-label">실전</span>
+    <button onclick="tab('init',this)">⑨ 초기설정</button>
+  </div>
+</nav>
+
+<!-- ① 색상 -->
+<div id="tab-color" class="section active">
+  <h1>① 색상</h1>
+  <p class="subtitle">CSS에서 색상을 표현하는 다양한 방법입니다.</p>
+
+  <div class="two-col">
+    <div class="card">
+      <h2>색상 표현 방식</h2>
+      <div class="swatches">
+        <div class="swatch"><div class="swatch-color" style="background:tomato"></div><div class="swatch-label">tomato<br>키워드</div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#4cc9f0"></div><div class="swatch-label">#4cc9f0<br>HEX</div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#4cc9f088"></div><div class="swatch-label">#4cc9f088<br>HEX+투명도</div></div>
+        <div class="swatch"><div class="swatch-color" style="background:rgb(76,201,240)"></div><div class="swatch-label">rgb(76,201,240)<br>RGB</div></div>
+        <div class="swatch"><div class="swatch-color" style="background:rgba(76,201,240,0.4)"></div><div class="swatch-label">rgba(…,0.4)<br>RGBA</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>RGB 슬라이더 — 직접 조절해보기</h2>
+      <div class="slider-row"><label>R</label><input type="range" min="0" max="255" value="76" id="cr" oninput="updateColor()"><span id="crv">76</span></div>
+      <div class="slider-row"><label>G</label><input type="range" min="0" max="255" value="201" id="cg" oninput="updateColor()"><span id="cgv">201</span></div>
+      <div class="slider-row"><label>B</label><input type="range" min="0" max="255" value="240" id="cb" oninput="updateColor()"><span id="cbv">240</span></div>
+      <div class="slider-row"><label>A</label><input type="range" min="0" max="100" value="100" id="ca" oninput="updateColor()"><span id="cav">1</span></div>
+      <div class="color-preview" id="color-preview"></div>
+      <p style="margin-top:10px;font-family:monospace;font-size:12px;color:var(--muted)" id="color-code"></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>코드 요약</h2>
+    <div class="code-block">
+<span class="cm">/* 키워드 */</span>
+<span class="prop">color</span>: red;
+<span class="prop">color</span>: tomato;
+
+<span class="cm">/* HEX */</span>
+<span class="prop">color</span>: <span class="val">#RRGGBB</span>;        <span class="cm">/* 각 채널 00~FF */</span>
+<span class="prop">color</span>: <span class="val">#RRGGBBAA</span>;      <span class="cm">/* 투명도 포함 */</span>
+
+<span class="cm">/* RGB / RGBA */</span>
+<span class="prop">color</span>: <span class="val">rgb(0~255, 0~255, 0~255)</span>;
+<span class="prop">color</span>: <span class="val">rgba(0~255, 0~255, 0~255, 0~1)</span>; <span class="cm">/* 투명도 포함 */</span>
+    </div>
+  </div>
+</div>
+
+<!-- ② 단위 -->
+<div id="tab-unit" class="section">
+  <h1>② 크기 단위</h1>
+  <p class="subtitle">CSS에서 크기를 지정하는 다양한 단위입니다. 기준이 무엇인지가 핵심입니다.</p>
+
+  <div class="card">
+    <h2>단위 비교 — 기준 font-size: 16px, 부모 너비: 400px, viewport: 800px</h2>
+    <div class="unit-rows" id="unit-rows"></div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h2>절대 단위</h2>
+      <p><code>px</code> — 픽셀. 화면의 점 1개. 가장 직관적이고 정확합니다.</p>
+    </div>
+    <div class="card">
+      <h2>상대 단위</h2>
+      <p><code>em</code> — 현재 요소의 font-size 기준<br>
+         <code>rem</code> — &lt;html&gt;의 font-size 기준<br>
+         <code>%</code> — 부모 요소 기준<br>
+         <code>vh / vw</code> — viewport 높이/너비 기준</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><code>calc()</code></h2>
+    <p>서로 다른 단위를 섞어 계산할 수 있습니다. 반응형 레이아웃에서 자주 씁니다.</p>
+    <div class="code-block"><span class="prop">height</span>: <span class="val">calc(100vh - 60px)</span>; <span class="cm">/* 전체 높이에서 헤더 높이를 뺀 나머지 */</span>
+<span class="prop">width</span>: <span class="val">calc(50% - 16px)</span>;</div>
+  </div>
+</div>
+
+<!-- ③ 텍스트 -->
+<div id="tab-text" class="section">
+  <h1>③ 텍스트 / 글꼴</h1>
+  <p class="subtitle">텍스트 스타일을 조정하는 주요 속성들입니다. 아래에서 직접 조절해보세요.</p>
+
+  <div class="card">
+    <h2>라이브 데모</h2>
+    <div class="text-controls">
+      <div class="ctrl-row"><label>font-size</label><input type="range" min="10" max="40" value="16" id="t-size" oninput="updateText()"><span id="t-size-v">16px</span></div>
+      <div class="ctrl-row"><label>font-weight</label>
+        <select id="t-weight" onchange="updateText()">
+          <option value="300">300 — light</option>
+          <option value="400" selected>400 — normal</option>
+          <option value="600">600 — semibold</option>
+          <option value="700">700 — bold</option>
+          <option value="900">900 — black</option>
+        </select>
+      </div>
+      <div class="ctrl-row"><label>text-align</label>
+        <select id="t-align" onchange="updateText()">
+          <option value="left" selected>left</option>
+          <option value="center">center</option>
+          <option value="right">right</option>
+        </select>
+      </div>
+      <div class="ctrl-row"><label>letter-spacing</label><input type="range" min="-2" max="10" value="0" id="t-ls" oninput="updateText()"><span id="t-ls-v">0px</span></div>
+      <div class="ctrl-row"><label>text-decoration</label>
+        <select id="t-deco" onchange="updateText()">
+          <option value="none" selected>none</option>
+          <option value="underline">underline</option>
+          <option value="line-through">line-through</option>
+          <option value="overline">overline</option>
+        </select>
+      </div>
+    </div>
+    <div id="text-preview">CSS 텍스트 속성을 직접 조절해보세요. The quick brown fox jumps over the lazy dog.</div>
+  </div>
+
+  <div class="card">
+    <h2>코드 요약</h2>
+    <div class="code-block">
+<span class="prop">color</span>: <span class="val">#333</span>;
+<span class="prop">font-size</span>: <span class="val">16px</span>;
+<span class="prop">font-weight</span>: <span class="val">700</span>;           <span class="cm">/* 100~900 또는 normal, bold */</span>
+<span class="prop">text-align</span>: <span class="val">center</span>;        <span class="cm">/* left | center | right */</span>
+<span class="prop">text-decoration</span>: <span class="val">underline</span>;  <span class="cm">/* none | underline | line-through */</span>
+<span class="prop">letter-spacing</span>: <span class="val">2px</span>;       <span class="cm">/* 글자 간격 */</span>
+<span class="prop">word-spacing</span>: <span class="val">4px</span>;          <span class="cm">/* 단어 간격 */</span>
+    </div>
+  </div>
+</div>
+
+<!-- ④ 배경 -->
+<div id="tab-bg" class="section">
+  <h1>④ 배경</h1>
+  <p class="subtitle">요소의 배경을 꾸미는 속성들입니다.</p>
+
+  <div class="two-col">
+    <div class="card">
+      <h2>배경색</h2>
+      <div class="demo-wrap" style="background:#4cc9f022;border:1px solid #4cc9f044;border-radius:8px;padding:20px;text-align:center;color:var(--accent);font-weight:700">background-color 적용됨</div>
+      <div class="code-block" style="margin-top:12px"><span class="prop">background-color</span>: <span class="val">#4cc9f022</span>;</div>
+    </div>
+    <div class="card">
+      <h2>배경 이미지 주요 속성</h2>
+      <div class="code-block">
+<span class="prop">background-image</span>: <span class="val">url('이미지경로')</span>;
+<span class="prop">background-size</span>: <span class="val">cover</span>;    <span class="cm">/* cover | contain | px */</span>
+<span class="prop">background-position</span>: <span class="val">center</span>; <span class="cm">/* top | bottom | left | right */</span>
+<span class="prop">background-repeat</span>: <span class="val">no-repeat</span>; <span class="cm">/* repeat | no-repeat */</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>background-size 비교</h2>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:140px">
+        <div style="height:100px;border-radius:8px;border:1px solid var(--border);background:url('https://picsum.photos/seed/a/300/200') center/cover no-repeat"></div>
+        <p style="text-align:center;font-size:12px;margin-top:6px;font-family:monospace;color:var(--accent)">cover</p>
+      </div>
+      <div style="flex:1;min-width:140px">
+        <div style="height:100px;border-radius:8px;border:1px solid var(--border);background:url('https://picsum.photos/seed/a/300/200') center/contain no-repeat;background-color:var(--bg3)"></div>
+        <p style="text-align:center;font-size:12px;margin-top:6px;font-family:monospace;color:var(--accent)">contain</p>
+      </div>
+      <div style="flex:1;min-width:140px">
+        <div style="height:100px;border-radius:8px;border:1px solid var(--border);background:url('https://picsum.photos/seed/a/300/200') center/100px no-repeat;background-color:var(--bg3)"></div>
+        <p style="text-align:center;font-size:12px;margin-top:6px;font-family:monospace;color:var(--accent)">100px</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ 그림자 -->
+<div id="tab-shadow" class="section">
+  <h1>⑤ 그림자</h1>
+  <p class="subtitle"><code>box-shadow</code>로 요소에 그림자를 추가합니다. 슬라이더로 직접 조절해보세요.</p>
+
+  <div class="card">
+    <h2>라이브 데모</h2>
+    <div class="slider-row"><label style="min-width:100px;font-size:12px;color:var(--muted)">수평거리</label><input type="range" min="-30" max="30" value="4" id="sh-x" oninput="updateShadow()"><span id="sh-xv">4px</span></div>
+    <div class="slider-row"><label style="min-width:100px;font-size:12px;color:var(--muted)">수직거리</label><input type="range" min="-30" max="30" value="4" id="sh-y" oninput="updateShadow()"><span id="sh-yv">4px</span></div>
+    <div class="slider-row"><label style="min-width:100px;font-size:12px;color:var(--muted)">흐림반경</label><input type="range" min="0" max="50" value="10" id="sh-b" oninput="updateShadow()"><span id="sh-bv">10px</span></div>
+    <div class="slider-row"><label style="min-width:100px;font-size:12px;color:var(--muted)">투명도</label><input type="range" min="0" max="100" value="30" id="sh-a" oninput="updateShadow()"><span id="sh-av">0.3</span></div>
+    <div class="shadow-preview" id="shadow-preview"></div>
+    <div class="code-block" style="margin-top:12px" id="shadow-code"></div>
+  </div>
+
+  <div class="card">
+    <h2>문법</h2>
+    <div class="code-block"><span class="prop">box-shadow</span>: <span class="val">수평거리 수직거리 흐림반경 색상</span>;
+<span class="cm">/* 확산반경은 보통 생략 */</span>
+<span class="prop">box-shadow</span>: <span class="val">4px 4px 10px rgba(0, 0, 0, 0.2)</span>;</div>
+  </div>
+</div>
+
+<!-- ⑥ 기타 -->
+<div id="tab-etc" class="section">
+  <h1>⑥ 기타 속성</h1>
+  <p class="subtitle">자주 쓰이는 기타 속성들입니다.</p>
+
+  <div class="two-col">
+    <div class="card">
+      <h2><code>cursor</code></h2>
+      <p>마우스 커서 모양을 지정합니다.</p>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+        <div style="padding:10px 14px;background:var(--bg3);border-radius:6px;font-size:13px;cursor:pointer;border:1px solid var(--border)">cursor: pointer — 마우스 올려보세요 👆</div>
+        <div style="padding:10px 14px;background:var(--bg3);border-radius:6px;font-size:13px;cursor:not-allowed;border:1px solid var(--border)">cursor: not-allowed 🚫</div>
+        <div style="padding:10px 14px;background:var(--bg3);border-radius:6px;font-size:13px;cursor:grab;border:1px solid var(--border)">cursor: grab ✋</div>
+        <div style="padding:10px 14px;background:var(--bg3);border-radius:6px;font-size:13px;cursor:text;border:1px solid var(--border)">cursor: text — 텍스트 입력 영역처럼</div>
+      </div>
+      <div class="code-block" style="margin-top:12px"><span class="prop">cursor</span>: <span class="val">pointer</span>; <span class="cm">/* pointer | not-allowed | grab | text */</span></div>
+    </div>
+
+    <div class="card">
+      <h2><code>opacity</code></h2>
+      <p>요소 전체의 투명도를 조절합니다. <code>0</code>(완전 투명) ~ <code>1</code>(불투명).</p>
+      <p><code>rgba()</code>의 투명도와 다르게, <strong>자식 요소까지 모두</strong> 영향을 받습니다.</p>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <div style="padding:10px 14px;background:var(--accent);color:#000;border-radius:6px;font-size:13px;font-weight:700;opacity:1">opacity: 1.0</div>
+        <div style="padding:10px 14px;background:var(--accent);color:#000;border-radius:6px;font-size:13px;font-weight:700;opacity:0.6">opacity: 0.6</div>
+        <div style="padding:10px 14px;background:var(--accent);color:#000;border-radius:6px;font-size:13px;font-weight:700;opacity:0.3">opacity: 0.3</div>
+      </div>
+      <div class="code-block" style="margin-top:12px"><span class="prop">opacity</span>: <span class="val">0.5</span>; <span class="cm">/* 0 ~ 1 */</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑦ display -->
+<div id="tab-display" class="section">
+  <h1>⑦ display</h1>
+  <p class="subtitle">요소가 어떤 방식으로 배치될지 결정합니다. 버튼을 눌러 차이를 확인해보세요.</p>
+
+  <div class="card">
+    <h2>라이브 데모</h2>
+    <div class="disp-btns">
+      <button class="disp-btn active" onclick="setDisplay('block',this)">block</button>
+      <button class="disp-btn" onclick="setDisplay('inline',this)">inline</button>
+      <button class="disp-btn" onclick="setDisplay('inline-block',this)">inline-block</button>
+      <button class="disp-btn" onclick="setDisplay('none',this)">none</button>
+    </div>
+    <div class="disp-area" id="disp-area">
+      <span class="disp-box" id="disp-box1">Box 1</span>
+      <span class="disp-box" id="disp-box2">Box 2</span>
+      <span class="disp-box" id="disp-box3">Box 3</span>
+    </div>
+    <div class="code-block" style="margin-top:12px" id="disp-code"></div>
+  </div>
+
+  <div class="card">
+    <h2>비교 요약</h2>
+    <table class="init-table">
+      <thead><tr><th>값</th><th>배치 방향</th><th>width/height</th><th>margin/padding</th><th>대표 태그</th></tr></thead>
+      <tbody>
+        <tr><td>block</td><td style="color:#bbb">위→아래, 줄 전체 차지</td><td style="color:#90be6d">✅ 적용</td><td style="color:#90be6d">✅ 상하좌우</td><td style="color:#bbb">div, p, h1</td></tr>
+        <tr><td>inline</td><td style="color:#bbb">왼→오른쪽</td><td style="color:#f3722c">❌ 무시</td><td style="color:#f9c74f">⚠️ 좌우만</td><td style="color:#bbb">span, a, strong</td></tr>
+        <tr><td>inline-block</td><td style="color:#bbb">왼→오른쪽</td><td style="color:#90be6d">✅ 적용</td><td style="color:#90be6d">✅ 상하좌우</td><td style="color:#bbb">button, input</td></tr>
+        <tr><td>none</td><td style="color:#bbb">보이지 않음, 자리 없음</td><td style="color:#555">—</td><td style="color:#555">—</td><td style="color:#bbb">모달, 토글 UI</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--muted);border:1px solid var(--border);line-height:1.8">
+      💡 <strong style="color:#ddd">visibility: hidden</strong> vs <strong style="color:#ddd">display: none</strong><br>
+      <code>visibility: hidden</code> — 보이지 않지만 <strong style="color:#ddd">자리는 차지</strong><br>
+      <code>display: none</code> — 보이지 않고 <strong style="color:#ddd">자리도 없음</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ⑧ overflow -->
+<div id="tab-overflow" class="section">
+  <h1>⑧ overflow</h1>
+  <p class="subtitle">자식 요소가 부모의 크기를 벗어날 때 어떻게 처리할지 지정합니다.</p>
+
+  <div class="card">
+    <h2>라이브 데모</h2>
+    <div class="of-btns">
+      <button class="of-btn active" onclick="setOf('visible',this)">visible</button>
+      <button class="of-btn" onclick="setOf('hidden',this)">hidden</button>
+      <button class="of-btn" onclick="setOf('scroll',this)">scroll</button>
+      <button class="of-btn" onclick="setOf('auto',this)">auto</button>
+    </div>
+    <div id="of-box">Lorem ipsum dolor sit amet consectetur adipisicing elit. Porro a iusto pariatur facilis voluptate unde! Numquam voluptatem maiores tenetur ut saepe ex mollitia. Quae fuga dolorem nulla tenetur quo a. Ea vero excepturi nesciunt eligendi nihil facilis officia molestias.</div>
+    <div class="code-block" style="margin-top:12px" id="of-code"></div>
+  </div>
+
+  <div class="card">
+    <h2>값 비교</h2>
+    <table class="init-table">
+      <thead><tr><th>값</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td>visible</td><td style="color:#bbb">기본값. 넘쳐도 그대로 보임</td></tr>
+        <tr><td>hidden</td><td style="color:#bbb">넘치는 부분 숨김. 스크롤 없음</td></tr>
+        <tr><td>scroll</td><td style="color:#bbb">항상 스크롤바 표시</td></tr>
+        <tr><td>auto</td><td style="color:#bbb">넘치는 경우에만 스크롤바 표시</td></tr>
+      </tbody>
+    </table>
+    <div class="code-block" style="margin-top:12px">
+<span class="prop">overflow</span>: <span class="val">hidden</span>;
+<span class="prop">overflow-x</span>: <span class="val">auto</span>;   <span class="cm">/* 가로만 */</span>
+<span class="prop">overflow-y</span>: <span class="val">scroll</span>; <span class="cm">/* 세로만 */</span>
+    </div>
+  </div>
+</div>
+
+<!-- ⑨ 초기설정 -->
+<div id="tab-init" class="section">
+  <h1>⑨ CSS 초기설정</h1>
+  <p class="subtitle">모든 프로젝트 시작 시 작성하는 기본 설정 코드입니다. 브라우저마다 다른 기본 스타일을 통일하고, 자주 쓰는 설정을 미리 잡아둡니다.</p>
+
+  <div class="card">
+    <h2>초기설정 전체 코드</h2>
+    <div class="code-block">
+<span class="cm">/* ── 초기설정 Start ───────────────────────── */</span>
+
+<span class="sel">:root</span> {
+  <span class="cm">/* 프로젝트 전체에서 공통으로 쓸 변수 */</span>
+  <span class="cm">/* --primary: #4cc9f0; */</span>
+  <span class="cm">/* --font-size-base: 16px; */</span>
+}
+
+<span class="sel">*</span> {
+  <span class="prop">box-sizing</span>: <span class="val">border-box</span>; <span class="cm">/* 크기 기준을 border로 */</span>
+  <span class="prop">margin</span>: <span class="val">0</span>;
+  <span class="prop">padding</span>: <span class="val">0</span>;
+}
+
+<span class="sel">body</span> {
+  <span class="prop">font-family</span>: <span class="val">'Segoe UI', sans-serif</span>;
+  <span class="prop">line-height</span>: <span class="val">1.6</span>;
+  <span class="prop">color</span>: <span class="val">#333</span>;
+  <span class="prop">background-color</span>: <span class="val">#fff</span>;
+}
+
+<span class="sel">a</span> {
+  <span class="prop">color</span>: <span class="val">inherit</span>;        <span class="cm">/* 부모 텍스트 색 상속 */</span>
+  <span class="prop">text-decoration</span>: <span class="val">none</span>; <span class="cm">/* 기본 밑줄 제거 */</span>
+}
+
+<span class="sel">li</span> {
+  <span class="prop">list-style</span>: <span class="val">none</span>; <span class="cm">/* 기본 마커 제거 */</span>
+}
+
+<span class="sel">img</span> {
+  <span class="prop">max-width</span>: <span class="val">100%</span>;     <span class="cm">/* 부모 너비 초과 방지 */</span>
+  <span class="prop">display</span>: <span class="val">block</span>;      <span class="cm">/* 하단 여백(inline 특성) 제거 */</span>
+}
+
+<span class="sel">button</span> {
+  <span class="prop">cursor</span>: <span class="val">pointer</span>;
+  <span class="prop">border</span>: <span class="val">none</span>;
+  <span class="prop">background</span>: <span class="val">none</span>;
+  <span class="prop">font-family</span>: <span class="val">inherit</span>; <span class="cm">/* 버튼은 기본적으로 폰트 상속 안 함 */</span>
+  <span class="prop">font-size</span>: <span class="val">inherit</span>;
+}
+
+<span class="cm">/* ── 초기설정 End ─────────────────────────── */</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>각 설정의 이유</h2>
+    <table class="init-table">
+      <thead><tr><th>선택자 / 속성</th><th>이유</th></tr></thead>
+      <tbody>
+        <tr><td>* { box-sizing: border-box }</td><td>padding/border를 추가해도 전체 크기가 변하지 않아 레이아웃 계산이 직관적</td></tr>
+        <tr><td>* { margin: 0; padding: 0 }</td><td>브라우저마다 h1, p, ul 등에 기본 margin/padding이 달라 통일</td></tr>
+        <tr><td>body { line-height: 1.6 }</td><td>기본값(1.2)은 줄 간격이 너무 좁아 가독성이 낮음</td></tr>
+        <tr><td>a { color: inherit }</td><td>기본 파란색 링크 색상을 부모 색으로 통일</td></tr>
+        <tr><td>a { text-decoration: none }</td><td>기본 밑줄 제거 후 필요한 곳에만 추가하는 방식으로 관리</td></tr>
+        <tr><td>li { list-style: none }</td><td>기본 점(•) 마커 제거</td></tr>
+        <tr><td>img { max-width: 100% }</td><td>이미지가 부모 컨테이너를 벗어나는 문제 방지</td></tr>
+        <tr><td>img { display: block }</td><td>inline 특성으로 생기는 이미지 하단 미세 여백 제거</td></tr>
+        <tr><td>button { font-family: inherit }</td><td>button은 기본적으로 폰트를 상속받지 않아 명시적으로 지정</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+// ── TABS ──
+function tab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── COLOR ──
+function updateColor() {
+  const r = document.getElementById('cr').value;
+  const g = document.getElementById('cg').value;
+  const b = document.getElementById('cb').value;
+  const a = (document.getElementById('ca').value / 100).toFixed(2);
+  document.getElementById('crv').textContent = r;
+  document.getElementById('cgv').textContent = g;
+  document.getElementById('cbv').textContent = b;
+  document.getElementById('cav').textContent = a;
+  const bg = `rgba(${r},${g},${b},${a})`;
+  document.getElementById('color-preview').style.background = bg;
+  document.getElementById('color-code').textContent = `color: rgba(${r}, ${g}, ${b}, ${a});`;
+}
+updateColor();
+
+// ── UNIT ──
+const units = [
+  { label: 'px',  width: 160, color: '#4cc9f0', desc: '고정값 160px' },
+  { label: 'em',  width: 160, color: '#90be6d', desc: '10em × 16px = 160px' },
+  { label: 'rem', width: 160, color: '#f9c74f', desc: '10rem × 16px = 160px' },
+  { label: '%',   width: 160, color: '#c77dff', desc: '40% × 400px = 160px' },
+  { label: 'vw',  width: 160, color: '#f3722c', desc: '20vw × 800px = 160px' },
+];
+const uWrap = document.getElementById('unit-rows');
+units.forEach(u => {
+  uWrap.innerHTML += `<div class="unit-row">
+    <span class="u-label">${u.label}</span>
+    <div class="unit-bar-wrap"><div class="unit-bar" style="width:${u.width}px;background:${u.color}22;border:1px solid ${u.color}66;color:${u.color}">${u.label}</div></div>
+    <span class="u-desc">${u.desc}</span>
+  </div>`;
+});
+
+// ── TEXT ──
+function updateText() {
+  const el = document.getElementById('text-preview');
+  const size = document.getElementById('t-size').value;
+  const weight = document.getElementById('t-weight').value;
+  const align = document.getElementById('t-align').value;
+  const ls = document.getElementById('t-ls').value;
+  const deco = document.getElementById('t-deco').value;
+  el.style.fontSize = size + 'px';
+  el.style.fontWeight = weight;
+  el.style.textAlign = align;
+  el.style.letterSpacing = ls + 'px';
+  el.style.textDecoration = deco;
+  document.getElementById('t-size-v').textContent = size + 'px';
+  document.getElementById('t-ls-v').textContent = ls + 'px';
+}
+
+// ── SHADOW ──
+function updateShadow() {
+  const x = document.getElementById('sh-x').value;
+  const y = document.getElementById('sh-y').value;
+  const b = document.getElementById('sh-b').value;
+  const a = (document.getElementById('sh-a').value / 100).toFixed(2);
+  document.getElementById('sh-xv').textContent = x + 'px';
+  document.getElementById('sh-yv').textContent = y + 'px';
+  document.getElementById('sh-bv').textContent = b + 'px';
+  document.getElementById('sh-av').textContent = a;
+  const shadow = `${x}px ${y}px ${b}px rgba(0,0,0,${a})`;
+  document.getElementById('shadow-preview').style.boxShadow = shadow;
+  document.getElementById('shadow-code').textContent = `box-shadow: ${shadow};`;
+}
+updateShadow();
+
+// ── DISPLAY ──
+function setDisplay(val, btn) {
+  document.querySelectorAll('.disp-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['disp-box1','disp-box2','disp-box3'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.style.display = val;
+    el.style.width = (val === 'block' || val === 'inline-block') ? '120px' : '';
+    el.style.height = (val === 'block' || val === 'inline-block') ? '40px' : '';
+  });
+  if (val === 'none') document.getElementById('disp-box1').style.display = 'none';
+  document.getElementById('disp-code').textContent = `.box { display: ${val}; }`;
+}
+setDisplay('block', document.querySelector('.disp-btn'));
+
+// ── OVERFLOW ──
+function setOf(val, btn) {
+  document.querySelectorAll('.of-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('of-box').style.overflow = val;
+  document.getElementById('of-code').textContent = `overflow: ${val};`;
+}
+setOf('visible', document.querySelector('.of-btn'));
+</script>
+</body>
+</html>
