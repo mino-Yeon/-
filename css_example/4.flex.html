@@ -163,12 +163,20 @@
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <!-- 미리보기 + info -->
       <div>
-        <div class="demo-area" id="dir-area" style="display:flex;flex-direction:row;gap:8px;min-height:160px;align-items:flex-start">
-          <div class="f-item" style="width:70px;height:50px;background:#4cc9f022;border:1px solid #4cc9f066;color:var(--accent)">1</div>
-          <div class="f-item" style="width:70px;height:70px;background:#90be6d22;border:1px solid #90be6d66;color:var(--green)">2</div>
-          <div class="f-item" style="width:70px;height:60px;background:#c77dff22;border:1px solid #c77dff66;color:var(--purple)">3</div>
+      <!-- 가로축 라벨 (컨테이너 위) -->
+      <div id="dir-axis-horiz" style="display:flex;align-items:center;gap:4px;margin-bottom:10px;padding-left:36px"></div>
+      <div style="display:flex;gap:0">
+        <!-- 세로축 라벨 (컨테이너 왼쪽) -->
+        <div id="dir-axis-vert" style="display:flex;flex-direction:column;align-items:center;gap:3px;width:28px;margin-right:6px"></div>
+        <div>
+          <div class="demo-area" id="dir-area" style="display:flex;flex-direction:row;gap:8px;width:320px;height:250px;align-items:flex-start">
+            <div class="f-item" style="width:60px;height:50px;background:#4cc9f022;border:1px solid #4cc9f066;color:var(--accent)">1</div>
+            <div class="f-item" style="width:80px;height:70px;background:#90be6d22;border:1px solid #90be6d66;color:var(--green)">2</div>
+            <div class="f-item" style="width:70px;height:60px;background:#c77dff22;border:1px solid #c77dff66;color:var(--purple)">3</div>
+          </div>
+          <div class="info-box" id="dir-info" style="margin-top:8px"></div>
         </div>
-        <div class="info-box" id="dir-info" style="margin-top:8px"></div>
+      </div>
       </div>
       <!-- 코드 패널 (CSS / HTML 탭) -->
       <div style="align-self:start">
@@ -569,6 +577,29 @@ function switchDirTab(t) {
   renderDirCode();
 }
 
+function renderDirAxes(val) {
+  const isCol = val === 'column' || val === 'column-reverse';
+  const horiz = document.getElementById('dir-axis-horiz');
+  const vert  = document.getElementById('dir-axis-vert');
+  const labelStyle = `font-size:11px;font-family:'Segoe UI',sans-serif;font-weight:600;letter-spacing:.3px`;
+  const arrow = isCol ? '↓' : (val === 'row-reverse' ? '←' : '→');
+  const vArrow = isCol ? (val === 'column-reverse' ? '↑' : '↓') : '↓';
+
+  if (isCol) {
+    vert.innerHTML = `
+      <span style="${labelStyle};color:var(--accent);transform:rotate(-90deg);white-space:nowrap">주축</span>
+      <div style="flex:1;width:2px;min-height:40px;background:linear-gradient(180deg,var(--accent),#4cc9f044);border-radius:2px"></div>
+      <span style="color:var(--accent);font-size:15px;line-height:1">${vArrow}</span>`;
+    horiz.innerHTML = '';
+  } else {
+    horiz.innerHTML = `
+      <span style="${labelStyle};color:var(--accent)">주축</span>
+      <div style="flex:1;height:2px;background:linear-gradient(${val === 'row-reverse' ? '270' : '90'}deg,var(--accent),#4cc9f044);border-radius:2px"></div>
+      <span style="color:var(--accent);font-size:15px;line-height:1">${arrow}</span>`;
+    vert.innerHTML = '';
+  }
+}
+
 function setDir(val, btn) {
   document.querySelectorAll('#dir-btns .opt-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -576,6 +607,7 @@ function setDir(val, btn) {
   document.getElementById('dir-area').style.flexDirection = val;
   document.getElementById('dir-info').textContent = dirInfo[val];
   renderDirCode();
+  renderDirAxes(val);
 }
 
 // 초기화
