@@ -14,7 +14,6 @@
   }
   body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  /* NAV */
   nav { display: flex; background: var(--bg3); border-bottom: 2px solid var(--border); position: sticky; top: 0; z-index: 100; overflow-x: auto; }
   nav::-webkit-scrollbar { height: 0; }
   nav button { flex-shrink: 0; padding: 13px 14px; background: none; border: none; border-bottom: 3px solid transparent; color: #888; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .2s; white-space: nowrap; }
@@ -26,43 +25,36 @@
   h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
   .subtitle { color: var(--muted); font-size: 13px; line-height: 1.7; margin-bottom: 28px; }
 
-  /* MAIN LAYOUT */
   .learn-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; align-items: start; }
   @media(max-width: 720px) { .learn-layout { grid-template-columns: 1fr; } }
 
-  /* SELECTOR LIST */
   .sel-panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; position: sticky; top: 60px; }
   .sel-panel-title { padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--bg3); }
   .sel-item { padding: 11px 16px; cursor: pointer; border-bottom: 1px solid #1e1e38; transition: background .15s; display: flex; align-items: center; gap: 10px; }
   .sel-item:last-child { border-bottom: none; }
   .sel-item:hover { background: #1f1f3a; }
   .sel-item.active { background: #1a2a3a; border-left: 3px solid var(--accent); }
-  .sel-code { font-family: 'Courier New', monospace; font-size: 13px; color: var(--accent); font-weight: 700; min-width: 130px; }
+  .sel-code { font-family: 'Courier New', monospace; font-size: 13px; color: var(--accent); font-weight: 700; min-width: 150px; }
   .sel-name { font-size: 12px; color: var(--muted); }
 
-  /* RIGHT PANEL */
   .right-panel { display: flex; flex-direction: column; gap: 16px; }
 
-  /* DESCRIPTION */
   .desc-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-  .desc-card h2 { font-size: 16px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+  .desc-card h2 { font-size: 16px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .desc-card h2 code { font-family: 'Courier New', monospace; color: var(--accent); font-size: 15px; background: #0a0a18; padding: 2px 8px; border-radius: 4px; }
   .desc-card p { font-size: 13px; color: #bbb; line-height: 1.7; margin-bottom: 10px; }
   .desc-card p:last-child { margin-bottom: 0; }
   .match-badge { display: inline-block; background: #1a3026; color: var(--green); border: 1px solid var(--green); border-radius: 20px; font-size: 11px; font-weight: 700; padding: 3px 10px; }
 
-  /* HTML PREVIEW */
   .preview-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
   .preview-header { padding: 10px 16px; background: var(--bg3); border-bottom: 1px solid var(--border); font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
   .preview-body { padding: 16px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 2; }
 
-  /* HTML ELEMENT HIGHLIGHT */
   .el { display: block; padding: 1px 4px; border-radius: 3px; transition: all .2s; white-space: pre; }
   .el.hl { background: var(--hl); outline: 1px solid var(--hl-border); color: #fff; border-radius: 4px; }
   .tag { color: #f8766d; } .attr { color: #ebcb8b; } .val { color: #a3be8c; } .cm { color: #555; }
   .ind1 { padding-left: 20px; } .ind2 { padding-left: 40px; } .ind3 { padding-left: 60px; }
 
-  /* LIVE DEMO */
   .demo-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
   .demo-header { padding: 10px 16px; background: var(--bg3); border-bottom: 1px solid var(--border); font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
   .demo-body { padding: 20px; }
@@ -76,7 +68,7 @@
   .spec-row { display: flex; align-items: center; gap: 10px; background: var(--bg3); border-radius: 8px; padding: 10px 14px; border: 1px solid var(--border); cursor: pointer; transition: all .2s; }
   .spec-row:hover { border-color: var(--accent); }
   .spec-row.picked { border-color: var(--accent); background: #1a2a3a; }
-  .spec-sel { font-family: monospace; font-size: 13px; color: var(--accent); min-width: 120px; }
+  .spec-sel { font-family: monospace; font-size: 13px; color: var(--accent); min-width: 100px; }
   .spec-desc { font-size: 12px; color: var(--muted); flex: 1; }
   .spec-pts { font-family: monospace; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
   .pts-id { background: #f3722c22; color: #f3722c; }
@@ -90,7 +82,6 @@
   .score-box .lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
   .score-sep { font-size: 20px; color: var(--muted); }
   .score-total { font-size: 22px; font-weight: 700; font-family: monospace; color: var(--yellow); }
-
   .spec-combined { font-family: monospace; font-size: 14px; color: #ddd; background: #0a0a18; padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border); word-break: break-all; }
   .spec-note { font-size: 12px; color: var(--muted); line-height: 1.7; margin-top: 12px; }
   .spec-note strong { color: #ddd; }
@@ -117,25 +108,23 @@
   <button onclick="tab('specificity',this)">⑥ Specificity</button>
 </nav>
 
-<!-- ══════════ ① 기본 선택자 ══════════ -->
+<!-- ① 기본 선택자 -->
 <div id="tab-basic" class="section active">
   <h1>① 기본 선택자</h1>
   <p class="subtitle">가장 기본이 되는 선택자입니다. 선택자를 클릭하면 오른쪽 HTML에서 어떤 요소가 선택되는지 확인하세요.</p>
   <div class="learn-layout">
     <div class="sel-panel">
       <div class="sel-panel-title">선택자 목록</div>
-      <div class="sel-item active" onclick="basicSel(this,'*')"><span class="sel-code">*</span><span class="sel-name">전체 선택자</span></div>
+      <div class="sel-item active" onclick="basicSel(this,'all')"><span class="sel-code">*</span><span class="sel-name">전체 선택자</span></div>
       <div class="sel-item" onclick="basicSel(this,'tag')"><span class="sel-code">p</span><span class="sel-name">태그 선택자</span></div>
       <div class="sel-item" onclick="basicSel(this,'class')"><span class="sel-code">.highlight</span><span class="sel-name">클래스 선택자</span></div>
       <div class="sel-item" onclick="basicSel(this,'id')"><span class="sel-code">#main-title</span><span class="sel-name">아이디 선택자</span></div>
       <div class="sel-item" onclick="basicSel(this,'multi')"><span class="sel-code">h2, p</span><span class="sel-name">그룹 선택자</span></div>
+      <div class="sel-item" onclick="basicSel(this,'multiclass')"><span class="sel-code">.highlight.bold</span><span class="sel-name">클래스 동시 적용</span></div>
+      <div class="sel-item" onclick="basicSel(this,'tagclass')"><span class="sel-code">p.highlight</span><span class="sel-name">태그 + 클래스</span></div>
     </div>
     <div class="right-panel">
-      <div class="desc-card" id="basic-desc">
-        <h2><code>*</code> 전체 선택자</h2>
-        <p>페이지의 <strong>모든 요소</strong>를 선택합니다. 주로 전역 초기화(reset)에 사용합니다.</p>
-        <p><span class="match-badge" id="basic-match">✦ 7개 요소 선택됨</span></p>
-      </div>
+      <div class="desc-card" id="basic-desc"></div>
       <div class="preview-card">
         <div class="preview-header"><span>HTML 구조</span><span style="color:var(--accent);font-size:10px">← 선택된 요소가 하이라이트됩니다</span></div>
         <div class="preview-body" id="basic-html"></div>
@@ -144,7 +133,7 @@
   </div>
 </div>
 
-<!-- ══════════ ② 결합자 ══════════ -->
+<!-- ② 결합자 -->
 <div id="tab-combinator" class="section">
   <h1>② 결합자 (Combinators)</h1>
   <p class="subtitle">두 선택자의 <strong>관계</strong>를 이용해 요소를 선택합니다. HTML 구조를 이해해야 제대로 쓸 수 있습니다.</p>
@@ -157,11 +146,7 @@
       <div class="sel-item" onclick="combSel(this,'sib')"><span class="sel-code">h2 ~ p</span><span class="sel-name">일반 형제</span></div>
     </div>
     <div class="right-panel">
-      <div class="desc-card" id="comb-desc">
-        <h2><code>div p</code> 자손 선택자</h2>
-        <p>div <strong>안에 있는 모든</strong> p를 선택합니다. 얼마나 깊이 중첩돼 있든 상관없습니다.</p>
-        <p><span class="match-badge" id="comb-match">✦ 3개 요소 선택됨</span></p>
-      </div>
+      <div class="desc-card" id="comb-desc"></div>
       <div class="preview-card">
         <div class="preview-header"><span>HTML 구조</span><span style="color:var(--accent);font-size:10px">← 선택된 요소가 하이라이트됩니다</span></div>
         <div class="preview-body" id="comb-html"></div>
@@ -170,7 +155,7 @@
   </div>
 </div>
 
-<!-- ══════════ ③ 속성 선택자 ══════════ -->
+<!-- ③ 속성 선택자 -->
 <div id="tab-attr" class="section">
   <h1>③ 속성 선택자</h1>
   <p class="subtitle">HTML 속성(attribute)을 기준으로 요소를 선택합니다. 폼 요소나 링크 스타일링에 자주 사용됩니다.</p>
@@ -182,11 +167,7 @@
       <div class="sel-item" onclick="attrSel(this,'start')"><span class="sel-code">[href^="https"]</span><span class="sel-name">값으로 시작</span></div>
     </div>
     <div class="right-panel">
-      <div class="desc-card" id="attr-desc">
-        <h2><code>[required]</code> 속성 존재</h2>
-        <p><strong>required 속성이 있는</strong> 요소를 선택합니다. 값과 상관없이 속성만 있으면 됩니다.</p>
-        <p><span class="match-badge" id="attr-match">✦ 2개 요소 선택됨</span></p>
-      </div>
+      <div class="desc-card" id="attr-desc"></div>
       <div class="preview-card">
         <div class="preview-header"><span>HTML 구조</span><span style="color:var(--accent);font-size:10px">← 선택된 요소가 하이라이트됩니다</span></div>
         <div class="preview-body" id="attr-html"></div>
@@ -195,10 +176,10 @@
   </div>
 </div>
 
-<!-- ══════════ ④ 가상 클래스 ══════════ -->
+<!-- ④ 가상 클래스 -->
 <div id="tab-pseudo" class="section">
   <h1>④ 가상 클래스 (Pseudo-class)</h1>
-  <p class="subtitle">요소의 <strong>상태</strong>나 <strong>위치</strong>를 기준으로 선택합니다. 실제로 아래 데모에서 직접 상호작용해보세요.</p>
+  <p class="subtitle">요소의 <strong>상태</strong>나 <strong>위치</strong>를 기준으로 선택합니다. 아래 데모에서 직접 상호작용해보세요.</p>
   <div class="learn-layout">
     <div class="sel-panel">
       <div class="sel-panel-title">선택자 목록</div>
@@ -210,10 +191,7 @@
       <div class="sel-item" onclick="pseudoSel(this,'nth')"><span class="sel-code">:nth-child(n)</span><span class="sel-name">n번째 자식</span></div>
     </div>
     <div class="right-panel">
-      <div class="desc-card" id="pseudo-desc">
-        <h2><code>:hover</code> 마우스 올림</h2>
-        <p>마우스 커서가 요소 위에 올라갔을 때 적용됩니다. 버튼, 링크, 카드 등 인터랙션 피드백에 가장 많이 씁니다.</p>
-      </div>
+      <div class="desc-card" id="pseudo-desc"></div>
       <div class="demo-card">
         <div class="demo-header">라이브 데모 — 직접 상호작용해보세요</div>
         <div class="demo-body" id="pseudo-demo"></div>
@@ -226,10 +204,10 @@
   </div>
 </div>
 
-<!-- ══════════ ⑤ 가상 요소 ══════════ -->
+<!-- ⑤ 가상 요소 -->
 <div id="tab-element" class="section">
   <h1>⑤ 가상 요소 (Pseudo-element)</h1>
-  <p class="subtitle">HTML을 수정하지 않고 CSS만으로 <strong>가상의 요소를 생성</strong>합니다. <code>::before</code>와 <code>::after</code>가 핵심입니다.</p>
+  <p class="subtitle">HTML을 수정하지 않고 CSS만으로 <strong>가상의 요소를 생성</strong>합니다.</p>
   <div class="learn-layout">
     <div class="sel-panel">
       <div class="sel-panel-title">선택자 목록</div>
@@ -237,11 +215,7 @@
       <div class="sel-item" onclick="elemSel(this,'after')"><span class="sel-code">::after</span><span class="sel-name">요소 뒤에 삽입</span></div>
     </div>
     <div class="right-panel">
-      <div class="desc-card" id="elem-desc">
-        <h2><code>::before</code> 요소 앞에 삽입</h2>
-        <p>선택한 요소의 <strong>내부 맨 앞</strong>에 가상 요소를 만듭니다. 반드시 <code>content</code> 속성이 있어야 표시됩니다.</p>
-        <p>HTML을 건드리지 않고 아이콘, 장식 등을 추가할 때 씁니다.</p>
-      </div>
+      <div class="desc-card" id="elem-desc"></div>
       <div class="demo-card">
         <div class="demo-header">라이브 데모</div>
         <div class="demo-body" id="elem-demo"></div>
@@ -254,7 +228,7 @@
   </div>
 </div>
 
-<!-- ══════════ ⑥ Specificity ══════════ -->
+<!-- ⑥ Specificity -->
 <div id="tab-specificity" class="section">
   <h1>⑥ Specificity (명시도)</h1>
   <p class="subtitle">같은 요소에 여러 선택자가 충돌할 때 <strong>어떤 스타일이 이길지</strong> 결정하는 점수 체계입니다.</p>
@@ -263,27 +237,22 @@
       <h2>선택자를 조합해서 점수를 확인해보세요</h2>
       <div class="spec-items">
         <div class="spec-row" onclick="toggleSpec(this,'id',100)">
-          <span class="sel-code">#id</span>
+          <span class="spec-sel">#id</span>
           <span class="spec-desc">아이디 선택자</span>
           <span class="spec-pts pts-id">100점</span>
         </div>
         <div class="spec-row" onclick="toggleSpec(this,'cls',10)">
-          <span class="sel-code">.class</span>
+          <span class="spec-sel">.class</span>
           <span class="spec-desc">클래스 선택자</span>
           <span class="spec-pts pts-cls">10점</span>
         </div>
         <div class="spec-row" onclick="toggleSpec(this,'hover',10)">
-          <span class="sel-code">:hover</span>
+          <span class="spec-sel">:hover</span>
           <span class="spec-desc">가상 클래스</span>
           <span class="spec-pts pts-cls">10점</span>
         </div>
         <div class="spec-row" onclick="toggleSpec(this,'tag',1)">
-          <span class="sel-code">div</span>
-          <span class="spec-desc">태그 선택자</span>
-          <span class="spec-pts pts-tag">1점</span>
-        </div>
-        <div class="spec-row" onclick="toggleSpec(this,'p',1)">
-          <span class="sel-code">p</span>
+          <span class="spec-sel">div</span>
           <span class="spec-desc">태그 선택자</span>
           <span class="spec-pts pts-tag">1점</span>
         </div>
@@ -333,13 +302,90 @@
         </div>
       </div>
       <p style="font-size:12px;color:var(--muted);margin-top:14px;line-height:1.7">
-        세 선택자가 같은 요소에 적용될 때, 점수가 가장 높은 <code style="color:var(--accent)">#title</code>(100점)이 이깁니다.<br>
+        점수가 가장 높은 <code style="color:var(--accent)">#title</code>(100점)이 이깁니다.<br>
         점수가 같으면 <strong style="color:#ddd">나중에 작성된 스타일</strong>이 적용됩니다.
       </p>
       <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--muted);line-height:1.9;border:1px solid var(--border)">
         <strong style="color:#ddd;display:block;margin-bottom:4px">⚠️ !important 주의</strong>
         <code style="color:var(--orange)">color: red !important</code>는 점수 계산을 무시하고 무조건 이깁니다.<br>
         하지만 남용하면 스타일 관리가 매우 어려워지므로 꼭 필요한 경우에만 사용하세요.
+      </div>
+    </div>
+
+    <div class="winner-card">
+      <h2>결합자가 포함된 복합 선택자의 점수</h2>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.7">결합자( <code style="color:var(--accent)">공백 &gt; + ~</code> )는 점수에 포함되지 않습니다. 선택자 각각의 점수만 더하면 됩니다.</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;border:1px solid var(--border);font-size:13px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+            <code style="color:var(--accent);font-size:14px">div p</code>
+            <span style="color:var(--muted);font-size:12px">자손 결합자</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;font-family:monospace">
+            <span style="background:#90be6d18;border:1px solid #90be6d44;color:var(--green);padding:2px 8px;border-radius:4px">div = 1</span>
+            <span style="color:var(--muted)">+</span>
+            <span style="background:#90be6d18;border:1px solid #90be6d44;color:var(--green);padding:2px 8px;border-radius:4px">p = 1</span>
+            <span style="color:var(--muted)">=</span>
+            <span style="color:var(--yellow);font-weight:700">0, 0, 2</span>
+            <span style="color:var(--muted)">(2점)</span>
+          </div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;border:1px solid var(--border);font-size:13px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+            <code style="color:var(--accent);font-size:14px">div > .title</code>
+            <span style="color:var(--muted);font-size:12px">자식 결합자</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;font-family:monospace">
+            <span style="background:#90be6d18;border:1px solid #90be6d44;color:var(--green);padding:2px 8px;border-radius:4px">div = 1</span>
+            <span style="color:var(--muted)">+</span>
+            <span style="background:#4cc9f018;border:1px solid #4cc9f044;color:var(--accent);padding:2px 8px;border-radius:4px">.title = 10</span>
+            <span style="color:var(--muted)">=</span>
+            <span style="color:var(--yellow);font-weight:700">0, 1, 1</span>
+            <span style="color:var(--muted)">(11점)</span>
+          </div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;border:1px solid var(--border);font-size:13px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+            <code style="color:var(--accent);font-size:14px">ul li + li.active</code>
+            <span style="color:var(--muted);font-size:12px">인접 형제 결합자</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;font-family:monospace">
+            <span style="background:#90be6d18;border:1px solid #90be6d44;color:var(--green);padding:2px 8px;border-radius:4px">ul = 1</span>
+            <span style="color:var(--muted)">+</span>
+            <span style="background:#90be6d18;border:1px solid #90be6d44;color:var(--green);padding:2px 8px;border-radius:4px">li = 1</span>
+            <span style="color:var(--muted)">+</span>
+            <span style="background:#90be6d18;border:1px solid #90be6d44;color:var(--green);padding:2px 8px;border-radius:4px">li = 1</span>
+            <span style="color:var(--muted)">+</span>
+            <span style="background:#4cc9f018;border:1px solid #4cc9f044;color:var(--accent);padding:2px 8px;border-radius:4px">.active = 10</span>
+            <span style="color:var(--muted)">=</span>
+            <span style="color:var(--yellow);font-weight:700">0, 1, 3</span>
+            <span style="color:var(--muted)">(13점)</span>
+          </div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:12px 14px;border:1px solid #f3722c44;font-size:13px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+            <code style="color:var(--accent);font-size:14px">#nav ul > li.active:hover</code>
+            <span style="color:var(--muted);font-size:12px">복합 선택자</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;font-family:monospace">
+            <span style="background:#f3722c18;border:1px solid #f3722c44;color:var(--orange);padding:2px 8px;border-radius:4px">#nav = 100</span>
+            <span style="color:var(--muted)">+</span>
+            <span style="background:#90be6d18;border:1px solid #90be6d44;color:var(--green);padding:2px 8px;border-radius:4px">ul = 1</span>
+            <span style="color:var(--muted)">+</span>
+            <span style="background:#90be6d18;border:1px solid #90be6d44;color:var(--green);padding:2px 8px;border-radius:4px">li = 1</span>
+            <span style="color:var(--muted)">+</span>
+            <span style="background:#4cc9f018;border:1px solid #4cc9f044;color:var(--accent);padding:2px 8px;border-radius:4px">.active = 10</span>
+            <span style="color:var(--muted)">+</span>
+            <span style="background:#4cc9f018;border:1px solid #4cc9f044;color:var(--accent);padding:2px 8px;border-radius:4px">:hover = 10</span>
+            <span style="color:var(--muted)">=</span>
+            <span style="color:var(--yellow);font-weight:700">1, 2, 2</span>
+            <span style="color:var(--muted)">(122점)</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--muted);line-height:1.9;border:1px solid var(--border)">
+        💡 <strong style="color:#ddd">핵심 규칙</strong> — 결합자 자체( <code style="color:var(--accent)">공백 &gt; + ~</code> )는 점수가 없습니다.<br>
+        선택자를 쪼갠 뒤 <strong style="color:#f3722c">#id(100)</strong> · <strong style="color:var(--accent)">.class / :가상클래스(10)</strong> · <strong style="color:var(--green)">태그(1)</strong> 를 각각 세어서 더하면 됩니다.
       </div>
     </div>
   </div>
@@ -355,85 +401,102 @@ function tab(id, btn) {
 }
 
 // ══════ HELPERS ══════
-const T = (tag,cls='',txt='') => `<span class="${cls}">${txt||tag}</span>`;
-const tag = s => T('',`tag`,s);
-const attr = s => T('',`attr`,s);
-const val = s => T('',`val`,s);
-const cm = s => T('',`cm`,s);
+const tag  = s => `<span class="tag">${s}</span>`;
+const attr = s => `<span class="attr">${s}</span>`;
+const val  = s => `<span class="val">${s}</span>`;
 
 function el(indent, html, idx) {
   return `<span class="el ind${indent}" data-i="${idx}">${html}</span>`;
 }
-
 function applyHL(containerId, hlIdx) {
   document.querySelectorAll(`#${containerId} .el`).forEach(span => {
-    const i = +span.dataset.i;
-    span.classList.toggle('hl', hlIdx.includes(i));
+    span.classList.toggle('hl', hlIdx.includes(+span.dataset.i));
   });
 }
 
 // ══════ ① BASIC ══════
-const basicHTML = {
-  '*': {
-    desc: ['모든 요소', '페이지의 <strong>모든 요소</strong>를 선택합니다. 주로 전역 초기화(reset)에 사용합니다.', '7'],
-    hl: [0,1,2,3,4,5,6]
+const basicData = {
+  all: {
+    desc: ['*', '전체 선택자', '페이지의 <strong>모든 요소</strong>를 선택합니다. 주로 전역 초기화(reset)에 사용합니다.', '8'],
+    hl: [0,1,2,3,4,5,6,7]
   },
   tag: {
-    desc: ['p — 태그 선택자', '태그 이름으로 선택합니다. 해당 태그를 <strong>모두</strong> 선택하므로 범위가 넓습니다.', '3'],
-    hl: [2, 3, 5]
+    desc: ['p', '태그 선택자', '태그 이름으로 선택합니다. 해당 태그를 <strong>모두</strong> 선택하므로 범위가 넓습니다.', '3'],
+    hl: [2, 4, 6]
   },
   class: {
-    desc: ['.highlight — 클래스 선택자', '<code>class="highlight"</code>가 있는 요소를 선택합니다. 태그 종류에 관계없이 선택 가능합니다.', '2'],
-    hl: [3, 4]
+    desc: ['.highlight', '클래스 선택자', '<code>class</code>에 <code>highlight</code>가 포함된 요소를 선택합니다. 태그 종류에 관계없이 선택됩니다.', '3'],
+    hl: [3, 4, 5]
   },
   id: {
-    desc: ['#main-title — 아이디 선택자', '<code>id="main-title"</code>인 요소를 선택합니다. id는 페이지에서 <strong>유일</strong>해야 하므로 1개만 선택됩니다.', '1'],
+    desc: ['#main-title', '아이디 선택자', '<code>id="main-title"</code>인 요소를 선택합니다. id는 페이지에서 <strong>유일</strong>해야 하므로 1개만 선택됩니다.', '1'],
     hl: [1]
   },
   multi: {
-    desc: ['h2, p — 그룹 선택자', '쉼표로 구분해 여러 선택자를 동시에 적용합니다. 반복 작성을 줄일 때 씁니다.', '4'],
-    hl: [1, 2, 3, 5]
+    desc: ['h2, p', '그룹 선택자', '쉼표로 구분해 여러 선택자를 동시에 적용합니다. 반복 작성을 줄일 때 씁니다.', '4'],
+    hl: [1, 2, 4, 6]
+  },
+  multiclass: {
+    desc: ['.highlight.bold', '클래스 동시 적용', '두 클래스를 <strong>모두 가진</strong> 요소만 선택합니다. 띄어쓰기 없이 붙여 씁니다. <code>.highlight</code>만 있는 요소는 선택되지 않습니다.', '1'],
+    hl: [4]
+  },
+  tagclass: {
+    desc: ['p.highlight', '태그 + 클래스 선택자', '<code>p</code> 태그이면서 <code>highlight</code> 클래스를 가진 요소만 선택합니다. <code>span.highlight</code>는 선택되지 않습니다.', '2'],
+    hl: [3, 4]
   }
 };
 
+// HTML 구조:
+// 0: <article>
+// 1:   <h2 id="main-title">
+// 2:   <p>첫 번째 단락</p>
+// 3:   <p class="highlight">강조 단락</p>
+// 4:   <p class="highlight bold">강조 + 굵게 단락</p>
+// 5:   <span class="highlight">강조 텍스트</span>
+// 6:   <span class="bold">굵게 텍스트</span>
+// 7:   <p>세 번째 단락입니다.</p>
+// 8: </article>
 function renderBasicHTML() {
   return [
     el(0, tag('&lt;article&gt;'), 0),
     el(1, tag('&lt;h2 ') + attr('id') + '=' + val('"main-title"') + tag('&gt;') + 'CSS 선택자' + tag('&lt;/h2&gt;'), 1),
     el(1, tag('&lt;p&gt;') + '첫 번째 단락입니다.' + tag('&lt;/p&gt;'), 2),
     el(1, tag('&lt;p ') + attr('class') + '=' + val('"highlight"') + tag('&gt;') + '강조 단락' + tag('&lt;/p&gt;'), 3),
-    el(1, tag('&lt;span ') + attr('class') + '=' + val('"highlight"') + tag('&gt;') + '강조 텍스트' + tag('&lt;/span&gt;'), 4),
-    el(1, tag('&lt;p&gt;') + '세 번째 단락입니다.' + tag('&lt;/p&gt;'), 5),
-    el(0, tag('&lt;/article&gt;'), 6),
+    el(1, tag('&lt;p ') + attr('class') + '=' + val('"highlight bold"') + tag('&gt;') + '강조 + 굵게 단락' + tag('&lt;/p&gt;'), 4),
+    el(1, tag('&lt;span ') + attr('class') + '=' + val('"highlight"') + tag('&gt;') + '강조 텍스트' + tag('&lt;/span&gt;'), 5),
+    el(1, tag('&lt;span ') + attr('class') + '=' + val('"bold"') + tag('&gt;') + '굵게 텍스트' + tag('&lt;/span&gt;'), 6),
+    el(1, tag('&lt;p&gt;') + '세 번째 단락입니다.' + tag('&lt;/p&gt;'), 7),
+    el(0, tag('&lt;/article&gt;'), 8),
   ].join('');
 }
 
 function basicSel(el, key) {
   document.querySelectorAll('#tab-basic .sel-item').forEach(i => i.classList.remove('active'));
   el.classList.add('active');
-  const d = basicHTML[key];
-  document.getElementById('basic-desc').innerHTML = `<h2><code>${d.desc[0]}</code></h2><p>${d.desc[1]}</p><p><span class="match-badge">✦ ${d.desc[2]}개 요소 선택됨</span></p>`;
+  const d = basicData[key];
+  document.getElementById('basic-desc').innerHTML =
+    `<h2><code>${d.desc[0]}</code> ${d.desc[1]}</h2><p>${d.desc[2]}</p><p><span class="match-badge">✦ ${d.desc[3]}개 요소 선택됨</span></p>`;
   applyHL('basic-html', d.hl);
 }
 document.getElementById('basic-html').innerHTML = renderBasicHTML();
-applyHL('basic-html', basicHTML['*'].hl);
+basicSel(document.querySelector('#tab-basic .sel-item'), 'all');
 
 // ══════ ② COMBINATOR ══════
 const combData = {
   desc: {
-    desc: ['div p — 자손 선택자', 'div <strong>안에 있는 모든</strong> p를 선택합니다. 얼마나 깊이 중첩돼 있든 상관없습니다.', '3'],
+    desc: ['div p', '자손 선택자', 'div <strong>안에 있는 모든</strong> p를 선택합니다. 얼마나 깊이 중첩돼 있든 상관없습니다.', '3'],
     hl: [2, 5, 7]
   },
   child: {
-    desc: ['div > p — 자식 선택자', 'div의 <strong>바로 아래(직계 자식)</strong> p만 선택합니다. 더 깊이 중첩된 p는 선택되지 않습니다.', '2'],
+    desc: ['div > p', '자식 선택자', 'div의 <strong>바로 아래(직계 자식)</strong> p만 선택합니다. 더 깊이 중첩된 p는 선택되지 않습니다.', '2'],
     hl: [2, 7]
   },
   adj: {
-    desc: ['h2 + p — 인접 형제 선택자', 'h2 바로 다음에 오는 <strong>첫 번째 형제</strong> p만 선택합니다. h2가 두 개이므로 각각의 바로 다음 p가 선택됩니다.', '2'],
+    desc: ['h2 + p', '인접 형제 선택자', 'h2 바로 다음에 오는 <strong>첫 번째 형제</strong> p만 선택합니다. h2가 두 개이므로 각각의 바로 다음 p가 선택됩니다.', '2'],
     hl: [2, 5]
   },
   sib: {
-    desc: ['h2 ~ p — 일반 형제 선택자', 'h2 이후에 오는 <strong>모든 형제</strong> p를 선택합니다. 각 h2를 기준으로 같은 부모 안의 p가 모두 선택됩니다.', '3'],
+    desc: ['h2 ~ p', '일반 형제 선택자', 'h2 이후에 오는 <strong>모든 형제</strong> p를 선택합니다. 각 h2 기준으로 같은 부모 안의 p가 모두 선택됩니다.', '3'],
     hl: [2, 5, 7]
   }
 };
@@ -456,24 +519,25 @@ function combSel(el, key) {
   document.querySelectorAll('#tab-combinator .sel-item').forEach(i => i.classList.remove('active'));
   el.classList.add('active');
   const d = combData[key];
-  document.getElementById('comb-desc').innerHTML = `<h2><code>${d.desc[0]}</code></h2><p>${d.desc[1]}</p><p><span class="match-badge">✦ ${d.desc[2]}개 요소 선택됨</span></p>`;
+  document.getElementById('comb-desc').innerHTML =
+    `<h2><code>${d.desc[0]}</code> ${d.desc[1]}</h2><p>${d.desc[2]}</p><p><span class="match-badge">✦ ${d.desc[3]}개 요소 선택됨</span></p>`;
   applyHL('comb-html', d.hl);
 }
 document.getElementById('comb-html').innerHTML = renderCombHTML();
-applyHL('comb-html', combData.desc.hl);
+combSel(document.querySelector('#tab-combinator .sel-item'), 'desc');
 
 // ══════ ③ ATTR ══════
 const attrData = {
   exist: {
-    desc: ['[required] — 속성 존재', '<strong>required 속성이 있는</strong> 요소를 선택합니다. 값과 상관없이 속성만 있으면 됩니다.', '2'],
+    desc: ['[required]', '속성 존재', '<strong>required 속성이 있는</strong> 요소를 선택합니다. 값과 상관없이 속성만 있으면 됩니다.', '2'],
     hl: [1, 3]
   },
   eq: {
-    desc: ['[type="text"] — 값 일치', '<code>type</code> 속성값이 정확히 <code>"text"</code>인 요소를 선택합니다.', '1'],
+    desc: ['[type="text"]', '값 일치', '<code>type</code> 속성값이 정확히 <code>"text"</code>인 요소를 선택합니다.', '1'],
     hl: [1]
   },
   start: {
-    desc: ['[href^="https"] — 값으로 시작', '<code>href</code>가 <code>https</code>로 시작하는 링크만 선택합니다. 외부 링크 표시에 자주 씁니다.', '2'],
+    desc: ['[href^="https"]', '값으로 시작', '<code>href</code>가 <code>https</code>로 시작하는 링크만 선택합니다. 외부 링크 표시에 자주 씁니다.', '2'],
     hl: [6, 7]
   }
 };
@@ -496,18 +560,19 @@ function attrSel(el, key) {
   document.querySelectorAll('#tab-attr .sel-item').forEach(i => i.classList.remove('active'));
   el.classList.add('active');
   const d = attrData[key];
-  document.getElementById('attr-desc').innerHTML = `<h2><code>${d.desc[0]}</code></h2><p>${d.desc[1]}</p><p><span class="match-badge">✦ ${d.desc[2]}개 요소 선택됨</span></p>`;
+  document.getElementById('attr-desc').innerHTML =
+    `<h2><code>${d.desc[0]}</code> ${d.desc[1]}</h2><p>${d.desc[2]}</p><p><span class="match-badge">✦ ${d.desc[3]}개 요소 선택됨</span></p>`;
   applyHL('attr-html', d.hl);
 }
 document.getElementById('attr-html').innerHTML = renderAttrHTML();
-applyHL('attr-html', attrData.exist.hl);
+attrSel(document.querySelector('#tab-attr .sel-item'), 'exist');
 
 // ══════ ④ PSEUDO CLASS ══════
 const pseudoData = {
   hover: {
     desc: ':hover — 마우스 올림',
     text: '마우스 커서가 요소 위에 올라갔을 때 적용됩니다. 버튼, 링크, 카드 등 인터랙션 피드백에 가장 많이 씁니다.',
-    demo: `<style>.demo-hover-btn { padding:12px 28px;background:#4cc9f0;color:#000;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s; } .demo-hover-btn:hover{background:#7ee8ff;transform:translateY(-2px);box-shadow:0 6px 20px #4cc9f044;}</style><button class="demo-hover-btn">버튼에 마우스를 올려보세요</button>`,
+    demo: `<style>.demo-hover-btn{padding:12px 28px;background:#4cc9f0;color:#000;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}.demo-hover-btn:hover{background:#7ee8ff;transform:translateY(-2px);box-shadow:0 6px 20px #4cc9f044;}</style><button class="demo-hover-btn">버튼에 마우스를 올려보세요</button>`,
     code: `<span class="tag">.button</span>:hover {\n  background: <span class="val">#7ee8ff</span>;\n  transform: <span class="val">translateY(-2px)</span>;\n}`
   },
   focus: {
@@ -558,28 +623,14 @@ const elemData = {
     desc: '::before — 요소 앞에 삽입',
     text: '선택한 요소의 <strong>내부 맨 앞</strong>에 가상 요소를 만듭니다. 반드시 <code>content</code> 속성이 있어야 표시됩니다.',
     text2: 'HTML을 건드리지 않고 아이콘, 장식 등을 추가할 때 씁니다.',
-    demo: `<style>
-      .pe-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px;}
-      .pe-list li{padding:10px 14px;background:#1a1a2e;border-radius:6px;font-size:13px;color:#ccc;position:relative;padding-left:32px;}
-      .pe-list li::before{content:'✓';position:absolute;left:10px;color:#90be6d;font-weight:700;}
-    </style>
-    <ul class="pe-list"><li>HTML 수정 없이 아이콘 추가</li><li>content 속성으로 내용 지정</li><li>position: absolute로 자유롭게 배치</li></ul>
-    <p style="font-size:11px;color:#666;margin-top:12px;font-family:monospace">← ✓ 아이콘은 HTML에 없고 ::before로 생성됨</p>`,
+    demo: `<style>.pe-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px;}.pe-list li{padding:10px 14px;background:#1a1a2e;border-radius:6px;font-size:13px;color:#ccc;position:relative;padding-left:32px;}.pe-list li::before{content:'✓';position:absolute;left:10px;color:#90be6d;font-weight:700;}</style><ul class="pe-list"><li>HTML 수정 없이 아이콘 추가</li><li>content 속성으로 내용 지정</li><li>position: absolute로 자유롭게 배치</li></ul><p style="font-size:11px;color:#666;margin-top:12px;font-family:monospace">← ✓ 아이콘은 HTML에 없고 ::before로 생성됨</p>`,
     code: `<span class="tag">li</span>::before {\n  content: <span class="val">'✓'</span>;\n  position: <span class="val">absolute</span>;\n  left: <span class="val">10px</span>;\n  color: <span class="val">#90be6d</span>;\n}`
   },
   after: {
     desc: '::after — 요소 뒤에 삽입',
     text: '선택한 요소의 <strong>내부 맨 뒤</strong>에 가상 요소를 만듭니다. <code>content: ""</code>으로 비워두고 장식용으로 자주 씁니다.',
     text2: '버튼 밑줄 애니메이션, 배지 등에 활용됩니다.',
-    demo: `<style>
-      .pe-link{color:#4cc9f0;font-size:15px;font-weight:600;text-decoration:none;position:relative;display:inline-block;}
-      .pe-link::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:2px;background:#4cc9f0;transition:width .3s;}
-      .pe-link:hover::after{width:100%;}
-      .pe-badge{display:inline-block;font-size:14px;font-weight:700;padding:8px 16px;background:#1a1a2e;color:#e0e0f0;border-radius:6px;position:relative;margin-top:20px;}
-      .pe-badge::after{content:'NEW';position:absolute;top:-8px;right:-8px;background:#f3722c;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;}
-    </style>
-    <a class="pe-link" href="#">마우스를 올려 밑줄 애니메이션 확인</a><br>
-    <span class="pe-badge">최신 강의</span>`,
+    demo: `<style>.pe-link{color:#4cc9f0;font-size:15px;font-weight:600;text-decoration:none;position:relative;display:inline-block;}.pe-link::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:2px;background:#4cc9f0;transition:width .3s;}.pe-link:hover::after{width:100%;}.pe-badge{display:inline-block;font-size:14px;font-weight:700;padding:8px 16px;background:#1a1a2e;color:#e0e0f0;border-radius:6px;position:relative;margin-top:20px;}.pe-badge::after{content:'NEW';position:absolute;top:-8px;right:-8px;background:#f3722c;color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;}</style><a class="pe-link" href="#">마우스를 올려 밑줄 애니메이션 확인</a><br><span class="pe-badge">최신 강의</span>`,
     code: `<span class="tag">.link</span>::after {\n  content: <span class="val">''</span>;\n  position: <span class="val">absolute</span>;\n  bottom: <span class="val">-2px</span>; left: <span class="val">0</span>;\n  width: <span class="val">0</span>; height: <span class="val">2px</span>;\n  background: <span class="val">#4cc9f0</span>;\n  transition: <span class="val">width .3s</span>;\n}\n<span class="tag">.link</span>:hover::after {\n  width: <span class="val">100%</span>;\n}`
   }
 };
@@ -595,9 +646,8 @@ function elemSel(elBtn, key) {
 elemSel(document.querySelector('#tab-element .sel-item'), 'before');
 
 // ══════ ⑥ SPECIFICITY ══════
-const specState = { id:0, cls:0, hover:0, tag:0, p:0 };
-const specLabels = { id:'#id', cls:'.class', hover:':hover', tag:'div', p:'p' };
-const specCat = { id:'id', cls:'cls', hover:'cls', tag:'tag', p:'tag' };
+const specState = { id:0, cls:0, hover:0, tag:0 };
+const specLabels = { id:'#id', cls:'.class', hover:':hover', tag:'div' };
 
 function toggleSpec(row, key, pts) {
   row.classList.toggle('picked');
@@ -606,23 +656,25 @@ function toggleSpec(row, key, pts) {
 }
 
 function updateSpec() {
-  const idScore = specState.id;
+  const idScore  = specState.id;
   const clsScore = specState.cls + specState.hover;
-  const tagScore = specState.tag + specState.p;
-  const total = idScore + clsScore + tagScore;
+  const tagScore = specState.tag;
+  const total    = idScore + clsScore + tagScore;
 
-  document.getElementById('sc-id').textContent = idScore;
-  document.getElementById('sc-cls').textContent = clsScore;
-  document.getElementById('sc-tag').textContent = tagScore;
+  document.getElementById('sc-id').textContent    = idScore;
+  document.getElementById('sc-cls').textContent   = clsScore;
+  document.getElementById('sc-tag').textContent   = tagScore;
   document.getElementById('sc-total').textContent = total + '점';
 
-  const parts = Object.entries(specState).filter(([,v])=>v>0).map(([k])=>specLabels[k]);
+  // CSS 선택자 표기 순서: 태그 → ID → 클래스 → 가상클래스
+  const order = ['tag', 'id', 'cls', 'hover'];
+  const parts = order.filter(k => specState[k] > 0).map(k => specLabels[k]);
   document.getElementById('sc-combined').textContent = parts.length ? parts.join('') : '선택자를 클릭해서 조합해보세요';
 
   let note = '';
-  if (total >= 100) note = `<strong style="color:#f3722c">#id 선택자</strong>가 포함되어 있어 매우 높은 명시도입니다. id는 꼭 필요할 때만 쓰세요.`;
-  else if (total >= 10) note = `클래스/가상 클래스가 포함된 일반적인 명시도입니다.`;
-  else if (total > 0) note = `태그 선택자만 사용 중입니다. 재사용을 위해 <strong style="color:#ddd">.class</strong>로 바꾸는 것이 좋습니다.`;
+  if (total >= 100)      note = `<strong style="color:#f3722c">#id 선택자</strong>가 포함되어 있어 매우 높은 명시도입니다. id는 꼭 필요할 때만 쓰세요.`;
+  else if (total >= 10)  note = `클래스/가상 클래스가 포함된 일반적인 명시도입니다.`;
+  else if (total > 0)    note = `태그 선택자만 사용 중입니다. 재사용을 위해 <strong style="color:#ddd">.class</strong>로 바꾸는 것이 좋습니다.`;
   document.getElementById('sc-note').innerHTML = note;
 }
 </script>
