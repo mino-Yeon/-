@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Box Model</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --mc: #f9c74f;
+    --bc: #f3722c;
+    --pc: #90be6d;
+    --cc: #4cc9f0;
+    --bg: #0f0f1a;
+    --bg2: #13132a;
+    --bg3: #1a1a2e;
+    --border: #2d2d50;
+    --text: #e0e0f0;
+    --muted: #888;
+  }
+  body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* NAV */
+  nav { display: flex; background: var(--bg3); border-bottom: 2px solid var(--border); position: sticky; top: 0; z-index: 100; }
+  nav button { flex: 1; padding: 14px 8px; background: none; border: none; border-bottom: 3px solid transparent; color: #aaa; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  nav button.active { color: var(--cc); border-bottom-color: var(--cc); }
+  nav button:hover:not(.active) { background: #ffffff06; color: #ddd; }
+
+  .section { display: none; max-width: 1000px; margin: 0 auto; padding: 36px 24px 60px; }
+  .section.active { display: block; }
+  h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+  .subtitle { color: var(--muted); font-size: 14px; line-height: 1.7; margin-bottom: 32px; }
+
+  /* ── INTRO ── */
+  .layer-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .lc { border-radius: 10px; padding: 18px; border: 1px solid var(--border); background: var(--bg2); border-top: 3px solid; }
+  .lc h3 { font-size: 15px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .lc h3 .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .lc p { font-size: 13px; color: #aaa; line-height: 1.6; }
+  .lc code { background: #0a0a18; padding: 1px 5px; border-radius: 3px; font-size: 12px; color: var(--cc); }
+
+  /* static diagram */
+  .diagram-outer { display: flex; justify-content: center; margin: 8px 0 32px; }
+  .sd { display: inline-flex; align-items: center; justify-content: center; position: relative; }
+  .sd-label { position: absolute; top: 4px; left: 8px; font-size: 10px; font-weight: 700; letter-spacing: .5px; }
+
+  .formula-box { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--cc); border-radius: 8px; padding: 16px 20px; font-size: 13px; line-height: 2; color: #ccd; }
+  .formula-box strong { color: var(--cc); }
+  .formula-box code { background: #0a0a18; padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #a3be8c; }
+
+  /* ── INTERACTIVE ── */
+  .iLayout { display: grid; grid-template-columns: 260px 1fr; gap: 20px; align-items: start; }
+  @media(max-width: 680px) { .iLayout { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+
+  .ctrl-section { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #555; margin: 18px 0 10px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .ctrl-section:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+
+  .ctrl { margin-bottom: 12px; }
+  .ctrl-head { display: flex; justify-content: space-between; font-size: 12px; color: #bbb; margin-bottom: 5px; }
+  .ctrl-head .prop { font-family: monospace; color: #ddd; }
+  .ctrl-head .val { font-family: monospace; color: var(--cc); font-weight: 700; min-width: 42px; text-align: right; }
+  input[type=range] { width: 100%; accent-color: var(--cc); cursor: pointer; height: 18px; }
+
+  /* toggle */
+  .toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+  .toggle-row .tl { font-size: 12px; color: #bbb; }
+  .toggle { position: relative; width: 42px; height: 22px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .tslider { position: absolute; inset: 0; background: var(--border); border-radius: 11px; cursor: pointer; transition: .25s; }
+  .tslider:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px; background: #666; border-radius: 50%; transition: .25s; }
+  input:checked + .tslider { background: var(--cc); }
+  input:checked + .tslider:before { transform: translateX(20px); background: #fff; }
+  .bs-badge { font-family: monospace; font-size: 11px; color: var(--muted); }
+
+  /* CANVAS */
+  .canvas-wrap { position: relative; background: var(--bg3); border-radius: 10px; overflow: hidden; height: 340px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+
+  /* SVG labels on canvas */
+  #box-svg { position: absolute; top: 0; left: 0; pointer-events: none; }
+
+  /* size bar */
+  .size-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .sbadge { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; font-size: 12px; }
+  .sbadge .sv { color: var(--cc); font-weight: 700; font-family: monospace; }
+
+  /* code */
+  .code-block { background: #080814; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.9; white-space: pre; overflow-x: auto; }
+  .cp { color: #88c0d0; } .cv { color: #a3be8c; } .cn { color: #ebcb8b; } .ck { color: #c792ea; }
+
+  /* ── BOX-SIZING ── */
+  .bs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 24px 0; }
+  @media(max-width:560px){ .bs-grid { grid-template-columns: 1fr; } }
+  .bs-card { background: var(--bg2); border: 2px solid var(--border); border-radius: 12px; padding: 22px; text-align: center; }
+  .bs-card.active { border-color: var(--cc); }
+  .bs-card h3 { font-size: 14px; margin-bottom: 6px; }
+  .bs-tag { display: inline-block; font-family: monospace; font-size: 12px; color: var(--cc); background: #0a0a18; padding: 3px 10px; border-radius: 4px; margin-bottom: 16px; }
+  .bs-desc { font-size: 12px; color: #999; line-height: 1.7; margin-top: 14px; }
+
+  .tip-box { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid #a3be8c; border-radius: 8px; padding: 16px 20px; font-size: 13px; line-height: 1.8; color: #ccd; margin: 20px 0; }
+  .tip-box code { background: #0a0a18; padding: 2px 6px; border-radius: 4px; color: #a3be8c; font-size: 12px; }
+
+  /* live compare */
+  .live-compare { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-end; }
+  .lc-item p { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-family: monospace; }
+  .cb-box { height: 60px; padding: 20px; border: 5px solid; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #ccc; border-radius: 2px; transition: all .3s; }
+
+  /* ── QUIZ ── */
+  .qcard { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .qq { font-size: 15px; font-weight: 600; line-height: 1.6; margin-bottom: 4px; }
+  .qsub { font-size: 12px; font-family: monospace; color: #aaa; background: #080814; padding: 8px 12px; border-radius: 6px; margin: 10px 0 16px; line-height: 1.7; white-space: pre-wrap; }
+  .qopts { display: flex; flex-direction: column; gap: 8px; }
+  .qopts button { background: #1a1a30; border: 1px solid var(--border); color: #ccc; padding: 10px 14px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 13px; transition: all .2s; }
+  .qopts button:hover:not(:disabled) { border-color: var(--cc); background: #1f1f40; }
+  .qopts button.ok { background: #1a3026; border-color: var(--pc); color: var(--pc); }
+  .qopts button.ng { background: #301a1a; border-color: var(--bc); color: #f88; }
+  .qfb { display: none; margin-top: 12px; font-size: 13px; color: #aaa; line-height: 1.6; padding: 10px 14px; background: #0a0a18; border-radius: 6px; }
+  .qfb.show { display: block; }
+  .qnav { display: flex; gap: 10px; align-items: center; }
+  .qnav button { background: var(--cc); color: #000; border: none; padding: 10px 22px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; }
+  .qnav button:disabled { opacity: .35; cursor: default; }
+  .qprog { font-size: 12px; color: var(--muted); margin-left: auto; }
+  .qscore { font-size: 14px; color: var(--pc); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<nav>
+  <button class="active" onclick="tab('intro',this)">📦 개념</button>
+  <button onclick="tab('interactive',this)">🎮 인터랙티브</button>
+  <button onclick="tab('boxsizing',this)">⚙️ box-sizing</button>
+  <button onclick="tab('quiz',this)">✅ 퀴즈</button>
+</nav>
+
+<!-- ════════ 개념 ════════ -->
+<div id="tab-intro" class="section active">
+  <h1>📦 CSS Box Model</h1>
+  <p class="subtitle">브라우저는 모든 HTML 요소를 <strong style="color:#e0e0f0">사각형 박스</strong>로 렌더링합니다.<br>
+  이 박스가 어떻게 구성되는지 이해하는 것이 레이아웃의 시작입니다.</p>
+
+  <div class="diagram-outer">
+    <div class="sd" style="background:var(--mc);padding:36px;border-radius:3px">
+      <span class="sd-label" style="color:#6b4f00">margin</span>
+      <div class="sd" style="background:var(--bc);padding:16px">
+        <span class="sd-label" style="color:#fff">border</span>
+        <div class="sd" style="background:var(--pc);padding:20px">
+          <span class="sd-label" style="color:#2a4a1a">padding</span>
+          <div style="background:var(--cc);width:140px;height:64px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#003;flex-direction:column;gap:2px">
+            <span>content</span>
+            <span style="font-size:10px;opacity:.7">width × height</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="layer-cards">
+    <div class="lc" style="border-top-color:var(--cc)">
+      <h3><span class="dot" style="background:var(--cc)"></span>Content</h3>
+      <p>텍스트, 이미지 등 실제 내용이 들어가는 공간입니다. <code>width</code>와 <code>height</code>로 크기를 지정합니다.</p>
+    </div>
+    <div class="lc" style="border-top-color:var(--pc)">
+      <h3><span class="dot" style="background:var(--pc)"></span>Padding</h3>
+      <p>콘텐츠와 테두리 사이의 <strong>내부 여백</strong>입니다. 배경색이 padding 영역까지 채워집니다.</p>
+    </div>
+    <div class="lc" style="border-top-color:var(--bc)">
+      <h3><span class="dot" style="background:var(--bc)"></span>Border</h3>
+      <p>요소를 감싸는 테두리입니다. <code>border: 2px solid #333</code>처럼 두께·스타일·색을 지정합니다.</p>
+    </div>
+    <div class="lc" style="border-top-color:var(--mc)">
+      <h3><span class="dot" style="background:var(--mc)"></span>Margin</h3>
+      <p>다른 요소와의 <strong>외부 간격</strong>입니다. 배경색이 적용되지 않는 투명한 영역입니다.</p>
+    </div>
+  </div>
+
+  <div class="formula-box">
+    💡 <strong>기본 크기 계산</strong> &nbsp;<code>box-sizing: content-box</code> 기준<br>
+    실제 가로 = <strong>width</strong> + padding × 2 + border × 2<br>
+    전체 가로 = 실제 가로 + margin × 2
+  </div>
+</div>
+
+<!-- ════════ 인터랙티브 ════════ -->
+<div id="tab-interactive" class="section">
+  <h1>🎮 직접 조작해보기</h1>
+  <p class="subtitle">슬라이더를 움직이면 박스가 실시간으로 변합니다. 전체 구조가 항상 보이도록 자동으로 크기가 조절됩니다.</p>
+
+  <div class="iLayout">
+    <!-- CONTROLS -->
+    <div class="panel">
+      <div class="ctrl-section">📐 Content</div>
+      <div class="ctrl">
+        <div class="ctrl-head"><span class="prop">width</span><span class="val" id="vw">120px</span></div>
+        <input type="range" min="60" max="200" value="120" oninput="upd('w',+this.value)">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-head"><span class="prop">height</span><span class="val" id="vh">60px</span></div>
+        <input type="range" min="40" max="140" value="60" oninput="upd('h',+this.value)">
+      </div>
+
+      <div class="ctrl-section">🟢 Padding</div>
+      <div class="ctrl">
+        <div class="ctrl-head"><span class="prop">padding</span><span class="val" id="vp">16px</span></div>
+        <input type="range" min="0" max="48" value="16" oninput="upd('p',+this.value)">
+      </div>
+
+      <div class="ctrl-section">🟠 Border</div>
+      <div class="ctrl">
+        <div class="ctrl-head"><span class="prop">border-width</span><span class="val" id="vb">4px</span></div>
+        <input type="range" min="0" max="20" value="4" oninput="upd('b',+this.value)">
+      </div>
+
+      <div class="ctrl-section">🟡 Margin</div>
+      <div class="ctrl">
+        <div class="ctrl-head"><span class="prop">margin</span><span class="val" id="vm">20px</span></div>
+        <input type="range" min="0" max="60" value="20" oninput="upd('m',+this.value)">
+      </div>
+
+      <div class="ctrl-section">⚙️ box-sizing</div>
+      <div class="toggle-row">
+        <label class="toggle">
+          <input type="checkbox" id="bst" onchange="upd('bs',this.checked)">
+          <span class="tslider"></span>
+        </label>
+        <span class="bs-badge" id="bslabel">content-box</span>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div>
+      <!-- CANVAS -->
+      <div class="canvas-wrap" id="canvas">
+        <svg id="box-svg" width="100%" height="100%"></svg>
+        <canvas id="bc" width="400" height="340"></canvas>
+      </div>
+
+      <!-- SIZE INFO -->
+      <div class="size-bar">
+        <div class="sbadge">content <span class="sv" id="si-c">120×60</span>px</div>
+        <div class="sbadge">렌더링 <span class="sv" id="si-r">152×92</span>px</div>
+        <div class="sbadge">전체(+margin) <span class="sv" id="si-t">192×132</span>px</div>
+      </div>
+
+      <!-- CODE -->
+      <div class="code-block" id="codeout"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ BOX-SIZING ════════ -->
+<div id="tab-boxsizing" class="section">
+  <h1>⚙️ box-sizing</h1>
+  <p class="subtitle"><code style="color:var(--cc)">width</code>와 <code style="color:var(--cc)">height</code>가 <strong>어디까지를 포함해서 측정되는지</strong>를 결정하는 속성입니다.<br>
+  이 차이를 모르면 레이아웃이 의도와 다르게 깨지는 경우가 많습니다.</p>
+
+  <div class="bs-grid">
+    <div class="bs-card">
+      <h3>기본값</h3>
+      <div class="bs-tag">box-sizing: content-box</div>
+      <svg width="190" height="150" viewBox="0 0 190 150">
+        <rect x="5" y="5" width="180" height="140" fill="none" stroke="#f9c74f" stroke-width="1.5" stroke-dasharray="5,3" rx="2"/>
+        <text x="7" y="15" fill="#f9c74f" font-size="9">margin</text>
+        <rect x="22" y="24" width="146" height="102" fill="none" stroke="#f3722c" stroke-width="8" rx="1"/>
+        <text x="28" y="36" fill="#f3722c" font-size="9">border</text>
+        <rect x="38" y="40" width="114" height="70" fill="#90be6d22"/>
+        <text x="40" y="49" fill="#90be6d" font-size="9">padding</text>
+        <rect x="54" y="56" width="82" height="38" fill="#4cc9f0aa"/>
+        <text x="95" y="79" text-anchor="middle" fill="#001" font-size="10" font-weight="700">width = 82px</text>
+        <line x1="22" y1="132" x2="168" y2="132" stroke="#f3722c" stroke-width="1.5"/>
+        <text x="95" y="145" text-anchor="middle" fill="#f3722c" font-size="9">실제: 82 + pad×2 + border×2</text>
+      </svg>
+      <div class="bs-desc"><strong style="color:#e0e0f0">width = content 영역만</strong><br>padding·border가 추가로 더해지기 때문에 실제 렌더링 크기가 지정값보다 커집니다.</div>
+    </div>
+    <div class="bs-card active">
+      <h3>✅ 실무 권장</h3>
+      <div class="bs-tag">box-sizing: border-box</div>
+      <svg width="190" height="150" viewBox="0 0 190 150">
+        <rect x="5" y="5" width="180" height="140" fill="none" stroke="#f9c74f" stroke-width="1.5" stroke-dasharray="5,3" rx="2"/>
+        <text x="7" y="15" fill="#f9c74f" font-size="9">margin</text>
+        <rect x="22" y="24" width="146" height="102" fill="none" stroke="#f3722c" stroke-width="8" rx="1"/>
+        <text x="28" y="36" fill="#f3722c" font-size="9">border</text>
+        <rect x="38" y="40" width="114" height="70" fill="#90be6d22"/>
+        <text x="40" y="49" fill="#90be6d" font-size="9">padding</text>
+        <rect x="54" y="56" width="82" height="38" fill="#4cc9f0aa"/>
+        <text x="95" y="79" text-anchor="middle" fill="#001" font-size="9">content(자동계산)</text>
+        <line x1="22" y1="132" x2="168" y2="132" stroke="#4cc9f0" stroke-width="2"/>
+        <text x="95" y="145" text-anchor="middle" fill="#4cc9f0" font-size="9" font-weight="700">width = 146px (border까지 포함)</text>
+      </svg>
+      <div class="bs-desc"><strong style="color:#e0e0f0">width = border까지 포함</strong><br>padding·border가 늘어도 전체 크기는 그대로. 레이아웃 예측이 훨씬 쉬워집니다.</div>
+    </div>
+  </div>
+
+  <div class="tip-box">
+    💡 <strong style="color:#a3be8c">실무 팁</strong> — 거의 모든 현대 CSS 프로젝트는 파일 최상단에 아래 코드를 넣습니다:<br><br>
+    <code>*, *::before, *::after { box-sizing: border-box; }</code><br><br>
+    이렇게 하면 <code>width: 300px</code>이 실제로도 <strong>딱 300px</strong>로 나와서 직관적으로 작업할 수 있습니다.
+  </div>
+
+  <h2 style="margin-bottom:14px;font-size:17px;color:#ccc">📏 같은 값, 다른 크기</h2>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:16px">두 박스 모두 <code style="color:var(--cc)">width:200px · padding:20px · border:5px</code> 적용</p>
+  <div class="live-compare">
+    <div class="lc-item">
+      <p>content-box → 실제 250px</p>
+      <div class="cb-box" style="width:200px;box-sizing:content-box;border-color:#f3722c;background:#f3722c18">200px 지정</div>
+    </div>
+    <div class="lc-item">
+      <p>border-box → 실제 200px</p>
+      <div class="cb-box" style="width:200px;box-sizing:border-box;border-color:#4cc9f0;background:#4cc9f018">200px 지정</div>
+    </div>
+  </div>
+  <p style="font-size:12px;color:var(--muted);margin-top:10px">위쪽 박스가 더 넓습니다. 동일한 <code style="color:var(--cc)">width:200px</code>이지만 content-box는 padding+border가 밖으로 붙기 때문입니다.</p>
+</div>
+
+<!-- ════════ QUIZ ════════ -->
+<div id="tab-quiz" class="section">
+  <h1>✅ 이해도 확인</h1>
+  <p class="subtitle">배운 내용을 문제로 확인해보세요.</p>
+  <div id="qwrap"></div>
+  <div class="qnav">
+    <button id="qprev" onclick="qmove(-1)" disabled>← 이전</button>
+    <button id="qnext" onclick="qmove(1)" disabled>다음 →</button>
+    <span class="qprog" id="qprog">1 / 5</span>
+    <span class="qscore" id="qscore"></span>
+  </div>
+</div>
+
+<script>
+// ══════════════ INTERACTIVE ══════════════
+const S = { w:120, h:60, p:16, b:4, m:20, bs:false };
+const COLORS = { m:'#f9c74f', b:'#f3722c', p:'#90be6d', c:'#4cc9f0' };
+
+function upd(k, v) {
+  S[k] = v;
+  const labels = { w:'vw', h:'vh', p:'vp', b:'vb', m:'vm' };
+  if (labels[k]) document.getElementById(labels[k]).textContent = v + 'px';
+  if (k === 'bs') document.getElementById('bslabel').textContent = v ? 'border-box' : 'content-box';
+  draw();
+}
+
+function draw() {
+  const canvas = document.getElementById('bc');
+  const wrap = document.getElementById('canvas');
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  canvas.width = W; canvas.height = H;
+  const svg = document.getElementById('box-svg');
+  svg.setAttribute('width', W); svg.setAttribute('height', H);
+
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  const { w, h, p, b, m, bs } = S;
+
+  // actual content size
+  let cw = w, ch = h;
+  if (bs) { cw = Math.max(0, w - p*2 - b*2); ch = Math.max(0, h - p*2 - b*2); }
+
+  // total box dimensions
+  const rw = bs ? w : w + p*2 + b*2;
+  const rh = bs ? h : h + p*2 + b*2;
+  const tw = rw + m*2, th = rh + m*2;
+
+  // scale to fit canvas with padding
+  const pad = 28;
+  const scale = Math.min((W - pad*2) / tw, (H - pad*2) / th, 1.8);
+
+  // center
+  const ox = (W - tw * scale) / 2;
+  const oy = (H - th * scale) / 2;
+
+  function rect(x, y, rw, rh, color, label, labelColor) {
+    ctx.fillStyle = color;
+    ctx.fillRect(ox + x*scale, oy + y*scale, rw*scale, rh*scale);
+    if (label && rw*scale > 30 && rh*scale > 18) {
+      const fs = Math.min(11, Math.max(8, 10*scale));
+      ctx.font = `bold ${fs}px Segoe UI, sans-serif`;
+      ctx.fillStyle = labelColor || '#333';
+      ctx.fillText(label, ox + x*scale + 4, oy + y*scale + fs + 2);
+    }
+  }
+
+  // draw layers (outer to inner)
+  rect(0, 0, tw, th, COLORS.m, 'margin', '#6b4f00');
+  rect(m, m, rw, rh, COLORS.b, 'border', '#fff');
+  rect(m+b, m+b, rw-b*2, rh-b*2, COLORS.p, 'padding', '#2a4a1a');
+  rect(m+b+p, m+b+p, cw, ch, COLORS.c);
+
+  // content label
+  const cx = ox + (m+b+p+cw/2)*scale, cy = oy + (m+b+p+ch/2)*scale;
+  ctx.fillStyle = '#003';
+  ctx.font = `bold ${Math.min(12, Math.max(8, 11*scale))}px Segoe UI, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText('content', cx, cy + 4);
+  ctx.textAlign = 'left';
+
+  // ── dimension arrows via SVG overlay ──
+  svg.innerHTML = '';
+  const arrowColor = '#ffffff55';
+  function arrow(x1, y1, x2, y2, txt) {
+    if (!txt) return;
+    const id = 'a' + Math.random().toString(36).slice(2);
+    // line
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+    line.setAttribute('stroke', '#4cc9f088'); line.setAttribute('stroke-width', '1');
+    svg.appendChild(line);
+    // label
+    const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.setAttribute('x', (x1+x2)/2); text.setAttribute('y', y2 > y1 ? y2+11 : y2-5);
+    text.setAttribute('text-anchor','middle'); text.setAttribute('fill','#4cc9f0');
+    text.setAttribute('font-size','10'); text.setAttribute('font-family','monospace');
+    text.textContent = txt;
+    svg.appendChild(text);
+  }
+
+  // content width arrow (bottom of content)
+  const acx1 = ox + (m+b+p)*scale, acx2 = ox + (m+b+p+cw)*scale;
+  const acy = oy + (m+b+p+ch)*scale + 4;
+  arrow(acx1, acy, acx2, acy, cw+'px');
+
+  // render width arrow
+  if (rw !== cw) {
+    const arx1 = ox + m*scale, arx2 = ox + (m+rw)*scale;
+    const ary = oy + (m+rh)*scale + 16;
+    arrow(arx1, ary, arx2, ary, rw+'px');
+  }
+
+  // update size badges
+  document.getElementById('si-c').textContent = `${cw}×${ch}`;
+  document.getElementById('si-r').textContent = `${rw}×${rh}`;
+  document.getElementById('si-t').textContent = `${tw}×${th}`;
+
+  // code output
+  document.getElementById('codeout').innerHTML =
+    `<span class="ck">.box</span> {\n` +
+    `  <span class="cp">width</span>: <span class="cv">${w}</span><span class="cn">px</span>;\n` +
+    `  <span class="cp">height</span>: <span class="cv">${h}</span><span class="cn">px</span>;\n` +
+    `  <span class="cp">padding</span>: <span class="cv">${p}</span><span class="cn">px</span>;\n` +
+    `  <span class="cp">border</span>: <span class="cv">${b}</span><span class="cn">px</span> solid <span class="cv">#f3722c</span>;\n` +
+    `  <span class="cp">margin</span>: <span class="cv">${m}</span><span class="cn">px</span>;\n` +
+    (bs ? `  <span class="cp">box-sizing</span>: <span class="cv">border-box</span>;\n` : '') +
+    `}`;
+}
+
+// redraw on resize
+window.addEventListener('resize', draw);
+// initial draw after layout
+setTimeout(draw, 50);
+
+// ══════════════ TABS ══════════════
+function tab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'interactive') setTimeout(draw, 50);
+}
+
+// ══════════════ QUIZ ══════════════
+const QS = [
+  { q: "Box Model 레이어를 안쪽 → 바깥쪽 순서로 올바르게 나열한 것은?",
+    opts: ["content → border → padding → margin","content → padding → border → margin","padding → content → border → margin","margin → border → padding → content"],
+    ans: 1, fb: "content(내용) → padding(내부 여백) → border(테두리) → margin(외부 여백) 순서입니다." },
+  { q: "아래 CSS에서 요소의 실제 렌더링 너비는? (margin 제외)", code: "width: 100px;\npadding: 10px;\nborder: 5px solid black;\n/* box-sizing: content-box (기본값) */",
+    opts: ["100px","115px","120px","130px"],
+    ans: 3, fb: "content-box: 100(width) + 10×2(padding) + 5×2(border) = 130px" },
+  { q: "배경색(background-color)이 적용되지 않는 영역은?",
+    opts: ["content","padding","border","margin"],
+    ans: 3, fb: "margin은 항상 투명합니다. content, padding, border 영역에는 배경색이 채워집니다." },
+  { q: "box-sizing: border-box 에서 width 값이 포함하는 범위는?",
+    opts: ["content만","content + padding","content + padding + border","content + padding + border + margin"],
+    ans: 2, fb: "border-box: width = content + padding + border까지 포함. margin은 항상 외부에 따로 적용됩니다." },
+  { q: "아래 CSS에서 실제 렌더링 너비는?", code: ".box {\n  width: 200px;\n  padding: 20px;\n  border: 5px solid;\n  box-sizing: border-box;\n}",
+    opts: ["200px","230px","250px","170px"],
+    ans: 0, fb: "border-box이므로 width = 200px이 그대로 렌더링 크기입니다. padding·border가 내부에서 처리됩니다." }
+];
+
+let qi = 0, ans = [];
+
+function buildQ() {
+  const d = QS[qi];
+  const w = document.getElementById('qwrap');
+  w.innerHTML = `
+    <div class="qcard">
+      <div class="qq">Q${qi+1}. ${d.q}</div>
+      ${d.code ? `<div class="qsub">${d.code}</div>` : ''}
+      <div class="qopts" id="qopts"></div>
+      <div class="qfb${ans[qi]!==undefined?' show':''}" id="qfb">${ans[qi]!==undefined?(ans[qi]===d.ans?'✅ 정답! ':'❌ 오답! ')+d.fb:''}</div>
+    </div>`;
+  const opts = document.getElementById('qopts');
+  d.opts.forEach((o, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = o;
+    btn.onclick = () => ansQ(i);
+    if (ans[qi] !== undefined) {
+      btn.disabled = true;
+      if (i === d.ans) btn.classList.add('ok');
+      else if (i === ans[qi]) btn.classList.add('ng');
+    }
+    opts.appendChild(btn);
+  });
+  document.getElementById('qprog').textContent = `${qi+1} / ${QS.length}`;
+  document.getElementById('qprev').disabled = qi === 0;
+  document.getElementById('qnext').disabled = ans[qi] === undefined || qi === QS.length-1;
+  const done = ans.filter(a=>a!==undefined).length;
+  document.getElementById('qscore').textContent = done ? `${ans.filter((a,i)=>a===QS[i].ans).length} / ${done} 정답` : '';
+}
+
+function ansQ(i) {
+  if (ans[qi] !== undefined) return;
+  ans[qi] = i;
+  const d = QS[qi];
+  document.querySelectorAll('#qopts button').forEach((b,j) => {
+    b.disabled = true;
+    if (j === d.ans) b.classList.add('ok');
+    else if (j === i) b.classList.add('ng');
+  });
+  const fb = document.getElementById('qfb');
+  fb.textContent = (i === d.ans ? '✅ 정답! ' : '❌ 오답! ') + d.fb;
+  fb.className = 'qfb show';
+  document.getElementById('qnext').disabled = qi === QS.length-1;
+  document.getElementById('qscore').textContent = `${ans.filter((a,i)=>a===QS[i].ans).length} / ${ans.filter(a=>a!==undefined).length} 정답`;
+}
+
+function qmove(d) { qi = Math.max(0, Math.min(QS.length-1, qi+d)); buildQ(); }
+buildQ();
+</script>
+</body>
+</html>
