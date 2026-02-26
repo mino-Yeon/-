@@ -237,6 +237,7 @@
             <li><a href="#find"><span class="nav-badge">find·findIndex</span></a></li>
             <li><a href="#reduce"><span class="nav-badge">reduce</span></a></li>
             <li><a href="#sort"><span class="nav-badge">sort</span></a></li>
+            <li><a href="#chaining"><span class="nav-badge">chaining</span></a></li>
             <li><a href="#some-every"><span class="nav-badge">some·every</span></a></li>
           </ul>
         </div>
@@ -498,6 +499,61 @@ console.log(byName.map(item => item.name));</code></pre>
             </div>
           </div>
           <div class="tip">원본 배열 보존이 필요하다면 <code>[...cart]</code> 또는 <code>cart.slice()</code>로 복사한 뒤 정렬하세요.</div>
+        </section>
+
+        <!-- 메서드 체이닝 -->
+        <section class="section" id="chaining">
+          <div class="section-header">
+            <h2>메서드 체이닝</h2>
+            <span class="badge">chaining</span>
+          </div>
+          <p>배열 메서드는 새 배열을 반환하기 때문에 <strong>연속으로 이어서 호출</strong>할 수 있습니다. 이를 메서드 체이닝이라고 합니다.</p>
+
+          <h3>filter + map</h3>
+          <p>전자기기만 골라서 이름 목록으로 변환합니다.</p>
+          <div class="code-block">
+            <pre><code>const result = cart
+  .filter(item => item.category === "전자기기")
+  .map(item => item.name);
+
+console.log(result);</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>["MacBook Pro", "모니터"]</code></pre>
+            </div>
+          </div>
+
+          <h3>filter + reduce</h3>
+          <p>주변기기 상품의 총 금액을 계산합니다.</p>
+          <div class="code-block">
+            <pre><code>const total = cart
+  .filter(item => item.category === "주변기기")
+  .reduce((acc, item) => acc + item.price, 0);
+
+console.log(total.toLocaleString() + "원");</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>183,000원</code></pre>
+            </div>
+          </div>
+
+          <h3>filter + sort + map</h3>
+          <p>10만원 이상 상품을 가격 오름차순으로 정렬해 이름만 뽑습니다.</p>
+          <div class="code-block">
+            <pre><code>const result = cart
+  .filter(item => item.price >= 100000)
+  .sort((a, b) => a.price - b.price)
+  .map(item => `${item.name} (${item.price.toLocaleString()}원)`);
+
+console.log(result);</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>["키보드 (120,000원)", "모니터 (450,000원)", "MacBook Pro (2,500,000원)"]</code></pre>
+            </div>
+          </div>
+          <div class="tip">
+            체이닝은 코드를 간결하게 만들어주지만, 단계가 너무 많아지면 오히려 읽기 어려워질 수 있습니다. 3단계 이상이라면 중간 변수로 분리하는 것도 좋습니다.
+          </div>
         </section>
 
         <!-- some / every -->
