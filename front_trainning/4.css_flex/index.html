@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flex 실습</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+
+    <!-- ===== 실습 1: 네비게이션 배치 ===== -->
+    <section class="practice practice-1">
+      <h2 class="practice-title">실습 1 — 네비게이션 배치</h2>
+      <p class="practice-desc">global-nav는 왼쪽, user-nav는 오른쪽에 오도록 배치하고, 각 메뉴 항목은 가로로 나란히 놓아보세요.</p>
+
+      <header>
+        <h1>사이트</h1>
+        <div class="nav-container">
+          <nav class="global-nav">
+            <ul>
+              <li><a href="#">메뉴1</a></li>
+              <li><a href="#">메뉴2</a></li>
+              <li><a href="#">메뉴3</a></li>
+            </ul>
+          </nav>
+          <nav class="user-nav">
+            <ul>
+              <li><a href="#">로그인</a></li>
+              <li><a href="#">회원가입</a></li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+    </section>
+
+    <!-- ===== 실습 2: 카드 레이아웃 ===== -->
+    <section class="practice practice-2">
+      <h2 class="practice-title">실습 2 — 카드 레이아웃</h2>
+      <p class="practice-desc">카드들이 가로로 나열되고, 공간이 부족하면 자동으로 줄바꿈되도록 배치해보세요.</p>
+
+      <div class="card-container">
+        <div class="card">
+          <img src="https://picsum.photos/seed/a/300/160" alt="이미지1" />
+          <div class="card-body">
+            <h3>카드 제목 1</h3>
+            <p>카드에 들어가는 간단한 설명 텍스트입니다.</p>
+          </div>
+        </div>
+        <div class="card">
+          <img src="https://picsum.photos/seed/b/300/160" alt="이미지2" />
+          <div class="card-body">
+            <h3>카드 제목 2</h3>
+            <p>카드에 들어가는 간단한 설명 텍스트입니다.</p>
+          </div>
+        </div>
+        <div class="card">
+          <img src="https://picsum.photos/seed/c/300/160" alt="이미지3" />
+          <div class="card-body">
+            <h3>카드 제목 3</h3>
+            <p>카드에 들어가는 간단한 설명 텍스트입니다.</p>
+          </div>
+        </div>
+        <div class="card">
+          <img src="https://picsum.photos/seed/d/300/160" alt="이미지4" />
+          <div class="card-body">
+            <h3>카드 제목 4</h3>
+            <p>카드에 들어가는 간단한 설명 텍스트입니다.</p>
+          </div>
+        </div>
+        <div class="card">
+          <img src="https://picsum.photos/seed/e/300/160" alt="이미지5" />
+          <div class="card-body">
+            <h3>카드 제목 5</h3>
+            <p>카드에 들어가는 간단한 설명 텍스트입니다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 실습 3: 가운데 정렬 ===== -->
+    <section class="practice practice-3">
+      <h2 class="practice-title">실습 3 — 가운데 정렬</h2>
+      <p class="practice-desc">로그인 박스가 영역의 정중앙(수평 + 수직)에 오도록 배치해보세요.</p>
+
+      <div class="center-container">
+        <div class="login-box">
+          <h3>로그인</h3>
+          <input type="text" placeholder="아이디" />
+          <input type="password" placeholder="비밀번호" />
+          <button>로그인</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 실습 4: 2단 레이아웃 ===== -->
+    <section class="practice practice-4">
+      <h2 class="practice-title">실습 4 — 사이드바 + 메인 콘텐츠</h2>
+      <p class="practice-desc">사이드바는 200px 고정, 메인 영역은 나머지 공간을 모두 차지하도록 배치해보세요.</p>
+
+      <div class="layout-container">
+        <aside class="sidebar">
+          <h3>사이드바</h3>
+          <ul>
+            <li><a href="#">메뉴 A</a></li>
+            <li><a href="#">메뉴 B</a></li>
+            <li><a href="#">메뉴 C</a></li>
+          </ul>
+        </aside>
+        <main class="main-content">
+          <h3>메인 콘텐츠</h3>
+          <p>사이드바 옆에서 나머지 공간을 채우는 메인 영역입니다. 창 크기를 바꿔도 사이드바는 200px을 유지하고, 이 영역만 늘어나고 줄어들어야 해요.</p>
+        </main>
+      </div>
+    </section>
+
+  </body>
+</html>
