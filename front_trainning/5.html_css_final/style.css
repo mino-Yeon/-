@@ -40,7 +40,7 @@ nav a {
 
 /* 🆕 aside 스타일 */
 aside {
-  flex: 1;
+  flex : 0 0 200px; /* flex-grow: 0, flex-shrink: 0, flex-basis: 200px */
   background-color: #f0f0f0;
   padding: 16px;
   border-radius: 12px;
@@ -71,7 +71,7 @@ aside a:hover {
 }
 
 main {
-  flex: 2;
+  flex: 1;
   background-color: white;
   padding: 24px;
   border-radius: 12px;
