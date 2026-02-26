@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>JavaScript 학습 가이드</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      :root {
+        --gray-900: #0f172a;
+        --gray-700: #334155;
+        --gray-400: #94a3b8;
+        --gray-100: #f1f5f9;
+      }
+
+      body {
+        font-family: sans-serif;
+        background-color: #f4f6f8;
+        color: #333;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* 헤더 */
+      header {
+        background: linear-gradient(135deg, var(--gray-900), #1e3a5f);
+        color: white;
+        padding: 48px 24px 40px;
+        text-align: center;
+      }
+      header .label {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: #7dd3fc;
+        margin-bottom: 12px;
+      }
+      header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin-bottom: 10px;
+      }
+      header p {
+        font-size: 0.95rem;
+        color: #94a3b8;
+      }
+
+      /* 본문 */
+      .container {
+        max-width: 960px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 40px 24px;
+        flex: 1;
+      }
+
+      .section-label {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #94a3b8;
+        margin-bottom: 20px;
+      }
+
+      /* 그리드 */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+
+      /* 카드 공통 */
+      .card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        transition: transform 0.15s, box-shadow 0.15s;
+      }
+
+      /* 활성 카드 */
+      .card.active { cursor: pointer; text-decoration: none; color: inherit; }
+      .card.active:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      }
+
+      /* 비활성 카드 */
+      .card.disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+
+      .card-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .card-icon {
+        font-size: 1.6rem;
+      }
+      .card-num {
+        font-size: 0.75rem;
+        color: #cbd5e1;
+        font-weight: 600;
+      }
+
+      .card h2 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e293b;
+      }
+      .card p {
+        font-size: 0.85rem;
+        color: #64748b;
+        line-height: 1.6;
+        flex: 1;
+      }
+
+      /* 태그 영역 */
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .tag {
+        font-size: 0.72rem;
+        font-family: "Courier New", monospace;
+        padding: 2px 8px;
+        border-radius: 20px;
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+      }
+
+      /* 활성 카드별 포인트 컬러 */
+      .card.c1 { border-top: 3px solid #ffa07a; }
+      .card.c1 .tag { background: #fff8f0; border-color: #ffd7c2; color: #c2440f; }
+
+      .card.c2 { border-top: 3px solid #38bdf8; }
+      .card.c2 .tag { background: #f0f9ff; border-color: #bae6fd; color: #0284c7; }
+
+      /* coming soon 배지 */
+      .soon {
+        font-size: 0.7rem;
+        background: #f1f5f9;
+        color: #94a3b8;
+        padding: 2px 8px;
+        border-radius: 20px;
+        border: 1px solid #e2e8f0;
+        align-self: flex-start;
+      }
+
+      /* 푸터 */
+      footer {
+        background-color: var(--gray-900);
+        color: #475569;
+        text-align: center;
+        padding: 16px;
+        font-size: 0.82rem;
+      }
+    </style>
+  </head>
+  <body>
+
+    <header>
+      <div class="label">Learning Guide</div>
+      <h1>JavaScript 학습 가이드</h1>
+      <p>단계별로 JavaScript의 핵심 개념을 학습합니다.</p>
+    </header>
+
+    <div class="container">
+      <div class="section-label">전체 목록 — 2 / 6 챕터</div>
+      <div class="grid">
+
+        <!-- 1. 기본 문법 -->
+        <a class="card active c1" href="1.javascript_basics.html">
+          <div class="card-top">
+            <div class="card-icon">📝</div>
+            <div class="card-num">01</div>
+          </div>
+          <h2>기본 문법</h2>
+          <p>변수 선언, 자료형, 함수, 호이스팅 등 JavaScript의 핵심 기초를 다룹니다.</p>
+          <div class="tags">
+            <span class="tag">var·let·const</span>
+            <span class="tag">hoisting</span>
+            <span class="tag">function</span>
+            <span class="tag">callback</span>
+          </div>
+        </a>
+
+        <!-- 2. Array Helper -->
+        <a class="card active c2" href="2.array_helper_methods.html">
+          <div class="card-top">
+            <div class="card-icon">📦</div>
+            <div class="card-num">02</div>
+          </div>
+          <h2>Array Helper Methods</h2>
+          <p>map, filter, reduce 등 배열을 다루는 핵심 메서드를 장바구니 예제로 학습합니다.</p>
+          <div class="tags">
+            <span class="tag">map</span>
+            <span class="tag">filter</span>
+            <span class="tag">reduce</span>
+            <span class="tag">chaining</span>
+          </div>
+        </a>
+
+
+
+      </div>
+    </div>
+
+    <footer>
+      <p>JavaScript 학습 가이드 &nbsp;|&nbsp; 학습용 문서</p>
+    </footer>
+
+  </body>
+</html>
