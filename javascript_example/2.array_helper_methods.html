@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Array Helper Methods</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      :root {
+        --accent: #38bdf8;
+        --accent-dark: #0284c7;
+        --accent-bg: #f0f9ff;
+        --accent-border: #bae6fd;
+      }
+
+      body {
+        font-family: sans-serif;
+        background-color: #f4f6f8;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      header {
+        background: linear-gradient(135deg, #0f172a, #0369a1);
+        color: white;
+        padding: 18px 28px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      header .header-icon { font-size: 1.4rem; }
+      header h1 { font-size: 1.2rem; letter-spacing: 0.02em; }
+      header span {
+        font-size: 0.8rem;
+        background: rgba(255,255,255,0.15);
+        padding: 2px 10px;
+        border-radius: 20px;
+        margin-left: 8px;
+        color: #bae6fd;
+      }
+
+      .layout {
+        display: flex;
+        flex: 1;
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 24px;
+        gap: 24px;
+      }
+
+      nav.sidebar-left { width: 200px; flex-shrink: 0; }
+      nav.sidebar-left .sidebar-inner {
+        position: sticky;
+        top: 24px;
+        background: #fff;
+        border-radius: 10px;
+        padding: 16px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      }
+      nav.sidebar-left h2 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #94a3b8;
+        margin-bottom: 12px;
+      }
+      nav.sidebar-left ul { list-style: none; }
+      nav.sidebar-left ul li { margin-bottom: 4px; }
+      nav.sidebar-left ul li a {
+        text-decoration: none;
+        color: #555;
+        font-size: 0.88rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 8px;
+        border-radius: 6px;
+        transition: background 0.15s;
+      }
+      nav.sidebar-left ul li a:hover { background: var(--accent-bg); color: var(--accent-dark); }
+      nav.sidebar-left ul li a .nav-badge {
+        font-size: 0.72rem;
+        background: #e2e8f0;
+        color: #64748b;
+        padding: 1px 7px;
+        border-radius: 20px;
+        font-family: "Courier New", monospace;
+      }
+      nav.sidebar-left ul li a:hover .nav-badge {
+        background: var(--accent-border);
+        color: var(--accent-dark);
+      }
+
+      main { flex: 1; min-width: 600px; }
+
+      aside.sidebar-right { width: 220px; flex-shrink: 0; }
+      aside.sidebar-right .data-sticky {
+        position: sticky;
+        top: 28px;
+        margin-top: 1735px;
+        background: #1e293b;
+        border-radius: 10px;
+        padding: 16px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      }
+      aside.sidebar-right h2 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #64748b;
+        margin-bottom: 12px;
+      }
+
+      .section {
+        background-color: #fff;
+        border-radius: 10px;
+        padding: 28px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--accent-border);
+      }
+      .section-header h2 { font-size: 1.25rem; color: #1e293b; }
+      .badge {
+        font-family: "Courier New", monospace;
+        font-size: 0.82rem;
+        font-weight: bold;
+        background: var(--accent-bg);
+        color: var(--accent-dark);
+        border: 1px solid var(--accent-border);
+        padding: 3px 10px;
+        border-radius: 20px;
+      }
+      .badge + .badge { margin-left: 4px; }
+
+      .section h3 { font-size: 0.95rem; margin: 20px 0 8px; color: #475569; font-weight: 600; }
+      .section p { font-size: 0.95rem; line-height: 1.75; color: #444; margin-bottom: 10px; }
+      .section ul { padding-left: 20px; margin-bottom: 12px; }
+      .section ul li { font-size: 0.95rem; line-height: 1.85; color: #444; list-style: disc; }
+
+      pre {
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 0.88rem;
+        line-height: 1.6;
+        margin: 8px 0 4px;
+      }
+      pre code.hljs { border-radius: 8px; }
+      .hljs-comment { color: #98c379 !important; }
+      .hljs-string  { color: #e5c07b !important; }
+      code { font-family: "Courier New", monospace; }
+      p code, li code {
+        background-color: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.87rem;
+        color: #0369a1;
+      }
+
+      .code-block pre { border-radius: 8px 8px 0 0; margin-bottom: 0; }
+      .result {
+        background: #0f172a;
+        border-radius: 0 0 8px 8px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+        border-top: 2px solid var(--accent);
+      }
+      .result-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+      .result pre { margin: 0; background: transparent !important; padding: 0; }
+      .result code {
+        font-family: "Courier New", monospace;
+        font-size: 0.87rem;
+        color: #e2e8f0;
+        background: transparent !important;
+        padding: 0;
+        border-radius: 0;
+      }
+      .result code .comment { color: #6b7280; }
+
+      .tip {
+        background-color: var(--accent-bg);
+        border-left: 4px solid var(--accent);
+        padding: 12px 16px;
+        border-radius: 0 6px 6px 0;
+        margin: 12px 0;
+        font-size: 0.9rem;
+        color: #334155;
+        line-height: 1.65;
+      }
+
+      footer {
+        background-color: #0f172a;
+        color: #475569;
+        text-align: center;
+        padding: 16px;
+        font-size: 0.82rem;
+      }
+    </style>
+  </head>
+  <body>
+
+    <header>
+      <div class="header-icon">📦</div>
+      <h1>Array Helper Methods <span>JavaScript</span></h1>
+    </header>
+
+    <div class="layout">
+
+      <nav class="sidebar-left">
+        <div class="sidebar-inner">
+          <h2>목차</h2>
+          <ul>
+            <li><a href="#push-pop"><span class="nav-badge">push·pop</span></a></li>
+            <li><a href="#includes-indexof"><span class="nav-badge">includes·indexOf</span></a></li>
+            <li><a href="#foreach"><span class="nav-badge">forEach</span></a></li>
+            <li><a href="#map"><span class="nav-badge">map</span></a></li>
+            <li><a href="#filter"><span class="nav-badge">filter</span></a></li>
+            <li><a href="#find"><span class="nav-badge">find·findIndex</span></a></li>
+            <li><a href="#reduce"><span class="nav-badge">reduce</span></a></li>
+            <li><a href="#sort"><span class="nav-badge">sort</span></a></li>
+            <li><a href="#some-every"><span class="nav-badge">some·every</span></a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <main>
+
+        <!-- push / pop -->
+        <section class="section" id="push-pop">
+          <div class="section-header">
+            <h2>push · pop</h2>
+            <span class="badge">push</span>
+            <span class="badge">pop</span>
+          </div>
+          <p>배열의 맨 뒤에 요소를 추가하거나 제거하는 가장 기본적인 메서드입니다.</p>
+
+          <h3>push — 맨 뒤에 추가</h3>
+          <div class="code-block">
+            <pre><code>const fruits = ["apple", "banana"];
+fruits.push("cherry");
+console.log(fruits);</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>["apple", "banana", "cherry"]</code></pre>
+            </div>
+          </div>
+
+          <h3>pop — 맨 뒤에서 제거</h3>
+          <p><code>pop()</code>은 제거한 요소를 반환합니다.</p>
+          <div class="code-block">
+            <pre><code>const fruits = ["apple", "banana", "cherry"];
+const removed = fruits.pop();
+console.log(removed);
+console.log(fruits);</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>"cherry"
+["apple", "banana"]</code></pre>
+            </div>
+          </div>
+          <div class="tip"><code>push</code> / <code>pop</code>은 원본 배열을 직접 수정합니다.</div>
+        </section>
+
+        <!-- includes / indexOf -->
+        <section class="section" id="includes-indexof">
+          <div class="section-header">
+            <h2>includes · indexOf</h2>
+            <span class="badge">includes</span>
+            <span class="badge">indexOf</span>
+          </div>
+          <p>배열 안에 특정 값이 존재하는지 확인할 때 사용합니다.</p>
+
+          <h3>includes — 존재 여부 확인 (boolean 반환)</h3>
+          <div class="code-block">
+            <pre><code>const categories = ["전자기기", "주변기기", "전자기기", "주변기기", "주변기기"];
+
+console.log(categories.includes("전자기기")); // 있으면 true
+console.log(categories.includes("가구"));     // 없으면 false</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>true
+false</code></pre>
+            </div>
+          </div>
+
+          <h3>indexOf — 처음 발견된 인덱스 반환</h3>
+          <p>찾지 못하면 <code>-1</code>을 반환합니다.</p>
+          <div class="code-block">
+            <pre><code>const names = ["MacBook Pro", "무선 마우스", "모니터", "USB 허브", "키보드"];
+
+console.log(names.indexOf("모니터")); // 인덱스 2
+console.log(names.indexOf("태블릿")); // 없으면 -1</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>2
+-1</code></pre>
+            </div>
+          </div>
+          <div class="tip">단순히 있는지 없는지만 확인할 땐 <code>includes</code>를, 위치(인덱스)가 필요할 땐 <code>indexOf</code>를 사용하세요.</div>
+        </section>
+
+        <!-- forEach -->
+        <section class="section" id="foreach">
+          <div class="section-header">
+            <h2>forEach</h2>
+            <span class="badge">forEach</span>
+          </div>
+          <p>배열의 각 요소를 순서대로 순회하며 콜백 함수를 실행합니다. 반환값은 없습니다.</p>
+          <div class="code-block">
+            <pre><code>cart.forEach(item => {
+  console.log(`${item.name} — ${item.price.toLocaleString()}원`);
+});</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>MacBook Pro — 2,500,000원
+무선 마우스 — 35,000원
+<span class="comment">// ... 총 5개 출력</span></code></pre>
+            </div>
+          </div>
+          <div class="tip"><code>forEach</code>는 반환값이 없어서 새 배열을 만들 수 없습니다. 단순 출력이나 외부 변수 조작 등 부수 효과(side effect)가 목적일 때 사용합니다.</div>
+        </section>
+
+        <!-- map -->
+        <section class="section" id="map">
+          <div class="section-header">
+            <h2>map</h2>
+            <span class="badge">map</span>
+          </div>
+          <p>각 요소를 가공해서 <strong>새 배열</strong>을 반환합니다. 원본 배열은 변경되지 않습니다.</p>
+          <div class="code-block">
+            <pre><code>// 각 상품에 10% 부가세를 적용한 새 배열
+const withTax = cart.map(item => ({
+  ...item,
+  price: Math.round(item.price * 1.1),
+}));
+
+console.log(withTax[0]);
+console.log(cart[0]); // 원본은 그대로</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>{ id: 1, name: "MacBook Pro", price: 2750000, category: "전자기기" }
+{ id: 1, name: "MacBook Pro", price: 2500000, category: "전자기기" }</code></pre>
+            </div>
+          </div>
+          <div class="tip"><code>map</code>은 원본과 <strong>길이가 동일한</strong> 새 배열을 반환합니다. 각 요소를 변환할 때 사용하세요.</div>
+        </section>
+
+        <!-- filter -->
+        <section class="section" id="filter">
+          <div class="section-header">
+            <h2>filter</h2>
+            <span class="badge">filter</span>
+          </div>
+          <p>조건을 만족하는 요소만 모아 <strong>새 배열</strong>을 반환합니다.</p>
+          <div class="code-block">
+            <pre><code>// "주변기기" 카테고리 상품만 필터링
+const result = cart.filter(item => item.category === "주변기기");
+result.forEach(item => console.log(item.name));</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>무선 마우스
+USB 허브
+키보드</code></pre>
+            </div>
+          </div>
+          <div class="code-block">
+            <pre><code>// 가격이 100,000원 이하인 상품
+const result = cart.filter(item => item.price <= 100000);
+console.log(result.map(item => item.name));</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>["무선 마우스", "USB 허브"]</code></pre>
+            </div>
+          </div>
+          <div class="tip"><code>filter</code>는 조건에 따라 원본보다 <strong>길이가 짧아질 수 있는</strong> 새 배열을 반환합니다.</div>
+        </section>
+
+        <!-- find / findIndex -->
+        <section class="section" id="find">
+          <div class="section-header">
+            <h2>find · findIndex</h2>
+            <span class="badge">find</span>
+            <span class="badge">findIndex</span>
+          </div>
+          <p>조건을 만족하는 <strong>첫 번째 요소</strong>를 찾습니다.</p>
+
+          <h3>find — 요소 자체를 반환</h3>
+          <p>찾지 못하면 <code>undefined</code>를 반환합니다.</p>
+          <div class="code-block">
+            <pre><code>const item = cart.find(item => item.id === 3);
+console.log(item);</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>{ id: 3, name: "모니터", price: 450000, category: "전자기기" }</code></pre>
+            </div>
+          </div>
+
+          <h3>findIndex — 인덱스를 반환</h3>
+          <p>찾지 못하면 <code>-1</code>을 반환합니다.</p>
+          <div class="code-block">
+            <pre><code>const idx = cart.findIndex(item => item.name === "키보드");
+console.log(idx);
+console.log(cart[idx].price);</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>4
+120000</code></pre>
+            </div>
+          </div>
+          <div class="tip">요소 자체가 필요하면 <code>find</code>, 위치가 필요하면 <code>findIndex</code>를 사용하세요. <code>filter</code>와 달리 첫 번째 결과만 반환하고 즉시 종료됩니다.</div>
+        </section>
+
+        <!-- reduce -->
+        <section class="section" id="reduce">
+          <div class="section-header">
+            <h2>reduce</h2>
+            <span class="badge">reduce</span>
+          </div>
+          <p>배열의 모든 요소를 순회하며 누적값을 계산해 <strong>하나의 결과</strong>를 반환합니다.</p>
+          <pre><code>array.reduce((acc, cur) => { ... }, 초기값)</code></pre>
+          <ul>
+            <li><code>acc</code> — 누적값 (이전 콜백의 반환값)</li>
+            <li><code>cur</code> — 현재 요소</li>
+            <li><code>초기값</code> — acc의 시작값</li>
+          </ul>
+
+          <h3>장바구니 총 금액 계산</h3>
+          <div class="code-block">
+            <pre><code>const total = cart.reduce((acc, item) => acc + item.price, 0);
+console.log(total.toLocaleString() + "원");</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>3,133,000원</code></pre>
+            </div>
+          </div>
+
+          <h3>카테고리별 총 금액 집계</h3>
+          <div class="code-block">
+            <pre><code>const byCategory = cart.reduce((acc, item) => {
+  const k = item.category;
+  acc[k] = (acc[k] || 0) + item.price;
+  return acc;
+}, {});
+
+console.log(byCategory);</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>{ 전자기기: 2950000, 주변기기: 183000 }</code></pre>
+            </div>
+          </div>
+          <div class="tip"><code>reduce</code>는 합계뿐 아니라 객체 집계, 중복 제거 등 다양한 용도로 활용할 수 있습니다. 초기값을 반드시 지정하는 습관을 들이세요.</div>
+        </section>
+
+        <!-- sort -->
+        <section class="section" id="sort">
+          <div class="section-header">
+            <h2>sort</h2>
+            <span class="badge">sort</span>
+          </div>
+          <p>배열을 정렬합니다. <strong>원본 배열을 직접 수정</strong>하므로 주의가 필요합니다.</p>
+
+          <h3>가격 오름차순 정렬</h3>
+          <div class="code-block">
+            <pre><code>const byPrice = [...cart].sort((a, b) => a.price - b.price);
+console.log(byPrice.map(item => item.name));</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>["USB 허브", "무선 마우스", "키보드", "모니터", "MacBook Pro"]</code></pre>
+            </div>
+          </div>
+
+          <h3>이름 가나다순 정렬</h3>
+          <div class="code-block">
+            <pre><code>const byName = [...cart].sort((a, b) => a.name.localeCompare(b.name));
+console.log(byName.map(item => item.name));</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>["MacBook Pro", "USB 허브", "모니터", "무선 마우스", "키보드"]</code></pre>
+            </div>
+          </div>
+          <div class="tip">원본 배열 보존이 필요하다면 <code>[...cart]</code> 또는 <code>cart.slice()</code>로 복사한 뒤 정렬하세요.</div>
+        </section>
+
+        <!-- some / every -->
+        <section class="section" id="some-every">
+          <div class="section-header">
+            <h2>some · every</h2>
+            <span class="badge">some</span>
+            <span class="badge">every</span>
+          </div>
+          <p>조건을 검사해 <code>true</code> 또는 <code>false</code>를 반환합니다.</p>
+
+          <h3>some — 하나라도 만족하면 true</h3>
+          <div class="code-block">
+            <pre><code>// 100,000원 이상인 상품이 하나라도 있는가?
+const result = cart.some(item => item.price >= 100000);
+console.log(result);</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>true</code></pre>
+            </div>
+          </div>
+
+          <h3>every — 모두 만족해야 true</h3>
+          <div class="code-block">
+            <pre><code>// 모든 상품이 10,000원 이상인가?
+const r1 = cart.every(item => item.price >= 10000);
+// 모든 상품이 전자기기인가?
+const r2 = cart.every(item => item.category === "전자기기");
+console.log(r1, r2);</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>true false</code></pre>
+            </div>
+          </div>
+          <div class="tip"><code>some</code>은 조건을 만족하는 요소를 찾는 순간, <code>every</code>는 조건을 만족하지 않는 요소를 찾는 순간 즉시 종료합니다.</div>
+        </section>
+
+      </main>
+
+      <aside class="sidebar-right">
+        <div class="data-sticky" id="cartSidebar">
+          <h2>🛒 장바구니 데이터</h2>
+          <pre style="margin:0;background:transparent;padding:0;font-size:0.78rem;line-height:1.7;color:#94a3b8;white-space:pre-wrap;font-family:'Courier New',monospace;">const cart = [
+  {
+    id: <span style="color:#86efac">1</span>,
+    name: <span style="color:#fde68a">"MacBook Pro"</span>,
+    price: <span style="color:#86efac">2500000</span>,
+    category: <span style="color:#fde68a">"전자기기"</span>
+  },
+  {
+    id: <span style="color:#86efac">2</span>,
+    name: <span style="color:#fde68a">"무선 마우스"</span>,
+    price: <span style="color:#86efac">35000</span>,
+    category: <span style="color:#fde68a">"주변기기"</span>
+  },
+  {
+    id: <span style="color:#86efac">3</span>,
+    name: <span style="color:#fde68a">"모니터"</span>,
+    price: <span style="color:#86efac">450000</span>,
+    category: <span style="color:#fde68a">"전자기기"</span>
+  },
+  {
+    id: <span style="color:#86efac">4</span>,
+    name: <span style="color:#fde68a">"USB 허브"</span>,
+    price: <span style="color:#86efac">28000</span>,
+    category: <span style="color:#fde68a">"주변기기"</span>
+  },
+  {
+    id: <span style="color:#86efac">5</span>,
+    name: <span style="color:#fde68a">"키보드"</span>,
+    price: <span style="color:#86efac">120000</span>,
+    category: <span style="color:#fde68a">"주변기기"</span>
+  },
+];</pre>
+        </div>
+      </aside>
+
+    </div>
+
+    <footer>
+      <p>JavaScript Array Helper Methods &nbsp;|&nbsp; 학습용 문서</p>
+    </footer>
+
+  </body>
+</html>
