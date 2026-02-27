@@ -102,12 +102,29 @@
       aside.sidebar-right { width: 220px; flex-shrink: 0; }
       aside.sidebar-right .data-sticky {
         position: sticky;
-        top: 28px;
-        margin-top: 2705px;
+        top: 24px;
         background: #1e293b;
         border-radius: 10px;
         padding: 16px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        margin-top: 2705px;
+        /* ✅ 화면 높이에 맞게 스크롤 가능하도록 */
+        max-height: calc(100vh - 56px);
+        overflow-y: auto;
+      }
+      /* ✅ 스크롤바 스타일 */
+      aside.sidebar-right .data-sticky::-webkit-scrollbar {
+        width: 6px;
+      }
+      aside.sidebar-right .data-sticky::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      aside.sidebar-right .data-sticky::-webkit-scrollbar-thumb {
+        background: #475569;
+        border-radius: 3px;
+      }
+      aside.sidebar-right .data-sticky::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
       }
       aside.sidebar-right h2 {
         font-size: 0.75rem;
