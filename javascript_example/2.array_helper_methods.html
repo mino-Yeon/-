@@ -103,7 +103,7 @@
       aside.sidebar-right .data-sticky {
         position: sticky;
         top: 28px;
-        margin-top: 1735px;
+        margin-top: 2705px;
         background: #1e293b;
         border-radius: 10px;
         padding: 16px;
@@ -230,6 +230,7 @@
           <h2>목차</h2>
           <ul>
             <li><a href="#push-pop"><span class="nav-badge">push·pop</span></a></li>
+            <li><a href="#splice"><span class="nav-badge">splice</span></a></li>
             <li><a href="#includes-indexof"><span class="nav-badge">includes·indexOf</span></a></li>
             <li><a href="#foreach"><span class="nav-badge">forEach</span></a></li>
             <li><a href="#map"><span class="nav-badge">map</span></a></li>
@@ -279,6 +280,48 @@ console.log(fruits);</code></pre>
             </div>
           </div>
           <div class="tip"><code>push</code> / <code>pop</code>은 원본 배열을 직접 수정합니다.</div>
+        </section>
+
+        <!-- splice -->
+        <section class="section" id="splice">
+          <div class="section-header">
+            <h2>splice</h2>
+            <span class="badge">splice</span>
+          </div>
+          <p>특정 인덱스의 요소를 <strong>삭제</strong>하거나 교체할 때 사용합니다. 원본 배열을 직접 수정합니다.</p>
+          <pre><code>array.splice(시작_인덱스, 삭제할_개수)</code></pre>
+
+          <h3>특정 인덱스 요소 1개 삭제</h3>
+          <div class="code-block">
+            <pre><code>const fruits = ["apple", "banana", "cherry", "mango"];
+
+fruits.splice(2, 1); // 인덱스 2부터 1개 삭제
+console.log(fruits);</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>["apple", "banana", "mango"]</code></pre>
+            </div>
+          </div>
+
+          <h3>findIndex와 함께 활용</h3>
+          <p>삭제할 요소의 인덱스를 모를 때는 <code>findIndex</code>로 먼저 찾은 뒤 삭제합니다.</p>
+          <div class="code-block">
+            <pre><code>// id가 3인 상품 삭제
+const idx = cart.findIndex(item => item.id === 3);
+if (idx !== -1) cart.splice(idx, 1);
+
+cart.forEach(item => console.log(item.name));</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과</div>
+              <pre><code>MacBook Pro
+무선 마우스
+USB 허브
+키보드</code></pre>
+            </div>
+          </div>
+          <div class="tip">
+            <code>splice</code>는 원본 배열을 직접 수정합니다. 삭제 전 인덱스가 <code>-1</code>인지 반드시 체크하세요.
+          </div>
         </section>
 
         <!-- includes / indexOf -->
