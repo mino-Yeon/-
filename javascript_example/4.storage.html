@@ -345,13 +345,18 @@ if (raw) {
           <h3>코드</h3>
           <div class="code-block">
             <pre><code>// 입력할 때마다 저장
+titleInput.addEventListener("input", () => {
+  localStorage.setItem("draftTitle", titleInput.value);
+});
 textarea.addEventListener("input", () => {
   localStorage.setItem("draftContent", textarea.value);
 });
 
 // 페이지 로드 시 복원
-const draft = localStorage.getItem("draftContent");
-if (draft) textarea.value = draft;</code></pre>
+const savedTitle = localStorage.getItem("draftTitle");
+const savedContent = localStorage.getItem("draftContent");
+if (savedTitle)   titleInput.value = savedTitle;
+if (savedContent) textarea.value   = savedContent;</code></pre>
           </div>
 
           <h3>직접 해보기</h3>
@@ -407,7 +412,6 @@ if (draft) textarea.value = draft;</code></pre>
       const demoSaveId = document.getElementById("demoSaveId");
       const demoLoginStatus = document.getElementById("demoLoginStatus");
 
-      // 페이지 로드 시 복원
       const savedId = localStorage.getItem("savedId");
       if (savedId) { demoId.value = savedId; demoSaveId.checked = true; }
 
@@ -436,7 +440,6 @@ if (draft) textarea.value = draft;</code></pre>
         autoLoginMsg.textContent = `👋 ${id}님, 자동 로그인되었습니다.`;
       }
 
-      // 페이지 로드 시 자동 로그인 확인
       const autoRaw = localStorage.getItem("autoLogin");
       if (autoRaw) showAutoLogin(JSON.parse(autoRaw).id);
 
@@ -463,10 +466,10 @@ if (draft) textarea.value = draft;</code></pre>
       const draftStatus  = document.getElementById("draftStatus");
 
       // 페이지 로드 시 복원
-      const savedTitle   = localStorage.getItem("draftTitle");
-      const savedContent = localStorage.getItem("draftContent");
-      if (savedTitle)   draftTitle.value   = savedTitle;
-      if (savedContent) draftContent.value = savedContent;
+      const savedDraftTitle   = localStorage.getItem("draftTitle");
+      const savedDraftContent = localStorage.getItem("draftContent");
+      if (savedDraftTitle)   draftTitle.value   = savedDraftTitle;
+      if (savedDraftContent) draftContent.value = savedDraftContent;
 
       function showDraftStatus() {
         draftStatus.textContent = "✅ 자동 저장됨";
