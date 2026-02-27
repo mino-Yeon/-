@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Event</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root { --accent: #38bdf8; --accent-dark: #0284c7; --accent-bg: #f0f9ff; --accent-border: #bae6fd; }
+
+      body { font-family: sans-serif; background: #f4f6f8; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+
+      header { background: linear-gradient(135deg, #0f172a, #0369a1); color: white; padding: 18px 28px; display: flex; align-items: center; gap: 12px; }
+      header .header-icon { font-size: 1.4rem; }
+      header h1 { font-size: 1.2rem; letter-spacing: 0.02em; }
+      header span { font-size: 0.8rem; background: rgba(255,255,255,0.15); padding: 2px 10px; border-radius: 20px; margin-left: 8px; color: #bae6fd; }
+
+      .layout { display: flex; flex: 1; max-width: 1100px; width: 100%; margin: 0 auto; padding: 24px; gap: 24px; }
+
+      nav.sidebar { width: 200px; flex-shrink: 0; }
+      nav.sidebar .sidebar-inner { position: sticky; top: 24px; background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+      nav.sidebar h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 12px; }
+      nav.sidebar ul { list-style: none; }
+      nav.sidebar ul li { margin-bottom: 4px; }
+      nav.sidebar ul li a { text-decoration: none; color: #555; font-size: 0.88rem; display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 6px; transition: background 0.15s; }
+      nav.sidebar ul li a:hover { background: var(--accent-bg); color: var(--accent-dark); }
+      nav.sidebar ul li a .nav-badge { font-size: 0.72rem; background: #e2e8f0; color: #64748b; padding: 1px 7px; border-radius: 20px; font-family: "Courier New", monospace; }
+      nav.sidebar ul li a:hover .nav-badge { background: var(--accent-border); color: var(--accent-dark); }
+
+      main { flex: 1; min-width: 0; }
+
+      .section { background: #fff; border-radius: 10px; padding: 28px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+      .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--accent-border); }
+      .section-header h2 { font-size: 1.25rem; color: #1e293b; }
+      .badge { font-family: "Courier New", monospace; font-size: 0.82rem; font-weight: bold; background: var(--accent-bg); color: var(--accent-dark); border: 1px solid var(--accent-border); padding: 3px 10px; border-radius: 20px; }
+      .badge + .badge { margin-left: 4px; }
+
+      .section h3 { font-size: 0.95rem; margin: 20px 0 8px; color: #475569; font-weight: 600; }
+      .section p { font-size: 0.95rem; line-height: 1.75; color: #444; margin-bottom: 10px; }
+      .section ul { padding-left: 20px; margin-bottom: 12px; }
+      .section ul li { font-size: 0.95rem; line-height: 1.85; color: #444; list-style: disc; }
+
+      pre { border-radius: 8px; overflow-x: auto; font-size: 0.88rem; line-height: 1.6; margin: 8px 0 4px; }
+      pre code.hljs { border-radius: 8px; }
+      .hljs-comment { color: #98c379 !important; }
+      .hljs-string  { color: #e5c07b !important; }
+      code { font-family: "Courier New", monospace; }
+      p code, li code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.87rem; color: #0369a1; }
+
+      .code-block pre { border-radius: 8px 8px 0 0; margin-bottom: 0; }
+      .result { background: #0f172a; border-radius: 0 0 8px 8px; padding: 12px 16px; margin-bottom: 16px; border-top: 2px solid var(--accent); }
+      .result-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 8px; font-weight: bold; }
+      .result pre { margin: 0; background: transparent !important; padding: 0; }
+      .result code { font-family: "Courier New", monospace; font-size: 0.87rem; color: #e2e8f0; background: transparent !important; padding: 0; border-radius: 0; }
+
+      .tip  { background: var(--accent-bg); border-left: 4px solid var(--accent); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 0.9rem; color: #334155; line-height: 1.65; }
+      .warn { background: #fff7ed; border-left: 4px solid #fb923c; padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 0.9rem; color: #7c2d12; line-height: 1.65; }
+
+      .event-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+      .event-tag { font-family: "Courier New", monospace; font-size: 0.82rem; background: #f1f5f9; color: #0369a1; border: 1px solid #e2e8f0; padding: 4px 12px; border-radius: 20px; }
+
+      /* 탭 */
+      .tab-wrap { margin-top: 16px; }
+      .tab-btns { display: flex; }
+      .tab-btn { padding: 8px 20px; border: 1.5px solid #e2e8f0; background: #f8fafc; font-size: 0.88rem; font-family: inherit; cursor: pointer; color: #64748b; transition: all 0.15s; }
+      .tab-btn:first-child { border-radius: 8px 0 0 0; }
+      .tab-btn:last-child  { border-radius: 0 8px 0 0; border-left: none; }
+      .tab-btn.active { background: #fff; color: var(--accent-dark); border-bottom-color: #fff; font-weight: 600; border-top: 2px solid var(--accent); }
+      .tab-content { border: 1.5px solid #e2e8f0; border-radius: 0 8px 8px 8px; padding: 20px; background: #fff; display: none; }
+      .tab-content.active { display: block; }
+
+      /* 데모 */
+      .demo { background: #f8fafc; border: 1.5px solid var(--accent-border); border-radius: 8px; padding: 20px; margin-top: 12px; }
+      .demo-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-dark); font-weight: bold; margin-bottom: 14px; }
+      .demo-btn { padding: 8px 18px; border-radius: 6px; border: none; font-size: 0.88rem; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+      .demo-btn.primary { background: #0284c7; color: white; }
+      .demo-btn.primary:hover { background: #0369a1; }
+      .demo-btn.gray { background: #e2e8f0; color: #475569; }
+      .demo-btn.gray:hover { background: #cbd5e1; }
+      .demo-inp { padding: 8px 12px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 0.9rem; font-family: inherit; outline: none; background: #fff; transition: border-color 0.15s; width: 100%; margin-bottom: 8px; }
+      .demo-inp:focus { border-color: var(--accent); }
+
+      /* 로그 박스 */
+      .log-box { background: #1e293b; border-radius: 8px; padding: 12px 16px; margin-top: 10px; min-height: 56px; max-height: 180px; overflow-y: auto; }
+      .log-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 6px; font-weight: bold; }
+      .log-line { font-family: "Courier New", monospace; font-size: 0.82rem; line-height: 1.7; }
+      .log-line.green  { color: #86efac; }
+      .log-line.yellow { color: #fde68a; }
+      .log-line.red    { color: #fca5a5; }
+      .log-line.white  { color: #e2e8f0; }
+      .log-line.sky    { color: #7dd3fc; }
+
+      /* target vs currentTarget 데모 */
+      .target-demo-outer { background: #dbeafe; border: 2px solid #93c5fd; border-radius: 10px; padding: 20px; cursor: pointer; }
+      .target-demo-outer span.box-label { font-size: 0.78rem; color: #1e40af; font-weight: 600; display: block; margin-bottom: 12px; pointer-events: none; }
+      .target-demo-btns { display: flex; gap: 10px; pointer-events: none; }
+      .target-demo-btn { pointer-events: auto; }
+      .target-demo-btn { padding: 8px 16px; border-radius: 6px; border: 2px solid #60a5fa; background: #eff6ff; color: #1d4ed8; font-size: 0.85rem; font-family: inherit; cursor: pointer; font-weight: 600; }
+      .target-demo-btn:hover { background: #dbeafe; }
+
+      /* 버블링 박스 — 3단계 */
+      .tr-box { background: #dbeafe; border: 2px solid #93c5fd; border-radius: 8px; padding: 18px; cursor: pointer; }
+      .tr-box > .blbl { font-size: 0.78rem; font-weight: 600; color: #1e40af; display: block; margin-bottom: 10px; }
+      .td-box { background: #bfdbfe; border: 2px solid #60a5fa; border-radius: 6px; padding: 14px; cursor: pointer; }
+      .td-box > .blbl { font-size: 0.78rem; font-weight: 600; color: #1d4ed8; display: block; margin-bottom: 8px; }
+      .del-btn { display: inline-block; background: #fee2e2; border: 2px solid #fca5a5; border-radius: 6px; padding: 6px 14px; font-size: 0.82rem; color: #b91c1c; font-weight: 600; cursor: pointer; }
+
+      /* 자주 쓰는 이벤트 카드 */
+      .event-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+      .event-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 16px; }
+      .event-card .ec-name { font-family: "Courier New", monospace; font-size: 0.88rem; color: var(--accent-dark); font-weight: bold; margin-bottom: 4px; }
+      .event-card .ec-desc { font-size: 0.82rem; color: #64748b; margin-bottom: 10px; }
+      .event-card pre { margin: 0 0 10px; font-size: 0.8rem; }
+      .event-card .mini-demo { background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; font-size: 0.82rem; }
+      .event-card .mini-demo input,
+      .event-card .mini-demo select { width: 100%; padding: 6px 10px; border: 1.5px solid #e2e8f0; border-radius: 5px; font-size: 0.85rem; font-family: inherit; outline: none; margin-bottom: 6px; background: #f8fafc; }
+      .event-card .mini-demo input:focus { border-color: var(--accent); }
+      .event-card .mini-demo button { padding: 5px 12px; border-radius: 5px; border: none; background: #0284c7; color: white; font-size: 0.82rem; font-family: inherit; cursor: pointer; margin-bottom: 6px; }
+      .event-card .mini-result { font-family: "Courier New", monospace; font-size: 0.8rem; color: #0369a1; background: var(--accent-bg); border-radius: 4px; padding: 4px 8px; min-height: 24px; margin-top: 4px; }
+
+      footer { background: #0f172a; color: #475569; text-align: center; padding: 16px; font-size: 0.82rem; }
+    </style>
+  </head>
+  <body>
+
+    <header>
+      <div class="header-icon">⚡</div>
+      <h1>Event <span>JavaScript</span></h1>
+    </header>
+
+    <div class="layout">
+      <nav class="sidebar">
+        <div class="sidebar-inner">
+          <h2>목차</h2>
+          <ul>
+            <li><a href="#overview"><span class="nav-badge">개요</span></a></li>
+            <li><a href="#handling"><span class="nav-badge">이벤트 핸들링</span></a></li>
+            <li><a href="#object"><span class="nav-badge">이벤트 객체</span></a></li>
+            <li><a href="#prevent"><span class="nav-badge">preventDefault</span></a></li>
+            <li><a href="#bubbling"><span class="nav-badge">이벤트 버블링</span></a></li>
+            <li><a href="#common"><span class="nav-badge">자주 쓰는 이벤트</span></a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <main>
+
+        <!-- 1. 개요 -->
+        <section class="section" id="overview">
+          <div class="section-header"><h2>이벤트란?</h2></div>
+          <p>특정 행위에 의해 발생하는 것입니다. 이벤트는 특정 조건을 만족하면 <strong>항상 발생</strong>하도록 설계되어 있습니다.</p>
+          <div class="event-tags">
+            <span class="event-tag">click</span>
+            <span class="event-tag">input</span>
+            <span class="event-tag">submit</span>
+            <span class="event-tag">change</span>
+            <span class="event-tag">keydown</span>
+            <span class="event-tag">keyup</span>
+            <span class="event-tag">focus</span>
+            <span class="event-tag">blur</span>
+            <span class="event-tag">mouseover</span>
+            <span class="event-tag">scroll</span>
+            <span class="event-tag">DOMContentLoaded</span>
+          </div>
+        </section>
+
+        <!-- 2. 이벤트 핸들링 -->
+        <section class="section" id="handling">
+          <div class="section-header"><h2>이벤트 핸들링</h2></div>
+          <p>이벤트가 발생했을 때 처리하는 방법은 세 가지입니다.</p>
+
+          <h3>1. 인라인 이벤트 핸들링</h3>
+          <p>HTML 태그에 직접 이벤트를 작성하는 방식입니다.</p>
+          <div class="code-block">
+            <pre><code class="language-html">&lt;input id="inp" type="text" oninput="print()" /&gt;
+&lt;script&gt;
+  const input = document.getElementById("inp");
+  function print() {
+    console.log(input.value);
+  }
+&lt;/script&gt;</code></pre>
+          </div>
+
+          <h3>2. 이벤트 핸들러 프로퍼티 방식</h3>
+          <div class="code-block">
+            <pre><code class="language-html">&lt;input id="inp" type="text" /&gt;
+&lt;script&gt;
+  const input = document.getElementById("inp");
+  input.oninput = function () {
+    console.log(input.value);
+  };
+&lt;/script&gt;</code></pre>
+          </div>
+          <div class="warn">
+            하나의 이벤트에 핸들러를 <strong>하나밖에 등록할 수 없습니다.</strong> 나중에 등록한 핸들러가 이전 것을 덮어씁니다. 실무에서는 거의 사용하지 않습니다.
+          </div>
+
+          <h3>3. addEventListener() — 권장</h3>
+          <p>가장 많이 사용하는 방식입니다. 하나의 이벤트에 여러 핸들러를 등록할 수 있습니다.</p>
+          <div class="code-block">
+            <pre><code class="language-html">&lt;input id="inp" type="text" /&gt;
+&lt;script&gt;
+  const input = document.getElementById("inp");
+  input.addEventListener("input", function () {
+    console.log("input 이벤트 발생");
+  });
+&lt;/script&gt;</code></pre>
+          </div>
+          <div class="tip">
+            React 등 프레임워크에서는 JSX 기반 인라인 방식(<code>onClick</code>, <code>onChange</code>)을 주로 사용합니다. 바닐라 JS에서는 <code>addEventListener</code>가 표준입니다.
+          </div>
+        </section>
+
+        <!-- 3. 이벤트 객체 -->
+        <section class="section" id="object">
+          <div class="section-header">
+            <h2>이벤트 객체</h2>
+            <span class="badge">event</span>
+          </div>
+          <p>이벤트가 발생하면 핸들러 함수에 <strong>이벤트 객체</strong>가 자동으로 전달됩니다.</p>
+
+          <h3>주요 프로퍼티</h3>
+          <div class="code-block">
+            <pre><code class="language-javascript">element.addEventListener("click", function (event) {
+  console.log(event.type);          // 이벤트 종류 ("click")
+  console.log(event.target);        // 실제 이벤트가 발생한 요소
+  console.log(event.currentTarget); // 핸들러가 등록된 요소
+});</code></pre>
+          </div>
+
+          <h3>target vs currentTarget</h3>
+          <p><code>event.target</code>은 <strong>실제로 클릭된 요소</strong>, <code>event.currentTarget</code>은 <strong>핸들러가 등록된 요소</strong>입니다. 아래에서 각 버튼을 클릭해 차이를 확인해보세요.</p>
+          <div class="code-block">
+            <pre><code class="language-javascript">// 부모(outer)에만 핸들러 등록
+outer.addEventListener("click", function (e) {
+  console.log(e.target);        // 실제로 클릭한 요소 (버튼 A or B or outer)
+  console.log(e.currentTarget); // 항상 outer — 핸들러가 등록된 곳
+});</code></pre>
+          </div>
+
+          <div class="demo">
+            <div class="demo-label">🔍 데모 — target vs currentTarget</div>
+            <p style="font-size:0.83rem;color:#64748b;margin-bottom:12px">핸들러는 파란 영역(부모)에만 등록되어 있습니다. 각 버튼을 클릭해보세요.</p>
+            <div class="target-demo-outer" id="outer">
+              <span class="box-label">📦 outer (핸들러 등록된 곳 — currentTarget)</span>
+              <div class="target-demo-btns">
+                <button class="target-demo-btn" id="btnA">버튼 A</button>
+                <button class="target-demo-btn" id="btnB">버튼 B</button>
+              </div>
+            </div>
+            <div class="log-box" id="targetLog">
+              <div class="log-label">▶ 이벤트 로그</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. preventDefault -->
+        <section class="section" id="prevent">
+          <div class="section-header">
+            <h2>preventDefault()</h2>
+            <span class="badge">preventDefault</span>
+          </div>
+          <p>이벤트의 <strong>기본 동작을 막습니다.</strong> <code>submit</code> 이벤트의 기본 동작은 페이지 새로고침인데, <code>preventDefault()</code>로 막고 직접 처리할 수 있습니다.</p>
+
+          <div class="tab-wrap" id="preventTab">
+            <div class="tab-btns">
+              <button class="tab-btn active" data-tab="prevent-before">❌ 적용 전</button>
+              <button class="tab-btn"        data-tab="prevent-after">✅ 적용 후</button>
+            </div>
+            <div class="tab-content active" id="prevent-before">
+              <p style="font-size:0.88rem;color:#64748b;margin-bottom:12px">기본 동작 그대로 — 폼 제출 시 <strong>페이지가 새로고침</strong>됩니다.</p>
+              <div class="code-block">
+                <pre><code class="language-javascript">form.addEventListener("submit", function (e) {
+  // preventDefault() 없음 → 페이지 새로고침 발생
+});</code></pre>
+              </div>
+              <div class="demo">
+                <div class="demo-label">🔴 데모 — 적용 전 (제출 시 새로고침 발생)</div>
+                <form id="formBefore">
+                  <input class="demo-inp" type="text" placeholder="아무 내용 입력 후 제출" />
+                  <button type="submit" class="demo-btn primary">제출</button>
+                </form>
+              </div>
+            </div>
+            <div class="tab-content" id="prevent-after">
+              <p style="font-size:0.88rem;color:#64748b;margin-bottom:12px"><code>preventDefault()</code> 적용 — 새로고침 없이 <strong>입력값을 직접 처리</strong>합니다.</p>
+              <div class="code-block">
+                <pre><code class="language-javascript">form.addEventListener("submit", function (e) {
+  e.preventDefault(); // 기본 동작(새로고침) 차단
+  console.log("입력값:", input.value);
+});</code></pre>
+              </div>
+              <div class="demo">
+                <div class="demo-label">🟢 데모 — 적용 후 (새로고침 없음)</div>
+                <form id="formAfter">
+                  <input class="demo-inp" id="formAfterInput" type="text" placeholder="아무 내용 입력 후 제출" />
+                  <button type="submit" class="demo-btn primary">제출</button>
+                </form>
+                <div class="log-box" id="preventLog">
+                  <div class="log-label">▶ 처리 결과</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. 이벤트 버블링 -->
+        <section class="section" id="bubbling">
+          <div class="section-header">
+            <h2>이벤트 버블링</h2>
+            <span class="badge">stopPropagation</span>
+          </div>
+          <p>자식 요소에서 발생한 이벤트가 <strong>부모 요소로 전파</strong>되는 현상입니다. 아래 예시는 button → td → tr 3단계 구조에서 각 요소에 핸들러가 등록되어 있습니다.</p>
+          <div class="code-block">
+            <pre><code class="language-html">&lt;tr id="tr"&gt;
+  &lt;td id="td"&gt;
+    &lt;button id="btn"&gt;삭제&lt;/button&gt;
+  &lt;/td&gt;
+&lt;/tr&gt;</code></pre>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-javascript">tr.addEventListener("click",  () => console.log("tr 클릭"));
+td.addEventListener("click",  () => console.log("td 클릭"));
+btn.addEventListener("click", () => console.log("버튼 클릭"));</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 버튼 클릭 시 출력 순서</div>
+              <pre><code>버튼 클릭
+td 클릭    ← 버블링
+tr 클릭    ← 버블링</code></pre>
+            </div>
+          </div>
+
+          <div class="tab-wrap" id="bubbleTab">
+            <div class="tab-btns">
+              <button class="tab-btn active" data-tab="bubble-before">❌ stopPropagation 없음</button>
+              <button class="tab-btn"        data-tab="bubble-after">✅ stopPropagation 적용</button>
+            </div>
+
+            <!-- 버블링: 적용 전 -->
+            <div class="tab-content active" id="bubble-before">
+              <p style="font-size:0.88rem;color:#64748b;margin-bottom:12px">버튼 클릭 시 이벤트가 td → tr 순으로 <strong>버블링되어 모든 핸들러가 실행</strong>됩니다.</p>
+              <div class="code-block">
+                <pre><code class="language-javascript">const tr  = document.getElementById("tr");
+const td  = document.getElementById("td");
+const btn = document.getElementById("btn");
+
+tr.addEventListener("click",  () => console.log("tr — 상세화면 이동"));
+td.addEventListener("click",  () => console.log("td — 핸들러 실행"));
+btn.addEventListener("click", () => console.log("버튼 — 삭제 처리"));</code></pre>
+              </div>
+              <div class="demo">
+                <div class="demo-label">🔴 데모 — 버블링 발생 (버튼 클릭 시 tr까지 전파)</div>
+                <div class="tr-box" id="bb-tr">
+                  <span class="blbl">tr (최상위 부모) — 클릭 시 상세화면 이동</span>
+                  <div class="td-box" id="bb-td">
+                    <span class="blbl">td (자식)</span>
+                    <span class="del-btn" id="bb-btn">🗑 삭제</span>
+                  </div>
+                </div>
+                <div class="log-box" id="bbBeforeLog">
+                  <div class="log-label">▶ 이벤트 로그</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 버블링: 적용 후 -->
+            <div class="tab-content" id="bubble-after">
+              <p style="font-size:0.88rem;color:#64748b;margin-bottom:12px">버튼 핸들러에 <code>stopPropagation()</code>을 추가하면 <strong>td · tr로의 전파가 차단</strong>됩니다.</p>
+              <div class="code-block">
+                <pre><code class="language-javascript">const tr  = document.getElementById("tr");
+const td  = document.getElementById("td");
+const btn = document.getElementById("btn");
+
+tr.addEventListener("click",  () => console.log("tr — 상세화면 이동"));
+td.addEventListener("click",  () => console.log("td — 핸들러 실행"));
+btn.addEventListener("click", (e) => {
+  e.stopPropagation(); // td · tr로의 버블링 차단
+  console.log("버튼 — 삭제 처리");
+});</code></pre>
+              </div>
+              <div class="demo">
+                <div class="demo-label">🟢 데모 — 버블링 차단 (버튼 핸들러만 실행)</div>
+                <div class="tr-box" id="ba-tr">
+                  <span class="blbl">tr (최상위 부모) — 클릭 시 상세화면 이동</span>
+                  <div class="td-box" id="ba-td">
+                    <span class="blbl">td (자식)</span>
+                    <span class="del-btn" id="ba-btn">🗑 삭제</span>
+                  </div>
+                </div>
+                <div class="log-box" id="bbAfterLog">
+                  <div class="log-label">▶ 이벤트 로그</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. 자주 쓰는 이벤트 -->
+        <section class="section" id="common">
+          <div class="section-header"><h2>자주 쓰는 이벤트</h2></div>
+          <div class="event-cards">
+
+            <div class="event-card">
+              <div class="ec-name">click</div>
+              <div class="ec-desc">요소를 클릭했을 때 발생</div>
+              <pre><code class="language-javascript">btn.addEventListener("click", (e) => {
+  console.log("클릭!", e.target.textContent);
+});</code></pre>
+              <div class="mini-demo">
+                <button id="ec-click-btn">버튼 클릭</button>
+                <div class="mini-result" id="ec-click-result">—</div>
+              </div>
+            </div>
+
+            <div class="event-card">
+              <div class="ec-name">submit</div>
+              <div class="ec-desc">폼이 제출될 때. 항상 preventDefault()와 함께 사용</div>
+              <pre><code class="language-javascript">form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  console.log(input.value);
+});</code></pre>
+              <div class="mini-demo">
+                <form id="ec-submit-form">
+                  <input type="text" id="ec-submit-input" placeholder="입력 후 엔터 또는 버튼" />
+                  <button type="submit">제출</button>
+                </form>
+                <div class="mini-result" id="ec-submit-result">—</div>
+              </div>
+            </div>
+
+            <div class="event-card">
+              <div class="ec-name">input</div>
+              <div class="ec-desc">입력값이 바뀔 때마다 실시간으로 발생</div>
+              <pre><code class="language-javascript">input.addEventListener("input", (e) => {
+  console.log(e.target.value);
+});</code></pre>
+              <div class="mini-demo">
+                <input type="text" id="ec-input-inp" placeholder="실시간 입력 확인" />
+                <div class="mini-result" id="ec-input-result">—</div>
+              </div>
+            </div>
+
+            <div class="event-card">
+              <div class="ec-name">change</div>
+              <div class="ec-desc">값이 변경되고 포커스를 잃었을 때 발생</div>
+              <pre><code class="language-javascript">select.addEventListener("change", (e) => {
+  console.log(e.target.value);
+});</code></pre>
+              <div class="mini-demo">
+                <select id="ec-change-sel">
+                  <option value="">선택하세요</option>
+                  <option value="전자기기">전자기기</option>
+                  <option value="주변기기">주변기기</option>
+                  <option value="가구">가구</option>
+                </select>
+                <div class="mini-result" id="ec-change-result">—</div>
+              </div>
+            </div>
+
+            <div class="event-card">
+              <div class="ec-name">keydown</div>
+              <div class="ec-desc">키보드를 눌렀을 때. 어떤 키인지 확인 가능</div>
+              <pre><code class="language-javascript">input.addEventListener("keydown", (e) => {
+  console.log(e.key);
+});</code></pre>
+              <div class="mini-demo">
+                <input type="text" id="ec-key-inp" placeholder="아무 키나 눌러보세요" />
+                <div class="mini-result" id="ec-key-result">—</div>
+              </div>
+            </div>
+
+            <div class="event-card">
+              <div class="ec-name">focus · blur</div>
+              <div class="ec-desc">포커스를 얻을 때 / 잃을 때</div>
+              <pre><code class="language-javascript">input.addEventListener("focus", () => { ... });
+input.addEventListener("blur",  () => { ... });</code></pre>
+              <div class="mini-demo">
+                <input type="text" id="ec-focus-inp" placeholder="클릭해서 포커스 주고 빼보기" />
+                <div class="mini-result" id="ec-focus-result">—</div>
+              </div>
+            </div>
+
+            <div class="event-card">
+              <div class="ec-name">mouseover · mouseout</div>
+              <div class="ec-desc">마우스가 요소 위에 올라올 때 / 벗어날 때</div>
+              <pre><code class="language-javascript">el.addEventListener("mouseover", () => { ... });
+el.addEventListener("mouseout",  () => { ... });</code></pre>
+              <div class="mini-demo">
+                <div id="ec-mouse-box" style="background:#f1f5f9;border:1.5px solid #e2e8f0;border-radius:6px;padding:10px;text-align:center;font-size:0.85rem;color:#64748b;cursor:default">
+                  마우스를 올려보세요
+                </div>
+                <div class="mini-result" id="ec-mouse-result">—</div>
+              </div>
+            </div>
+
+            <div class="event-card">
+              <div class="ec-name">DOMContentLoaded</div>
+              <div class="ec-desc">HTML 파싱 완료 시. 스크립트를 &lt;head&gt;에 넣을 때 사용</div>
+              <pre><code class="language-javascript">document.addEventListener(
+  "DOMContentLoaded", () => {
+    console.log("DOM 준비 완료");
+  }
+);</code></pre>
+              <div class="mini-demo">
+                <div class="mini-result" id="ec-dom-result">—</div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <footer>
+      <p>JavaScript Event &nbsp;|&nbsp; 학습용 문서</p>
+    </footer>
+
+    <script>
+      // ── 탭 공통 ──
+      document.querySelectorAll(".tab-wrap").forEach(wrap => {
+        wrap.querySelectorAll(".tab-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            wrap.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            wrap.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById(btn.dataset.tab).classList.add("active");
+          });
+        });
+      });
+
+      // ── 로그 헬퍼 ──
+      function addLog(boxId, msg, cls = "white") {
+        const box = document.getElementById(boxId);
+        const line = document.createElement("div");
+        line.className = "log-line " + cls;
+        line.textContent = msg;
+        box.appendChild(line);
+        box.scrollTop = box.scrollHeight;
+      }
+
+      // ── target vs currentTarget 데모 ──
+      document.getElementById("outer").addEventListener("click", e => {
+        const isOuter = e.target === e.currentTarget;
+        addLog("targetLog", `target: <${e.target.tagName}> id="${e.target.id || '(없음)'}"`, "yellow");
+        addLog("targetLog", `currentTarget: <${e.currentTarget.tagName}> id="outer"  ${isOuter ? "← target과 동일" : "← target과 다름!"}`, "green");
+        addLog("targetLog", "─────────────────────────────────", "white");
+      });
+
+      // ── preventDefault 데모 ──
+      document.getElementById("formAfter").addEventListener("submit", e => {
+        e.preventDefault();
+        const val = document.getElementById("formAfterInput").value;
+        addLog("preventLog", `✅ preventDefault() 적용 — 입력값: "${val}" | 새로고침 없음`, "green");
+      });
+
+      // ── 버블링: 적용 전 (button → td → tr 모두 실행) ──
+      document.getElementById("bb-tr").addEventListener("click", () => {
+        addLog("bbBeforeLog", "🔵 tr 핸들러 실행 → 상세화면 이동", "yellow");
+        addLog("bbBeforeLog", "──────────────────────────────", "white");
+      });
+      document.getElementById("bb-td").addEventListener("click", () => {
+        addLog("bbBeforeLog", "🟡 td 핸들러 실행", "sky");
+      });
+      document.getElementById("bb-btn").addEventListener("click", () => {
+        addLog("bbBeforeLog", "🔴 버튼 핸들러 실행 → 삭제 처리", "red");
+      });
+
+      // ── 버블링: 적용 후 (button에서 stopPropagation) ──
+      document.getElementById("ba-tr").addEventListener("click", () => {
+        addLog("bbAfterLog", "🔵 tr 핸들러 실행 → 상세화면 이동", "yellow");
+        addLog("bbAfterLog", "──────────────────────────────", "white");
+      });
+      document.getElementById("ba-td").addEventListener("click", () => {
+        addLog("bbAfterLog", "🟡 td 핸들러 실행", "sky");
+      });
+      document.getElementById("ba-btn").addEventListener("click", e => {
+        e.stopPropagation();
+        addLog("bbAfterLog", "🟢 버튼 핸들러 실행 → 삭제 처리 (td · tr 전파 차단)", "green");
+        addLog("bbAfterLog", "──────────────────────────────", "white");
+      });
+
+      // ── 자주 쓰는 이벤트 미니 데모 ──
+      // click — 버튼 배경 플래시
+      const ecClickBtn = document.getElementById("ec-click-btn");
+      ecClickBtn.addEventListener("click", e => {
+        document.getElementById("ec-click-result").textContent = `클릭! target: "${e.target.textContent}"`;
+        ecClickBtn.style.background = "#38bdf8";
+        ecClickBtn.style.color = "#fff";
+        setTimeout(() => { ecClickBtn.style.background = ""; ecClickBtn.style.color = ""; }, 300);
+      });
+
+      // submit — form 테두리 강조 후 복귀
+      const ecSubmitForm = document.getElementById("ec-submit-form");
+      ecSubmitForm.style.borderRadius = "6px";
+      ecSubmitForm.style.transition = "outline 0.1s";
+      ecSubmitForm.addEventListener("submit", e => {
+        e.preventDefault();
+        const v = document.getElementById("ec-submit-input").value;
+        document.getElementById("ec-submit-result").textContent = `제출됨 — 입력값: "${v}"`;
+        ecSubmitForm.style.outline = "2.5px solid #38bdf8";
+        setTimeout(() => ecSubmitForm.style.outline = "none", 600);
+      });
+
+      // input — 입력 중 테두리 강조
+      const ecInputInp = document.getElementById("ec-input-inp");
+      ecInputInp.addEventListener("input", e => {
+        document.getElementById("ec-input-result").textContent = `현재 값: "${e.target.value}"`;
+        ecInputInp.style.borderColor = "#38bdf8";
+        ecInputInp.style.background = "#f0f9ff";
+        clearTimeout(ecInputInp._t);
+        ecInputInp._t = setTimeout(() => {
+          ecInputInp.style.borderColor = "#e2e8f0";
+          ecInputInp.style.background = "#f8fafc";
+        }, 600);
+      });
+
+      // change — select 배경 플래시
+      const ecChangeSel = document.getElementById("ec-change-sel");
+      ecChangeSel.addEventListener("change", e => {
+        document.getElementById("ec-change-result").textContent = `선택됨: "${e.target.value}"`;
+        ecChangeSel.style.background = "#f0f9ff";
+        ecChangeSel.style.borderColor = "#38bdf8";
+        setTimeout(() => {
+          ecChangeSel.style.background = "#f8fafc";
+          ecChangeSel.style.borderColor = "#e2e8f0";
+        }, 600);
+      });
+
+      // keydown — 테두리 플래시
+      const ecKeyInp = document.getElementById("ec-key-inp");
+      ecKeyInp.addEventListener("keydown", e => {
+        document.getElementById("ec-key-result").textContent = `key: "${e.key}"  code: "${e.code}"`;
+        ecKeyInp.style.borderColor = "#38bdf8";
+        ecKeyInp.style.background = "#f0f9ff";
+        clearTimeout(ecKeyInp._t);
+        ecKeyInp._t = setTimeout(() => {
+          ecKeyInp.style.borderColor = "#e2e8f0";
+          ecKeyInp.style.background = "#f8fafc";
+        }, 300);
+      });
+
+      // focus / blur — 테두리 + 배경
+      const focusInp = document.getElementById("ec-focus-inp");
+      focusInp.addEventListener("focus", () => {
+        focusInp.style.borderColor = "#38bdf8";
+        focusInp.style.background = "#f0f9ff";
+        document.getElementById("ec-focus-result").textContent = "focus 이벤트 발생 — 포커스 얻음";
+      });
+      focusInp.addEventListener("blur", () => {
+        focusInp.style.borderColor = "#e2e8f0";
+        focusInp.style.background = "#f8fafc";
+        document.getElementById("ec-focus-result").textContent = "blur 이벤트 발생 — 포커스 잃음";
+      });
+
+      // mouseover / mouseout — 배경 + 테두리
+      const mouseBox = document.getElementById("ec-mouse-box");
+      mouseBox.addEventListener("mouseover", () => {
+        mouseBox.style.background = "#e0f2fe";
+        mouseBox.style.borderColor = "#38bdf8";
+        mouseBox.style.color = "#0369a1";
+        document.getElementById("ec-mouse-result").textContent = "mouseover — 마우스 올라옴";
+      });
+      mouseBox.addEventListener("mouseout", () => {
+        mouseBox.style.background = "#f1f5f9";
+        mouseBox.style.borderColor = "#e2e8f0";
+        mouseBox.style.color = "#64748b";
+        document.getElementById("ec-mouse-result").textContent = "mouseout — 마우스 벗어남";
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("ec-dom-result").textContent = "DOMContentLoaded 발생 — DOM 준비 완료!";
+      });
+    </script>
+
+  </body>
+</html>
