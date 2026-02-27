@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOM 학습 사이트</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:#fff; --bg2:#f9f9fb; --border:#d7d7db;
+    --text:#15141a; --muted:#5b5b66; --subtle:#8f8f9d;
+    --blue:#0060df; --blue-l:#deeafc; --blue-d:#003eaa;
+    --green:#017a40; --green-l:#d5f5e3;
+    --orange:#cd3600; --orange-l:#fde5d8;
+    --purple:#7a42f4; --purple-l:#ede5fd;
+    --red:#c00;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+  header { height:56px; display:flex; align-items:center; gap:12px; padding:0 24px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg); z-index:100; }
+  .logo-icon { width:30px; height:30px; background:var(--blue); border-radius:6px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:13px; }
+  .logo-text { font-size:1rem; font-weight:700; }
+  .logo-sub { font-size:.74rem; color:var(--subtle); margin-left:4px; font-weight:400; }
+
+  .layout { display:flex; height:calc(100vh - 56px); }
+
+  .sidebar { width:242px; border-right:1px solid var(--border); overflow-y:auto; flex-shrink:0; background:var(--bg2); padding:16px 0; }
+  .sb-sec { padding:6px 18px 3px; font-size:.67rem; font-weight:700; color:var(--subtle); text-transform:uppercase; letter-spacing:.08em; margin-top:8px; }
+  .nav-item { display:flex; align-items:center; justify-content:space-between; padding:7px 18px; font-size:.83rem; color:var(--muted); cursor:pointer; border-left:3px solid transparent; transition:all .1s; }
+  .nav-item:hover { color:var(--text); background:#eee; }
+  .nav-item.active { color:var(--blue); border-left-color:var(--blue); background:var(--blue-l); font-weight:600; }
+  .nb { font-size:.63rem; padding:1px 5px; border-radius:3px; font-weight:700; }
+  .nb-b { background:var(--blue-l); color:var(--blue-d); }
+  .nb-g { background:var(--green-l); color:var(--green); }
+  .nb-p { background:var(--purple-l); color:var(--purple); }
+  .nb-r { background:#fff0f0; color:var(--red); }
+
+  .main { flex:1; overflow-y:auto; }
+  .lesson { display:none; max-width:1040px; padding:32px 36px 60px; margin:0 auto; }
+  .lesson.active { display:block; }
+  .lesson-title { font-size:1.65rem; font-weight:700; margin-bottom:8px; }
+  .lesson-desc { font-size:.9rem; color:var(--muted); line-height:1.75; padding-bottom:20px; border-bottom:1px solid var(--border); margin-bottom:22px; }
+  .lesson-desc code { background:#f4f4f5; padding:1px 5px; border-radius:3px; font-size:.84em; color:var(--orange); font-family:monospace; }
+  h3 { font-size:.82rem; font-weight:700; margin:0 0 8px; color:var(--subtle); text-transform:uppercase; letter-spacing:.06em; }
+  .note { display:flex; gap:10px; padding:11px 15px; border-radius:6px; font-size:.83rem; margin-bottom:18px; line-height:1.6; }
+  .note.info  { background:var(--blue-l);   border-left:4px solid var(--blue); }
+  .note.warn  { background:var(--orange-l); border-left:4px solid var(--orange); }
+  .note.tip   { background:var(--green-l);  border-left:4px solid var(--green); }
+  .note-icon { flex-shrink:0; }
+
+  /* SPLIT */
+  .split { display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; }
+
+  /* CODE PANEL */
+  .code-panel { display:flex; flex-direction:column; gap:12px; }
+  .code-block { border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+  .code-header { display:flex; align-items:center; justify-content:space-between; padding:6px 12px; border-bottom:1px solid #2d2d30; background:#252528; }
+  .lang-badge { font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:4px; }
+  .lb-html { background:var(--orange-l); color:var(--orange); }
+  .lb-js   { background:var(--blue-l);   color:var(--blue-d); }
+  .copy-btn { padding:3px 9px; background:#3a3a3e; border:1px solid #555; color:#ccc; border-radius:4px; cursor:pointer; font-size:.71rem; transition:background .12s; }
+  .copy-btn:hover { background:#505055; }
+  .copy-btn.copied { background:#14532d; border-color:#16a34a; color:#4ade80; }
+  pre { padding:14px 16px; background:#1b1b1e; overflow-x:auto; margin:0; }
+  pre code { font-family:'Fira Code',Consolas,monospace; font-size:.78rem; line-height:1.85; color:#e2e8f0; }
+
+  /* syntax */
+  .kw{color:#c084fc} .fn{color:#60a5fa} .str{color:#4ade80} .cmt{color:#6b7280;font-style:italic} .num{color:#fb923c} .attr-name{color:#fbbf24}
+  .hl-id  { color:#e8a000; font-weight:700; background:#7c5a0018; border-radius:2px; padding:0 1px; }
+  .hl-cls { color:#00a85a; font-weight:700; background:#01784018; border-radius:2px; padding:0 1px; }
+  .hl-tag { color:#e0622a; font-weight:700; background:#cd360018; border-radius:2px; padding:0 1px; }
+
+  /* LEGEND */
+  .legend { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; font-size:.75rem; }
+  .leg { display:flex; align-items:center; gap:5px; color:var(--muted); }
+  .leg-dot { width:10px; height:10px; border-radius:2px; }
+  .ld-id{background:#e8a000} .ld-cls{background:#00a85a} .ld-tag{background:#e0622a}
+
+  /* ── 실습 패널 공통 ── */
+  .practice-tabs { display:flex; border-bottom:1px solid var(--border); background:var(--bg2); }
+  .ptab { padding:8px 16px; font-size:.8rem; font-weight:600; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; transition:all .12s; }
+  .ptab:hover { color:var(--text); }
+  .ptab.active { color:var(--blue); border-bottom-color:var(--blue); background:var(--bg); }
+  .practice-panel { border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+  .pane { display:none; }
+  .pane.active { display:block; }
+
+  /* 단계별 실행 */
+  .step-area { padding:14px; background:var(--bg); }
+  .step-list { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+  .step-item {
+    display:flex; align-items:flex-start; gap:10px; padding:9px 12px;
+    border:1px solid var(--border); border-radius:6px; cursor:pointer;
+    font-size:.8rem; font-family:'Fira Code',Consolas,monospace;
+    background:var(--bg2); transition:all .12s; line-height:1.5;
+  }
+  .step-item:hover { border-color:var(--blue); background:var(--blue-l); }
+  .step-item.done { border-color:#ccc; background:#f4f4f5; color:var(--subtle); }
+  .step-item.active-step { border-color:var(--blue); background:var(--blue-l); font-weight:700; }
+  .step-num { font-size:.7rem; font-weight:700; color:var(--subtle); min-width:18px; margin-top:1px; }
+  .step-desc { font-size:.72rem; color:var(--muted); font-family:sans-serif; margin-top:2px; }
+
+  .dom-preview { background:#f9f9fb; border:1px solid var(--border); border-radius:6px; padding:12px; min-height:80px; margin-bottom:10px; }
+  .dom-preview-label { font-size:.68rem; color:var(--subtle); text-transform:uppercase; font-weight:700; letter-spacing:.06em; margin-bottom:8px; }
+  .step-log { background:#1b1b1e; border-radius:6px; padding:8px 12px; min-height:36px; max-height:80px; overflow-y:auto; }
+  .step-log p { font-size:.72rem; font-family:monospace; line-height:1.7; color:#4ade80; }
+  .step-log p.info { color:#60a5fa; }
+  .step-controls { display:flex; gap:6px; margin-bottom:10px; }
+
+  /* 코드 에디터 */
+  .editor-area { padding:14px; background:var(--bg); display:flex; flex-direction:column; gap:10px; }
+  .editor-wrap { border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+  .editor-header { padding:5px 10px; background:#252528; font-size:.7rem; color:#aaa; display:flex; justify-content:space-between; align-items:center; }
+  textarea.editor {
+    width:100%; padding:12px 14px; background:#1b1b1e; color:#e2e8f0;
+    font-family:'Fira Code',Consolas,monospace; font-size:.78rem; line-height:1.8;
+    border:none; resize:vertical; min-height:120px; outline:none;
+    tab-size:2;
+  }
+  .editor-result { background:#f9f9fb; border:1px solid var(--border); border-radius:6px; padding:12px; min-height:70px; }
+  .editor-result-label { font-size:.68rem; color:var(--subtle); text-transform:uppercase; font-weight:700; letter-spacing:.06em; margin-bottom:8px; }
+  .editor-log { background:#1b1b1e; border-radius:6px; padding:8px 12px; min-height:36px; max-height:70px; overflow-y:auto; }
+  .editor-log p { font-size:.72rem; font-family:monospace; line-height:1.7; color:#4ade80; }
+  .editor-log p.err { color:#f87171; }
+
+  /* 데모 리스트 공통 */
+  .demo-ul { list-style:none; padding:0; }
+  .demo-ul li { padding:5px 10px; border:1px solid var(--border); border-radius:4px; margin-bottom:4px; font-size:.83rem; background:var(--bg); }
+
+  /* BUTTONS */
+  .btn { padding:5px 12px; border-radius:5px; border:1px solid transparent; cursor:pointer; font-size:.79rem; font-weight:600; transition:all .12s; }
+  .btn-blue  { background:var(--blue);  color:#fff; border-color:var(--blue); }
+  .btn-blue:hover  { background:var(--blue-d); }
+  .btn-green { background:var(--green); color:#fff; border-color:var(--green); }
+  .btn-green:hover { background:#015c30; }
+  .btn-ghost { background:var(--bg); color:var(--muted); border-color:var(--border); }
+  .btn-ghost:hover { background:var(--bg2); }
+  .btn-red   { background:#fff; color:var(--red); border-color:#e5b3b3; }
+  .btn-red:hover   { background:#fff0f0; }
+
+  .demo-input { padding:5px 9px; border:1px solid var(--border); border-radius:5px; font-size:.82rem; color:var(--text); }
+  .demo-input:focus { outline:none; border-color:var(--blue); box-shadow:0 0 0 2px var(--blue-l); }
+
+  /* query result */
+  .qres { margin-top:10px; padding:8px 12px; border-radius:5px; background:var(--bg2); border:1px solid var(--border); font-size:.77rem; font-family:monospace; color:var(--muted); min-height:34px; }
+  .qres.hit { border-color:var(--blue); background:var(--blue-l); color:var(--blue-d); }
+
+  /* classList target */
+  #cls-target { display:inline-block; padding:10px 20px; border-radius:6px; border:2px solid var(--border); background:var(--bg2); font-weight:600; font-size:.9rem; transition:all .25s; }
+  #cls-target.highlight { background:var(--blue-l); border-color:var(--blue); color:var(--blue-d); font-size:1.05rem; }
+  #cls-target.danger    { background:#fff0f0; border-color:#e53e3e; color:var(--red); }
+
+  #attr-target { display:inline-block; padding:10px 18px; border-radius:6px; border:2px solid var(--border); background:var(--bg2); font-weight:600; transition:all .25s; }
+
+  #tr-list li { cursor:pointer; }
+  #tr-list li:hover { background:#eef; }
+  .tr-sel { outline:2px solid var(--blue)  !important; background:var(--blue-l)  !important; }
+  .tr-hit { outline:2px solid var(--green) !important; background:var(--green-l) !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">D</div>
+  <span class="logo-text">DOM Reference<span class="logo-sub">학습 사이트</span></span>
+</header>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="sb-sec">노드 추가</div>
+    <div class="nav-item active" onclick="show('create',this)">createElement로 추가 <span class="nb nb-g">기본</span></div>
+    <div class="nav-item" onclick="show('inner',this)">innerHTML 활용법 <span class="nb nb-b">속성</span></div>
+    <div class="sb-sec">조회 / 탐색</div>
+    <div class="nav-item" onclick="show('query',this)">엘리먼트 조회</div>
+    <div class="nav-item" onclick="show('attr',this)">속성 조회 / 수정</div>
+    <div class="nav-item" onclick="show('traverse',this)">부모 · 자식 · 형제 탐색</div>
+    <div class="sb-sec">조작</div>
+    <div class="nav-item" onclick="show('remove',this)">노드 제거</div>
+    <div class="nav-item" onclick="show('classlist',this)">classList <span class="nb nb-p">실무 필수</span></div>
+  </nav>
+
+  <div class="main">
+
+    <!-- createElement -->
+    <div class="lesson active" id="lesson-create">
+      <div class="lesson-title">document.createElement()</div>
+      <div class="lesson-desc">엘리먼트를 직접 생성해 DOM에 붙이는 가장 안전한 방법입니다. <strong>① 생성 → ② 세팅 → ③ 추가</strong> 3단계로 이루어집니다.</div>
+      <div class="note tip"><span class="note-icon">✅</span><span>기존 자식을 건드리지 않고 새 노드만 추가하므로 이벤트·입력값이 보존됩니다.</span></div>
+      <div class="legend"><div class="leg"><div class="leg-dot ld-id"></div>id 참조</div><div class="leg"><div class="leg-dot ld-tag"></div>태그 참조</div></div>
+      <div class="split">
+        <div class="code-panel">
+          <h3>HTML</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang-badge lb-html">HTML</span><button class="copy-btn" onclick="cp('h-create',this)">복사</button></div>
+            <pre><code id="h-create">&lt;<span class="hl-tag">ul</span> <span class="attr-name">id</span>=<span class="str">"<span class="hl-id">list</span>"</span>&gt;&lt;/<span class="hl-tag">ul</span>&gt;</code></pre>
+          </div>
+          <h3>JavaScript</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang-badge lb-js">JS</span><button class="copy-btn" onclick="cp('j-create',this)">복사</button></div>
+            <pre><code id="j-create"><span class="cmt">// 1. 생성</span>
+<span class="kw">const</span> li = document.<span class="fn">createElement</span>(<span class="str">"<span class="hl-tag">li</span>"</span>);
+
+<span class="cmt">// 2. 세팅</span>
+li.innerText = <span class="str">"아이템 텍스트"</span>;
+li.id = <span class="str">"<span class="hl-id">item-1</span>"</span>;
+li.<span class="fn">setAttribute</span>(<span class="str">"class"</span>, <span class="str">"<span class="hl-cls">list-item</span>"</span>);
+
+<span class="cmt">// input이 필요하면 innerHTML 활용</span>
+<span class="kw">const</span> li2 = document.<span class="fn">createElement</span>(<span class="str">"<span class="hl-tag">li</span>"</span>);
+li2.innerHTML = <span class="str">`&lt;input type="text" value="기본값"&gt;`</span>;
+
+<span class="cmt">// 3. 추가</span>
+list.<span class="fn">appendChild</span>(li);
+list.<span class="fn">appendChild</span>(li2);</code></pre>
+          </div>
+        </div>
+        <div>
+          <h3>실습</h3>
+          <div class="practice-panel">
+            <div class="practice-tabs">
+              <div class="ptab active" onclick="switchTab('create','step')">단계별 실행</div>
+              <div class="ptab" onclick="switchTab('create','editor')">코드 에디터</div>
+            </div>
+            <!-- 단계별 -->
+            <div class="pane active" id="create-step">
+              <div class="step-area">
+                <div class="dom-preview"><div class="dom-preview-label">DOM 미리보기</div><ul class="demo-ul" id="cr-preview"></ul></div>
+                <div class="step-controls">
+                  <button class="btn btn-blue" onclick="crStep()">▶ 다음 단계</button>
+                  <button class="btn btn-ghost" onclick="crReset()">초기화</button>
+                </div>
+                <div class="step-list" id="cr-steps">
+                  <div class="step-item" id="cr-s1"><span class="step-num">1</span><div><div>document.createElement("li")</div><div class="step-desc">li 엘리먼트 노드를 메모리에 생성</div></div></div>
+                  <div class="step-item" id="cr-s2"><span class="step-num">2</span><div><div>li.innerText = "새 아이템"</div><div class="step-desc">텍스트 내용 세팅</div></div></div>
+                  <div class="step-item" id="cr-s3"><span class="step-num">3</span><div><div>li.setAttribute("class", "list-item")</div><div class="step-desc">class 속성 추가</div></div></div>
+                  <div class="step-item" id="cr-s4"><span class="step-num">4</span><div><div>list.appendChild(li)</div><div class="step-desc">DOM에 추가 — 여기서 처음 화면에 나타남</div></div></div>
+                </div>
+                <div class="step-log" id="cr-log"></div>
+              </div>
+            </div>
+            <!-- 에디터 -->
+            <div class="pane" id="create-editor">
+              <div class="editor-area">
+                <div class="editor-result"><div class="editor-result-label">DOM 결과</div><ul class="demo-ul" id="cr-ed-preview"></ul></div>
+                <div class="editor-wrap">
+                  <div class="editor-header"><span>JavaScript</span><button class="btn btn-blue" style="padding:2px 10px;font-size:.72rem" onclick="runEditor('cr')">▶ 실행</button></div>
+                  <textarea class="editor" id="cr-ed" spellcheck="false">const li = document.createElement("li");
+li.innerText = "직접 입력해보세요";
+list.appendChild(li);</textarea>
+                </div>
+                <div class="editor-log" id="cr-ed-log"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- innerHTML -->
+    <div class="lesson" id="lesson-inner">
+      <div class="lesson-title">innerHTML 활용법</div>
+      <div class="lesson-desc"><code>innerHTML</code>은 읽기/쓰기 모두 가능한 속성입니다. <code>+=</code>가 아닌 <code>=</code>로 사용하면 유용한 경우가 있습니다.</div>
+      <div class="note warn"><span class="note-icon">⚠️</span><span><code>innerHTML +=</code>은 기존 자식을 전부 파괴하고 재생성합니다. 이벤트·입력값이 날아가므로 사용을 피하세요.</span></div>
+      <div class="legend"><div class="leg"><div class="leg-dot ld-id"></div>id 참조</div><div class="leg"><div class="leg-dot ld-tag"></div>태그 참조</div></div>
+      <div class="split">
+        <div class="code-panel">
+          <h3>HTML</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang-badge lb-html">HTML</span><button class="copy-btn" onclick="cp('h-inner',this)">복사</button></div>
+            <pre><code id="h-inner">&lt;<span class="hl-tag">ul</span> <span class="attr-name">id</span>=<span class="str">"<span class="hl-id">list</span>"</span>&gt;
+  &lt;<span class="hl-tag">li</span>&gt;기존 항목 1&lt;/<span class="hl-tag">li</span>&gt;
+  &lt;<span class="hl-tag">li</span>&gt;기존 항목 2&lt;/<span class="hl-tag">li</span>&gt;
+&lt;/<span class="hl-tag">ul</span>&gt;</code></pre>
+          </div>
+          <h3>JavaScript</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang-badge lb-js">JS</span><button class="copy-btn" onclick="cp('j-inner',this)">복사</button></div>
+            <pre><code id="j-inner"><span class="kw">const</span> list = document.<span class="fn">getElementById</span>(<span class="str">"<span class="hl-id">list</span>"</span>);
+
+<span class="cmt">// ① 자식 전체 비우기</span>
+list.innerHTML = <span class="str">""</span>;
+
+<span class="cmt">// ② 새 내용으로 완전 대체</span>
+list.innerHTML = <span class="str">`
+  &lt;<span class="hl-tag">li</span>&gt;새 항목 A&lt;/<span class="hl-tag">li</span>&gt;
+  &lt;<span class="hl-tag">li</span>&gt;새 항목 B&lt;/<span class="hl-tag">li</span>&gt;
+`</span>;
+
+<span class="cmt">// ③ 현재 HTML 구조 읽기</span>
+console.<span class="fn">log</span>(list.innerHTML);
+<span class="cmt">// → "&lt;li&gt;새 항목 A&lt;/li&gt;&lt;li&gt;새 항목 B&lt;/li&gt;"</span></code></pre>
+          </div>
+        </div>
+        <div>
+          <h3>실습</h3>
+          <div class="practice-panel">
+            <div class="practice-tabs">
+              <div class="ptab active" onclick="switchTab('inner','step')">단계별 실행</div>
+              <div class="ptab" onclick="switchTab('inner','editor')">코드 에디터</div>
+            </div>
+            <div class="pane active" id="inner-step">
+              <div class="step-area">
+                <div class="dom-preview"><div class="dom-preview-label">DOM 미리보기</div><ul class="demo-ul" id="in-preview"><li>기존 항목 1</li><li>기존 항목 2</li></ul></div>
+                <div class="step-controls">
+                  <button class="btn btn-blue" onclick="inStep()">▶ 다음 단계</button>
+                  <button class="btn btn-ghost" onclick="inReset()">초기화</button>
+                </div>
+                <div class="step-list">
+                  <div class="step-item" id="in-s1"><span class="step-num">1</span><div><div>list.innerHTML = ""</div><div class="step-desc">자식 노드 전체 제거</div></div></div>
+                  <div class="step-item" id="in-s2"><span class="step-num">2</span><div><div>list.innerHTML = "&lt;li&gt;새 항목 A&lt;/li&gt;&lt;li&gt;새 항목 B&lt;/li&gt;"</div><div class="step-desc">새 내용으로 완전 대체</div></div></div>
+                  <div class="step-item" id="in-s3"><span class="step-num">3</span><div><div>console.log(list.innerHTML)</div><div class="step-desc">현재 HTML 구조를 문자열로 읽기</div></div></div>
+                </div>
+                <div class="step-log" id="in-log"></div>
+              </div>
+            </div>
+            <div class="pane" id="inner-editor">
+              <div class="editor-area">
+                <div class="editor-result"><div class="editor-result-label">DOM 결과</div><ul class="demo-ul" id="in-ed-preview"><li>기존 항목 1</li><li>기존 항목 2</li></ul></div>
+                <div class="editor-wrap">
+                  <div class="editor-header"><span>JavaScript</span><button class="btn btn-blue" style="padding:2px 10px;font-size:.72rem" onclick="runEditor('in')">▶ 실행</button></div>
+                  <textarea class="editor" id="in-ed" spellcheck="false">// list = #list ul 요소
+list.innerHTML = "<li>직접 바꿔보세요</li>";</textarea>
+                </div>
+                <div class="editor-log" id="in-ed-log"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- query -->
+    <div class="lesson" id="lesson-query">
+      <div class="lesson-title">엘리먼트 조회</div>
+      <div class="lesson-desc">DOM에서 특정 노드를 찾는 메서드들입니다. <code>querySelector</code> / <code>querySelectorAll</code>은 CSS 선택자를 그대로 쓸 수 있어 가장 범용적입니다.</div>
+      <div class="note info"><span class="note-icon">ℹ️</span><span><code>HTMLCollection</code>은 라이브 컬렉션(DOM 변경 시 자동 갱신), <code>NodeList</code>는 정적 스냅샷입니다.</span></div>
+      <div class="legend"><div class="leg"><div class="leg-dot ld-id"></div>id 참조</div><div class="leg"><div class="leg-dot ld-cls"></div>class 참조</div><div class="leg"><div class="leg-dot ld-tag"></div>태그 참조</div></div>
+      <div class="split">
+        <div class="code-panel">
+          <h3>HTML</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang-badge lb-html">HTML</span><button class="copy-btn" onclick="cp('h-query',this)">복사</button></div>
+            <pre><code id="h-query">&lt;<span class="hl-tag">ul</span> <span class="attr-name">id</span>=<span class="str">"<span class="hl-id">list</span>"</span>&gt;
+  &lt;<span class="hl-tag">li</span> <span class="attr-name">id</span>=<span class="str">"<span class="hl-id">q-a</span>"</span> <span class="attr-name">class</span>=<span class="str">"<span class="hl-cls">item</span> <span class="hl-cls">fruit</span>"</span>&gt;🍎 사과&lt;/<span class="hl-tag">li</span>&gt;
+  &lt;<span class="hl-tag">li</span> <span class="attr-name">id</span>=<span class="str">"<span class="hl-id">q-b</span>"</span> <span class="attr-name">class</span>=<span class="str">"<span class="hl-cls">item</span> <span class="hl-cls">fruit</span>"</span>&gt;🍌 바나나&lt;/<span class="hl-tag">li</span>&gt;
+  &lt;<span class="hl-tag">li</span> <span class="attr-name">id</span>=<span class="str">"<span class="hl-id">q-c</span>"</span> <span class="attr-name">class</span>=<span class="str">"<span class="hl-cls">item</span> <span class="hl-cls">veggie</span>"</span>&gt;🥦 브로콜리&lt;/<span class="hl-tag">li</span>&gt;
+  &lt;<span class="hl-tag">li</span> <span class="attr-name">id</span>=<span class="str">"<span class="hl-id">q-d</span>"</span> <span class="attr-name">class</span>=<span class="str">"<span class="hl-cls">veggie</span>"</span>&gt;🥕 당근&lt;/<span class="hl-tag">li</span>&gt;
+&lt;/<span class="hl-tag">ul</span>&gt;</code></pre>
+          </div>
+          <h3>JavaScript</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang-badge lb-js">JS</span><button class="copy-btn" onclick="cp('j-query',this)">복사</button></div>
+            <pre><code id="j-query"><span class="cmt">// ID → 단일 Element</span>
+document.<span class="fn">getElementById</span>(<span class="str">"<span class="hl-id">q-b</span>"</span>)
+
+<span class="cmt">// 태그명 → HTMLCollection</span>
+document.<span class="fn">getElementsByTagName</span>(<span class="str">"<span class="hl-tag">li</span>"</span>)
+
+<span class="cmt">// 클래스명 → HTMLCollection</span>
+document.<span class="fn">getElementsByClassName</span>(<span class="str">"<span class="hl-cls">item</span>"</span>)
+
+<span class="cmt">// CSS 선택자 → 첫 번째 Element</span>
+document.<span class="fn">querySelector</span>(<span class="str">".<span class="hl-cls">fruit</span>"</span>)
+
+<span class="cmt">// CSS 선택자 → NodeList (전체)</span>
+document.<span class="fn">querySelectorAll</span>(<span class="str">"<span class="hl-tag">li</span>.<span class="hl-cls">item</span>"</span>)</code></pre>
+          </div>
+        </div>
+        <div>
+          <h3>실습</h3>
+          <div class="practice-panel">
+            <div class="practice-tabs">
+              <div class="ptab active" onclick="switchTab('query','step')">단계별 실행</div>
+              <div class="ptab" onclick="switchTab('query','editor')">코드 에디터</div>
+            </div>
+            <div class="pane active" id="query-step">
+              <div class="step-area">
+                <ul style="list-style:none;padding:0;margin-bottom:10px" id="q-list">
+                  <li id="q-a" class="item fruit" style="padding:5px 10px;border:1px solid var(--border);border-radius:4px;margin-bottom:4px;font-size:.83rem;background:var(--bg2)">🍎 사과 <span style="font-size:.7rem;color:var(--subtle)">#q-a .item .fruit</span></li>
+                  <li id="q-b" class="item fruit" style="padding:5px 10px;border:1px solid var(--border);border-radius:4px;margin-bottom:4px;font-size:.83rem;background:var(--bg2)">🍌 바나나 <span style="font-size:.7rem;color:var(--subtle)">#q-b .item .fruit</span></li>
+                  <li id="q-c" class="item veggie" style="padding:5px 10px;border:1px solid var(--border);border-radius:4px;margin-bottom:4px;font-size:.83rem;background:var(--bg2)">🥦 브로콜리 <span style="font-size:.7rem;color:var(--subtle)">#q-c .item .veggie</span></li>
+                  <li id="q-d" class="veggie" style="padding:5px 10px;border:1px solid var(--border);border-radius:4px;margin-bottom:4px;font-size:.83rem;background:var(--bg2)">🥕 당근 <span style="font-size:.7rem;color:var(--subtle)">#q-d .veggie</span></li>
+                </ul>
+                <div class="qres" id="q-res">버튼을 눌러 조회 결과를 확인하세요.</div>
+                <div style="display:flex;flex-direction:column;gap:5px;margin-top:10px">
+                  <div style="display:flex;gap:5px;flex-wrap:wrap">
+                    <button class="btn btn-blue" onclick="qDemo('id')">getElementById("q-b")</button>
+                    <button class="btn btn-blue" onclick="qDemo('tag')">getElementsByTagName("li")</button>
+                  </div>
+                  <div style="display:flex;gap:5px;flex-wrap:wrap">
+                    <button class="btn btn-green" onclick="qDemo('cls')">getElementsByClassName("item")</button>
+                    <button class="btn btn-green" onclick="qDemo('qs')">querySelector(".fruit")</button>
+                    <button class="btn btn-green" onclick="qDemo('qsa')">querySelectorAll("li.item")</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="pane" id="query-editor">
+              <div class="editor-area">
+                <div class="editor-result" style="margin-bottom:0">
+                  <div class="editor-result-label">조회 결과</div>
+                  <div id="q-ed-res" style="font-size:.78rem;font-family:monospace;color:var(--muted)">—</div>
+                </div>
+                <div class="editor-wrap">
+                  <div class="editor-header"><span>JavaScript</span><button class="btn btn-blue" style="padding:2px 10px;font-size:.72rem" onclick="runEditor('q')">▶ 실행</button></div>
+                  <textarea class="editor" id="q-ed" spellcheck="false">// 아래 샘플 DOM을 대상으로 조회해보세요
+// #q-a, #q-b, #q-c, #q-d / .item .fruit .veggie
+document.querySelector(".fruit")</textarea>
+                </div>
+                <div class="editor-log" id="q-ed-log"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- attr -->
+    <div class="lesson" id="lesson-attr">
+      <div class="lesson-title">속성 노드 조회 / 추가 / 수정</div>
+      <div class="lesson-desc"><code>getAttribute</code> / <code>setAttribute</code>로 임의 속성을 다루거나, <code>el.id</code> / <code>el.style</code>처럼 프로퍼티로 직접 접근할 수 있습니다.</div>
+      <div class="legend"><div class="leg"><div class="leg-dot ld-id"></div>id 참조</div></div>
+      <div class="split">
+        <div class="code-panel">
+          <h3>HTML</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang-badge lb-html">HTML</span><button class="copy-btn" onclick="cp('h-attr',this)">복사</button></div>
+            <pre><code id="h-attr">&lt;div <span class="attr-name">id</span>=<span class="str">"<span class="hl-id">target</span>"</span> <span class="attr-name">class</span>=<span class="str">"box"</span>&gt;
+  안녕하세요 👋
+&lt;/div&gt;</code></pre>
+          </div>
+          <h3>JavaScript</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang-badge lb-js">JS</span><button class="copy-btn" onclick="cp('j-attr',this)">복사</button></div>
+            <pre><code id="j-attr"><span class="kw">const</span> el = document.<span class="fn">querySelector</span>(<span class="str">"#<span class="hl-id">target</span>"</span>);
+
+<span class="cmt">// 조회</span>
+el.<span class="fn">getAttribute</span>(<span class="str">"class"</span>);   <span class="cmt">// "box"</span>
+el.id;                         <span class="cmt">// "target"</span>
+
+<span class="cmt">// 추가 / 수정</span>
+el.<span class="fn">setAttribute</span>(<span class="str">"data-value"</span>, <span class="str">"42"</span>);
+el.className = <span class="str">"box active"</span>;
+
+<span class="cmt">// 스타일</span>
+el.style.color = <span class="str">"red"</span>;
+el.style.fontSize = <span class="str">"20px"</span>;</code></pre>
+          </div>
+        </div>
+        <div>
+          <h3>실습</h3>
+          <div class="practice-panel">
+            <div class="practice-tabs">
+              <div class="ptab active" onclick="switchTab('attr','step')">단계별 실행</div>
+              <div class="ptab" onclick="switchTab('attr','editor')">코드 에디터</div>
+            </div>
+            <div class="pane active" id="attr-step">
+              <div class="step-area">
+                <div class="dom-preview"><div class="dom-preview-label">DOM 미리보기</div><div id="attr-target">안녕하세요 👋</div></div>
+                <div class="step-controls">
+                  <button class="btn btn-blue" onclick="atStep()">▶ 다음 단계</button>
+                  <button class="btn btn-ghost" onclick="atReset()">초기화</button>
+                </div>
+                <div class="step-list">
+                  <div class="step-item" id="at-s1"><span class="step-num">1</span><div><div>el.getAttribute("id")</div><div class="step-desc">id 속성값 읽기</div></div></div>
+                  <div class="step-item" id="at-s2"><span class="step-num">2</span><div><div>el.style.color = "red"</div><div class="step-desc">스타일 직접 수정</div></div></div>
+                  <div class="step-item" id="at-s3"><span class="step-num">3</span><div><div>el.style.fontSize = "22px"</div><div class="step-desc">폰트 크기 변경</div></div></div>
+                  <div class="step-item" id="at-s4"><span class="step-num">4</span><div><div>el.setAttribute("data-value", "42")</div><div class="step-desc">커스텀 data 속성 추가</div></div></div>
+                </div>
+                <div class="step-log" id="at-log"></div>
+              </div>
+            </div>
+            <div class="pane" id="attr-editor">
+              <div class="editor-area">
+                <div class="editor-result"><div class="editor-result-label">DOM 결과</div><div id="at-ed-target" style="padding:10px 16px;border-radius:6px;border:2px solid var(--border);background:var(--bg2);font-weight:600;display:inline-block;transition:all .25s">안녕하세요 👋</div></div>
+                <div class="editor-wrap">
+                  <div class="editor-header"><span>JavaScript</span><button class="btn btn-blue" style="padding:2px 10px;font-size:.72rem" onclick="runEditor('at')">▶ 실행</button></div>
+                  <textarea class="editor" id="at-ed" spellcheck="false">// target = #at-ed-target 요소
+target.style.color = "blue";
+target.style.fontSize = "20px";</textarea>
+                </div>
+                <div class="editor-log" id="at-ed-log"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- traverse -->
+    <div class="lesson" id="lesson-traverse">
+      <div class="lesson-title">부모 · 자식 · 형제 탐색</div>
+      <div class="lesson-desc">선택한 노드를 기준으로 주변 노드를 탐색할 수 있습니다.</div>
+      <div class="legend"><div class="leg"><div class="leg-dot ld-id"></div>id 참조</div><div class="leg"><div class="leg-dot ld-tag"></div>태그 참조</div></div>
+      <div class="split">
+        <div class="code-panel">
+          <h3>HTML</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang-badge lb-html">HTML</span><button class="copy-btn" onclick="cp('h-tr',this)">복사</button></div>
+            <pre><code id="h-tr">&lt;<span class="hl-tag">ul</span> <span class="attr-name">id</span>=<span class="str">"<span class="hl-id">list</span>"</span>&gt;
+  &lt;<span class="hl-tag">li</span> <span class="attr-name">id</span>=<span class="str">"<span class="hl-id">tr-a</span>"</span>&gt;🍎 첫 번째&lt;/<span class="hl-tag">li</span>&gt;
+  &lt;<span class="hl-tag">li</span> <span class="attr-name">id</span>=<span class="str">"<span class="hl-id">tr-b</span>"</span>&gt;🍌 두 번째&lt;/<span class="hl-tag">li</span>&gt;
+  &lt;<span class="hl-tag">li</span> <span class="attr-name">id</span>=<span class="str">"<span class="hl-id">tr-c</span>"</span>&gt;🥦 세 번째&lt;/<span class="hl-tag">li</span>&gt;
+&lt;/<span class="hl-tag">ul</span>&gt;</code></pre>
+          </div>
+          <h3>JavaScript</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang-badge lb-js">JS</span><button class="copy-btn" onclick="cp('j-tr',this)">복사</button></div>
+            <pre><code id="j-tr"><span class="kw">const</span> el = document.<span class="fn">getElementById</span>(<span class="str">"<span class="hl-id">tr-b</span>"</span>);
+
+el.parentElement;                    <span class="cmt">// ul#list</span>
+el.parentElement.children;           <span class="cmt">// HTMLCollection(3)</span>
+el.parentElement.firstElementChild;  <span class="cmt">// #tr-a</span>
+el.parentElement.lastElementChild;   <span class="cmt">// #tr-c</span>
+el.previousElementSibling;           <span class="cmt">// #tr-a</span>
+el.nextElementSibling;               <span class="cmt">// #tr-c</span></code></pre>
+          </div>
+        </div>
+        <div>
+          <h3>실습</h3>
+          <div class="practice-panel">
+            <div class="practice-tabs">
+              <div class="ptab active" onclick="switchTab('traverse','step')">단계별 실행</div>
+              <div class="ptab" onclick="switchTab('traverse','editor')">코드 에디터</div>
+            </div>
+            <div class="pane active" id="traverse-step">
+              <div class="step-area">
+                <ul id="tr-list" style="list-style:none;padding:0;margin-bottom:10px">
+                  <li id="tr-a" onclick="trSel('tr-a')" style="padding:6px 10px;border:1px solid var(--border);border-radius:4px;margin-bottom:4px;font-size:.83rem;background:var(--bg2)">🍎 첫 번째 (tr-a)</li>
+                  <li id="tr-b" onclick="trSel('tr-b')" style="padding:6px 10px;border:1px solid var(--border);border-radius:4px;margin-bottom:4px;font-size:.83rem;background:var(--bg2)">🍌 두 번째 (tr-b)</li>
+                  <li id="tr-c" onclick="trSel('tr-c')" style="padding:6px 10px;border:1px solid var(--border);border-radius:4px;margin-bottom:4px;font-size:.83rem;background:var(--bg2)">🥦 세 번째 (tr-c)</li>
+                </ul>
+                <div class="qres" id="tr-res">항목을 클릭해 선택하세요.</div>
+                <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:10px">
+                  <button class="btn btn-blue" onclick="trDemo('parent')">parentElement</button>
+                  <button class="btn btn-blue" onclick="trDemo('children')">children</button>
+                  <button class="btn btn-green" onclick="trDemo('prev')">previousElementSibling</button>
+                  <button class="btn btn-green" onclick="trDemo('next')">nextElementSibling</button>
+                </div>
+              </div>
+            </div>
+            <div class="pane" id="traverse-editor">
+              <div class="editor-area">
+                <div class="editor-result"><div class="editor-result-label">결과</div><div id="tr-ed-res" style="font-size:.78rem;font-family:monospace;color:var(--muted)">—</div></div>
+                <div class="editor-wrap">
+                  <div class="editor-header"><span>JavaScript</span><button class="btn btn-blue" style="padding:2px 10px;font-size:.72rem" onclick="runEditor('tr')">▶ 실행</button></div>
+                  <textarea class="editor" id="tr-ed" spellcheck="false">// tr_b = #tr-b 요소
+tr_b.nextElementSibling</textarea>
+                </div>
+                <div class="editor-log" id="tr-ed-log"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- remove -->
+    <div class="lesson" id="lesson-remove">
+      <div class="lesson-title">노드 제거</div>
+      <div class="lesson-desc"><code>Element.remove()</code>로 해당 노드를 DOM에서 제거합니다. 자식 전체를 비우려면 <code>innerHTML = ""</code>을 사용합니다.</div>
+      <div class="legend"><div class="leg"><div class="leg-dot ld-id"></div>id 참조</div><div class="leg"><div class="leg-dot ld-tag"></div>태그 참조</div></div>
+      <div class="split">
+        <div class="code-panel">
+          <h3>HTML</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang-badge lb-html">HTML</span><button class="copy-btn" onclick="cp('h-rm',this)">복사</button></div>
+            <pre><code id="h-rm">&lt;<span class="hl-tag">ul</span> <span class="attr-name">id</span>=<span class="str">"<span class="hl-id">list</span>"</span>&gt;
+  &lt;<span class="hl-tag">li</span> <span class="attr-name">id</span>=<span class="str">"<span class="hl-id">item</span>"</span>&gt;제거할 항목&lt;/<span class="hl-tag">li</span>&gt;
+&lt;/<span class="hl-tag">ul</span>&gt;</code></pre>
+          </div>
+          <h3>JavaScript</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang-badge lb-js">JS</span><button class="copy-btn" onclick="cp('j-rm',this)">복사</button></div>
+            <pre><code id="j-rm"><span class="cmt">// 직접 제거</span>
+<span class="kw">const</span> el = document.<span class="fn">getElementById</span>(<span class="str">"<span class="hl-id">item</span>"</span>);
+el.<span class="fn">remove</span>();
+
+<span class="cmt">// 이벤트 안에서 자기 자신 제거</span>
+btn.addEventListener(<span class="str">"click"</span>, (e) =&gt; {
+  e.target.parentElement.<span class="fn">remove</span>();
+});
+
+<span class="cmt">// 자식 전체 제거</span>
+<span class="kw">const</span> list = document.<span class="fn">getElementById</span>(<span class="str">"<span class="hl-id">list</span>"</span>);
+list.innerHTML = <span class="str">""</span>;</code></pre>
+          </div>
+        </div>
+        <div>
+          <h3>실습</h3>
+          <div class="practice-panel">
+            <div class="practice-tabs">
+              <div class="ptab active" onclick="switchTab('remove','step')">단계별 실행</div>
+              <div class="ptab" onclick="switchTab('remove','editor')">코드 에디터</div>
+            </div>
+            <div class="pane active" id="remove-step">
+              <div class="step-area">
+                <div class="dom-preview"><div class="dom-preview-label">DOM 미리보기</div><ul class="demo-ul" id="rm-preview"><li id="rm-item-a">📦 항목 A</li><li id="rm-item-b">📦 항목 B</li><li id="rm-item-c">📦 항목 C</li></ul></div>
+                <div class="step-controls">
+                  <button class="btn btn-blue" onclick="rmStep()">▶ 다음 단계</button>
+                  <button class="btn btn-ghost" onclick="rmReset()">초기화</button>
+                </div>
+                <div class="step-list">
+                  <div class="step-item" id="rm-s1"><span class="step-num">1</span><div><div>document.getElementById("rm-item-a").remove()</div><div class="step-desc">항목 A 제거</div></div></div>
+                  <div class="step-item" id="rm-s2"><span class="step-num">2</span><div><div>document.getElementById("rm-item-b").remove()</div><div class="step-desc">항목 B 제거</div></div></div>
+                  <div class="step-item" id="rm-s3"><span class="step-num">3</span><div><div>list.innerHTML = ""</div><div class="step-desc">자식 전체 제거</div></div></div>
+                </div>
+                <div class="step-log" id="rm-log"></div>
+              </div>
+            </div>
+            <div class="pane" id="remove-editor">
+              <div class="editor-area">
+                <div class="editor-result"><div class="editor-result-label">DOM 결과</div><ul class="demo-ul" id="rm-ed-preview"><li id="rm-ed-a">📦 항목 A</li><li id="rm-ed-b">📦 항목 B</li><li id="rm-ed-c">📦 항목 C</li></ul></div>
+                <div class="editor-wrap">
+                  <div class="editor-header"><span>JavaScript</span><button class="btn btn-blue" style="padding:2px 10px;font-size:.72rem" onclick="runEditor('rm')">▶ 실행</button></div>
+                  <textarea class="editor" id="rm-ed" spellcheck="false">// rm_ed_a, rm_ed_b, rm_ed_c 변수로 각 li에 접근 가능
+rm_ed_a.remove();</textarea>
+                </div>
+                <div class="editor-log" id="rm-ed-log"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- classList -->
+    <div class="lesson" id="lesson-classlist">
+      <div class="lesson-title">classList</div>
+      <div class="lesson-desc">스타일 속성을 직접 수정하는 대신 CSS 클래스를 추가/삭제하면 유지보수가 훨씬 쉬워집니다.</div>
+      <div class="note tip"><span class="note-icon">💡</span><span><code>toggle</code>은 클래스가 있으면 제거, 없으면 추가합니다. 버튼 클릭 시 상태 전환에 매우 유용합니다.</span></div>
+      <div class="legend"><div class="leg"><div class="leg-dot ld-id"></div>id 참조</div><div class="leg"><div class="leg-dot ld-cls"></div>class 참조</div></div>
+      <div class="split">
+        <div class="code-panel">
+          <h3>HTML + CSS</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang-badge lb-html">HTML</span><button class="copy-btn" onclick="cp('h-cls',this)">복사</button></div>
+            <pre><code id="h-cls">&lt;style&gt;
+  .<span class="hl-cls">highlight</span> {
+    background: #deeafc;
+    color: #003eaa;
+    font-size: 1.1rem;
+  }
+  .<span class="hl-cls">danger</span> {
+    background: #fff0f0;
+    color: #c00;
+  }
+&lt;/style&gt;
+
+&lt;div <span class="attr-name">id</span>=<span class="str">"<span class="hl-id">target</span>"</span>&gt;안녕하세요 👋&lt;/div&gt;</code></pre>
+          </div>
+          <h3>JavaScript</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="lang-badge lb-js">JS</span><button class="copy-btn" onclick="cp('j-cls',this)">복사</button></div>
+            <pre><code id="j-cls"><span class="kw">const</span> el = document.<span class="fn">querySelector</span>(<span class="str">"#<span class="hl-id">target</span>"</span>);
+
+el.classList.<span class="fn">add</span>(<span class="str">"<span class="hl-cls">highlight</span>"</span>);
+el.classList.<span class="fn">remove</span>(<span class="str">"<span class="hl-cls">highlight</span>"</span>);
+el.classList.<span class="fn">toggle</span>(<span class="str">"<span class="hl-cls">highlight</span>"</span>);
+el.classList.<span class="fn">replace</span>(<span class="str">"<span class="hl-cls">highlight</span>"</span>, <span class="str">"<span class="hl-cls">danger</span>"</span>);
+el.classList.<span class="fn">contains</span>(<span class="str">"<span class="hl-cls">highlight</span>"</span>); <span class="cmt">// true/false</span></code></pre>
+          </div>
+        </div>
+        <div>
+          <h3>실습</h3>
+          <div class="practice-panel">
+            <div class="practice-tabs">
+              <div class="ptab active" onclick="switchTab('cls','step')">단계별 실행</div>
+              <div class="ptab" onclick="switchTab('cls','editor')">코드 에디터</div>
+            </div>
+            <div class="pane active" id="cls-step">
+              <div class="step-area">
+                <div class="dom-preview">
+                  <div class="dom-preview-label">DOM 미리보기</div>
+                  <div id="cls-target">안녕하세요 👋</div>
+                  <div style="margin-top:8px;font-size:.75rem;color:var(--muted)">현재 클래스: <code id="cls-display" style="background:#f4f4f5;padding:1px 6px;border-radius:3px;color:var(--blue)"></code></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:5px;margin-top:10px">
+                  <div style="display:flex;gap:5px;flex-wrap:wrap">
+                    <button class="btn btn-green" onclick="clsD('add')">add("highlight")</button>
+                    <button class="btn btn-red"   onclick="clsD('remove')">remove("highlight")</button>
+                    <button class="btn btn-blue"  onclick="clsD('toggle')">toggle("highlight")</button>
+                  </div>
+                  <div style="display:flex;gap:5px;flex-wrap:wrap">
+                    <button class="btn btn-ghost" onclick="clsD('replace')">replace → "danger"</button>
+                    <button class="btn btn-ghost" onclick="clsD('contains')">contains("highlight")?</button>
+                    <button class="btn btn-ghost" onclick="clsD('reset')">초기화</button>
+                  </div>
+                </div>
+                <div class="step-log" id="cls-log" style="margin-top:10px"></div>
+              </div>
+            </div>
+            <div class="pane" id="cls-editor">
+              <div class="editor-area">
+                <div class="editor-result">
+                  <div class="editor-result-label">DOM 결과</div>
+                  <div id="cls-ed-target" style="display:inline-block;padding:10px 20px;border-radius:6px;border:2px solid var(--border);background:var(--bg2);font-weight:600;transition:all .25s">안녕하세요 👋</div>
+                  <div style="margin-top:6px;font-size:.75rem;color:var(--muted)">현재 클래스: <code id="cls-ed-display" style="background:#f4f4f5;padding:1px 6px;border-radius:3px;color:var(--blue)"></code></div>
+                </div>
+                <div class="editor-wrap">
+                  <div class="editor-header"><span>JavaScript</span><button class="btn btn-blue" style="padding:2px 10px;font-size:.72rem" onclick="runEditor('cls')">▶ 실행</button></div>
+                  <textarea class="editor" id="cls-ed" spellcheck="false">// cls_ed = #cls-ed-target 요소
+// 사용 가능 클래스: "highlight", "danger"
+cls_ed.classList.toggle("highlight");</textarea>
+                </div>
+                <div class="editor-log" id="cls-ed-log"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const slog = (id, msg, t='ok') => {
+  const el=$(id); if(!el) return;
+  const p=document.createElement('p'); p.className=t; p.textContent='> '+msg;
+  el.appendChild(p); el.scrollTop=el.scrollHeight;
+};
+
+function show(id, nav) {
+  document.querySelectorAll('.lesson').forEach(l=>l.classList.remove('active'));
+  $('lesson-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  nav.classList.add('active');
+}
+
+function switchTab(lesson, tab) {
+  const panel = $('lesson-'+lesson).querySelector('.practice-panel');
+  panel.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  panel.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  panel.querySelector(`[onclick*="'${lesson}','${tab}'"]`).classList.add('active');
+  $(lesson+'-'+tab).classList.add('active');
+}
+
+function cp(id, btn) {
+  const clone=$(id).cloneNode(true);
+  clone.querySelectorAll('span').forEach(s=>s.replaceWith(document.createTextNode(s.textContent)));
+  navigator.clipboard.writeText(clone.textContent).then(()=>{
+    btn.textContent='✓ 복사됨'; btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent='복사'; btn.classList.remove('copied'); },1500);
+  });
+}
+
+// ── createElement 단계별 ──
+let crStepN=0, crEl=null;
+const crSteps=[
+  ()=>{ crEl=document.createElement('li'); slog('cr-log','createElement("li") → 메모리에 li 생성'); $('cr-s1').classList.add('done'); $('cr-s2').classList.add('active-step'); },
+  ()=>{ if(!crEl)return; crEl.innerText='새 아이템'; slog('cr-log','li.innerText = "새 아이템"','info'); $('cr-s2').classList.remove('active-step'); $('cr-s2').classList.add('done'); $('cr-s3').classList.add('active-step'); },
+  ()=>{ if(!crEl)return; crEl.setAttribute('class','list-item'); slog('cr-log','setAttribute("class","list-item")','info'); $('cr-s3').classList.remove('active-step'); $('cr-s3').classList.add('done'); $('cr-s4').classList.add('active-step'); },
+  ()=>{ if(!crEl)return; $('cr-preview').appendChild(crEl); slog('cr-log','appendChild(li) → DOM에 추가됨 ✅'); $('cr-s4').classList.remove('active-step'); $('cr-s4').classList.add('done'); crStepN=-1; }
+];
+function crStep(){ if(crStepN<crSteps.length){ crSteps[crStepN](); crStepN++; } }
+function crReset(){ crStepN=0; crEl=null; $('cr-preview').innerHTML=''; $('cr-log').innerHTML=''; ['cr-s1','cr-s2','cr-s3','cr-s4'].forEach(id=>{ $(id).className='step-item'; }); $('cr-s1').classList.add('active-step'); }
+crReset(); $('cr-s1').classList.remove('active-step');
+
+// ── innerHTML 단계별 ──
+let inStepN=0;
+const inSteps=[
+  ()=>{ $('in-preview').innerHTML=''; slog('in-log','innerHTML = "" → 자식 전체 제거'); $('in-s1').classList.add('done'); $('in-s2').classList.add('active-step'); },
+  ()=>{ $('in-preview').innerHTML='<li>새 항목 A</li><li>새 항목 B</li>'; slog('in-log','innerHTML = "<li>새 항목 A</li>..." → 대체됨','info'); $('in-s2').classList.remove('active-step'); $('in-s2').classList.add('done'); $('in-s3').classList.add('active-step'); },
+  ()=>{ const v=$('in-preview').innerHTML; slog('in-log',`innerHTML 읽기: "${v.slice(0,40)}..."','info`); $('in-s3').classList.remove('active-step'); $('in-s3').classList.add('done'); inStepN=-1; }
+];
+function inStep(){ if(inStepN<inSteps.length){ inSteps[inStepN](); inStepN++; } }
+function inReset(){ inStepN=0; $('in-preview').innerHTML='<li>기존 항목 1</li><li>기존 항목 2</li>'; $('in-log').innerHTML=''; ['in-s1','in-s2','in-s3'].forEach(id=>$(id).className='step-item'); }
+
+// ── 속성 단계별 ──
+let atStepN=0;
+const atSteps=[
+  ()=>{ const v=$('attr-target').getAttribute('id'); slog('at-log',`getAttribute("id") → "${v}"`,'info'); $('at-s1').classList.add('done'); $('at-s2').classList.add('active-step'); },
+  ()=>{ $('attr-target').style.color='#c00'; slog('at-log','style.color = "#c00"'); $('at-s2').classList.remove('active-step'); $('at-s2').classList.add('done'); $('at-s3').classList.add('active-step'); },
+  ()=>{ $('attr-target').style.fontSize='22px'; slog('at-log','style.fontSize = "22px"'); $('at-s3').classList.remove('active-step'); $('at-s3').classList.add('done'); $('at-s4').classList.add('active-step'); },
+  ()=>{ $('attr-target').setAttribute('data-value','42'); slog('at-log','setAttribute("data-value","42") 추가됨'); $('at-s4').classList.remove('active-step'); $('at-s4').classList.add('done'); atStepN=-1; }
+];
+function atStep(){ if(atStepN<atSteps.length){ atSteps[atStepN](); atStepN++; } }
+function atReset(){ atStepN=0; const el=$('attr-target'); el.style.cssText=''; el.removeAttribute('data-value'); $('at-log').innerHTML=''; ['at-s1','at-s2','at-s3','at-s4'].forEach(id=>$(id).className='step-item'); }
+
+// ── 조회 ──
+function qDemo(type) {
+  document.querySelectorAll('#q-list li').forEach(l=>{ l.style.outline=''; l.style.background=''; });
+  const res=$('q-res'); res.className='qres hit';
+  const hl=(els,o,b)=>[...els].forEach(l=>{ l.style.outline=o; l.style.background=b; });
+  if(type==='id'){ hl([$('q-b')],'2px solid var(--blue)','var(--blue-l)'); res.textContent='getElementById("q-b") → <li id="q-b" class="item fruit">'; }
+  else if(type==='tag'){ hl($('q-list').getElementsByTagName('li'),'2px solid var(--orange)','var(--orange-l)'); res.textContent='getElementsByTagName("li") → HTMLCollection(4)'; }
+  else if(type==='cls'){ hl($('q-list').getElementsByClassName('item'),'2px solid var(--green)','var(--green-l)'); res.textContent='getElementsByClassName("item") → HTMLCollection(3)'; }
+  else if(type==='qs'){ const el=document.querySelector('#q-list .fruit'); hl([el],'2px solid var(--purple)','var(--purple-l)'); res.textContent='querySelector(".fruit") → 첫 번째 .fruit: 🍎 사과'; }
+  else if(type==='qsa'){ hl(document.querySelectorAll('#q-list li.item'),'2px solid var(--blue)','var(--blue-l)'); res.textContent='querySelectorAll("li.item") → NodeList(3)'; }
+}
+
+// ── 탐색 ──
+let trSelected=null;
+function trSel(id){
+  document.querySelectorAll('#tr-list li').forEach(l=>l.className='');
+  trSelected=id; $(id).classList.add('tr-sel');
+  $('tr-res').textContent=`선택됨: #${id}`; $('tr-res').className='qres hit';
+}
+function trDemo(type){
+  if(!trSelected){ $('tr-res').textContent='먼저 항목을 클릭해 선택하세요'; return; }
+  const el=$(trSelected), res=$('tr-res');
+  document.querySelectorAll('#tr-list li').forEach(l=>l.classList.remove('tr-hit'));
+  $(trSelected).classList.add('tr-sel');
+  if(type==='parent'){ const p=el.parentElement; p.style.outline='2px solid var(--green)'; res.textContent=`parentElement → <${p.tagName.toLowerCase()} id="${p.id}">`; setTimeout(()=>p.style.outline='',1200); }
+  else if(type==='children'){ [...$('tr-list').children].forEach(l=>l.classList.add('tr-hit')); res.textContent='children → HTMLCollection(3): #tr-a, #tr-b, #tr-c'; }
+  else if(type==='prev'){ const p=el.previousElementSibling; if(p){ p.classList.add('tr-hit'); res.textContent=`previousElementSibling → #${p.id}`; } else res.textContent='previousElementSibling → null'; }
+  else if(type==='next'){ const n=el.nextElementSibling; if(n){ n.classList.add('tr-hit'); res.textContent=`nextElementSibling → #${n.id}`; } else res.textContent='nextElementSibling → null'; }
+}
+
+// ── 제거 단계별 ──
+let rmStepN=0;
+const rmSteps=[
+  ()=>{ const el=$('rm-item-a'); if(el){ el.style.background='#fff0f0'; setTimeout(()=>el.remove(),300); slog('rm-log','rm-item-a.remove()','ok'); } $('rm-s1').classList.add('done'); $('rm-s2').classList.add('active-step'); },
+  ()=>{ const el=$('rm-item-b'); if(el){ el.style.background='#fff0f0'; setTimeout(()=>el.remove(),300); slog('rm-log','rm-item-b.remove()','ok'); } $('rm-s2').classList.remove('active-step'); $('rm-s2').classList.add('done'); $('rm-s3').classList.add('active-step'); },
+  ()=>{ $('rm-preview').innerHTML=''; slog('rm-log','list.innerHTML = "" → 전체 제거','ok'); $('rm-s3').classList.remove('active-step'); $('rm-s3').classList.add('done'); rmStepN=-1; }
+];
+function rmStep(){ if(rmStepN<rmSteps.length){ rmSteps[rmStepN](); rmStepN++; } }
+function rmReset(){ rmStepN=0; $('rm-preview').innerHTML='<li id="rm-item-a">📦 항목 A</li><li id="rm-item-b">📦 항목 B</li><li id="rm-item-c">📦 항목 C</li>'; $('rm-log').innerHTML=''; ['rm-s1','rm-s2','rm-s3'].forEach(id=>$(id).className='step-item'); }
+
+// ── classList ──
+function clsUpd(){ $('cls-display').textContent=$('cls-target').className||'(없음)'; }
+function clsD(t){
+  const el=$('cls-target');
+  if(t==='add')     { el.classList.add('highlight');               slog('cls-log','classList.add("highlight")',     'ok'); }
+  else if(t==='remove') { el.classList.remove('highlight');        slog('cls-log','classList.remove("highlight")', 'ok'); }
+  else if(t==='toggle') { el.classList.toggle('highlight');        slog('cls-log',`toggle → ${el.classList.contains('highlight')?'추가':'제거'}됨`,'info'); }
+  else if(t==='replace'){ el.classList.replace('highlight','danger'); slog('cls-log','replace("highlight","danger")','ok'); }
+  else if(t==='contains'){ const h=el.classList.contains('highlight'); slog('cls-log',`contains("highlight") → ${h}`, h?'ok':'info'); }
+  else if(t==='reset')  { el.className=''; $('cls-log').innerHTML=''; }
+  clsUpd();
+}
+clsUpd();
+
+// ── 코드 에디터 실행 ──
+function runEditor(type) {
+  const code = $(type+'-ed').value;
+  const logId = type+'-ed-log';
+  $(logId).innerHTML='';
+
+  // 각 에디터에 주입할 변수 세팅
+  const vars = {
+    cr: { list: $('cr-ed-preview') },
+    in: { list: $('in-ed-preview') },
+    q:  {},
+    at: { target: $('at-ed-target') },
+    tr: { tr_b: $('tr-b'), tr_a: $('tr-a'), tr_c: $('tr-c') },
+    rm: { rm_ed_a: $('rm-ed-a'), rm_ed_b: $('rm-ed-b'), rm_ed_c: $('rm-ed-c') },
+    cls:{ cls_ed: $('cls-ed-target') }
+  }[type] || {};
+
+  // query 에디터는 결과를 반환값으로 표시
+  try {
+    const fn = new Function(...Object.keys(vars), `"use strict"; return (${code})`);
+    const result = fn(...Object.values(vars));
+    if(type==='q'){ const res=$('q-ed-res'); res.textContent = result ? (result.length!==undefined ? `NodeList/HTMLCollection — ${result.length}개` : result.outerHTML||result.textContent||String(result)) : 'null'; }
+    if(type==='cls'){ $('cls-ed-display').textContent=$('cls-ed-target').className||'(없음)'; }
+    slog(logId, '실행 완료 ✅');
+  } catch(e){
+    // expression 실패 시 statement로 재시도
+    try {
+      const fn2 = new Function(...Object.keys(vars), `"use strict"; ${code}`);
+      fn2(...Object.values(vars));
+      if(type==='cls') $('cls-ed-display').textContent=$('cls-ed-target').className||'(없음)';
+      slog(logId, '실행 완료 ✅');
+    } catch(e2){
+      slog(logId, `오류: ${e2.message}`, 'err');
+    }
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>JavaScript 퀴즈</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root { --gray-900: #0f172a; --correct: #22c55e; --wrong: #ef4444; }
+
+      body { font-family: sans-serif; background: #f4f6f8; color: #333; min-height: 100vh; display: flex; flex-direction: column; }
+
+      header { background: linear-gradient(135deg, var(--gray-900), #1e3a5f); color: white; padding: 40px 24px 36px; text-align: center; }
+      header .label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.12em; color: #7dd3fc; margin-bottom: 12px; }
+      header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+      header p { font-size: 0.9rem; color: #94a3b8; }
+
+      .container { max-width: 760px; width: 100%; margin: 0 auto; padding: 40px 24px; flex: 1; }
+
+      .progress-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+      .progress-bar { flex: 1; height: 6px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
+      .progress-bar .fill { height: 100%; background: linear-gradient(90deg, #ffa07a, #38bdf8); border-radius: 99px; transition: width 0.4s; }
+      .progress-text { font-size: 0.82rem; color: #94a3b8; white-space: nowrap; }
+
+      .section-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 8px; }
+
+      .q-card { background: #fff; border-radius: 12px; padding: 28px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); display: none; }
+      .q-card.active { display: block; }
+
+      .q-type-badge { display: inline-block; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 10px; border-radius: 20px; margin-bottom: 14px; }
+      .badge-mc    { background: #fff8f0; color: #c2440f; border: 1px solid #ffd7c2; }
+      .badge-code  { background: #f0f9ff; color: #0284c7; border: 1px solid #bae6fd; }
+      .badge-fill  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+      .badge-write { background: #fdf4ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+
+      .q-text { font-size: 1rem; font-weight: 600; color: #1e293b; margin-bottom: 16px; line-height: 1.6; }
+
+      .q-code { border-radius: 8px; overflow: hidden; margin-bottom: 16px; font-size: 0.88rem; }
+      .q-code pre { margin: 0; }
+      .q-code code.hljs { border-radius: 8px; }
+
+      .options { display: flex; flex-direction: column; gap: 8px; }
+      .opt-btn { text-align: left; padding: 10px 16px; border-radius: 8px; border: 1.5px solid #e2e8f0; background: #f8fafc; font-size: 0.92rem; color: #334155; cursor: pointer; transition: border-color 0.15s, background 0.15s; font-family: inherit; }
+      .opt-btn:hover:not(:disabled) { border-color: #94a3b8; background: #f1f5f9; }
+      .opt-btn.correct { border-color: var(--correct); background: #f0fdf4; color: #15803d; font-weight: 600; }
+      .opt-btn.wrong   { border-color: var(--wrong);   background: #fef2f2; color: #b91c1c; }
+
+      .fill-input { width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 0.92rem; font-family: "Courier New", monospace; color: #1e293b; background: #f8fafc; outline: none; transition: border-color 0.15s; margin-bottom: 10px; }
+      .fill-input:focus { border-color: #94a3b8; }
+      .fill-input.correct { border-color: var(--correct); background: #f0fdf4; }
+      .fill-input.wrong   { border-color: var(--wrong);   background: #fef2f2; }
+
+      .code-input { width: 100%; padding: 12px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 0.88rem; font-family: "Courier New", monospace; color: #e2e8f0; background: #1e293b; outline: none; resize: vertical; min-height: 120px; line-height: 1.6; margin-bottom: 10px; transition: border-color 0.15s; }
+      .code-input:focus { border-color: #475569; }
+
+      .submit-btn { padding: 8px 20px; border-radius: 8px; border: none; background: #1e293b; color: white; font-size: 0.88rem; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+      .submit-btn:hover { background: #334155; }
+      .submit-btn:disabled { background: #cbd5e1; cursor: default; }
+
+      .feedback { display: none; margin-top: 14px; padding: 12px 16px; border-radius: 8px; font-size: 0.88rem; line-height: 1.6; }
+      .feedback.show { display: block; }
+      .feedback.correct { background: #f0fdf4; border-left: 4px solid var(--correct); color: #15803d; }
+      .feedback.wrong   { background: #fef2f2; border-left: 4px solid var(--wrong);   color: #991b1b; }
+
+      .next-btn { display: none; margin-top: 12px; padding: 8px 20px; border-radius: 8px; border: none; background: linear-gradient(135deg, var(--gray-900), #1e3a5f); color: white; font-size: 0.88rem; font-family: inherit; cursor: pointer; }
+      .next-btn.show { display: inline-block; }
+
+      .result-screen { display: none; background: #fff; border-radius: 12px; padding: 48px 28px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+      .result-screen.show { display: block; }
+      .result-score { font-size: 3rem; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+      .result-score span { color: #38bdf8; }
+      .result-msg { font-size: 1rem; color: #64748b; margin-bottom: 24px; }
+      .result-detail { display: flex; justify-content: center; gap: 24px; margin-bottom: 28px; }
+      .result-detail .item { font-size: 0.88rem; color: #64748b; }
+      .result-detail .item strong { display: block; font-size: 1.2rem; color: #1e293b; }
+      .retry-btn { padding: 10px 28px; border-radius: 8px; border: none; background: linear-gradient(135deg, var(--gray-900), #1e3a5f); color: white; font-size: 0.92rem; font-family: inherit; cursor: pointer; }
+
+      .self-check { display: none; gap: 8px; margin-top: 10px; }
+      .self-check.show { display: flex; }
+      .self-check button { padding: 7px 18px; border-radius: 8px; border: none; font-size: 0.88rem; font-family: inherit; cursor: pointer; }
+      .sc-correct { background: #f0fdf4; color: #15803d; border: 1.5px solid #86efac !important; border: none; }
+      .sc-correct:hover { background: #dcfce7; }
+      .sc-wrong   { background: #fef2f2; color: #b91c1c; border: 1.5px solid #fca5a5 !important; border: none; }
+      .sc-wrong:hover   { background: #fee2e2; }
+
+      ic { background:#f1f5f9; padding:2px 6px; border-radius:4px; color:#0284c7; font-family:"Courier New",monospace; font-size:0.88rem; }
+
+      footer { background: var(--gray-900); color: #475569; text-align: center; padding: 16px; font-size: 0.82rem; }
+    </style>
+  </head>
+  <body>
+
+    <header>
+      <div class="label">Quiz</div>
+      <h1>JavaScript 퀴즈</h1>
+      <p>기본 문법 · Array Helper Methods — 총 24문제</p>
+    </header>
+
+    <div class="container">
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="fill" id="progressFill" style="width:0%"></div></div>
+        <div class="progress-text" id="progressText">0 / 24</div>
+      </div>
+      <div class="section-label" id="sectionLabel"></div>
+
+      <!-- ── 객관식 Q1~6 ── -->
+      <div class="q-card active" data-q="0">
+        <span class="q-type-badge badge-mc">객관식</span>
+        <div class="q-text">Q1. 다음 중 블록 스코프를 가지며 재선언이 불가능한 변수 선언 키워드를 모두 고르면?</div>
+        <div class="options">
+          <button class="opt-btn" data-ans="0">var</button>
+          <button class="opt-btn" data-ans="1">let과 const</button>
+          <button class="opt-btn" data-ans="2">var와 let</button>
+          <button class="opt-btn" data-ans="3">const</button>
+        </div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="1">
+        <span class="q-type-badge badge-mc">객관식</span>
+        <div class="q-text">Q2. <ic>null</ic>과 <ic>undefined</ic>에 대한 설명으로 올바른 것은?</div>
+        <div class="options">
+          <button class="opt-btn" data-ans="0">둘 다 동일한 의미로 사용할 수 있다</button>
+          <button class="opt-btn" data-ans="1">null은 선언만 하고 값을 할당하지 않은 상태다</button>
+          <button class="opt-btn" data-ans="2">undefined는 개발자가 의도적으로 비워둔 상태다</button>
+          <button class="opt-btn" data-ans="3">null은 의도적으로 비워둔 상태, undefined는 값이 할당된 적 없는 상태다</button>
+        </div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="2">
+        <span class="q-type-badge badge-mc">객관식</span>
+        <div class="q-text">Q3. 다음 중 <ic>filter</ic>에 대한 설명으로 올바른 것은?</div>
+        <div class="options">
+          <button class="opt-btn" data-ans="0">원본 배열을 직접 수정한다</button>
+          <button class="opt-btn" data-ans="1">항상 원본과 길이가 동일한 새 배열을 반환한다</button>
+          <button class="opt-btn" data-ans="2">조건을 만족하는 요소만 모아 새 배열을 반환한다</button>
+          <button class="opt-btn" data-ans="3">반환값이 없다</button>
+        </div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="3">
+        <span class="q-type-badge badge-mc">객관식</span>
+        <div class="q-text">Q4. 함수 선언문과 함수 표현식의 차이로 올바른 것은?</div>
+        <div class="q-code"><pre><code class="language-javascript">// 함수 선언문
+function method() { ... }
+
+// 함수 표현식
+const method = function() { ... };</code></pre></div>
+        <div class="options">
+          <button class="opt-btn" data-ans="0">함수 표현식은 호이스팅이 적용되어 선언 전에 호출할 수 있다</button>
+          <button class="opt-btn" data-ans="1">함수 선언문은 호이스팅이 적용되어 선언 전에 호출할 수 있다</button>
+          <button class="opt-btn" data-ans="2">둘 다 호이스팅이 적용되지 않는다</button>
+          <button class="opt-btn" data-ans="3">둘 다 선언 전에 호출할 수 있다</button>
+        </div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="4">
+        <span class="q-type-badge badge-mc">객관식</span>
+        <div class="q-text">Q5. <ic>forEach</ic>와 <ic>map</ic>의 차이로 올바른 것은?</div>
+        <div class="options">
+          <button class="opt-btn" data-ans="0">forEach는 새 배열을 반환하고, map은 반환값이 없다</button>
+          <button class="opt-btn" data-ans="1">둘 다 새 배열을 반환한다</button>
+          <button class="opt-btn" data-ans="2">map은 새 배열을 반환하고, forEach는 반환값이 없다</button>
+          <button class="opt-btn" data-ans="3">둘 다 원본 배열을 수정한다</button>
+        </div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="5">
+        <span class="q-type-badge badge-mc">객관식</span>
+        <div class="q-text">Q6. <ic>find</ic>와 <ic>filter</ic>의 차이로 올바른 것은?</div>
+        <div class="options">
+          <button class="opt-btn" data-ans="0">find는 조건을 만족하는 모든 요소를 배열로 반환한다</button>
+          <button class="opt-btn" data-ans="1">filter는 조건을 만족하는 첫 번째 요소만 반환한다</button>
+          <button class="opt-btn" data-ans="2">find는 첫 번째 요소를 반환하고, filter는 조건을 만족하는 모든 요소를 배열로 반환한다</button>
+          <button class="opt-btn" data-ans="3">둘 다 동일하게 동작한다</button>
+        </div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <!-- ── 코드 해석 Q7~12 ── -->
+      <div class="q-card" data-q="6">
+        <span class="q-type-badge badge-code">코드 해석</span>
+        <div class="q-text">Q7. 아래 코드의 실행 결과는?</div>
+        <div class="q-code"><pre><code class="language-javascript">console.log(x);
+var x = 10;</code></pre></div>
+        <div class="options">
+          <button class="opt-btn" data-ans="0">10</button>
+          <button class="opt-btn" data-ans="1">undefined</button>
+          <button class="opt-btn" data-ans="2">ReferenceError</button>
+          <button class="opt-btn" data-ans="3">null</button>
+        </div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="7">
+        <span class="q-type-badge badge-code">코드 해석</span>
+        <div class="q-text">Q8. 아래 코드의 실행 결과는?</div>
+        <div class="q-code"><pre><code class="language-javascript">const cart = [
+  { name: "MacBook Pro", price: 2500000, category: "전자기기" },
+  { name: "무선 마우스", price: 35000,   category: "주변기기" },
+  { name: "모니터",      price: 450000,  category: "전자기기" },
+];
+
+const result = cart
+  .filter(item => item.category === "전자기기")
+  .map(item => item.name);
+
+console.log(result);</code></pre></div>
+        <div class="options">
+          <button class="opt-btn" data-ans="0">["무선 마우스"]</button>
+          <button class="opt-btn" data-ans="1">["MacBook Pro", "모니터"]</button>
+          <button class="opt-btn" data-ans="2">["MacBook Pro"]</button>
+          <button class="opt-btn" data-ans="3">["MacBook Pro", "무선 마우스", "모니터"]</button>
+        </div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="8">
+        <span class="q-type-badge badge-code">코드 해석</span>
+        <div class="q-text">Q9. 아래 코드의 실행 결과는?</div>
+        <div class="q-code"><pre><code class="language-javascript">const nums = [10, 20, 30, 40];
+const total = nums.reduce((acc, cur) => acc + cur, 0);
+console.log(total);</code></pre></div>
+        <div class="options">
+          <button class="opt-btn" data-ans="0">10</button>
+          <button class="opt-btn" data-ans="1">40</button>
+          <button class="opt-btn" data-ans="2">100</button>
+          <button class="opt-btn" data-ans="3">NaN</button>
+        </div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="9">
+        <span class="q-type-badge badge-code">코드 해석</span>
+        <div class="q-text">Q10. 아래 코드의 실행 결과는?</div>
+        <div class="q-code"><pre><code class="language-javascript">console.log(y);
+let y = 5;</code></pre></div>
+        <div class="options">
+          <button class="opt-btn" data-ans="0">5</button>
+          <button class="opt-btn" data-ans="1">undefined</button>
+          <button class="opt-btn" data-ans="2">ReferenceError</button>
+          <button class="opt-btn" data-ans="3">null</button>
+        </div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="10">
+        <span class="q-type-badge badge-code">코드 해석</span>
+        <div class="q-text">Q11. 아래 코드의 실행 결과는?</div>
+        <div class="q-code"><pre><code class="language-javascript">const arr = [1, 2, 3, 4, 5];
+const result = arr.find(n => n > 3);
+console.log(result);</code></pre></div>
+        <div class="options">
+          <button class="opt-btn" data-ans="0">3</button>
+          <button class="opt-btn" data-ans="1">4</button>
+          <button class="opt-btn" data-ans="2">[4, 5]</button>
+          <button class="opt-btn" data-ans="3">5</button>
+        </div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="11">
+        <span class="q-type-badge badge-code">코드 해석</span>
+        <div class="q-text">Q12. 아래 코드의 실행 결과는?</div>
+        <div class="q-code"><pre><code class="language-javascript">const cart = [
+  { name: "MacBook Pro", price: 2500000 },
+  { name: "무선 마우스", price: 35000 },
+  { name: "키보드",      price: 120000 },
+];
+
+const result = cart.some(item => item.price < 50000);
+console.log(result);</code></pre></div>
+        <div class="options">
+          <button class="opt-btn" data-ans="0">false</button>
+          <button class="opt-btn" data-ans="1">true</button>
+          <button class="opt-btn" data-ans="2">undefined</button>
+          <button class="opt-btn" data-ans="3">1</button>
+        </div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <!-- ── 빈칸 채우기 Q13~18 ── -->
+      <div class="q-card" data-q="12">
+        <span class="q-type-badge badge-fill">빈칸 채우기</span>
+        <div class="q-text">Q13. 조건을 만족하는 <strong>첫 번째 요소</strong>를 반환하는 메서드명을 입력하세요.</div>
+        <div class="q-code"><pre><code class="language-javascript">const item = cart._____(item => item.id === 3);</code></pre></div>
+        <input class="fill-input" type="text" placeholder="메서드명 입력..." />
+        <button class="submit-btn">확인</button>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="13">
+        <span class="q-type-badge badge-fill">빈칸 채우기</span>
+        <div class="q-text">Q14. 화살표 함수로 변환할 때 빈칸을 채우세요.</div>
+        <div class="q-code"><pre><code class="language-javascript">// 기존
+const double = function(n) { return n * 2; };
+
+// 화살표 함수
+const double = _____ => n * 2;</code></pre></div>
+        <input class="fill-input" type="text" placeholder="빈칸 입력..." />
+        <button class="submit-btn">확인</button>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="14">
+        <span class="q-type-badge badge-fill">빈칸 채우기</span>
+        <div class="q-text">Q15. 가격 <strong>내림차순</strong>으로 정렬하려 합니다. 빈칸에 알맞은 식을 입력하세요.</div>
+        <div class="q-code"><pre><code class="language-javascript">const cart = [
+  { name: "MacBook Pro", price: 2500000 },
+  { name: "무선 마우스", price: 35000 },
+  { name: "모니터",      price: 450000 },
+  { name: "USB 허브",    price: 28000 },
+  { name: "키보드",      price: 120000 },
+];
+
+cart.sort((a, b) => _____);</code></pre></div>
+        <input class="fill-input" type="text" placeholder="빈칸 입력..." />
+        <button class="submit-btn">확인</button>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="15">
+        <span class="q-type-badge badge-fill">빈칸 채우기</span>
+        <div class="q-text">Q16. 아래는 객체의 속성에 접근하는 코드입니다. 변수 <ic>key</ic>를 사용해 동적으로 속성에 접근하는 빈칸을 채우세요.</div>
+        <div class="q-code"><pre><code class="language-javascript">const obj = { name: "MacBook Pro", price: 2500000 };
+const key = "price";
+
+console.log(_____); // 2500000</code></pre></div>
+        <input class="fill-input" type="text" placeholder="빈칸 입력..." />
+        <button class="submit-btn">확인</button>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="16">
+        <span class="q-type-badge badge-fill">빈칸 채우기</span>
+        <div class="q-text">Q17. 배열에서 특정 값의 인덱스를 찾는 메서드명을 입력하세요. 없으면 <ic>-1</ic>을 반환합니다.</div>
+        <div class="q-code"><pre><code class="language-javascript">const names = ["MacBook Pro", "무선 마우스", "모니터"];
+console.log(names._____("모니터")); // 2</code></pre></div>
+        <input class="fill-input" type="text" placeholder="메서드명 입력..." />
+        <button class="submit-btn">확인</button>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="17">
+        <span class="q-type-badge badge-fill">빈칸 채우기</span>
+        <div class="q-text">Q18. <ic>reduce</ic>로 배열의 합계를 구하는 코드입니다. 빈칸에 초기값을 입력하세요.</div>
+        <div class="q-code"><pre><code class="language-javascript">const nums = [10, 20, 30];
+const sum = nums.reduce((acc, cur) => acc + cur, _____);
+console.log(sum); // 60</code></pre></div>
+        <input class="fill-input" type="text" placeholder="빈칸 입력..." />
+        <button class="submit-btn">확인</button>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <!-- ── 코드 작성 Q19~24 ── -->
+      <div class="q-card" data-q="18">
+        <span class="q-type-badge badge-write">코드 작성</span>
+        <div class="q-text">Q19. 아래 배열에서 <strong>가격이 50,000원 이상인 상품의 이름만</strong> 담은 배열을 만드세요. (<ic>filter</ic> + <ic>map</ic> 체이닝)</div>
+        <div class="q-code"><pre><code class="language-javascript">const cart = [
+  { name: "MacBook Pro", price: 2500000 },
+  { name: "무선 마우스", price: 35000 },
+  { name: "모니터",      price: 450000 },
+  { name: "USB 허브",    price: 28000 },
+  { name: "키보드",      price: 120000 },
+];</code></pre></div>
+        <textarea class="code-input" placeholder="const result = cart&#10;  .filter(...)&#10;  .map(...)"></textarea>
+        <button class="submit-btn">정답 확인</button>
+        <div class="self-check"><button class="sc-correct">✅ 맞았어요</button><button class="sc-wrong">❌ 틀렸어요</button></div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="19">
+        <span class="q-type-badge badge-write">코드 작성</span>
+        <div class="q-text">Q20. <ic>reduce</ic>를 사용해 <strong>모든 상품의 가격 합계</strong>를 구하는 코드를 작성하세요.</div>
+        <div class="q-code"><pre><code class="language-javascript">const cart = [
+  { name: "MacBook Pro", price: 2500000 },
+  { name: "무선 마우스", price: 35000 },
+  { name: "모니터",      price: 450000 },
+  { name: "USB 허브",    price: 28000 },
+  { name: "키보드",      price: 120000 },
+];</code></pre></div>
+        <textarea class="code-input" placeholder="const total = cart.reduce(...)"></textarea>
+        <button class="submit-btn">정답 확인</button>
+        <div class="self-check"><button class="sc-correct">✅ 맞았어요</button><button class="sc-wrong">❌ 틀렸어요</button></div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="20">
+        <span class="q-type-badge badge-write">코드 작성</span>
+        <div class="q-text">Q21. <strong>"키보드"라는 이름을 가진 상품의 인덱스</strong>를 구하는 코드를 작성하세요.</div>
+        <div class="q-code"><pre><code class="language-javascript">const cart = [
+  { name: "MacBook Pro", price: 2500000 },
+  { name: "무선 마우스", price: 35000 },
+  { name: "모니터",      price: 450000 },
+  { name: "USB 허브",    price: 28000 },
+  { name: "키보드",      price: 120000 },
+];</code></pre></div>
+        <textarea class="code-input" placeholder="const idx = cart.findIndex(...)"></textarea>
+        <button class="submit-btn">정답 확인</button>
+        <div class="self-check"><button class="sc-correct">✅ 맞았어요</button><button class="sc-wrong">❌ 틀렸어요</button></div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="21">
+        <span class="q-type-badge badge-write">코드 작성</span>
+        <div class="q-text">Q22. <ic>some</ic>을 사용해 <strong>가격이 1,000,000원 이상인 상품이 하나라도 있는지</strong> 확인하는 코드를 작성하세요.</div>
+        <div class="q-code"><pre><code class="language-javascript">const cart = [
+  { name: "MacBook Pro", price: 2500000 },
+  { name: "무선 마우스", price: 35000 },
+  { name: "모니터",      price: 450000 },
+];</code></pre></div>
+        <textarea class="code-input" placeholder="const result = cart.some(...)"></textarea>
+        <button class="submit-btn">정답 확인</button>
+        <div class="self-check"><button class="sc-correct">✅ 맞았어요</button><button class="sc-wrong">❌ 틀렸어요</button></div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="22">
+        <span class="q-type-badge badge-write">코드 작성</span>
+        <div class="q-text">Q23. 아래 생성자 함수를 이용해 <strong>id가 1, name이 "홍길동", score가 "A"인 Student 객체</strong>를 만드는 코드를 작성하세요.</div>
+        <div class="q-code"><pre><code class="language-javascript">function Student(id, name, score) {
+  this.id    = id;
+  this.name  = name;
+  this.score = score;
+}</code></pre></div>
+        <textarea class="code-input" placeholder="const stu = ..."></textarea>
+        <button class="submit-btn">정답 확인</button>
+        <div class="self-check"><button class="sc-correct">✅ 맞았어요</button><button class="sc-wrong">❌ 틀렸어요</button></div>
+        <div class="feedback"></div><button class="next-btn">다음 문제 →</button>
+      </div>
+
+      <div class="q-card" data-q="23">
+        <span class="q-type-badge badge-write">코드 작성</span>
+        <div class="q-text">Q24. <ic>filter</ic> + <ic>sort</ic> + <ic>map</ic>을 체이닝해서 <strong>가격이 50,000원 이상인 상품을 가격 오름차순으로 정렬한 뒤 이름만</strong> 뽑는 코드를 작성하세요.</div>
+        <div class="q-code"><pre><code class="language-javascript">const cart = [
+  { name: "MacBook Pro", price: 2500000 },
+  { name: "무선 마우스", price: 35000 },
+  { name: "모니터",      price: 450000 },
+  { name: "USB 허브",    price: 28000 },
+  { name: "키보드",      price: 120000 },
+];</code></pre></div>
+        <textarea class="code-input" placeholder="const result = cart&#10;  .filter(...)&#10;  .sort(...)&#10;  .map(...)"></textarea>
+        <button class="submit-btn">정답 확인</button>
+        <div class="self-check"><button class="sc-correct">✅ 맞았어요</button><button class="sc-wrong">❌ 틀렸어요</button></div>
+        <div class="feedback"></div><button class="next-btn">결과 보기 →</button>
+      </div>
+
+      <!-- 결과 화면 -->
+      <div class="result-screen" id="resultScreen">
+        <div class="result-score" id="resultScore"></div>
+        <div class="result-msg" id="resultMsg"></div>
+        <div class="result-detail">
+          <div class="item"><strong id="rCorrect"></strong>정답</div>
+          <div class="item"><strong id="rWrong"></strong>오답</div>
+          <div class="item"><strong id="rSkip"></strong>직접 확인</div>
+        </div>
+        <button class="retry-btn" onclick="location.reload()">다시 풀기</button>
+      </div>
+    </div>
+
+    <footer>
+      <p>JavaScript 학습 가이드 &nbsp;|&nbsp; 학습용 문서</p>
+    </footer>
+
+    <script>
+      const TOTAL = 24;
+      const answers = [
+        // 객관식 Q1~6
+        { type:"mc",   correct:[1], ex:"let과 const는 블록 스코프를 가지며 재선언이 불가능합니다. var는 함수 스코프이며 재선언이 가능합니다.\n\n💡 재선언 vs 재할당\n재선언: 같은 이름의 변수를 다시 선언하는 것 → let x = 1; let x = 2; (❌)\n재할당: 이미 선언된 변수에 새 값을 대입하는 것 → let x = 1; x = 2; (✅)\nconst는 재선언·재할당 모두 불가, let은 재할당만 가능합니다." },
+        { type:"mc",   correct:[3], ex:"null은 개발자가 의도적으로 비워둔 값, undefined는 선언만 되고 값이 할당된 적 없는 상태입니다." },
+        { type:"mc",   correct:[2], ex:"filter는 조건을 만족하는 요소만 모아 새 배열을 반환합니다. 원본은 변경되지 않습니다." },
+        { type:"mc",   correct:[1], ex:"함수 선언문은 호이스팅이 적용되어 선언 전에 호출할 수 있습니다. 함수 표현식은 호이스팅이 적용되지 않습니다." },
+        { type:"mc",   correct:[2], ex:"map은 가공된 새 배열을 반환하고, forEach는 반환값이 없습니다." },
+        { type:"mc",   correct:[2], ex:"find는 조건을 만족하는 첫 번째 요소를 반환하고, filter는 조건을 만족하는 모든 요소를 배열로 반환합니다." },
+        // 코드 해석 Q7~12
+        { type:"mc",   correct:[1], ex:"var는 호이스팅 시 선언만 끌어올려지고 값은 아직 없으므로 undefined가 출력됩니다." },
+        { type:"mc",   correct:[1], ex:"전자기기 카테고리인 MacBook Pro와 모니터의 이름만 담긴 배열이 반환됩니다." },
+        { type:"mc",   correct:[2], ex:"10 + 20 + 30 + 40 = 100. reduce는 초기값 0부터 누적 합산합니다." },
+        { type:"mc",   correct:[2], ex:"let은 호이스팅되지만 TDZ(Temporal Dead Zone)로 인해 선언 전에 접근하면 ReferenceError가 발생합니다." },
+        { type:"mc",   correct:[1], ex:"find는 조건을 만족하는 첫 번째 요소를 반환합니다. 3보다 큰 첫 번째 값은 4입니다." },
+        { type:"mc",   correct:[1], ex:"무선 마우스(35,000원)가 50,000원 미만이므로 some은 true를 반환합니다." },
+        // 빈칸 채우기 Q13~18
+        { type:"fill", correct:["find"],          ex:"find는 조건을 만족하는 첫 번째 요소를 반환합니다. 없으면 undefined를 반환합니다." },
+        { type:"fill", correct:["n","(n)"],        ex:"매개변수가 하나일 때는 괄호를 생략할 수 있습니다." },
+        { type:"fill", correct:["b.price-a.price","b.price - a.price"], ex:"오름차순은 a - b, 내림차순은 b - a입니다." },
+        { type:"fill", correct:["obj[key]"],       ex:"변수를 키로 사용할 때는 괄호 표기법 obj[key]를 사용합니다. obj.key는 'key'라는 문자열 속성을 찾습니다.", normalize: s => s.replace(/\s/g,"") },
+        { type:"fill", correct:["indexof","indexOf"], ex:"indexOf는 처음 발견된 인덱스를 반환합니다. 없으면 -1을 반환합니다." },
+        { type:"fill", correct:["0"],              ex:"reduce의 두 번째 인자는 acc의 초기값입니다. 합계를 구할 때는 0으로 시작합니다." },
+        // 코드 작성 Q19~24
+        { type:"write", ex:"예시 정답:\nconst result = cart\n  .filter(item => item.price >= 50000)\n  .map(item => item.name);\n// [\"MacBook Pro\", \"모니터\", \"키보드\"]" },
+        { type:"write", ex:"예시 정답:\nconst total = cart.reduce((acc, item) => acc + item.price, 0);\n// 3133000" },
+        { type:"write", ex:"예시 정답:\nconst idx = cart.findIndex(item => item.name === \"키보드\");\n// 4" },
+        { type:"write", ex:"예시 정답:\nconst result = cart.some(item => item.price >= 1000000);\n// true" },
+        { type:"write", ex:"예시 정답:\nconst stu = new Student(1, \"홍길동\", \"A\");" },
+        { type:"write", ex:"예시 정답:\nconst result = cart\n  .filter(item => item.price >= 50000)\n  .sort((a, b) => a.price - b.price)\n  .map(item => item.name);\n// [\"키보드\", \"모니터\", \"MacBook Pro\"]" },
+      ];
+
+      const sectionLabels = [
+        "객관식","객관식","객관식","객관식","객관식","객관식",
+        "코드 해석","코드 해석","코드 해석","코드 해석","코드 해석","코드 해석",
+        "빈칸 채우기","빈칸 채우기","빈칸 채우기","빈칸 채우기","빈칸 채우기","빈칸 채우기",
+        "코드 작성","코드 작성","코드 작성","코드 작성","코드 작성","코드 작성",
+      ];
+
+      let current = 0, score = 0, skipped = 0;
+      const cards = document.querySelectorAll(".q-card");
+      const fill  = document.getElementById("progressFill");
+      const pText = document.getElementById("progressText");
+      const secLbl= document.getElementById("sectionLabel");
+
+      function updateProgress() {
+        fill.style.width = (current / TOTAL * 100) + "%";
+        pText.textContent = current + " / " + TOTAL;
+        secLbl.textContent = current < TOTAL ? sectionLabels[current] : "";
+      }
+      updateProgress();
+
+      cards.forEach((card, qi) => {
+        const a    = answers[qi];
+        const fb   = card.querySelector(".feedback");
+        const next = card.querySelector(".next-btn");
+
+        if (a.type === "mc") {
+          card.querySelectorAll(".opt-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+              const idx = parseInt(btn.dataset.ans);
+              card.querySelectorAll(".opt-btn").forEach(b => b.disabled = true);
+              if (a.correct.includes(idx)) {
+                btn.classList.add("correct");
+                fb.textContent = "✅ 정답! " + a.ex;
+                fb.className = "feedback show correct";
+                score++;
+              } else {
+                btn.classList.add("wrong");
+                card.querySelectorAll(".opt-btn").forEach(b => {
+                  if (a.correct.includes(parseInt(b.dataset.ans))) b.classList.add("correct");
+                });
+                fb.textContent = "❌ 오답. " + a.ex;
+                fb.className = "feedback show wrong";
+              }
+              current++; updateProgress(); next.classList.add("show");
+            });
+          });
+        }
+
+        if (a.type === "fill") {
+          const inp = card.querySelector(".fill-input");
+          const btn = card.querySelector(".submit-btn");
+          const check = () => {
+            const raw = inp.value.trim();
+            const normalize = a.normalize || (s => s.toLowerCase().replace(/\s/g,""));
+            const val = normalize(raw);
+            const ok  = a.correct.some(c => val === normalize(c));
+            inp.disabled = true; btn.disabled = true;
+            if (ok) {
+              inp.classList.add("correct");
+              fb.textContent = "✅ 정답! " + a.ex;
+              fb.className = "feedback show correct";
+              score++;
+            } else {
+              inp.classList.add("wrong");
+              fb.textContent = "❌ 오답. 정답: " + a.correct[0] + " — " + a.ex;
+              fb.className = "feedback show wrong";
+            }
+            current++; updateProgress(); next.classList.add("show");
+          };
+          btn.addEventListener("click", check);
+          inp.addEventListener("keydown", e => { if (e.key === "Enter") check(); });
+        }
+
+        if (a.type === "write") {
+          const btn = card.querySelector(".submit-btn");
+          btn.addEventListener("click", () => {
+            btn.disabled = true;
+            fb.innerHTML = "📋 예시 정답을 확인하고 직접 비교해보세요.<br><pre style='margin-top:8px;background:#1e293b;padding:12px;border-radius:6px;font-size:0.82rem;color:#e2e8f0;white-space:pre-wrap'>" + a.ex + "</pre>";
+            fb.className = "feedback show correct";
+            // self-check 버튼 표시
+            const sc = card.querySelector(".self-check");
+            sc.classList.add("show");
+            sc.querySelector(".sc-correct").addEventListener("click", () => {
+              score++; sc.classList.remove("show");
+              fb.textContent = "✅ 스스로 정답으로 체크했습니다!";
+              fb.className = "feedback show correct";
+              current++; updateProgress(); next.classList.add("show");
+            });
+            sc.querySelector(".sc-wrong").addEventListener("click", () => {
+              skipped++; sc.classList.remove("show");
+              fb.textContent = "❌ 스스로 오답으로 체크했습니다. 예시 정답을 다시 확인해보세요.";
+              fb.className = "feedback show wrong";
+              current++; updateProgress(); next.classList.add("show");
+            });
+          });
+        }
+
+        next.addEventListener("click", () => {
+          card.classList.remove("active");
+          if (qi + 1 < TOTAL) cards[qi + 1].classList.add("active");
+          else showResult();
+        });
+      });
+
+      function showResult() {
+        document.querySelectorAll(".q-card").forEach(c => c.classList.remove("active"));
+        const wrong = TOTAL - score - skipped;
+        const pct = Math.round(score / TOTAL * 100);
+        document.getElementById("resultScore").innerHTML = pct + "<span>%</span>";
+        document.getElementById("rCorrect").textContent = score + "개 ";
+        document.getElementById("rWrong").textContent   = wrong + "개 ";
+        document.getElementById("rSkip").textContent    = skipped + "개 ";
+        const msg = pct >= 90 ? "🎉 완벽해요! 개념을 확실히 이해하고 있네요."
+                  : pct >= 70 ? "👍 잘 했어요! 틀린 문제를 다시 복습해보세요."
+                  : pct >= 50 ? "📚 절반은 맞혔어요. 학습 자료를 다시 확인해보세요."
+                  :             "💪 아직 어렵죠? 기본 문법과 Array Helper를 다시 학습해보세요.";
+        document.getElementById("resultMsg").textContent = msg;
+        document.getElementById("resultScreen").classList.add("show");
+        secLbl.textContent = "";
+      }
+
+      hljs.highlightAll();
+    </script>
+  </body>
+</html>
