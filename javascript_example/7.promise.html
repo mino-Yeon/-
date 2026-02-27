@@ -142,12 +142,12 @@
           <p>서버에서 데이터를 가져오는 작업처럼 시간이 오래 걸리는 작업이 있으면, 그 작업이 끝날 때까지 <strong>나머지 모든 작업이 대기</strong>해야 합니다.</p>
 
           <div class="code-block">
-            <pre><code class="language-javascript">function work() {
+            <pre><code class="language-javascript">function syncRequest() {
   console.log("작업 시작");
 
   // 서버 요청 — 동기 방식 (세 번째 인자 false)
   const xhr = new XMLHttpRequest();
-  xhr.open("GET", "/api/data", false); // false = 동기
+  xhr.open("GET", "https://jsonplaceholder.typicode.com/todos/1", false); // false = 동기
   xhr.send(); // 응답이 올 때까지 여기서 멈춤!
 
   alert(xhr.responseText);
@@ -170,12 +170,12 @@
           <p>세 번째 인자를 <code>true</code>로 바꾸고, 응답이 왔을 때 실행할 코드를 <strong>콜백 함수</strong>로 등록합니다. 요청을 보낸 뒤 응답을 기다리지 않고 다음 코드를 바로 실행합니다.</p>
 
           <div class="code-block">
-            <pre><code class="language-javascript">function work() {
+            <pre><code class="language-javascript">function asyncRequest() {
   console.log("작업 시작");
 
   // 서버 요청 — 비동기 방식 (세 번째 인자 true)
   const xhr = new XMLHttpRequest();
-  xhr.open("GET", "/api/data", true); // true = 비동기
+  xhr.open("GET", "https://jsonplaceholder.typicode.com/todos/1", true); // true = 비동기
   xhr.onload = () => {
     // 응답이 왔을 때 실행할 콜백 등록
     alert(xhr.responseText);
@@ -200,29 +200,23 @@ alert 실행        <span class="comment">← onload 콜백 실행</span></code>
           <div class="section-header"><h2>비동기의 장점</h2></div>
           <p>비동기 방식을 사용하면 시간이 걸리는 작업들을 <strong>동시에 처리</strong>할 수 있습니다.</p>
 
-          <div class="code-block">
-            <pre><code class="language-javascript">console.log("작업 1 시작");
-setTimeout(() => {
-  console.log("작업 1 끝");
-}, 1000);
+          <p>같은 요청을 <strong>동기</strong>로 2번 호출할 때와 <strong>비동기</strong>로 2번 호출할 때의 총 소요 시간을 비교해보세요.</p>
 
-console.log("작업 2 시작");
-setTimeout(() => {
-  console.log("작업 2 끝");
-}, 1000);</code></pre>
-            <div class="result">
-              <div class="result-label">▶ 실행 결과 (총 소요 시간: 약 1초)</div>
-              <pre><code>작업 1 시작
-작업 2 시작       <span class="comment">← 작업 1을 기다리지 않고 바로 실행</span>
-작업 1 끝         <span class="comment">← 1초 후</span>
-작업 2 끝         <span class="comment">← 1초 후 (2초가 아님!)</span></code></pre>
-            </div>
+          <div class="code-block">
+            <pre><code class="language-javascript">// 동기 — 요청이 순서대로 처리됨 (총 소요 = 요청1 + 요청2)
+syncRequest(); // 첫 번째 응답 올 때까지 대기
+syncRequest(); // 그 다음 두 번째 요청 시작
+
+// 비동기 — 요청이 동시에 처리됨 (총 소요 ≈ max(요청1, 요청2))
+asyncRequest(); // 요청만 보내고 바로 다음으로
+asyncRequest(); // 첫 번째 응답을 기다리지 않고 바로 요청</code></pre>
           </div>
 
           <div class="demo">
-            <div class="demo-label">▶ 데모 — 비동기 병렬 처리</div>
+            <div class="demo-label">⏱ 데모 — 동기 2회 vs 비동기 2회 소요 시간 비교</div>
             <div class="demo-row">
-              <button class="demo-btn primary" id="asyncDemoBtn">실행</button>
+              <button class="demo-btn danger"   id="syncDemoBtn">🔴 동기 2회 호출</button>
+              <button class="demo-btn success"  id="asyncDemoBtn">🟢 비동기 2회 호출</button>
             </div>
             <div class="log-box" id="asyncDemoLog">
               <div class="log-label">▶ 실행 로그</div>
@@ -485,14 +479,36 @@ loadData();</code></pre>
       }
 
       // ── 비동기 장점 데모 ──
-      document.getElementById("asyncDemoBtn").addEventListener("click", () => {
+      const URL = "https://jsonplaceholder.typicode.com/todos/1";
+
+      document.getElementById("syncDemoBtn").addEventListener("click", async () => {
         clearLog("asyncDemoLog");
+        addLog("asyncDemoLog", "🔴 동기 방식 시뮬레이션 (순차 처리)", "red");
         const start = Date.now();
-        addLog("asyncDemoLog", "작업 1 시작", "white");
-        setTimeout(() => addLog("asyncDemoLog", `작업 1 끝 (${Date.now()-start}ms 경과)`, "green"), 1000);
-        addLog("asyncDemoLog", "작업 2 시작", "white");
-        setTimeout(() => addLog("asyncDemoLog", `작업 2 끝 (${Date.now()-start}ms 경과)`, "sky"), 1000);
-        addLog("asyncDemoLog", "── 두 작업이 동시에 진행됩니다 ──", "gray");
+
+        addLog("asyncDemoLog", "요청 1 시작...", "gray");
+        await fetch(URL);
+        const t1 = Date.now() - start;
+        addLog("asyncDemoLog", `✅ 요청 1 완료 (${t1}ms 경과)`, "yellow");
+
+        addLog("asyncDemoLog", "요청 2 시작... (요청 1 끝난 후)", "gray");
+        await fetch(URL);
+        const t2 = Date.now() - start;
+        addLog("asyncDemoLog", `✅ 요청 2 완료 (${t2}ms 경과)`, "yellow");
+        addLog("asyncDemoLog", `⏱ 총 소요 시간: ${t2}ms (요청1 + 요청2)`, "red");
+      });
+
+      document.getElementById("asyncDemoBtn").addEventListener("click", async () => {
+        clearLog("asyncDemoLog");
+        addLog("asyncDemoLog", "🟢 비동기 방식 (동시 처리)", "green");
+        const start = Date.now();
+
+        addLog("asyncDemoLog", "요청 1, 2 동시 시작...", "gray");
+        const [r1, r2] = await Promise.all([fetch(URL), fetch(URL)]);
+        const t = Date.now() - start;
+        addLog("asyncDemoLog", `✅ 요청 1 완료`, "sky");
+        addLog("asyncDemoLog", `✅ 요청 2 완료`, "sky");
+        addLog("asyncDemoLog", `⏱ 총 소요 시간: ${t}ms (동시 처리 — 훨씬 빠름!)`, "green");
       });
 
       // ── resolve / reject 데모 ──
