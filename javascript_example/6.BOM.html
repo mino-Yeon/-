@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>BOM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root { --accent: #38bdf8; --accent-dark: #0284c7; --accent-bg: #f0f9ff; --accent-border: #bae6fd; }
+
+      body { font-family: sans-serif; background: #f4f6f8; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+
+      header { background: linear-gradient(135deg, #0f172a, #0369a1); color: white; padding: 18px 28px; display: flex; align-items: center; gap: 12px; }
+      header .header-icon { font-size: 1.4rem; }
+      header h1 { font-size: 1.2rem; letter-spacing: 0.02em; }
+      header span { font-size: 0.8rem; background: rgba(255,255,255,0.15); padding: 2px 10px; border-radius: 20px; margin-left: 8px; color: #bae6fd; }
+
+      .layout { display: flex; flex: 1; max-width: 1100px; width: 100%; margin: 0 auto; padding: 24px; gap: 24px; }
+
+      nav.sidebar { width: 200px; flex-shrink: 0; }
+      nav.sidebar .sidebar-inner { position: sticky; top: 24px; background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+      nav.sidebar h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 12px; }
+      nav.sidebar ul { list-style: none; }
+      nav.sidebar ul li { margin-bottom: 4px; }
+      nav.sidebar ul li a { text-decoration: none; color: #555; font-size: 0.88rem; display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 6px; transition: background 0.15s; }
+      nav.sidebar ul li a:hover { background: var(--accent-bg); color: var(--accent-dark); }
+      nav.sidebar ul li a .nav-badge { font-size: 0.72rem; background: #e2e8f0; color: #64748b; padding: 1px 7px; border-radius: 20px; font-family: "Courier New", monospace; }
+      nav.sidebar ul li a:hover .nav-badge { background: var(--accent-border); color: var(--accent-dark); }
+
+      main { flex: 1; min-width: 0; }
+
+      .section { background: #fff; border-radius: 10px; padding: 28px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+      .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--accent-border); }
+      .section-header h2 { font-size: 1.25rem; color: #1e293b; }
+      .badge { font-family: "Courier New", monospace; font-size: 0.82rem; font-weight: bold; background: var(--accent-bg); color: var(--accent-dark); border: 1px solid var(--accent-border); padding: 3px 10px; border-radius: 20px; }
+      .badge + .badge { margin-left: 4px; }
+
+      .section h3 { font-size: 0.95rem; margin: 20px 0 8px; color: #475569; font-weight: 600; }
+      .section p { font-size: 0.95rem; line-height: 1.75; color: #444; margin-bottom: 10px; }
+      .section ul { padding-left: 20px; margin-bottom: 12px; }
+      .section ul li { font-size: 0.95rem; line-height: 1.85; color: #444; list-style: disc; }
+
+      pre { border-radius: 8px; overflow-x: auto; font-size: 0.88rem; line-height: 1.6; margin: 8px 0 4px; }
+      pre code.hljs { border-radius: 8px; }
+      .hljs-comment { color: #98c379 !important; }
+      .hljs-string  { color: #e5c07b !important; }
+      code { font-family: "Courier New", monospace; }
+      p code, li code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.87rem; color: #0369a1; }
+
+      .code-block pre { border-radius: 8px 8px 0 0; margin-bottom: 0; }
+      .result { background: #0f172a; border-radius: 0 0 8px 8px; padding: 12px 16px; margin-bottom: 16px; border-top: 2px solid var(--accent); }
+      .result-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 8px; font-weight: bold; }
+      .result pre { margin: 0; background: transparent !important; padding: 0; }
+      .result code { font-family: "Courier New", monospace; font-size: 0.87rem; color: #e2e8f0; background: transparent !important; padding: 0; border-radius: 0; }
+
+      .tip  { background: var(--accent-bg); border-left: 4px solid var(--accent); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 0.9rem; color: #334155; line-height: 1.65; }
+      .warn { background: #fff7ed; border-left: 4px solid #fb923c; padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 0.9rem; color: #7c2d12; line-height: 1.65; }
+
+      /* 데모 */
+      .demo { background: #f8fafc; border: 1.5px solid var(--accent-border); border-radius: 8px; padding: 20px; margin-top: 12px; }
+      .demo-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-dark); font-weight: bold; margin-bottom: 14px; }
+      .demo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+      .demo-btn { padding: 8px 18px; border-radius: 6px; border: none; font-size: 0.88rem; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+      .demo-btn.primary { background: #0284c7; color: white; }
+      .demo-btn.primary:hover { background: #0369a1; }
+      .demo-btn.danger { background: #fee2e2; color: #b91c1c; }
+      .demo-btn.danger:hover { background: #fecaca; }
+      .demo-btn.gray { background: #e2e8f0; color: #475569; }
+      .demo-btn.gray:hover { background: #cbd5e1; }
+      .demo-result { font-family: "Courier New", monospace; font-size: 0.88rem; color: #0369a1; background: var(--accent-bg); border: 1px solid var(--accent-border); border-radius: 6px; padding: 8px 14px; margin-top: 8px; min-height: 36px; display: flex; align-items: center; }
+
+      /* 타이머 데모 */
+      .timer-display { font-size: 2.4rem; font-weight: 700; font-family: "Courier New", monospace; color: #1e293b; text-align: center; padding: 16px; background: #f1f5f9; border-radius: 8px; margin-bottom: 12px; letter-spacing: 0.05em; }
+      .timer-display.active { color: var(--accent-dark); background: var(--accent-bg); }
+
+      /* navigator 카드 */
+      .nav-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+      .nav-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 16px; }
+      .nav-card .nc-name { font-family: "Courier New", monospace; font-size: 0.88rem; color: var(--accent-dark); font-weight: bold; margin-bottom: 4px; }
+      .nav-card .nc-desc { font-size: 0.82rem; color: #64748b; margin-bottom: 10px; }
+      .nav-card .nc-result { font-family: "Courier New", monospace; font-size: 0.8rem; color: #334155; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; word-break: break-all; line-height: 1.6; }
+
+      footer { background: #0f172a; color: #475569; text-align: center; padding: 16px; font-size: 0.82rem; }
+    </style>
+  </head>
+  <body>
+
+    <header>
+      <div class="header-icon">🌐</div>
+      <h1>BOM <span>JavaScript</span></h1>
+    </header>
+
+    <div class="layout">
+      <nav class="sidebar">
+        <div class="sidebar-inner">
+          <h2>목차</h2>
+          <ul>
+            <li><a href="#overview"><span class="nav-badge">개요</span></a></li>
+            <li><a href="#alert"><span class="nav-badge">alert</span></a></li>
+            <li><a href="#confirm"><span class="nav-badge">confirm</span></a></li>
+            <li><a href="#prompt"><span class="nav-badge">prompt</span></a></li>
+            <li><a href="#open"><span class="nav-badge">open</span></a></li>
+            <li><a href="#timeout"><span class="nav-badge">setTimeout</span></a></li>
+            <li><a href="#interval"><span class="nav-badge">setInterval</span></a></li>
+            <li><a href="#location"><span class="nav-badge">location</span></a></li>
+            <li><a href="#history"><span class="nav-badge">history</span></a></li>
+            <li><a href="#navigator"><span class="nav-badge">navigator</span></a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <main>
+
+        <!-- 개요 -->
+        <section class="section" id="overview">
+          <div class="section-header"><h2>BOM이란?</h2></div>
+          <p><strong>BOM(Browser Object Model)</strong>은 브라우저 환경에서 JavaScript의 최상위 전역 객체인 <code>window</code>를 통해 브라우저 자체를 제어할 수 있는 모델입니다.</p>
+          <p><code>window</code>는 브라우저 탭 하나를 대표하는 객체로, 모든 전역 변수와 함수는 사실 <code>window</code>의 프로퍼티입니다. 따라서 <code>window.alert()</code>는 <code>alert()</code>과 동일합니다.</p>
+          <div class="code-block">
+            <pre><code class="language-javascript">window.alert("안녕하세요");
+alert("안녕하세요"); // 위와 동일 — window. 생략 가능</code></pre>
+          </div>
+          <div class="tip"><code>window</code> 아래에는 메소드(<code>alert</code>, <code>setTimeout</code> 등)뿐 아니라 <code>location</code>, <code>history</code>, <code>navigator</code> 같은 하위 객체도 있습니다.</div>
+        </section>
+
+        <!-- alert -->
+        <section class="section" id="alert">
+          <div class="section-header">
+            <h2>alert()</h2>
+            <span class="badge">alert</span>
+          </div>
+          <p>사용자에게 메시지를 보여주는 알림 창을 띄웁니다. 확인을 누를 때까지 이후 코드는 실행되지 않습니다.</p>
+          <div class="code-block">
+            <pre><code class="language-javascript">alert("저장되었습니다.");</code></pre>
+          </div>
+          <div class="demo">
+            <div class="demo-label">🔔 데모 — alert</div>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="alertBtn">alert 실행</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- confirm -->
+        <section class="section" id="confirm">
+          <div class="section-header">
+            <h2>confirm()</h2>
+            <span class="badge">confirm</span>
+          </div>
+          <p>확인 / 취소 버튼이 있는 창을 띄우고, 사용자의 선택에 따라 <code>true</code> 또는 <code>false</code>를 반환합니다.</p>
+          <div class="code-block">
+            <pre><code class="language-javascript">const result = confirm("정말 삭제하시겠습니까?");
+console.log(result); // 확인 → true, 취소 → false</code></pre>
+          </div>
+          <div class="demo">
+            <div class="demo-label">✅ 데모 — confirm</div>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="confirmBtn">confirm 실행</button>
+            </div>
+            <div class="demo-result" id="confirmResult">버튼을 눌러 결과를 확인하세요.</div>
+          </div>
+        </section>
+
+        <!-- prompt -->
+        <section class="section" id="prompt">
+          <div class="section-header">
+            <h2>prompt()</h2>
+            <span class="badge">prompt</span>
+          </div>
+          <p>텍스트 입력창을 띄우고 사용자가 입력한 값을 문자열로 반환합니다. 취소하면 <code>null</code>을 반환합니다.</p>
+          <div class="code-block">
+            <pre><code class="language-javascript">const name = prompt("이름을 입력하세요.");
+console.log(name); // 입력한 문자열 or null(취소 시)</code></pre>
+          </div>
+          <div class="demo">
+            <div class="demo-label">✏️ 데모 — prompt</div>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="promptBtn">prompt 실행</button>
+            </div>
+            <div class="demo-result" id="promptResult">버튼을 눌러 결과를 확인하세요.</div>
+          </div>
+        </section>
+
+        <!-- open -->
+        <section class="section" id="open">
+          <div class="section-header">
+            <h2>open()</h2>
+            <span class="badge">open</span>
+          </div>
+          <p>새 브라우저 창(또는 탭)을 엽니다. 열린 창에서는 <code>window.opener</code>를 통해 부모 창의 <code>window</code> 객체에 접근할 수 있습니다.</p>
+          <div class="code-block">
+            <pre><code class="language-javascript">// 새 창 열기
+window.open("https://example.com", "_blank");</code></pre>
+          </div>
+          <div class="code-block">
+            <pre><code class="language-javascript">// 열린 창(자식)에서 부모 창 접근
+window.opener.document.title = "부모창 제목 변경";</code></pre>
+          </div>
+          <div class="tip"><code>window.open()</code>은 팝업 차단 정책에 의해 사용자 동작(클릭 등) 없이 호출하면 브라우저가 차단할 수 있습니다.</div>
+          <div class="demo">
+            <div class="demo-label">🪟 데모 — open</div>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="openBtn">새 탭으로 열기</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- setTimeout -->
+        <section class="section" id="timeout">
+          <div class="section-header">
+            <h2>setTimeout()</h2>
+            <span class="badge">setTimeout</span>
+            <span class="badge">clearTimeout</span>
+          </div>
+          <p>일정 시간(ms) 후에 콜백 함수를 <strong>한 번</strong> 실행합니다. <code>clearTimeout()</code>으로 실행 전에 취소할 수 있습니다.</p>
+          <div class="code-block">
+            <pre><code class="language-javascript">const timer = setTimeout(() => {
+  console.log("3초 후 실행");
+}, 3000);
+
+// 취소
+clearTimeout(timer);</code></pre>
+          </div>
+          <div class="demo">
+            <div class="demo-label">⏱ 데모 — setTimeout (3초 후 메시지 표시)</div>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="timeoutStartBtn">시작</button>
+              <button class="demo-btn danger"  id="timeoutClearBtn">취소</button>
+            </div>
+            <div class="demo-result" id="timeoutResult">시작 버튼을 누르면 3초 후 메시지가 표시됩니다.</div>
+          </div>
+        </section>
+
+        <!-- setInterval -->
+        <section class="section" id="interval">
+          <div class="section-header">
+            <h2>setInterval()</h2>
+            <span class="badge">setInterval</span>
+            <span class="badge">clearInterval</span>
+          </div>
+          <p>일정 시간(ms) 간격으로 콜백 함수를 <strong>반복</strong> 실행합니다. <code>clearInterval()</code>로 중단할 수 있습니다.</p>
+          <div class="code-block">
+            <pre><code class="language-javascript">const timer = setInterval(() => {
+  console.log("1초마다 실행");
+}, 1000);
+
+// 중단
+clearInterval(timer);</code></pre>
+          </div>
+          <div class="demo">
+            <div class="demo-label">🔄 데모 — setInterval (1초마다 카운트)</div>
+            <div class="timer-display" id="timerDisplay">00 : 00</div>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="intervalStartBtn">시작</button>
+              <button class="demo-btn danger"  id="intervalStopBtn">중단</button>
+              <button class="demo-btn gray"    id="intervalResetBtn">초기화</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- location -->
+        <section class="section" id="location">
+          <div class="section-header">
+            <h2>location</h2>
+            <span class="badge">location</span>
+          </div>
+          <p>현재 창의 URL 정보를 담고 있는 객체입니다. URL 조회, 페이지 이동, 새로고침 등을 처리할 수 있습니다.</p>
+
+          <h3>현재 URL 조회</h3>
+          <div class="code-block">
+            <pre><code class="language-javascript">console.log(location.href); // 현재 페이지의 전체 URL</code></pre>
+          </div>
+
+          <h3>페이지 이동</h3>
+          <div class="code-block">
+            <pre><code class="language-javascript">location.href = "https://example.com"; // history에 기록 남음
+location.replace("https://example.com"); // history에 기록 안 남음</code></pre>
+          </div>
+
+          <h3>새로고침</h3>
+          <div class="code-block">
+            <pre><code class="language-javascript">location.reload();</code></pre>
+          </div>
+
+          <div class="tip"><code>href</code>로 이동하면 뒤로 가기가 가능하지만, <code>replace()</code>로 이동하면 이전 페이지가 history에 남지 않아 뒤로 가기가 불가합니다. 로그인 후 리다이렉트 등에 활용합니다.</div>
+
+          <div class="demo">
+            <div class="demo-label">🔗 데모 — 현재 URL 조회</div>
+            <div class="demo-result" id="locationResult">—</div>
+            <div class="demo-row" style="margin-top:10px">
+              <button class="demo-btn primary" id="locationBtn">location.href 확인</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- history -->
+        <section class="section" id="history">
+          <div class="section-header">
+            <h2>history</h2>
+            <span class="badge">history</span>
+          </div>
+          <p>브라우저의 방문 기록을 다루는 객체입니다. 실제 페이지 이동 없이 앞/뒤 이동을 제어할 수 있습니다.</p>
+
+          <h3>뒤로 가기 / 앞으로 가기</h3>
+          <div class="code-block">
+            <pre><code class="language-javascript">history.back();    // 뒤로 가기 (history.go(-1)과 동일)
+history.forward(); // 앞으로 가기 (history.go(1)과 동일)</code></pre>
+          </div>
+
+          <h3>go(n) — 숫자로 이동</h3>
+          <div class="code-block">
+            <pre><code class="language-javascript">history.go(-2); // 2단계 뒤로
+history.go(1);  // 1단계 앞으로</code></pre>
+          </div>
+          <div class="tip"><code>back()</code> / <code>forward()</code>는 <code>go(-1)</code> / <code>go(1)</code>의 축약입니다. 여러 단계를 한 번에 이동할 때는 <code>go(n)</code>을 사용합니다.</div>
+        </section>
+
+        <!-- navigator -->
+        <section class="section" id="navigator">
+          <div class="section-header">
+            <h2>navigator</h2>
+            <span class="badge">navigator</span>
+          </div>
+          <p>브라우저와 운영체제에 대한 정보를 담고 있는 객체입니다. 사용자 환경을 파악할 때 활용합니다.</p>
+
+          <div class="nav-cards">
+            <div class="nav-card">
+              <div class="nc-name">navigator.userAgent</div>
+              <div class="nc-desc">브라우저 및 OS 정보를 담은 문자열</div>
+              <pre><code class="language-javascript">console.log(navigator.userAgent);</code></pre>
+              <div class="nc-result" id="navUserAgent">—</div>
+            </div>
+            <div class="nav-card">
+              <div class="nc-name">navigator.language</div>
+              <div class="nc-desc">사용자의 브라우저 언어 설정</div>
+              <pre><code class="language-javascript">console.log(navigator.language);</code></pre>
+              <div class="nc-result" id="navLanguage">—</div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <footer>
+      <p>JavaScript BOM &nbsp;|&nbsp; 학습용 문서</p>
+    </footer>
+
+    <script>
+      // ── alert ──
+      document.getElementById("alertBtn").addEventListener("click", () => {
+        alert("저장되었습니다.");
+      });
+
+      // ── confirm ──
+      document.getElementById("confirmBtn").addEventListener("click", () => {
+        const result = confirm("정말 삭제하시겠습니까?");
+        const el = document.getElementById("confirmResult");
+        el.textContent = `반환값: ${result} — ${result ? "확인을 눌렀습니다." : "취소를 눌렀습니다."}`;
+        el.style.color = result ? "#15803d" : "#b91c1c";
+      });
+
+      // ── prompt ──
+      document.getElementById("promptBtn").addEventListener("click", () => {
+        const name = prompt("이름을 입력하세요.");
+        const el = document.getElementById("promptResult");
+        if (name === null) {
+          el.textContent = `반환값: null — 취소를 눌렀습니다.`;
+          el.style.color = "#b91c1c";
+        } else {
+          el.textContent = `반환값: "${name}"`;
+          el.style.color = "#15803d";
+        }
+      });
+
+      // ── open ──
+      document.getElementById("openBtn").addEventListener("click", () => {
+        window.open("https://www.google.com", "_blank");
+      });
+
+      // ── setTimeout ──
+      let timeoutId = null;
+      document.getElementById("timeoutStartBtn").addEventListener("click", () => {
+        const el = document.getElementById("timeoutResult");
+        el.textContent = "⏳ 3초 후 메시지가 표시됩니다...";
+        el.style.color = "#0369a1";
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          el.textContent = "✅ 3초가 지났습니다! setTimeout 실행 완료.";
+          el.style.color = "#15803d";
+        }, 3000);
+      });
+      document.getElementById("timeoutClearBtn").addEventListener("click", () => {
+        clearTimeout(timeoutId);
+        const el = document.getElementById("timeoutResult");
+        el.textContent = "🚫 clearTimeout() — 실행이 취소되었습니다.";
+        el.style.color = "#b91c1c";
+      });
+
+      // ── setInterval ──
+      let intervalId = null;
+      let sec = 0, min = 0;
+      const display = document.getElementById("timerDisplay");
+
+      function pad(n) { return String(n).padStart(2, "0"); }
+      function updateDisplay() { display.textContent = `${pad(min)} : ${pad(sec)}`; }
+
+      document.getElementById("intervalStartBtn").addEventListener("click", () => {
+        if (intervalId) return;
+        display.classList.add("active");
+        intervalId = setInterval(() => {
+          sec++;
+          if (sec === 60) { sec = 0; min++; }
+          updateDisplay();
+        }, 1000);
+      });
+      document.getElementById("intervalStopBtn").addEventListener("click", () => {
+        clearInterval(intervalId);
+        intervalId = null;
+        display.classList.remove("active");
+      });
+      document.getElementById("intervalResetBtn").addEventListener("click", () => {
+        clearInterval(intervalId);
+        intervalId = null;
+        sec = 0; min = 0;
+        updateDisplay();
+        display.classList.remove("active");
+      });
+
+      // ── location ──
+      document.getElementById("locationBtn").addEventListener("click", () => {
+        document.getElementById("locationResult").textContent = location.href;
+      });
+
+      // ── navigator ──
+      document.getElementById("navUserAgent").textContent = navigator.userAgent;
+      document.getElementById("navLanguage").textContent  = navigator.language;
+    </script>
+
+  </body>
+</html>

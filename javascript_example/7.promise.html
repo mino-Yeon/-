@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Promise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root { --accent: #38bdf8; --accent-dark: #0284c7; --accent-bg: #f0f9ff; --accent-border: #bae6fd; }
+
+      body { font-family: sans-serif; background: #f4f6f8; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+
+      header { background: linear-gradient(135deg, #0f172a, #0369a1); color: white; padding: 18px 28px; display: flex; align-items: center; gap: 12px; }
+      header .header-icon { font-size: 1.4rem; }
+      header h1 { font-size: 1.2rem; letter-spacing: 0.02em; }
+      header span { font-size: 0.8rem; background: rgba(255,255,255,0.15); padding: 2px 10px; border-radius: 20px; margin-left: 8px; color: #bae6fd; }
+
+      .layout { display: flex; flex: 1; max-width: 1100px; width: 100%; margin: 0 auto; padding: 24px; gap: 24px; }
+
+      nav.sidebar { width: 200px; flex-shrink: 0; }
+      nav.sidebar .sidebar-inner { position: sticky; top: 24px; background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+      nav.sidebar h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 12px; }
+      nav.sidebar ul { list-style: none; }
+      nav.sidebar ul li { margin-bottom: 4px; }
+      nav.sidebar ul li a { text-decoration: none; color: #555; font-size: 0.88rem; display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 6px; transition: background 0.15s; }
+      nav.sidebar ul li a:hover { background: var(--accent-bg); color: var(--accent-dark); }
+      nav.sidebar ul li a .nav-badge { font-size: 0.72rem; background: #e2e8f0; color: #64748b; padding: 1px 7px; border-radius: 20px; font-family: "Courier New", monospace; }
+      nav.sidebar ul li a:hover .nav-badge { background: var(--accent-border); color: var(--accent-dark); }
+
+      main { flex: 1; min-width: 0; }
+
+      .section { background: #fff; border-radius: 10px; padding: 28px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+      .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--accent-border); }
+      .section-header h2 { font-size: 1.25rem; color: #1e293b; }
+      .badge { font-family: "Courier New", monospace; font-size: 0.82rem; font-weight: bold; background: var(--accent-bg); color: var(--accent-dark); border: 1px solid var(--accent-border); padding: 3px 10px; border-radius: 20px; }
+      .badge + .badge { margin-left: 4px; }
+
+      .section h3 { font-size: 0.95rem; margin: 20px 0 8px; color: #475569; font-weight: 600; }
+      .section p { font-size: 0.95rem; line-height: 1.75; color: #444; margin-bottom: 10px; }
+      .section ul { padding-left: 20px; margin-bottom: 12px; }
+      .section ul li { font-size: 0.95rem; line-height: 1.85; color: #444; list-style: disc; }
+
+      pre { border-radius: 8px; overflow-x: auto; font-size: 0.88rem; line-height: 1.6; margin: 8px 0 4px; }
+      pre code.hljs { border-radius: 8px; }
+      .hljs-comment { color: #98c379 !important; }
+      .hljs-string  { color: #e5c07b !important; }
+      code { font-family: "Courier New", monospace; }
+      p code, li code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.87rem; color: #0369a1; }
+
+      .code-block pre { border-radius: 8px 8px 0 0; margin-bottom: 0; }
+      .result { background: #0f172a; border-radius: 0 0 8px 8px; padding: 12px 16px; margin-bottom: 16px; border-top: 2px solid var(--accent); }
+      .result-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 8px; font-weight: bold; }
+      .result pre { margin: 0; background: transparent !important; padding: 0; }
+      .result code { font-family: "Courier New", monospace; font-size: 0.87rem; color: #e2e8f0; background: transparent !important; padding: 0; border-radius: 0; }
+      .result code .comment { color: #6b7280; }
+
+      .tip  { background: var(--accent-bg); border-left: 4px solid var(--accent); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 0.9rem; color: #334155; line-height: 1.65; }
+      .warn { background: #fff7ed; border-left: 4px solid #fb923c; padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 0.9rem; color: #7c2d12; line-height: 1.65; }
+
+      /* 탭 */
+      .tab-wrap { margin-top: 16px; }
+      .tab-btns { display: flex; }
+      .tab-btn { padding: 8px 20px; border: 1.5px solid #e2e8f0; background: #f8fafc; font-size: 0.88rem; font-family: inherit; cursor: pointer; color: #64748b; transition: all 0.15s; }
+      .tab-btn:first-child { border-radius: 8px 0 0 0; }
+      .tab-btn:last-child  { border-radius: 0 8px 0 0; border-left: none; }
+      .tab-btn.active { background: #fff; color: var(--accent-dark); border-bottom-color: #fff; font-weight: 600; border-top: 2px solid var(--accent); }
+      .tab-content { border: 1.5px solid #e2e8f0; border-radius: 0 8px 8px 8px; padding: 20px; background: #fff; display: none; }
+      .tab-content.active { display: block; }
+
+      /* 상태 배지 */
+      .state-cards { display: flex; gap: 12px; margin: 12px 0; }
+      .state-card { flex: 1; border-radius: 8px; padding: 14px 16px; text-align: center; }
+      .state-card .sc-name { font-family: "Courier New", monospace; font-size: 0.92rem; font-weight: 700; margin-bottom: 4px; }
+      .state-card .sc-desc { font-size: 0.8rem; }
+      .state-card.pending   { background: #fefce8; border: 1.5px solid #fde047; }
+      .state-card.pending   .sc-name { color: #a16207; }
+      .state-card.pending   .sc-desc { color: #854d0e; }
+      .state-card.fulfilled { background: #f0fdf4; border: 1.5px solid #86efac; }
+      .state-card.fulfilled .sc-name { color: #15803d; }
+      .state-card.fulfilled .sc-desc { color: #166534; }
+      .state-card.rejected  { background: #fef2f2; border: 1.5px solid #fca5a5; }
+      .state-card.rejected  .sc-name { color: #b91c1c; }
+      .state-card.rejected  .sc-desc { color: #991b1b; }
+
+      /* 데모 */
+      .demo { background: #f8fafc; border: 1.5px solid var(--accent-border); border-radius: 8px; padding: 20px; margin-top: 12px; }
+      .demo-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-dark); font-weight: bold; margin-bottom: 14px; }
+      .demo-btn { padding: 8px 18px; border-radius: 6px; border: none; font-size: 0.88rem; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+      .demo-btn.primary { background: #0284c7; color: white; }
+      .demo-btn.primary:hover { background: #0369a1; }
+      .demo-btn.success { background: #16a34a; color: white; }
+      .demo-btn.success:hover { background: #15803d; }
+      .demo-btn.danger { background: #fee2e2; color: #b91c1c; }
+      .demo-btn.danger:hover { background: #fecaca; }
+      .demo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+
+      /* 로그 박스 */
+      .log-box { background: #1e293b; border-radius: 8px; padding: 12px 16px; margin-top: 10px; min-height: 60px; max-height: 200px; overflow-y: auto; }
+      .log-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 6px; font-weight: bold; }
+      .log-line { font-family: "Courier New", monospace; font-size: 0.82rem; line-height: 1.8; }
+      .log-line.green  { color: #86efac; }
+      .log-line.yellow { color: #fde68a; }
+      .log-line.red    { color: #fca5a5; }
+      .log-line.white  { color: #e2e8f0; }
+      .log-line.sky    { color: #7dd3fc; }
+      .log-line.gray   { color: #6b7280; }
+
+      footer { background: #0f172a; color: #475569; text-align: center; padding: 16px; font-size: 0.82rem; }
+    </style>
+  </head>
+  <body>
+
+    <header>
+      <div class="header-icon">🔄</div>
+      <h1>Promise <span>JavaScript</span></h1>
+    </header>
+
+    <div class="layout">
+      <nav class="sidebar">
+        <div class="sidebar-inner">
+          <h2>목차</h2>
+          <ul>
+            <li><a href="#problem"><span class="nav-badge">문제</span></a></li>
+            <li><a href="#async"><span class="nav-badge">비동기 해결</span></a></li>
+            <li><a href="#async-advantage"><span class="nav-badge">비동기 장점</span></a></li>
+            <li><a href="#callback-hell"><span class="nav-badge">콜백 지옥</span></a></li>
+            <li><a href="#promise"><span class="nav-badge">Promise</span></a></li>
+            <li><a href="#chaining"><span class="nav-badge">체이닝</span></a></li>
+            <li><a href="#async-await"><span class="nav-badge">async/await</span></a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <main>
+
+        <!-- 1. 문제 -->
+        <section class="section" id="problem">
+          <div class="section-header"><h2>문제 — 동기 방식의 한계</h2></div>
+          <p>JavaScript는 기본적으로 <strong>싱글 스레드</strong> 환경에서 동작합니다. 즉, 한 번에 하나의 작업만 처리할 수 있습니다.</p>
+          <p>서버에서 데이터를 가져오는 작업처럼 시간이 오래 걸리는 작업이 있으면, 그 작업이 끝날 때까지 <strong>나머지 모든 작업이 대기</strong>해야 합니다.</p>
+
+          <div class="code-block">
+            <pre><code class="language-javascript">function work() {
+  console.log("작업 시작");
+
+  // 서버 요청 — 동기 방식 (세 번째 인자 false)
+  const xhr = new XMLHttpRequest();
+  xhr.open("GET", "/api/data", false); // false = 동기
+  xhr.send(); // 응답이 올 때까지 여기서 멈춤!
+
+  alert(xhr.responseText);
+
+  console.log("나머지 작업 수행"); // 응답이 올 때까지 실행 안 됨
+}</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 흐름</div>
+              <pre><code>작업 시작
+<span class="comment">// ⏸ 서버 응답 올 때까지 멈춤... (UI 전체 정지)</span>
+나머지 작업 수행</code></pre>
+            </div>
+          </div>
+          <div class="warn">동기 방식으로 서버 요청을 하면 응답이 오기 전까지 브라우저가 완전히 멈춥니다. 스크롤도, 클릭도, 화면 렌더링도 불가능합니다.</div>
+        </section>
+
+        <!-- 2. 비동기 해결 -->
+        <section class="section" id="async">
+          <div class="section-header"><h2>해결 — 비동기 방식</h2></div>
+          <p>세 번째 인자를 <code>true</code>로 바꾸고, 응답이 왔을 때 실행할 코드를 <strong>콜백 함수</strong>로 등록합니다. 요청을 보낸 뒤 응답을 기다리지 않고 다음 코드를 바로 실행합니다.</p>
+
+          <div class="code-block">
+            <pre><code class="language-javascript">function work() {
+  console.log("작업 시작");
+
+  // 서버 요청 — 비동기 방식 (세 번째 인자 true)
+  const xhr = new XMLHttpRequest();
+  xhr.open("GET", "/api/data", true); // true = 비동기
+  xhr.onload = () => {
+    // 응답이 왔을 때 실행할 콜백 등록
+    alert(xhr.responseText);
+  };
+  xhr.send(); // 요청만 보내고 바로 다음으로 넘어감
+
+  console.log("나머지 작업 수행"); // 응답을 기다리지 않고 바로 실행
+}</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 흐름</div>
+              <pre><code>작업 시작
+나머지 작업 수행  <span class="comment">← 응답 기다리지 않고 바로 실행</span>
+<span class="comment">// ... 나중에 응답이 오면</span>
+alert 실행        <span class="comment">← onload 콜백 실행</span></code></pre>
+            </div>
+          </div>
+          <div class="tip">응답이 오더라도 현재 실행 중인 작업이 있으면 그게 끝난 후에 콜백이 실행됩니다. 이 순서를 관리하는 것이 <strong>이벤트 루프</strong>입니다.</div>
+        </section>
+
+        <!-- 3. 비동기 장점 -->
+        <section class="section" id="async-advantage">
+          <div class="section-header"><h2>비동기의 장점</h2></div>
+          <p>비동기 방식을 사용하면 시간이 걸리는 작업들을 <strong>동시에 처리</strong>할 수 있습니다.</p>
+
+          <div class="code-block">
+            <pre><code class="language-javascript">console.log("작업 1 시작");
+setTimeout(() => {
+  console.log("작업 1 끝");
+}, 1000);
+
+console.log("작업 2 시작");
+setTimeout(() => {
+  console.log("작업 2 끝");
+}, 1000);</code></pre>
+            <div class="result">
+              <div class="result-label">▶ 실행 결과 (총 소요 시간: 약 1초)</div>
+              <pre><code>작업 1 시작
+작업 2 시작       <span class="comment">← 작업 1을 기다리지 않고 바로 실행</span>
+작업 1 끝         <span class="comment">← 1초 후</span>
+작업 2 끝         <span class="comment">← 1초 후 (2초가 아님!)</span></code></pre>
+            </div>
+          </div>
+
+          <div class="demo">
+            <div class="demo-label">▶ 데모 — 비동기 병렬 처리</div>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="asyncDemoBtn">실행</button>
+            </div>
+            <div class="log-box" id="asyncDemoLog">
+              <div class="log-label">▶ 실행 로그</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. 콜백 지옥 -->
+        <section class="section" id="callback-hell">
+          <div class="section-header"><h2>콜백 지옥</h2></div>
+          <p>비동기 작업들 사이에 <strong>순서가 필요한 경우</strong>에는 콜백 안에 콜백을 중첩해야 합니다.</p>
+          <p>예를 들어 아래 순서대로 처리해야 한다면:</p>
+          <ul>
+            <li>① 유저 정보 조회 (비동기)</li>
+            <li>② 유저 id로 게시글 조회 (비동기)</li>
+            <li>③ 게시글 제목으로 댓글 조회 (비동기)</li>
+          </ul>
+
+          <div class="code-block">
+            <pre><code class="language-javascript">setTimeout(() => {
+  console.log("유저 정보 가져옴");
+  const user = { id: 1, name: "홍길동" };
+
+  setTimeout(() => {
+    console.log("게시글 목록 가져옴");
+    const posts = ["게시글1", "게시글2"];
+
+    setTimeout(() => {
+      console.log("댓글 가져옴");
+      const comments = ["댓글1", "댓글2"];
+      console.log("결과:", comments);
+    }, 1000);
+
+  }, 1000);
+}, 1000);</code></pre>
+          </div>
+          <div class="warn">작업이 추가될수록 들여쓰기가 계속 깊어집니다. 이를 <strong>콜백 지옥</strong>이라고 하며 가독성이 크게 떨어지고 에러 처리도 어렵습니다.</div>
+        </section>
+
+        <!-- 5. Promise -->
+        <section class="section" id="promise">
+          <div class="section-header">
+            <h2>Promise</h2>
+            <span class="badge">Promise</span>
+            <span class="badge">resolve</span>
+            <span class="badge">reject</span>
+          </div>
+          <p>Promise는 <strong>비동기 작업을 처리하기 위한 객체</strong>입니다. 콜백 지옥을 없애고, 에러 처리를 쉽게 하며, 비동기 작업을 일관된 방식으로 다룰 수 있게 해줍니다.</p>
+
+          <h3>3가지 상태</h3>
+          <div class="state-cards">
+            <div class="state-card pending">
+              <div class="sc-name">pending</div>
+              <div class="sc-desc">대기 중 — 아직 결과 없음</div>
+            </div>
+            <div class="state-card fulfilled">
+              <div class="sc-name">fulfilled</div>
+              <div class="sc-desc">이행됨 — 성공, resolve 호출</div>
+            </div>
+            <div class="state-card rejected">
+              <div class="sc-name">rejected</div>
+              <div class="sc-desc">거부됨 — 실패, reject 호출</div>
+            </div>
+          </div>
+
+          <h3>기본 구조</h3>
+          <div class="code-block">
+            <pre><code class="language-javascript">const promise = new Promise((resolve, reject) => {
+  // 비동기 작업 수행
+  const success = true;
+
+  if (success) {
+    resolve("성공 데이터"); // fulfilled 상태로 전환
+  } else {
+    reject("에러 메시지"); // rejected 상태로 전환
+  }
+});
+
+promise
+  .then(data  => console.log("성공:", data))  // fulfilled 시 실행
+  .catch(err  => console.log("실패:", err))   // rejected 시 실행
+  .finally(   () => console.log("항상 실행")); // 결과 무관하게 실행</code></pre>
+          </div>
+
+          <div class="demo">
+            <div class="demo-label">🔬 데모 — resolve / reject</div>
+            <div class="demo-row">
+              <button class="demo-btn success" id="resolveBtn">resolve (성공)</button>
+              <button class="demo-btn danger"  id="rejectBtn">reject (실패)</button>
+            </div>
+            <div class="log-box" id="promiseLog">
+              <div class="log-label">▶ 실행 로그</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. 체이닝 -->
+        <section class="section" id="chaining">
+          <div class="section-header">
+            <h2>Promise 체이닝</h2>
+            <span class="badge">.then</span>
+            <span class="badge">.catch</span>
+            <span class="badge">.finally</span>
+          </div>
+          <p><code>.then()</code>에서 Promise를 반환하면 다음 <code>.then()</code>으로 연결할 수 있습니다. 이를 통해 콜백 지옥 없이 순차적인 비동기 처리가 가능합니다.</p>
+
+          <div class="tab-wrap">
+            <div class="tab-btns">
+              <button class="tab-btn active" data-tab="chain-bad">❌ 잘못된 방식</button>
+              <button class="tab-btn"        data-tab="chain-good">✅ 체이닝 방식</button>
+              <button class="tab-btn"        data-tab="chain-short">✨ 축약형</button>
+            </div>
+
+            <div class="tab-content active" id="chain-bad">
+              <p style="font-size:0.88rem;color:#64748b;margin-bottom:12px">then 안에서 또 then을 중첩하면 콜백 지옥이 그대로 발생합니다.</p>
+              <pre><code class="language-javascript">getUser()
+  .then(user => {
+    getPosts(user.id)       // ❌ return 없이 중첩
+      .then(posts => {
+        getComments(posts[0])
+          .then(comments => {
+            console.log("댓글:", comments);
+          });
+      });
+  });</code></pre>
+            </div>
+
+            <div class="tab-content" id="chain-good">
+              <p style="font-size:0.88rem;color:#64748b;margin-bottom:12px"><code>return</code>으로 Promise를 반환하면 체이닝이 가능합니다. <code>.catch()</code>는 앞선 모든 단계의 에러를 잡습니다.</p>
+              <pre><code class="language-javascript">getUser()
+  .then(user => {
+    return getPosts(user.id); // ✅ Promise를 return
+  })
+  .then(posts => {
+    return getComments(posts[0]);
+  })
+  .then(comments => {
+    console.log("댓글:", comments);
+  })
+  .catch(err => {
+    console.log("에러 발생:", err); // 어느 단계에서든 에러 처리
+  })
+  .finally(() => {
+    console.log("작업 완료");
+  });</code></pre>
+            </div>
+
+            <div class="tab-content" id="chain-short">
+              <p style="font-size:0.88rem;color:#64748b;margin-bottom:12px">콜백이 단순히 다음 Promise를 반환할 뿐이라면 더 짧게 쓸 수 있습니다.</p>
+              <pre><code class="language-javascript">getUser()
+  .then(user     => getPosts(user.id))
+  .then(posts    => getComments(posts[0]))
+  .then(comments => console.log("댓글:", comments))
+  .catch(err     => console.log("에러 발생:", err))
+  .finally(      () => console.log("작업 완료"));</code></pre>
+            </div>
+          </div>
+
+          <div class="demo">
+            <div class="demo-label">▶ 데모 — Promise 체이닝 (유저 → 게시글 → 댓글)</div>
+            <div class="demo-row">
+              <button class="demo-btn success" id="chainSuccessBtn">성공 시나리오</button>
+              <button class="demo-btn danger"  id="chainFailBtn">실패 시나리오 (게시글 조회 실패)</button>
+            </div>
+            <div class="log-box" id="chainLog">
+              <div class="log-label">▶ 실행 로그</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. async/await -->
+        <section class="section" id="async-await">
+          <div class="section-header">
+            <h2>async / await</h2>
+            <span class="badge">async</span>
+            <span class="badge">await</span>
+          </div>
+          <p>Promise 체이닝을 <strong>동기 코드처럼 읽히게</strong> 작성할 수 있는 문법입니다. <code>async</code> 함수 안에서만 <code>await</code>를 사용할 수 있으며, <code>await</code>는 Promise가 fulfilled 또는 rejected 될 때까지 기다립니다.</p>
+
+          <div class="tab-wrap">
+            <div class="tab-btns">
+              <button class="tab-btn active" data-tab="await-basic">기본 사용</button>
+              <button class="tab-btn"        data-tab="await-error">에러 처리</button>
+            </div>
+            <div class="tab-content active" id="await-basic">
+              <pre><code class="language-javascript">async function loadData() {
+  const user     = await getUser();           // Promise가 끝날 때까지 대기
+  const posts    = await getPosts(user.id);
+  const comments = await getComments(posts[0]);
+  console.log("댓글:", comments);
+}
+
+loadData(); // 호출 — async 함수는 항상 Promise를 반환</code></pre>
+            </div>
+            <div class="tab-content" id="await-error">
+              <p style="font-size:0.88rem;color:#64748b;margin-bottom:12px"><code>.catch()</code> 대신 <code>try/catch</code>로 에러를 처리합니다.</p>
+              <pre><code class="language-javascript">async function loadData() {
+  try {
+    const user     = await getUser();
+    const posts    = await getPosts(user.id);
+    const comments = await getComments(posts[0]);
+    console.log("댓글:", comments);
+  } catch (err) {
+    console.log("에러 발생:", err); // 어느 단계든 에러 처리
+  } finally {
+    console.log("작업 완료");
+  }
+}
+
+loadData();</code></pre>
+            </div>
+          </div>
+
+          <div class="demo">
+            <div class="demo-label">▶ 데모 — async/await (유저 → 게시글 → 댓글)</div>
+            <div class="demo-row">
+              <button class="demo-btn success" id="awaitSuccessBtn">성공 시나리오</button>
+              <button class="demo-btn danger"  id="awaitFailBtn">실패 시나리오 (게시글 조회 실패)</button>
+            </div>
+            <div class="log-box" id="awaitLog">
+              <div class="log-label">▶ 실행 로그</div>
+            </div>
+          </div>
+
+          <div class="tip"><code>async/await</code>는 Promise를 대체하는 게 아니라 Promise 위에서 동작하는 문법적 편의입니다. 내부적으로는 여전히 Promise입니다.</div>
+        </section>
+
+      </main>
+    </div>
+
+    <footer>
+      <p>JavaScript Promise &nbsp;|&nbsp; 학습용 문서</p>
+    </footer>
+
+    <script>
+      // ── 탭 공통 ──
+      document.querySelectorAll(".tab-wrap").forEach(wrap => {
+        wrap.querySelectorAll(".tab-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            wrap.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            wrap.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById(btn.dataset.tab).classList.add("active");
+          });
+        });
+      });
+
+      // ── 로그 헬퍼 ──
+      function addLog(boxId, msg, cls = "white") {
+        const box = document.getElementById(boxId);
+        const line = document.createElement("div");
+        line.className = "log-line " + cls;
+        line.textContent = msg;
+        box.appendChild(line);
+        box.scrollTop = box.scrollHeight;
+      }
+      function clearLog(boxId) {
+        const box = document.getElementById(boxId);
+        box.innerHTML = '<div class="log-label">▶ 실행 로그</div>';
+      }
+
+      // ── 비동기 장점 데모 ──
+      document.getElementById("asyncDemoBtn").addEventListener("click", () => {
+        clearLog("asyncDemoLog");
+        const start = Date.now();
+        addLog("asyncDemoLog", "작업 1 시작", "white");
+        setTimeout(() => addLog("asyncDemoLog", `작업 1 끝 (${Date.now()-start}ms 경과)`, "green"), 1000);
+        addLog("asyncDemoLog", "작업 2 시작", "white");
+        setTimeout(() => addLog("asyncDemoLog", `작업 2 끝 (${Date.now()-start}ms 경과)`, "sky"), 1000);
+        addLog("asyncDemoLog", "── 두 작업이 동시에 진행됩니다 ──", "gray");
+      });
+
+      // ── resolve / reject 데모 ──
+      function makePromise(success) {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (success) resolve("데이터 수신 성공");
+            else reject("서버 오류 발생");
+          }, 800);
+        });
+      }
+
+      document.getElementById("resolveBtn").addEventListener("click", () => {
+        clearLog("promiseLog");
+        addLog("promiseLog", "Promise 생성 — pending 상태", "yellow");
+        makePromise(true)
+          .then(data  => addLog("promiseLog", `✅ fulfilled — .then() 실행: "${data}"`, "green"))
+          .catch(err  => addLog("promiseLog", `❌ rejected  — .catch() 실행: "${err}"`, "red"))
+          .finally(   () => addLog("promiseLog", "⬜ .finally() 항상 실행", "white"));
+      });
+
+      document.getElementById("rejectBtn").addEventListener("click", () => {
+        clearLog("promiseLog");
+        addLog("promiseLog", "Promise 생성 — pending 상태", "yellow");
+        makePromise(false)
+          .then(data  => addLog("promiseLog", `✅ fulfilled — .then() 실행: "${data}"`, "green"))
+          .catch(err  => addLog("promiseLog", `❌ rejected  — .catch() 실행: "${err}"`, "red"))
+          .finally(   () => addLog("promiseLog", "⬜ .finally() 항상 실행", "white"));
+      });
+
+      // ── 체이닝 · await 공용 mock 함수 ──
+      function getUser() {
+        return new Promise(resolve => setTimeout(() => {
+          resolve({ id: 1, name: "홍길동" });
+        }, 700));
+      }
+      function getPosts(userId, fail = false) {
+        return new Promise((resolve, reject) => setTimeout(() => {
+          if (fail) reject("게시글 조회 실패 (서버 오류)");
+          else resolve(["게시글1", "게시글2"]);
+        }, 700));
+      }
+      function getComments(post) {
+        return new Promise(resolve => setTimeout(() => {
+          resolve(["댓글1", "댓글2"]);
+        }, 700));
+      }
+
+      // ── 체이닝 데모 ──
+      function runChain(fail, logId) {
+        clearLog(logId);
+        addLog(logId, "① 유저 정보 조회 중...", "gray");
+        getUser()
+          .then(user => {
+            addLog(logId, `✅ 유저: ${user.name} (id: ${user.id})`, "green");
+            addLog(logId, "② 게시글 조회 중...", "gray");
+            return getPosts(user.id, fail);
+          })
+          .then(posts => {
+            addLog(logId, `✅ 게시글: [${posts.join(", ")}]`, "green");
+            addLog(logId, "③ 댓글 조회 중...", "gray");
+            return getComments(posts[0]);
+          })
+          .then(comments => {
+            addLog(logId, `✅ 댓글: [${comments.join(", ")}]`, "sky");
+          })
+          .catch(err => {
+            addLog(logId, `❌ .catch() 실행 — ${err}`, "red");
+          })
+          .finally(() => {
+            addLog(logId, "⬜ .finally() — 작업 완료", "white");
+          });
+      }
+
+      document.getElementById("chainSuccessBtn").addEventListener("click", () => runChain(false, "chainLog"));
+      document.getElementById("chainFailBtn").addEventListener("click",    () => runChain(true,  "chainLog"));
+
+      // ── async/await 데모 ──
+      async function runAwait(fail, logId) {
+        clearLog(logId);
+        try {
+          addLog(logId, "① 유저 정보 조회 중...", "gray");
+          const user = await getUser();
+          addLog(logId, `✅ 유저: ${user.name} (id: ${user.id})`, "green");
+
+          addLog(logId, "② 게시글 조회 중...", "gray");
+          const posts = await getPosts(user.id, fail);
+          addLog(logId, `✅ 게시글: [${posts.join(", ")}]`, "green");
+
+          addLog(logId, "③ 댓글 조회 중...", "gray");
+          const comments = await getComments(posts[0]);
+          addLog(logId, `✅ 댓글: [${comments.join(", ")}]`, "sky");
+        } catch (err) {
+          addLog(logId, `❌ catch 실행 — ${err}`, "red");
+        } finally {
+          addLog(logId, "⬜ finally — 작업 완료", "white");
+        }
+      }
+
+      document.getElementById("awaitSuccessBtn").addEventListener("click", () => runAwait(false, "awaitLog"));
+      document.getElementById("awaitFailBtn").addEventListener("click",    () => runAwait(true,  "awaitLog"));
+    </script>
+
+  </body>
+</html>
