@@ -399,7 +399,7 @@ textarea.code-editor:focus { border-color: var(--blue); }
       <div class="example-item" onclick="insertCode(`document.querySelectorAll('.item')\n  .forEach(el => el.classList.toggle('highlight'))`)">querySelectorAll</div>
       <div class="example-item" onclick="insertCode(`document.querySelector('.post-item').classList.add('selected')`)">classList.add</div>
       <div class="example-item" onclick="insertCode(`document.querySelector('.post-item').classList.toggle('active')`)">classList.toggle</div>
-      <div class="example-item" onclick="insertCode(`const li = document.createElement('li')\nli.className = 'post-item item'\nli.textContent = '새 항목'\ndocument.getElementById('post-list').appendChild(li)`)">createElement</div>
+      <div class="example-item" onclick="insertCode(`const li = document.createElement('li')\nli.classList.add('post-item', 'item')\nli.textContent = '새 항목'\ndocument.getElementById('post-list').appendChild(li)`)">createElement</div>
       <div class="example-item" onclick="insertCode(`document.querySelector('.post-item').remove()`)">remove</div>
     </div>
     <div class="editor-col">
@@ -428,24 +428,24 @@ function buildTree(el, depth = 0) {
   const wrapper = document.createElement('div');
 
   const row = document.createElement('div');
-  row.className = 'tree-node';
+  row.classList.add('tree-node');
   row.dataset.treeId = nodeId;
 
   const tagEl = document.createElement('span');
-  tagEl.className = 't-tag';
+  tagEl.classList.add('t-tag');
   tagEl.textContent = `<${el.tagName.toLowerCase()}>`;
   row.appendChild(tagEl);
 
   if (el.id) {
     const idEl = document.createElement('span');
-    idEl.className = 't-id';
+    idEl.classList.add('t-id');
     idEl.textContent = ` #${el.id}`;
     row.appendChild(idEl);
   }
 
   if (el.classList.length) {
     const clsEl = document.createElement('span');
-    clsEl.className = 't-cls';
+    clsEl.classList.add('t-cls');
     clsEl.textContent = ' .' + [...el.classList].join('.');
     row.appendChild(clsEl);
   }
@@ -454,7 +454,7 @@ function buildTree(el, depth = 0) {
     const txt = el.textContent.trim().slice(0, 20);
     if (txt) {
       const txtEl = document.createElement('span');
-      txtEl.className = 't-txt';
+      txtEl.classList.add('t-txt');
       txtEl.textContent = ` "${txt}"`;
       row.appendChild(txtEl);
     }
@@ -467,7 +467,7 @@ function buildTree(el, depth = 0) {
   );
   if (dataAttrs.length) {
     const dataEl = document.createElement('span');
-    dataEl.className = 't-data';
+    dataEl.classList.add('t-data');
     dataEl.textContent = ' ' + dataAttrs.map(a => `[${a.name}="${a.value}"]`).join('');
     row.appendChild(dataEl);
   }
@@ -481,7 +481,7 @@ function buildTree(el, depth = 0) {
 
   if (el.children.length > 0) {
     const childGroup = document.createElement('div');
-    childGroup.className = 'tree-children';
+    childGroup.classList.add('tree-children');
     for (const child of el.children) {
       childGroup.appendChild(buildTree(child, depth + 1));
     }
@@ -542,7 +542,8 @@ function log(id, msg, type = '') {
   const box = document.getElementById(id);
   if (!box) return;
   const p = document.createElement('p');
-  p.className = `log-line${type ? ' l-' + type : ''}`;
+  p.classList.add('log-line');
+  if (type) p.classList.add('l-' + type);
   p.textContent = msg;
   box.appendChild(p);
   box.scrollTop = box.scrollHeight;
@@ -607,7 +608,7 @@ function s1_parent() {
   log('log1', `document.getElementById('post-list').parentElement`, 'info');
   log('log1', `parent.tagName    // "${parent.tagName.toLowerCase()}"`);
   log('log1', `parent.id         // "${parent.id}"`);
-  log('log1', `parent.className  // "${parent.className}"`);
+  log('log1', `parent.classList.value  // "${parent.classList.value}"`);
   focusElement(parent);
   updateTree();
 }
@@ -762,13 +763,13 @@ function s3_create() {
   const newId = ul.children.length + 1;
 
   const li = document.createElement('li');
-  li.className        = 'post-item item';
+  li.classList.add('post-item', 'item');
   li.dataset.id       = newId;
   li.dataset.category = 'new';
   li.textContent      = `새 포스트 #${newId}`;
 
   log('log3', `const li = document.createElement('li')`, 'info');
-  log('log3', `li.className = 'post-item item'`);
+  log('log3', `li.classList.add('post-item', 'item')`);
   log('log3', `li.dataset.id = ${newId}`);
   log('log3', `li.textContent = '새 포스트 #${newId}'`);
   log('log3', `document.getElementById('post-list').appendChild(li)`);
@@ -791,7 +792,7 @@ function s3_inner() {
   }
 
   const footer = document.createElement('div');
-  footer.className = 'post-footer new-node';
+  footer.classList.add('post-footer', 'new-node');
   footer.style.cssText = 'margin-top:8px;padding:6px;background:#f8f9fa;border-radius:4px;font-size:0.77rem;color:#666;';
   footer.innerHTML = `총 <strong>${document.querySelectorAll('.post-item').length}</strong>개 포스트`;
   section.appendChild(footer);
@@ -809,7 +810,7 @@ function s3_empty() {
   clearLog('log3');
   const box = document.getElementById('empty-box');
   const p   = document.createElement('p');
-  p.className       = 'item important new-node';
+  p.classList.add('item', 'important', 'new-node');
   p.style.margin    = '0';
   p.textContent     = 'createElement로 추가된 요소!';
   p.dataset.created = Date.now();
@@ -818,7 +819,7 @@ function s3_empty() {
   setTimeout(() => p.classList.remove('new-node'), 500);
 
   log('log3', `const p = document.createElement('p')`, 'info');
-  log('log3', `p.className = 'item important'`);
+  log('log3', `p.classList.add('item', 'important')`);
   log('log3', `p.textContent = 'createElement로 추가된 요소!'`);
   log('log3', `document.getElementById('empty-box').appendChild(p)`);
 
