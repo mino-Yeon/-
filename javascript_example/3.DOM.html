@@ -32,25 +32,19 @@ body {
   overflow: hidden;
 }
 
+/* ── 수정된 헤더 ── */
 .header {
-  background: #1e1e2e;
-  color: #cdd6f4;
-  padding: 9px 18px;
+  background: linear-gradient(135deg, #0f172a, #064e3b);
+  color: white;
+  padding: 18px 28px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex-shrink: 0;
-  border-bottom: 2px solid #313244;
 }
-.header-logo {
-  width: 26px; height: 26px;
-  background: var(--blue);
-  border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 12px; color: white; flex-shrink: 0;
-}
-.header h1  { font-size: 0.93rem; font-weight: 700; color: #89b4fa; }
-.header-sub { font-size: 0.7rem; color: #6c7086; margin-left: 4px; }
+.header-icon { font-size: 1.4rem; }
+.header h1 { font-size: 1.2rem; letter-spacing: 0.02em; }
+.header h1 span { font-size: 0.8rem; background: rgba(255,255,255,0.15); padding: 2px 10px; border-radius: 20px; margin-left: 8px; color: #6ee7b7; }
 
 .main-layout {
   display: grid;
@@ -258,9 +252,10 @@ textarea.code-editor:focus { border-color: var(--blue); }
 </head>
 <body>
 
+<!-- ── 수정된 헤더 ── -->
 <header class="header">
-  <div class="header-logo">D</div>
-  <h1>DOM 인터랙티브 실습<span class="header-sub"> — 보면서 배우는 DOM 조작</span></h1>
+  <div class="header-icon">🌐</div>
+  <h1>DOM <span>JavaScript</span></h1>
 </header>
 
 <div class="main-layout">
