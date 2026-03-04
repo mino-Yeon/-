@@ -108,6 +108,47 @@
       .log-line.gray   { color: #6b7280; }
 
       footer { background: #0f172a; color: #475569; text-align: center; padding: 16px; font-size: 0.82rem; }
+
+      /* 코드 블록 래퍼 — 복사 버튼 */
+      .code-wrap { position: relative; }
+      .copy-btn {
+        position: absolute; top: 8px; right: 8px;
+        background: rgba(255,255,255,0.1); color: #94a3b8;
+        border: 1px solid rgba(255,255,255,0.15); border-radius: 5px;
+        padding: 3px 10px; font-size: 0.75rem; font-family: inherit;
+        cursor: pointer; transition: all 0.15s; z-index: 10;
+      }
+      .copy-btn:hover { background: rgba(255,255,255,0.2); color: #e2e8f0; }
+      .copy-btn.copied { background: #16a34a33; color: #86efac; border-color: #16a34a66; }
+
+      /* Promise 상태 표시 */
+      .promise-state-wrap { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+      .ps-label { font-size: 0.75rem; color: #64748b; font-weight: 600; white-space: nowrap; }
+      .ps-badge {
+        font-family: "Courier New", monospace; font-size: 0.8rem; font-weight: 700;
+        padding: 4px 14px; border-radius: 20px; border: 1.5px solid;
+        transition: all 0.3s;
+      }
+      .ps-badge.state-pending   { background: #fefce8; border-color: #fde047; color: #a16207; }
+      .ps-badge.state-fulfilled { background: #f0fdf4; border-color: #86efac; color: #15803d; }
+      .ps-badge.state-rejected  { background: #fef2f2; border-color: #fca5a5; color: #b91c1c; }
+      .ps-badge.state-idle      { background: #f1f5f9; border-color: #e2e8f0; color: #94a3b8; }
+
+      /* 콘솔 패널 */
+      .console-box {
+        background: #0f172a; border-radius: 8px; margin-top: 8px;
+        min-height: 60px; max-height: 180px; overflow-y: auto;
+      }
+      .console-header {
+        display: flex; align-items: center; gap: 8px;
+        padding: 8px 14px 6px; border-bottom: 1px solid #1e293b;
+      }
+      .console-dot { width: 10px; height: 10px; border-radius: 50%; }
+      .console-dot.r { background: #ef4444; }
+      .console-dot.y { background: #eab308; }
+      .console-dot.g { background: #22c55e; }
+      .console-title { font-size: 0.7rem; color: #475569; font-family: "Courier New", monospace; margin-left: 4px; }
+      .console-body { padding: 8px 14px 10px; }
     </style>
   </head>
   <body>
@@ -125,8 +166,10 @@
             <li><a href="#problem"><span class="nav-badge">문제</span></a></li>
             <li><a href="#async"><span class="nav-badge">비동기 해결</span></a></li>
             <li><a href="#async-advantage"><span class="nav-badge">비동기 장점</span></a></li>
+            <li><a href="#xhr-demo"><span class="nav-badge">XHR 실습</span></a></li>
             <li><a href="#callback-hell"><span class="nav-badge">콜백 지옥</span></a></li>
             <li><a href="#promise"><span class="nav-badge">Promise</span></a></li>
+            <li><a href="#promise-fn"><span class="nav-badge">Promise 함수화</span></a></li>
             <li><a href="#chaining"><span class="nav-badge">체이닝</span></a></li>
             <li><a href="#async-await"><span class="nav-badge">async/await</span></a></li>
           </ul>
@@ -141,27 +184,36 @@
           <p>JavaScript는 기본적으로 <strong>싱글 스레드</strong> 환경에서 동작합니다. 즉, 한 번에 하나의 작업만 처리할 수 있습니다.</p>
           <p>서버에서 데이터를 가져오는 작업처럼 시간이 오래 걸리는 작업이 있으면, 그 작업이 끝날 때까지 <strong>나머지 모든 작업이 대기</strong>해야 합니다.</p>
 
-          <div class="code-block">
-            <pre><code class="language-javascript">function syncRequest() {
-  console.log("작업 시작");
+          <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">console.log("작업 시작");
 
-  // 서버 요청 — 동기 방식 (세 번째 인자 false)
-  const xhr = new XMLHttpRequest();
-  xhr.open("GET", "https://jsonplaceholder.typicode.com/todos/1", false); // false = 동기
-  xhr.send(); // 응답이 올 때까지 여기서 멈춤!
+// 서버 요청(2초 후 응답을 주는 서버) — 동기 방식 (세 번째 인자 false)
+const xhr = new XMLHttpRequest();
+xhr.open("GET", "https://httpbin.org/delay/2", false); // false = 동기
+xhr.send(); // 응답이 올 때까지 여기서 멈춤!
 
-  alert(xhr.responseText);
+console.log(xhr.responseText);    // 응답 도착 후 출력
+console.log("나머지 작업 수행"); // 응답이 올 때까지 실행 안 됨</code></pre>
+</div>
 
-  console.log("나머지 작업 수행"); // 응답이 올 때까지 실행 안 됨
-}</code></pre>
-            <div class="result">
-              <div class="result-label">▶ 실행 흐름</div>
-              <pre><code>작업 시작
-<span class="comment">// ⏸ 서버 응답 올 때까지 멈춤... (UI 전체 정지)</span>
-나머지 작업 수행</code></pre>
+          <div class="demo" style="margin-top:12px;">
+            <div class="demo-label">▶ 실행 흐름 — 동기 시뮬레이션</div>
+            <p style="font-size:0.85rem;color:#64748b;margin-bottom:10px;">실행 버튼을 누른 뒤 로그가 어떤 순서로 찍히는지 확인하세요.<br>동기 방식이라 <strong>응답이 올 때까지 두 번째·세 번째 줄이 출력되지 않습니다.</strong></p>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="syncRunBtn">▶ 실행</button>
+            </div>
+            <div class="console-box" style="margin-top:10px;">
+              <div class="console-header">
+                <div class="console-dot r"></div><div class="console-dot y"></div><div class="console-dot g"></div>
+                <span class="console-title">console</span>
+              </div>
+              <div class="console-body" id="syncRunLog">
+                <div class="log-line gray" style="font-family:'Courier New',monospace;font-size:0.82rem;">버튼을 눌러 실행하세요.</div>
+              </div>
             </div>
           </div>
-          <div class="warn">동기 방식으로 서버 요청을 하면 응답이 오기 전까지 브라우저가 완전히 멈춥니다. 스크롤도, 클릭도, 화면 렌더링도 불가능합니다.</div>
+          <div class="warn" style="margin-top:12px;">동기 방식으로 서버 요청을 하면 응답이 오기 전까지 브라우저가 완전히 멈춥니다. 스크롤도, 클릭도, 화면 렌더링도 불가능합니다.</div>
         </section>
 
         <!-- 2. 비동기 해결 -->
@@ -169,27 +221,36 @@
           <div class="section-header"><h2>해결 — 비동기 방식</h2></div>
           <p>세 번째 인자를 <code>true</code>로 바꾸고, 응답이 왔을 때 실행할 코드를 <strong>콜백 함수</strong>로 등록합니다. 요청을 보낸 뒤 응답을 기다리지 않고 다음 코드를 바로 실행합니다.</p>
 
-          <div class="code-block">
-            <pre><code class="language-javascript">function asyncRequest() {
-  console.log("작업 시작");
+          <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">console.log("작업 시작");
 
-  // 서버 요청 — 비동기 방식 (세 번째 인자 true)
-  const xhr = new XMLHttpRequest();
-  xhr.open("GET", "https://jsonplaceholder.typicode.com/todos/1", true); // true = 비동기
-  xhr.onload = () => {
-    // 응답이 왔을 때 실행할 콜백 등록
-    alert(xhr.responseText);
-  };
-  xhr.send(); // 요청만 보내고 바로 다음으로 넘어감
+// 서버 요청(2초 후 응답을 주는 서버) — 비동기 방식 (세 번째 인자 true)
+const xhr = new XMLHttpRequest();
+xhr.open("GET", "https://httpbin.org/delay/2", true); // true = 비동기
+xhr.onload = () => {
+  // 응답이 왔을 때 실행할 콜백 등록
+  console.log(xhr.responseText);
+};
+xhr.send(); // 요청만 보내고 바로 다음으로 넘어감
 
-  console.log("나머지 작업 수행"); // 응답을 기다리지 않고 바로 실행
-}</code></pre>
-            <div class="result">
-              <div class="result-label">▶ 실행 흐름</div>
-              <pre><code>작업 시작
-나머지 작업 수행  <span class="comment">← 응답 기다리지 않고 바로 실행</span>
-<span class="comment">// ... 나중에 응답이 오면</span>
-alert 실행        <span class="comment">← onload 콜백 실행</span></code></pre>
+console.log("나머지 작업 수행"); // 응답을 기다리지 않고 바로 실행</code></pre>
+</div>
+
+          <div class="demo" style="margin-top:12px;">
+            <div class="demo-label">▶ 실행 흐름 — 비동기 실제 실행</div>
+            <p style="font-size:0.85rem;color:#64748b;margin-bottom:10px;">실행 버튼을 누른 뒤 로그 순서를 확인하세요.<br><strong>"나머지 작업 수행"이 먼저 찍히고</strong>, 약 2초 뒤 응답이 도착하면 onload 콜백이 실행됩니다.</p>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="asyncRunBtn">▶ 실행</button>
+            </div>
+            <div class="console-box" style="margin-top:10px;">
+              <div class="console-header">
+                <div class="console-dot r"></div><div class="console-dot y"></div><div class="console-dot g"></div>
+                <span class="console-title">console</span>
+              </div>
+              <div class="console-body" id="asyncRunLog">
+                <div class="log-line gray" style="font-family:'Courier New',monospace;font-size:0.82rem;">버튼을 눌러 실행하세요.</div>
+              </div>
             </div>
           </div>
           <div class="tip">응답이 오더라도 현재 실행 중인 작업이 있으면 그게 끝난 후에 콜백이 실행됩니다. 이 순서를 관리하는 것이 <strong>이벤트 루프</strong>입니다.</div>
@@ -203,13 +264,16 @@ alert 실행        <span class="comment">← onload 콜백 실행</span></code>
           <p>같은 요청을 <strong>동기</strong>로 2번 호출할 때와 <strong>비동기</strong>로 2번 호출할 때의 총 소요 시간을 비교해보세요.</p>
 
           <div class="code-block">
-            <pre><code class="language-javascript">// 동기 — 요청이 순서대로 처리됨 (총 소요 = 요청1 + 요청2)
+            <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">// 동기 — 요청이 순서대로 처리됨 (총 소요 = 요청1 + 요청2)
 syncRequest(); // 첫 번째 응답 올 때까지 대기
 syncRequest(); // 그 다음 두 번째 요청 시작
 
 // 비동기 — 요청이 동시에 처리됨 (총 소요 ≈ max(요청1, 요청2))
 asyncRequest(); // 요청만 보내고 바로 다음으로
 asyncRequest(); // 첫 번째 응답을 기다리지 않고 바로 요청</code></pre>
+</div>
           </div>
 
           <div class="demo">
@@ -224,39 +288,119 @@ asyncRequest(); // 첫 번째 응답을 기다리지 않고 바로 요청</code>
           </div>
         </section>
 
-        <!-- 4. 콜백 지옥 -->
+        <!-- 4. XHR 실습 -->
+        <section class="section" id="xhr-demo">
+          <div class="section-header"><h2>XHR 요청 실습</h2></div>
+          <p>실제 API에 XHR 요청을 보내고 응답을 확인해봅니다. 각 요청은 <strong>서로 독립적</strong>으로 실행됩니다.</p>
+
+          <h3>① 유저 목록 조회</h3>
+          <div class="code-block">
+            <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">const xhr = new XMLHttpRequest();
+xhr.open("GET", "https://dummyjson.com/users", true);
+xhr.onload = () => {
+  const res = JSON.parse(xhr.responseText);
+  console.log("유저들:", res.users);
+};
+xhr.send();</code></pre>
+</div>
+          </div>
+          <div class="demo">
+            <div class="demo-label">▶ 데모</div>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="xhrUsersBtn">🔵 유저 목록 요청</button>
+            </div>
+            <div class="log-box" id="xhrUsersLog"><div class="log-label">▶ 실행 로그</div></div>
+          </div>
+
+          <h3>② 특정 유저의 게시글 조회</h3>
+          <div class="code-block">
+            <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">const xhr = new XMLHttpRequest();
+xhr.open("GET", `https://dummyjson.com/posts/user/${userId}`, true);
+xhr.onload = () => {
+  const res = JSON.parse(xhr.responseText);
+  console.log("게시글:", res.posts);
+};
+xhr.send();</code></pre>
+</div>
+          </div>
+          <div class="demo">
+            <div class="demo-label">▶ 데모 (userId = 1 고정)</div>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="xhrPostsBtn">🔵 게시글 목록 요청</button>
+            </div>
+            <div class="log-box" id="xhrPostsLog"><div class="log-label">▶ 실행 로그</div></div>
+          </div>
+
+          <h3>③ 특정 게시글의 댓글 조회</h3>
+          <div class="code-block">
+            <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">const xhr = new XMLHttpRequest();
+xhr.open("GET", `https://dummyjson.com/posts/${postId}/comments`, true);
+xhr.onload = () => {
+  const res = JSON.parse(xhr.responseText);
+  console.log("댓글:", res.comments);
+};
+xhr.send();</code></pre>
+</div>
+          </div>
+          <div class="demo">
+            <div class="demo-label">▶ 데모 (postId = 15 고정)</div>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="xhrCommentsBtn">🔵 댓글 목록 요청</button>
+            </div>
+            <div class="log-box" id="xhrCommentsLog"><div class="log-label">▶ 실행 로그</div></div>
+          </div>
+
+          <div class="tip">세 요청은 각각 독립적으로 실행됩니다. 순서를 보장하려면 응답을 받은 후에 다음 요청을 시작해야 합니다.</div>
+        </section>
+
+        <!-- 5. 콜백 지옥 -->
         <section class="section" id="callback-hell">
           <div class="section-header"><h2>콜백 지옥</h2></div>
-          <p>비동기 작업들 사이에 <strong>순서가 필요한 경우</strong>에는 콜백 안에 콜백을 중첩해야 합니다.</p>
-          <p>예를 들어 아래 순서대로 처리해야 한다면:</p>
-          <ul>
-            <li>① 유저 정보 조회 (비동기)</li>
-            <li>② 유저 id로 게시글 조회 (비동기)</li>
-            <li>③ 게시글 제목으로 댓글 조회 (비동기)</li>
-          </ul>
+          <p>이번에는 세 요청을 독립적으로 실행하는 것이 아니라, <strong>순서를 맞춰 연결</strong>해야 하는 상황입니다.</p>
+          <div class="tip" style="margin-bottom: 12px;">🎯 <strong>목표:</strong> 맨 첫 번째 유저가 작성한 첫 번째 게시글의 모든 댓글 정보 조회<br>
+          즉, <code>users[0].id</code> → <code>posts[0].id</code> → 해당 게시글의 <code>comments</code> 순서로 실행되어야 합니다.</div>
+          <p>각 요청 결과가 다음 요청의 <strong>입력값</strong>이 되기 때문에, 응답 콜백 안에 다음 요청을 중첩해야 합니다.</p>
 
           <div class="code-block">
-            <pre><code class="language-javascript">setTimeout(() => {
-  console.log("유저 정보 가져옴");
-  const user = { id: 1, name: "홍길동" };
+            <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">const xhr1 = new XMLHttpRequest();
+xhr1.open("GET", "https://dummyjson.com/users", true);
+xhr1.onload = () => {
+  const res = JSON.parse(xhr1.responseText);
+  console.log("유저들:", res.users);
 
-  setTimeout(() => {
-    console.log("게시글 목록 가져옴");
-    const posts = ["게시글1", "게시글2"];
+  const xhr2 = new XMLHttpRequest();
+  xhr2.open("GET", `https://dummyjson.com/posts/user/${res.users[0].id}`, true);
+  xhr2.onload = () => {
+    const res2 = JSON.parse(xhr2.responseText);
+    console.log("게시글:", res2.posts);
 
-    setTimeout(() => {
-      console.log("댓글 가져옴");
-      const comments = ["댓글1", "댓글2"];
-      console.log("결과:", comments);
-    }, 1000);
+    const xhr3 = new XMLHttpRequest();
+    xhr3.open("GET", `https://dummyjson.com/posts/${res2.posts[0].id}/comments`, true);
+    xhr3.onload = () => {
+      const res3 = JSON.parse(xhr3.responseText);
+      console.log("댓글:", res3.comments); // 점점 깊어지는 중첩
+    };
+    xhr3.send();
 
-  }, 1000);
-}, 1000);</code></pre>
+  };
+  xhr2.send();
+
+};
+xhr1.send();</code></pre>
+</div>
           </div>
           <div class="warn">작업이 추가될수록 들여쓰기가 계속 깊어집니다. 이를 <strong>콜백 지옥</strong>이라고 하며 가독성이 크게 떨어지고 에러 처리도 어렵습니다.</div>
         </section>
 
-        <!-- 5. Promise -->
+        <!-- 6. Promise -->
         <section class="section" id="promise">
           <div class="section-header">
             <h2>Promise</h2>
@@ -282,38 +426,182 @@ asyncRequest(); // 첫 번째 응답을 기다리지 않고 바로 요청</code>
             </div>
           </div>
 
-          <h3>기본 구조</h3>
-          <div class="code-block">
-            <pre><code class="language-javascript">const promise = new Promise((resolve, reject) => {
-  // 비동기 작업 수행
-  const success = true;
+          <h3>XHR 요청을 Promise로 감싸기</h3>
+          <p>콜백 방식의 XHR을 Promise로 감싸면, <code>.then()</code> / <code>.catch()</code> / <code>.finally()</code>로 결과를 처리할 수 있습니다.</p>
 
-  if (success) {
-    resolve("성공 데이터"); // fulfilled 상태로 전환
-  } else {
-    reject("에러 메시지"); // rejected 상태로 전환
-  }
+          <div class="tab-wrap">
+            <div class="tab-btns">
+              <button class="tab-btn active" data-tab="promise-basic">① 기본형</button>
+              <button class="tab-btn"        data-tab="promise-fn-form">② 함수형으로 발전</button>
+            </div>
+
+            <div class="tab-content active" id="promise-basic">
+              <p style="font-size:0.88rem;color:#64748b;margin-bottom:12px">먼저 <code>new Promise</code>로 직접 만들고, <code>.then()</code> / <code>.catch()</code> / <code>.finally()</code>로 결과를 처리합니다.</p>
+              <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">// 2초 후 응답을 주는 서버에 XHR 요청
+const promise = new Promise((resolve, reject) => {
+  const xhr = new XMLHttpRequest();
+  xhr.open("GET", "https://httpbin.org/delay/2", true);
+  xhr.onload = () => resolve(JSON.parse(xhr.responseText));
+  xhr.onerror = () => reject("네트워크 오류"); // 인터넷 끊김 등 네트워크 자체 실패 시
+  xhr.send();
 });
 
 promise
-  .then(data  => console.log("성공:", data))  // fulfilled 시 실행
+  .then(data  => console.log("응답:", data))  // fulfilled 시 실행
   .catch(err  => console.log("실패:", err))   // rejected 시 실행
   .finally(   () => console.log("항상 실행")); // 결과 무관하게 실행</code></pre>
+</div>
+            </div>
+
+            <div class="tab-content" id="promise-fn-form">
+              <p style="font-size:0.88rem;color:#64748b;margin-bottom:12px">같은 요청을 여러 번 써야 한다면, <strong>함수로 감싸서</strong> 호출할 때마다 새 Promise를 반환하게 만듭니다.</p>
+              <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">// Promise를 반환하는 함수로 만들기
+function fetchWithDelay() {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", "https://httpbin.org/delay/2", true);
+    xhr.onload = () => resolve(JSON.parse(xhr.responseText));
+    xhr.onerror = () => reject("네트워크 오류");
+    xhr.send();
+  });
+}
+
+// 호출할 때마다 새 Promise 생성
+fetchWithDelay()
+  .then(data  => console.log("응답:", data))
+  .catch(err  => console.log("실패:", err))
+  .finally(   () => console.log("항상 실행"));</code></pre>
+</div>
+            </div>
           </div>
 
           <div class="demo">
-            <div class="demo-label">🔬 데모 — resolve / reject</div>
+            <div class="demo-label">🔬 데모 — XHR Promise (2초 딜레이 서버)</div>
             <div class="demo-row">
-              <button class="demo-btn success" id="resolveBtn">resolve (성공)</button>
-              <button class="demo-btn danger"  id="rejectBtn">reject (실패)</button>
+              <button class="demo-btn success" id="resolveBtn">▶ 요청 실행 (성공)</button>
+              <button class="demo-btn danger"  id="rejectBtn">▶ 네트워크 오류 시뮬레이션</button>
             </div>
-            <div class="log-box" id="promiseLog">
-              <div class="log-label">▶ 실행 로그</div>
+
+            <div class="promise-state-wrap" style="margin-top:14px;">
+              <span class="ps-label">Promise 상태</span>
+              <span class="ps-badge state-idle" id="promiseStateBadge">— 대기 중 —</span>
+            </div>
+
+            <div class="console-box">
+              <div class="console-header">
+                <div class="console-dot r"></div>
+                <div class="console-dot y"></div>
+                <div class="console-dot g"></div>
+                <span class="console-title">console</span>
+              </div>
+              <div class="console-body" id="promiseLog">
+                <div class="log-line gray" style="font-family:'Courier New',monospace;font-size:0.82rem;">버튼을 눌러 실행하세요.</div>
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- 6. 체이닝 -->
+        <!-- 7. Promise 함수화 -->
+        <section class="section" id="promise-fn">
+          <div class="section-header">
+            <h2>Promise 함수화</h2>
+            <span class="badge">getUsers</span>
+            <span class="badge">getPosts</span>
+            <span class="badge">getComments</span>
+          </div>
+          <p>앞서 실습한 세 XHR 요청을 각각 <strong>Promise를 반환하는 함수</strong>로 만들면, 재사용하기 쉽고 체이닝도 가능해집니다.</p>
+
+          <h3>① getUsers()</h3>
+          <div class="code-block">
+            <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">function getUsers() {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", "https://dummyjson.com/users", true);
+    xhr.onload = () => resolve(JSON.parse(xhr.responseText).users);
+    xhr.onerror = () => reject("네트워크 오류");
+    xhr.send();
+  });
+}
+
+// 호출 예시
+getUsers()
+  .then(users => console.log("유저들:", users))
+  .catch(err  => console.log("실패:", err));</code></pre>
+</div>
+          </div>
+          <div class="demo">
+            <div class="demo-label">▶ 데모</div>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="fnUsersBtn">getUsers()</button>
+            </div>
+            <div class="log-box" id="fnUsersLog"><div class="log-label">▶ 실행 로그</div></div>
+          </div>
+
+          <h3>② getPosts(userId)</h3>
+          <div class="code-block">
+            <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">function getPosts(userId) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", `https://dummyjson.com/posts/user/${userId}`, true);
+    xhr.onload = () => resolve(JSON.parse(xhr.responseText).posts);
+    xhr.onerror = () => reject("네트워크 오류");
+    xhr.send();
+  });
+}
+
+// 호출 예시
+getPosts(1)
+  .then(posts => console.log("게시글:", posts))
+  .catch(err  => console.log("실패:", err));</code></pre>
+</div>
+          </div>
+          <div class="demo">
+            <div class="demo-label">▶ 데모 (userId = 1 고정)</div>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="fnPostsBtn">getPosts(1)</button>
+            </div>
+            <div class="log-box" id="fnPostsLog"><div class="log-label">▶ 실행 로그</div></div>
+          </div>
+
+          <h3>③ getComments(postId)</h3>
+          <div class="code-block">
+            <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">function getComments(postId) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", `https://dummyjson.com/posts/${postId}/comments`, true);
+    xhr.onload = () => resolve(JSON.parse(xhr.responseText).comments);
+    xhr.onerror = () => reject("네트워크 오류");
+    xhr.send();
+  });
+}
+
+// 호출 예시
+getComments(15)
+  .then(comments => console.log("댓글:", comments))
+  .catch(err     => console.log("실패:", err));</code></pre>
+</div>
+          </div>
+          <div class="demo">
+            <div class="demo-label">▶ 데모 (postId = 15 고정)</div>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="fnCommentsBtn">getComments(15)</button>
+            </div>
+            <div class="log-box" id="fnCommentsLog"><div class="log-label">▶ 실행 로그</div></div>
+          </div>
+          <div class="tip">각 함수가 Promise를 반환하기 때문에 <code>.then()</code>으로 결과를 받을 수 있습니다. 이제 이 함수들을 체이닝으로 연결해봅니다.</div>
+        </section>
+
+        <!-- 8. 체이닝 -->
         <section class="section" id="chaining">
           <div class="section-header">
             <h2>Promise 체이닝</h2>
@@ -332,26 +620,31 @@ promise
 
             <div class="tab-content active" id="chain-bad">
               <p style="font-size:0.88rem;color:#64748b;margin-bottom:12px">then 안에서 또 then을 중첩하면 콜백 지옥이 그대로 발생합니다.</p>
-              <pre><code class="language-javascript">getUser()
-  .then(user => {
-    getPosts(user.id)       // ❌ return 없이 중첩
+              <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">getUsers()
+  .then(users => {
+    getPosts(users[0].id)       // ❌ return 없이 중첩
       .then(posts => {
-        getComments(posts[0])
+        getComments(posts[0].id)
           .then(comments => {
             console.log("댓글:", comments);
           });
       });
   });</code></pre>
+</div>
             </div>
 
             <div class="tab-content" id="chain-good">
               <p style="font-size:0.88rem;color:#64748b;margin-bottom:12px"><code>return</code>으로 Promise를 반환하면 체이닝이 가능합니다. <code>.catch()</code>는 앞선 모든 단계의 에러를 잡습니다.</p>
-              <pre><code class="language-javascript">getUser()
-  .then(user => {
-    return getPosts(user.id); // ✅ Promise를 return
+              <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">getUsers()
+  .then(users => {
+    return getPosts(users[0].id); // ✅ Promise를 return
   })
   .then(posts => {
-    return getComments(posts[0]);
+    return getComments(posts[0].id);
   })
   .then(comments => {
     console.log("댓글:", comments);
@@ -362,24 +655,28 @@ promise
   .finally(() => {
     console.log("작업 완료");
   });</code></pre>
+</div>
             </div>
 
             <div class="tab-content" id="chain-short">
               <p style="font-size:0.88rem;color:#64748b;margin-bottom:12px">콜백이 단순히 다음 Promise를 반환할 뿐이라면 더 짧게 쓸 수 있습니다.</p>
-              <pre><code class="language-javascript">getUser()
-  .then(user     => getPosts(user.id))
-  .then(posts    => getComments(posts[0]))
+              <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">getUsers()
+  .then(users    => getPosts(users[0].id))
+  .then(posts    => getComments(posts[0].id))
   .then(comments => console.log("댓글:", comments))
   .catch(err     => console.log("에러 발생:", err))
   .finally(      () => console.log("작업 완료"));</code></pre>
+</div>
             </div>
           </div>
 
           <div class="demo">
             <div class="demo-label">▶ 데모 — Promise 체이닝 (유저 → 게시글 → 댓글)</div>
             <div class="demo-row">
-              <button class="demo-btn success" id="chainSuccessBtn">성공 시나리오</button>
-              <button class="demo-btn danger"  id="chainFailBtn">실패 시나리오 (게시글 조회 실패)</button>
+              <button class="demo-btn success" id="chainSuccessBtn">▶ 실행 (성공)</button>
+              <button class="demo-btn danger"  id="chainFailBtn">▶ 실패 시뮬레이션</button>
             </div>
             <div class="log-box" id="chainLog">
               <div class="log-label">▶ 실행 로그</div>
@@ -387,7 +684,7 @@ promise
           </div>
         </section>
 
-        <!-- 7. async/await -->
+        <!-- 9. async/await -->
         <section class="section" id="async-await">
           <div class="section-header">
             <h2>async / await</h2>
@@ -402,22 +699,27 @@ promise
               <button class="tab-btn"        data-tab="await-error">에러 처리</button>
             </div>
             <div class="tab-content active" id="await-basic">
-              <pre><code class="language-javascript">async function loadData() {
-  const user     = await getUser();           // Promise가 끝날 때까지 대기
-  const posts    = await getPosts(user.id);
-  const comments = await getComments(posts[0]);
+              <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">async function loadData() {
+  const users    = await getUsers();              // Promise가 끝날 때까지 대기
+  const posts    = await getPosts(users[0].id);
+  const comments = await getComments(posts[0].id);
   console.log("댓글:", comments);
 }
 
 loadData(); // 호출 — async 함수는 항상 Promise를 반환</code></pre>
+</div>
             </div>
             <div class="tab-content" id="await-error">
               <p style="font-size:0.88rem;color:#64748b;margin-bottom:12px"><code>.catch()</code> 대신 <code>try/catch</code>로 에러를 처리합니다.</p>
-              <pre><code class="language-javascript">async function loadData() {
+              <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">async function loadData() {
   try {
-    const user     = await getUser();
-    const posts    = await getPosts(user.id);
-    const comments = await getComments(posts[0]);
+    const users    = await getUsers();
+    const posts    = await getPosts(users[0].id);
+    const comments = await getComments(posts[0].id);
     console.log("댓글:", comments);
   } catch (err) {
     console.log("에러 발생:", err); // 어느 단계든 에러 처리
@@ -427,14 +729,15 @@ loadData(); // 호출 — async 함수는 항상 Promise를 반환</code></pre>
 }
 
 loadData();</code></pre>
+</div>
             </div>
           </div>
 
           <div class="demo">
             <div class="demo-label">▶ 데모 — async/await (유저 → 게시글 → 댓글)</div>
             <div class="demo-row">
-              <button class="demo-btn success" id="awaitSuccessBtn">성공 시나리오</button>
-              <button class="demo-btn danger"  id="awaitFailBtn">실패 시나리오 (게시글 조회 실패)</button>
+              <button class="demo-btn success" id="awaitSuccessBtn">▶ 실행 (성공)</button>
+              <button class="demo-btn danger"  id="awaitFailBtn">▶ 실패 시뮬레이션</button>
             </div>
             <div class="log-box" id="awaitLog">
               <div class="log-label">▶ 실행 로그</div>
@@ -464,33 +767,106 @@ loadData();</code></pre>
         });
       });
 
+      // ── 복사 버튼 ──
+      function copyCode(btn) {
+        const code = btn.nextElementSibling.querySelector("code");
+        navigator.clipboard.writeText(code.innerText).then(() => {
+          btn.textContent = "✓ 복사됨";
+          btn.classList.add("copied");
+          setTimeout(() => { btn.textContent = "복사"; btn.classList.remove("copied"); }, 1800);
+        });
+      }
+
       // ── 로그 헬퍼 ──
       function addLog(boxId, msg, cls = "white") {
         const box = document.getElementById(boxId);
         const line = document.createElement("div");
         line.className = "log-line " + cls;
+        line.style.cssText = "font-family:'Courier New',monospace;font-size:0.82rem;line-height:1.8;";
         line.textContent = msg;
         box.appendChild(line);
         box.scrollTop = box.scrollHeight;
       }
       function clearLog(boxId) {
-        const box = document.getElementById(boxId);
-        box.innerHTML = '<div class="log-label">▶ 실행 로그</div>';
+        document.getElementById(boxId).innerHTML = "";
       }
 
-      // ── 비동기 장점 데모 ──
-      const URL = "https://jsonplaceholder.typicode.com/todos/1";
+      // ── Promise 상태 배지 ──
+      function setPromiseState(state) {
+        const badge = document.getElementById("promiseStateBadge");
+        if (!badge) return;
+        badge.className = "ps-badge";
+        if (state === "pending")   { badge.classList.add("state-pending");   badge.textContent = "⏳ pending"; }
+        if (state === "fulfilled") { badge.classList.add("state-fulfilled"); badge.textContent = "✅ fulfilled"; }
+        if (state === "rejected")  { badge.classList.add("state-rejected");  badge.textContent = "❌ rejected"; }
+        if (state === "idle")      { badge.classList.add("state-idle");      badge.textContent = "— 대기 중 —"; }
+      }
 
+      // ── 데이터 요약 헬퍼 (0번 요소만 보여주고 나머지 ... 처리) ──
+      function summarize(arr, label) {
+        if (!Array.isArray(arr) || arr.length === 0) return `${label}: (없음)`;
+        const first = arr[0];
+        const preview = typeof first === "object"
+          ? JSON.stringify(first).slice(0, 80) + (JSON.stringify(first).length > 80 ? "…" : "")
+          : String(first);
+        const more = arr.length > 1 ? ` + ${arr.length - 1}개 더...` : "";
+        return `${label}[0]: ${preview}${more}`;
+      }
+
+      // ── 동기 방식 시뮬레이션 데모 ──
+      document.getElementById("syncRunBtn").addEventListener("click", async () => {
+        const log = "syncRunLog";
+        clearLog(log);
+        const btn = document.getElementById("syncRunBtn");
+        btn.disabled = true;
+
+        addLog(log, '"작업 시작"', "white");
+        addLog(log, "// ⏸ xhr.send() — 응답 대기 중... (UI 정지)", "yellow");
+
+        const res = await fetch("https://httpbin.org/delay/2");
+        const data = await res.json();
+        const preview = JSON.stringify(data).slice(0, 70) + "…";
+
+        addLog(log, preview, "sky");
+        addLog(log, '"나머지 작업 수행"', "white");
+
+        btn.disabled = false;
+      });
+
+      // ── 비동기 방식 실제 실행 데모 ──
+      document.getElementById("asyncRunBtn").addEventListener("click", () => {
+        const log = "asyncRunLog";
+        clearLog(log);
+        const btn = document.getElementById("asyncRunBtn");
+        btn.disabled = true;
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "https://httpbin.org/delay/2", true);
+
+        xhr.onload = () => {
+          const preview = xhr.responseText.slice(0, 70) + "…";
+          addLog(log, "// onload 콜백 실행", "yellow");
+          addLog(log, preview, "sky");
+          btn.disabled = false;
+        };
+        xhr.onerror = () => { addLog(log, "❌ 네트워크 오류", "red"); btn.disabled = false; };
+        xhr.send();
+
+        addLog(log, '"작업 시작"', "white");
+        addLog(log, '"나머지 작업 수행"', "green");
+        addLog(log, "// ⏳ 응답 대기 중...", "gray");
+      });
+
+      // ── 비동기 장점 데모 ──
       document.getElementById("syncDemoBtn").addEventListener("click", async () => {
+        const URL = "https://httpbin.org/delay/2";
         clearLog("asyncDemoLog");
         addLog("asyncDemoLog", "🔴 동기 방식 시뮬레이션 (순차 처리)", "red");
         const start = Date.now();
-
         addLog("asyncDemoLog", "요청 1 시작...", "gray");
         await fetch(URL);
         const t1 = Date.now() - start;
         addLog("asyncDemoLog", `✅ 요청 1 완료 (${t1}ms 경과)`, "yellow");
-
         addLog("asyncDemoLog", "요청 2 시작... (요청 1 끝난 후)", "gray");
         await fetch(URL);
         const t2 = Date.now() - start;
@@ -499,10 +875,10 @@ loadData();</code></pre>
       });
 
       document.getElementById("asyncDemoBtn").addEventListener("click", async () => {
+        const URL = "https://httpbin.org/delay/1";
         clearLog("asyncDemoLog");
         addLog("asyncDemoLog", "🟢 비동기 방식 (동시 처리)", "green");
         const start = Date.now();
-
         addLog("asyncDemoLog", "요청 1, 2 동시 시작...", "gray");
         const [r1, r2] = await Promise.all([fetch(URL), fetch(URL)]);
         const t = Date.now() - start;
@@ -511,76 +887,194 @@ loadData();</code></pre>
         addLog("asyncDemoLog", `⏱ 총 소요 시간: ${t}ms (동시 처리 — 훨씬 빠름!)`, "green");
       });
 
-      // ── resolve / reject 데모 ──
-      function makePromise(success) {
+      // ── XHR 실습 데모 ──
+      document.getElementById("xhrUsersBtn").addEventListener("click", () => {
+        clearLog("xhrUsersLog");
+        addLog("xhrUsersLog", "⏳ GET https://dummyjson.com/users 요청 중...", "gray");
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "https://dummyjson.com/users", true);
+        xhr.onload = () => {
+          const res = JSON.parse(xhr.responseText);
+          addLog("xhrUsersLog", "✅ 응답 수신 완료", "green");
+          addLog("xhrUsersLog", summarize(res.users, "users"), "sky");
+        };
+        xhr.onerror = () => addLog("xhrUsersLog", "❌ 네트워크 오류", "red");
+        xhr.send();
+      });
+
+      document.getElementById("xhrPostsBtn").addEventListener("click", () => {
+        clearLog("xhrPostsLog");
+        addLog("xhrPostsLog", "⏳ GET https://dummyjson.com/posts/user/1 요청 중...", "gray");
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "https://dummyjson.com/posts/user/1", true);
+        xhr.onload = () => {
+          const res = JSON.parse(xhr.responseText);
+          addLog("xhrPostsLog", "✅ 응답 수신 완료", "green");
+          addLog("xhrPostsLog", summarize(res.posts, "posts"), "sky");
+        };
+        xhr.onerror = () => addLog("xhrPostsLog", "❌ 네트워크 오류", "red");
+        xhr.send();
+      });
+
+      document.getElementById("xhrCommentsBtn").addEventListener("click", () => {
+        clearLog("xhrCommentsLog");
+        addLog("xhrCommentsLog", "⏳ GET https://dummyjson.com/posts/15/comments 요청 중...", "gray");
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "https://dummyjson.com/posts/15/comments", true);
+        xhr.onload = () => {
+          const res = JSON.parse(xhr.responseText);
+          addLog("xhrCommentsLog", "✅ 응답 수신 완료", "green");
+          addLog("xhrCommentsLog", summarize(res.comments, "comments"), "sky");
+        };
+        xhr.onerror = () => addLog("xhrCommentsLog", "❌ 네트워크 오류", "red");
+        xhr.send();
+      });
+
+      // ── Promise 함수 정의 (공통) ──
+      function getUsers() {
         return new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (success) resolve("데이터 수신 성공");
-            else reject("서버 오류 발생");
-          }, 800);
+          const xhr = new XMLHttpRequest();
+          xhr.open("GET", "https://dummyjson.com/users", true);
+          xhr.onload = () => {
+            resolve(JSON.parse(xhr.responseText).users);
+          };
+          xhr.onerror = () => reject("네트워크 오류");
+          xhr.send();
+        });
+      }
+      function getPosts(userId) {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("GET", `https://dummyjson.com/posts/user/${userId}`, true);
+          xhr.onload = () => {
+            resolve(JSON.parse(xhr.responseText).posts);
+          };
+          xhr.onerror = () => reject("네트워크 오류");
+          xhr.send();
+        });
+      }
+      function getComments(postId) {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("GET", `https://dummyjson.com/posts/${postId}/comments`, true);
+          xhr.onload = () => {
+            resolve(JSON.parse(xhr.responseText).comments);
+          };
+          xhr.onerror = () => reject("네트워크 오류");
+          xhr.send();
+        });
+      }
+
+      // ── Promise 데모 (httpbin delay) ──
+      function fetchWithDelay(forceError) {
+        return new Promise((resolve, reject) => {
+          if (forceError) { setTimeout(() => reject("네트워크 오류 (시뮬레이션)"), 300); return; }
+          const xhr = new XMLHttpRequest();
+          xhr.open("GET", "https://httpbin.org/delay/2", true);
+          xhr.onload = () => resolve(JSON.parse(xhr.responseText));
+          xhr.onerror = () => reject("네트워크 오류");
+          xhr.send();
         });
       }
 
       document.getElementById("resolveBtn").addEventListener("click", () => {
         clearLog("promiseLog");
-        addLog("promiseLog", "Promise 생성 — pending 상태", "yellow");
-        makePromise(true)
-          .then(data  => addLog("promiseLog", `✅ fulfilled — .then() 실행: "${data}"`, "green"))
-          .catch(err  => addLog("promiseLog", `❌ rejected  — .catch() 실행: "${err}"`, "red"))
-          .finally(   () => addLog("promiseLog", "⬜ .finally() 항상 실행", "white"));
+        setPromiseState("pending");
+        addLog("promiseLog", "// new Promise() 생성", "gray");
+        addLog("promiseLog", "// ⏳ XHR 요청 중... (2초 대기)", "gray");
+        fetchWithDelay(false)
+          .then(data => {
+            setPromiseState("fulfilled");
+            addLog("promiseLog", `.then(data => console.log("응답:", data))`, "green");
+            addLog("promiseLog", `  → "응답:" {origin: "${data.origin}"}`, "sky");
+          })
+          .catch(err => {
+            setPromiseState("rejected");
+            addLog("promiseLog", `.catch(err => console.log("실패:", err))`, "red");
+            addLog("promiseLog", `  → "실패:" "${err}"`, "red");
+          })
+          .finally(() => {
+            addLog("promiseLog", `.finally(() => console.log("항상 실행"))`, "white");
+            addLog("promiseLog", `  → "항상 실행"`, "white");
+          });
       });
 
       document.getElementById("rejectBtn").addEventListener("click", () => {
         clearLog("promiseLog");
-        addLog("promiseLog", "Promise 생성 — pending 상태", "yellow");
-        makePromise(false)
-          .then(data  => addLog("promiseLog", `✅ fulfilled — .then() 실행: "${data}"`, "green"))
-          .catch(err  => addLog("promiseLog", `❌ rejected  — .catch() 실행: "${err}"`, "red"))
-          .finally(   () => addLog("promiseLog", "⬜ .finally() 항상 실행", "white"));
+        setPromiseState("pending");
+        addLog("promiseLog", "// new Promise() 생성", "gray");
+        addLog("promiseLog", "// ⏳ 네트워크 오류 시뮬레이션...", "gray");
+        fetchWithDelay(true)
+          .then(data => {
+            setPromiseState("fulfilled");
+            addLog("promiseLog", `.then(data => console.log("응답:", data))`, "green");
+          })
+          .catch(err => {
+            setPromiseState("rejected");
+            addLog("promiseLog", `.catch(err => console.log("실패:", err))`, "red");
+            addLog("promiseLog", `  → "실패:" "${err}"`, "red");
+          })
+          .finally(() => {
+            addLog("promiseLog", `.finally(() => console.log("항상 실행"))`, "white");
+            addLog("promiseLog", `  → "항상 실행"`, "white");
+          });
       });
 
-      // ── 체이닝 · await 공용 mock 함수 ──
-      function getUser() {
-        return new Promise(resolve => setTimeout(() => {
-          resolve({ id: 1, name: "홍길동" });
-        }, 700));
-      }
-      function getPosts(userId, fail = false) {
-        return new Promise((resolve, reject) => setTimeout(() => {
-          if (fail) reject("게시글 조회 실패 (서버 오류)");
-          else resolve(["게시글1", "게시글2"]);
-        }, 700));
-      }
-      function getComments(post) {
-        return new Promise(resolve => setTimeout(() => {
-          resolve(["댓글1", "댓글2"]);
-        }, 700));
-      }
+      // ── Promise 함수화 데모 ──
+      document.getElementById("fnUsersBtn").addEventListener("click", () => {
+        clearLog("fnUsersLog");
+        addLog("fnUsersLog", "⏳ getUsers() 호출 중...", "gray");
+        getUsers()
+          .then(users => {
+            addLog("fnUsersLog", "✅ .then() 실행", "green");
+            addLog("fnUsersLog", summarize(users, "users"), "sky");
+          })
+          .catch(err => addLog("fnUsersLog", `❌ .catch(): ${err}`, "red"));
+      });
+
+      document.getElementById("fnPostsBtn").addEventListener("click", () => {
+        clearLog("fnPostsLog");
+        addLog("fnPostsLog", "⏳ getPosts(1) 호출 중...", "gray");
+        getPosts(1)
+          .then(posts => {
+            addLog("fnPostsLog", "✅ .then() 실행", "green");
+            addLog("fnPostsLog", summarize(posts, "posts"), "sky");
+          })
+          .catch(err => addLog("fnPostsLog", `❌ .catch(): ${err}`, "red"));
+      });
+
+      document.getElementById("fnCommentsBtn").addEventListener("click", () => {
+        clearLog("fnCommentsLog");
+        addLog("fnCommentsLog", "⏳ getComments(15) 호출 중...", "gray");
+        getComments(15)
+          .then(comments => {
+            addLog("fnCommentsLog", "✅ .then() 실행", "green");
+            addLog("fnCommentsLog", summarize(comments, "comments"), "sky");
+          })
+          .catch(err => addLog("fnCommentsLog", `❌ .catch(): ${err}`, "red"));
+      });
 
       // ── 체이닝 데모 ──
       function runChain(fail, logId) {
         clearLog(logId);
-        addLog(logId, "① 유저 정보 조회 중...", "gray");
-        getUser()
-          .then(user => {
-            addLog(logId, `✅ 유저: ${user.name} (id: ${user.id})`, "green");
+        addLog(logId, "① 유저 목록 조회 중...", "gray");
+        getUsers()
+          .then(users => {
+            addLog(logId, `✅ users[0]: ${users[0].firstName} ${users[0].lastName} (id: ${users[0].id})`, "green");
+            if (fail) return Promise.reject("게시글 조회 실패 (시뮬레이션)");
             addLog(logId, "② 게시글 조회 중...", "gray");
-            return getPosts(user.id, fail);
+            return getPosts(users[0].id);
           })
           .then(posts => {
-            addLog(logId, `✅ 게시글: [${posts.join(", ")}]`, "green");
+            addLog(logId, `✅ ${summarize(posts, "posts")}`, "green");
             addLog(logId, "③ 댓글 조회 중...", "gray");
-            return getComments(posts[0]);
+            return getComments(posts[0].id);
           })
           .then(comments => {
-            addLog(logId, `✅ 댓글: [${comments.join(", ")}]`, "sky");
+            addLog(logId, `✅ ${summarize(comments, "comments")}`, "sky");
           })
-          .catch(err => {
-            addLog(logId, `❌ .catch() 실행 — ${err}`, "red");
-          })
-          .finally(() => {
-            addLog(logId, "⬜ .finally() — 작업 완료", "white");
-          });
+          .catch(err => addLog(logId, `❌ .catch() 실행 — ${err}`, "red"))
+          .finally(  () => addLog(logId, "⬜ .finally() — 작업 완료", "white"));
       }
 
       document.getElementById("chainSuccessBtn").addEventListener("click", () => runChain(false, "chainLog"));
@@ -590,17 +1084,19 @@ loadData();</code></pre>
       async function runAwait(fail, logId) {
         clearLog(logId);
         try {
-          addLog(logId, "① 유저 정보 조회 중...", "gray");
-          const user = await getUser();
-          addLog(logId, `✅ 유저: ${user.name} (id: ${user.id})`, "green");
+          addLog(logId, "① 유저 목록 조회 중...", "gray");
+          const users = await getUsers();
+          addLog(logId, `✅ users[0]: ${users[0].firstName} ${users[0].lastName} (id: ${users[0].id})`, "green");
+
+          if (fail) throw new Error("게시글 조회 실패 (시뮬레이션)");
 
           addLog(logId, "② 게시글 조회 중...", "gray");
-          const posts = await getPosts(user.id, fail);
-          addLog(logId, `✅ 게시글: [${posts.join(", ")}]`, "green");
+          const posts = await getPosts(users[0].id);
+          addLog(logId, `✅ ${summarize(posts, "posts")}`, "green");
 
           addLog(logId, "③ 댓글 조회 중...", "gray");
-          const comments = await getComments(posts[0]);
-          addLog(logId, `✅ 댓글: [${comments.join(", ")}]`, "sky");
+          const comments = await getComments(posts[0].id);
+          addLog(logId, `✅ ${summarize(comments, "comments")}`, "sky");
         } catch (err) {
           addLog(logId, `❌ catch 실행 — ${err}`, "red");
         } finally {
