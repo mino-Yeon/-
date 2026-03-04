@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>드릴다운 유저 탐색기</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+
+    <header>
+      <h1>👤 드릴다운 유저 탐색기</h1>
+      <p>유저를 클릭하면 게시글을, 게시글을 클릭하면 댓글을 볼 수 있어요.</p>
+    </header>
+
+    <div class="layout">
+
+      <!-- 1열: 유저 목록 -->
+      <section class="panel" id="users-panel">
+        <div class="panel-header">
+          <h2>유저 목록</h2>
+        </div>
+        <div class="panel-body" id="users-container">
+          <p class="placeholder">불러오는 중...</p>
+        </div>
+      </section>
+
+      <!-- 2열: 게시글 목록 -->
+      <section class="panel" id="posts-panel">
+        <div class="panel-header">
+          <h2>게시글</h2>
+          <span class="panel-sub" id="posts-title">유저를 선택하세요</span>
+        </div>
+        <div class="panel-body" id="posts-container">
+          <p class="placeholder">← 유저를 선택하면 게시글이 표시됩니다.</p>
+        </div>
+      </section>
+
+      <!-- 3열: 댓글 목록 -->
+      <section class="panel" id="comments-panel">
+        <div class="panel-header">
+          <h2>댓글</h2>
+          <span class="panel-sub" id="comments-title">게시글을 선택하세요</span>
+        </div>
+        <div class="panel-body" id="comments-container">
+          <p class="placeholder">← 게시글을 선택하면 댓글이 표시됩니다.</p>
+        </div>
+      </section>
+
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
