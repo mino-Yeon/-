@@ -451,7 +451,7 @@ const promise = new Promise((resolve, reject) => {
 promise
   .then(data  => console.log("응답:", data))  // fulfilled 시 실행
   .catch(err  => console.log("실패:", err))   // rejected 시 실행
-  .finally(   () => console.log("항상 실행")); // 결과 무관하게 실행</code></pre>
+  .finally(() => console.log("항상 실행")); // 결과 무관하게 실행</code></pre>
 </div>
             </div>
 
@@ -474,7 +474,7 @@ function fetchWithDelay() {
 fetchWithDelay()
   .then(data  => console.log("응답:", data))
   .catch(err  => console.log("실패:", err))
-  .finally(   () => console.log("항상 실행"));</code></pre>
+  .finally(() => console.log("항상 실행"));</code></pre>
 </div>
             </div>
           </div>
@@ -667,7 +667,7 @@ getComments(15)
   .then(posts    => getComments(posts[0].id))
   .then(comments => console.log("댓글:", comments))
   .catch(err     => console.log("에러 발생:", err))
-  .finally(      () => console.log("작업 완료"));</code></pre>
+  .finally(()    => console.log("작업 완료"));</code></pre>
 </div>
             </div>
           </div>
@@ -676,7 +676,7 @@ getComments(15)
             <div class="demo-label">▶ 데모 — Promise 체이닝 (유저 → 게시글 → 댓글)</div>
             <div class="demo-row">
               <button class="demo-btn success" id="chainSuccessBtn">▶ 실행 (성공)</button>
-              <button class="demo-btn danger"  id="chainFailBtn">▶ 실패 시뮬레이션</button>
+              <button class="demo-btn danger"  id="chainFailBtn" style="display:none;">▶ 실패 시뮬레이션</button>
             </div>
             <div class="log-box" id="chainLog">
               <div class="log-label">▶ 실행 로그</div>
@@ -763,6 +763,13 @@ loadData();</code></pre>
             wrap.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
             btn.classList.add("active");
             document.getElementById(btn.dataset.tab).classList.add("active");
+
+            // 체이닝 탭 — 실패 버튼 토글
+            const failBtn = document.getElementById("chainFailBtn");
+            if (failBtn) {
+              const showFail = btn.dataset.tab === "chain-good" || btn.dataset.tab === "chain-short";
+              failBtn.style.display = showFail ? "inline-block" : "none";
+            }
           });
         });
       });
