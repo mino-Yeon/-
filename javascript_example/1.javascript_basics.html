@@ -18,12 +18,11 @@
         min-height: 100vh;
       }
 
-      header {
-        background-color: #333;
-        color: white;
-        padding: 16px 24px;
-      }
-      header h1 { font-size: 1.2rem; }
+      header { background: linear-gradient(135deg, #0f172a, #ffa07a); color: white; padding: 18px 28px; display: flex; align-items: center; gap: 12px; }
+      header .header-icon { font-size: 1.4rem; }
+      header h1 { font-size: 1.2rem; letter-spacing: 0.02em; }
+      header span { font-size: 0.8rem; background: rgba(255,255,255,0.15); padding: 2px 10px; border-radius: 20px; margin-left: 8px; color: #bae6fd; }
+
 
       .layout {
         display: flex;
@@ -146,8 +145,8 @@
     </style>
   </head>
   <body>
-
     <header>
+      <div class="header-icon">📝</div>
       <h1>Javascript 기본 문법</h1>
     </header>
 

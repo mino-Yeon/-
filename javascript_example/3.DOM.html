@@ -84,7 +84,7 @@ body {
 .ib-dim  { color: #585b70; margin-right: 2px; }
 
 .learn-panel {
-  height: 262px;
+  height: 210px;
   display: flex; flex-direction: column;
   flex-shrink: 0;
   border-top: 2px solid var(--border);
@@ -227,12 +227,6 @@ textarea.code-editor:focus { border-color: var(--blue); }
   border-radius: 4px; display: inline-block;
 }
 
-#empty-box {
-  border: 2px dashed #ced4da; border-radius: 6px;
-  padding: 10px; min-height: 36px;
-  color: #adb5bd; font-size: 0.75rem; text-align: center;
-}
-#empty-box:empty::before { content: '빈 컨테이너 (createElement 실습용)'; }
 
 #demo .highlight { background-color: #fff176 !important; box-shadow: inset 0 0 0 2px #fbc02d; }
 #demo .active    { border: 3px solid #1565c0 !important; box-shadow: 0 0 0 3px #bbdefb; }
@@ -265,9 +259,7 @@ textarea.code-editor:focus { border-color: var(--blue); }
       <span>실제 렌더링</span>
       <small style="font-size:0.63rem;color:#aaa;font-weight:400;">요소 클릭 → 트리 강조</small>
     </div>
-    <div class="panel-body">
-      <div id="demo">
-        <div id="app">
+    <div class="panel-body" id="demo">
           <header id="site-header" class="card">
             <h1 id="main-title" class="title" data-level="1">나의 블로그</h1>
             <nav id="site-nav">
@@ -287,17 +279,9 @@ textarea.code-editor:focus { border-color: var(--blue); }
               </ul>
             </section>
 
-            <aside id="sidebar">
-              <div id="profile" class="card" data-user="guest">
-                <span class="user-name">방문자</span>
-                <span class="user-role" data-role="reader">독자</span>
-              </div>
-            </aside>
+
           </main>
 
-          <div id="empty-box"></div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -319,7 +303,7 @@ textarea.code-editor:focus { border-color: var(--blue); }
     <button class="tab-btn active" onclick="switchTab('s1', this)">① 조회</button>
     <button class="tab-btn" onclick="switchTab('s2', this)">② 조작</button>
     <button class="tab-btn" onclick="switchTab('s3', this)">③ 노드 추가</button>
-    <button class="tab-btn" onclick="switchTab('s4', this)">④ 노드 제거</button>
+    <button class="tab-btn" onclick="switchTab('s4', this)">④ 제거</button>
     <button class="tab-btn" onclick="switchTab('editor', this)">코드 에디터</button>
     <button class="tab-btn reset-btn" onclick="resetDemo()">↺ 초기화</button>
   </div>
@@ -372,7 +356,6 @@ textarea.code-editor:focus { border-color: var(--blue); }
       <div class="btn-group-label">노드 추가 방법</div>
       <button class="btn btn-blue"   onclick="s3_create()">createElement + appendChild</button>
       <button class="btn btn-green"  onclick="s3_inner()">innerHTML로 footer 추가</button>
-      <button class="btn btn-orange" onclick="s3_empty()">빈 컨테이너에 요소 추가</button>
     </div>
     <div class="log-box" id="log3"></div>
   </div>
@@ -380,9 +363,8 @@ textarea.code-editor:focus { border-color: var(--blue); }
   <div class="tab-content" id="s4">
     <div class="btn-group">
       <div class="btn-group-label">노드 제거</div>
-      <button class="btn btn-red" onclick="s4_removeSelected()">선택된 요소 제거 (클릭 후 실행)</button>
-      <button class="btn btn-red" onclick="s4_removeEven()">짝수 data-id li 제거</button>
-      <button class="btn btn-red" onclick="s4_removeHidden()">hidden 요소 추가 후 제거</button>
+      <button class="btn btn-red"    onclick="s4_removeSelected()">선택된 요소 제거 (클릭 후 실행)</button>
+      <button class="btn btn-orange" onclick="s4_clearSelected()">선택된 요소 비우기 innerHTML = ""</button>
     </div>
     <div class="log-box" id="log4"></div>
   </div>
@@ -493,7 +475,9 @@ function updateTree() {
   treeIdCnt = 0;
   const root = document.getElementById('tree-root');
   root.innerHTML = '';
-  root.appendChild(buildTree(document.getElementById('demo')));
+  for (const child of document.getElementById('demo').children) {
+    root.appendChild(buildTree(child));
+  }
 }
 
 function focusElement(el) {
@@ -553,9 +537,6 @@ function s1_qs() {
   clearLog('log1');
   const el = document.querySelector('#main-title');
   log('log1', `const el = document.querySelector('#main-title')`, 'info');
-  log('log1', `el.tagName        // "${el.tagName.toLowerCase()}"`);
-  log('log1', `el.textContent    // "${el.textContent}"`);
-  log('log1', `el.classList      // [${[...el.classList].join(', ')}]`);
   focusElement(el);
   updateTree();
 }
@@ -565,10 +546,8 @@ function s1_qsa() {
   if (focused) { focused.removeAttribute('data-focused'); focused = null; }
   const els = document.querySelectorAll('#demo .item');
   log('log1', `const els = document.querySelectorAll('.item')`, 'info');
-  log('log1', `els.length        // ${els.length}`);
   els.forEach((el, i) => {
     el.setAttribute('data-focused', '');
-    log('log1', `els[${i}]  // <${el.tagName.toLowerCase()}>${el.id ? ' #' + el.id : ''}`);
   });
   setTimeout(() => { els.forEach(el => el.removeAttribute('data-focused')); updateTree(); }, 2000);
   updateTree();
@@ -578,8 +557,6 @@ function s1_gbi() {
   clearLog('log1');
   const el = document.getElementById('post-list');
   log('log1', `const el = document.getElementById('post-list')`, 'info');
-  log('log1', `el.tagName        // "${el.tagName.toLowerCase()}"`);
-  log('log1', `el.children.length // ${el.children.length}`);
   focusElement(el);
   updateTree();
 }
@@ -588,10 +565,6 @@ function s1_children() {
   clearLog('log1');
   const ul = document.getElementById('post-list');
   log('log1', `const kids = document.getElementById('post-list').children`, 'info');
-  log('log1', `kids.length       // ${ul.children.length}`);
-  for (const li of ul.children) {
-    log('log1', `  <li data-id="${li.dataset.id}"> "${li.textContent.trim()}"`);
-  }
   focusElement(ul);
   updateTree();
 }
@@ -600,10 +573,7 @@ function s1_parent() {
   clearLog('log1');
   const ul     = document.getElementById('post-list');
   const parent = ul.parentElement;
-  log('log1', `document.getElementById('post-list').parentElement`, 'info');
-  log('log1', `parent.tagName    // "${parent.tagName.toLowerCase()}"`);
-  log('log1', `parent.id         // "${parent.id}"`);
-  log('log1', `parent.classList.value  // "${parent.classList.value}"`);
+  log('log1', `const parent = document.getElementById('post-list').parentElement`, 'info');
   focusElement(parent);
   updateTree();
 }
@@ -613,9 +583,7 @@ function s1_sibling() {
   const first   = document.querySelector('#post-list .post-item');
   const sibling = first.nextElementSibling;
   log('log1', `const first = document.querySelector('#post-list .post-item')`, 'info');
-  log('log1', `first.nextElementSibling.textContent  // "${sibling.textContent.trim()}"`);
-  log('log1', `sibling.dataset.id        // "${sibling.dataset.id}"`);
-  log('log1', `sibling.dataset.category  // "${sibling.dataset.category}"`);
+  log('log1', `const sibling = first.nextElementSibling`);
   focusElement(sibling);
   updateTree();
 }
@@ -623,46 +591,34 @@ function s1_sibling() {
 function s1_getAttr() {
   clearLog('log1');
   const items = document.querySelectorAll('#post-list .post-item');
-  log('log1', `document.querySelectorAll('.post-item').forEach(li => li.getAttribute('data-category'))`, 'info');
-  items.forEach(li => {
-    log('log1', `  "${li.textContent.trim()}"  →  "${li.getAttribute('data-category')}"`);
-  });
+  log('log1', `document.querySelectorAll('.post-item')`, 'info');
+  log('log1', `  .forEach(li => li.getAttribute('data-category'))`);
 }
 
 function s1_dataset() {
   clearLog('log1');
   const profile = document.getElementById('profile');
-  const role    = document.querySelector('.user-role');
   log('log1', `const profile = document.getElementById('profile')`, 'info');
-  log('log1', `profile.dataset.user      // "${profile.dataset.user}"`);
-  log('log1', `profile.dataset           // { user: "${profile.dataset.user}" }`);
-  log('log1', `role.dataset.role         // "${role.dataset.role}"`);
-  focusElement(profile);
-  updateTree();
+  log('log1', `profile.dataset.user`);
 }
 
 function s2_text() {
   clearLog('log2');
-  const el   = document.getElementById('main-title');
-  const prev = el.textContent;
+  const el = document.getElementById('main-title');
   el.textContent = 'DOM으로 변경한 제목!';
   log('log2', `const el = document.getElementById('main-title')`, 'info');
   log('log2', `el.textContent = 'DOM으로 변경한 제목!'`);
-  log('log2', `// 이전: "${prev}"`);
-  log('log2', `// 이후: "${el.textContent}"`);
   focusElement(el);
   updateTree();
 }
 
 function s2_attr() {
   clearLog('log2');
-  const el   = document.getElementById('profile');
-  const prev = el.getAttribute('data-user');
+  const el = document.getElementById('profile');
   el.setAttribute('data-user', 'admin');
   el.querySelector('.user-name').textContent = '관리자';
   log('log2', `const el = document.getElementById('profile')`, 'info');
   log('log2', `el.setAttribute('data-user', 'admin')`);
-  log('log2', `// 이전: "${prev}"  →  이후: "${el.dataset.user}"`);
   focusElement(el);
   updateTree();
 }
@@ -672,8 +628,6 @@ function s2_add() {
   const target = getTarget();
   target.classList.add('highlight');
   log('log2', `el.classList.add('highlight')`, 'info');
-  log('log2', `// el: <${target.tagName.toLowerCase()}>${target.id ? ' #' + target.id : ''}`);
-  log('log2', `el.classList  // [${[...target.classList].join(', ')}]`);
   focusElement(target);
   updateTree();
 }
@@ -683,7 +637,6 @@ function s2_remove() {
   const target = getTarget();
   target.classList.remove('highlight');
   log('log2', `el.classList.remove('highlight')`, 'info');
-  log('log2', `el.classList  // [${[...target.classList].join(', ')}]`);
   focusElement(target);
   updateTree();
 }
@@ -691,10 +644,8 @@ function s2_remove() {
 function s2_toggle() {
   clearLog('log2');
   const target = getTarget();
-  const added  = target.classList.toggle('active');
+  target.classList.toggle('active');
   log('log2', `el.classList.toggle('active')`, 'info');
-  log('log2', `// 반환값: ${added}  (true=추가됨, false=제거됨)`);
-  log('log2', `el.classList  // [${[...target.classList].join(', ')}]`);
   focusElement(target);
   updateTree();
 }
@@ -703,18 +654,17 @@ function s2_hlAll() {
   clearLog('log2');
   const items = document.querySelectorAll('#demo .item');
   items.forEach(el => el.classList.add('highlight'));
-  log('log2', `document.querySelectorAll('.item').forEach(el => el.classList.add('highlight'))`, 'info');
-  log('log2', `// ${items.length}개 요소에 적용`);
+  log('log2', `document.querySelectorAll('.item')`, 'info');
+  log('log2', `  .forEach(el => el.classList.add('highlight'))`);
   updateTree();
 }
 
 function s2_hlAllOff() {
   clearLog('log2');
   const items = document.querySelectorAll('#demo .highlight');
-  const count = items.length;
   items.forEach(el => el.classList.remove('highlight'));
-  log('log2', `document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'))`, 'info');
-  log('log2', `// ${count}개 요소에서 제거`);
+  log('log2', `document.querySelectorAll('.highlight')`, 'info');
+  log('log2', `  .forEach(el => el.classList.remove('highlight'))`);
   updateTree();
 }
 
@@ -722,9 +672,8 @@ function s2_conditional() {
   clearLog('log2');
   const items = document.querySelectorAll('#demo [data-category="js"]');
   items.forEach(el => el.classList.toggle('important'));
-  log('log2', `document.querySelectorAll('[data-category="js"]').forEach(el => el.classList.toggle('important'))`, 'info');
-  log('log2', `// 대상 ${items.length}개:`);
-  items.forEach(el => log('log2', `//   "${el.textContent.trim()}"`));
+  log('log2', `document.querySelectorAll('[data-category="js"]')`, 'info');
+  log('log2', `  .forEach(el => el.classList.toggle('important'))`);
   updateTree();
 }
 
@@ -733,7 +682,6 @@ function s2_multi() {
   const last = document.querySelector('#post-list .post-item:last-child');
   last.classList.add('highlight', 'active');
   log('log2', `el.classList.add('highlight', 'active')`, 'info');
-  log('log2', `el.classList  // [${[...last.classList].join(', ')}]`);
   focusElement(last);
   updateTree();
 
@@ -832,11 +780,12 @@ function s4_removeSelected() {
 
   const tag = focused.tagName.toLowerCase();
   const id  = focused.id;
+  const cls = !focused.id && focused.classList.length ? '.' + [...focused.classList][0] : '';
+  const selector = id ? `#${id}` : cls ? cls : tag;
   const el  = focused;
 
-  log('log4', `el.classList.add('fade')`, 'info');
-  log('log4', `// 대상: <${tag}>${id ? ' #' + id : ''}`);
-  log('log4', `setTimeout(() => el.remove(), 500)`);
+  log('log4', `const el = document.querySelector("${selector}")`, 'info');
+  log('log4', `el.remove()`);
 
   el.classList.add('fade');
   setTimeout(() => {
@@ -847,45 +796,26 @@ function s4_removeSelected() {
   }, 500);
 }
 
-function s4_removeEven() {
+function s4_clearSelected() {
   clearLog('log4');
-  const items = [...document.querySelectorAll('#post-list .post-item')];
-  const evens = items.filter(li => Number(li.dataset.id) % 2 === 0);
-
-  if (!evens.length) {
-    log('log4', `// 짝수 data-id를 가진 li 없음`, 'warn');
+  const demo = document.getElementById('demo');
+  if (!focused || !demo.contains(focused) || focused === demo) {
+    log('log4', `// 먼저 비울 요소를 클릭해서 선택하세요`, 'warn');
     return;
   }
 
-  log('log4', `const evens = [...querySelectorAll('.post-item')].filter(li => li.dataset.id % 2 === 0)`, 'info');
-  log('log4', `// ${evens.length}개 대상:`);
-  evens.forEach(li => {
-    log('log4', `//   data-id="${li.dataset.id}"  "${li.textContent.trim()}"`);
-    li.classList.add('fade');
-    setTimeout(() => { li.remove(); updateTree(); }, 500);
-  });
-}
+  const tag      = focused.tagName.toLowerCase();
+  const id       = focused.id;
+  const childCnt = focused.children.length;
+  const el       = focused;
 
-function s4_removeHidden() {
-  clearLog('log4');
-  const items = document.querySelectorAll('#post-list .post-item');
-  if (!items.length) {
-    log('log4', `// #post-list에 li 없음`, 'warn');
-    return;
-  }
+  log('log4', `el.innerHTML = ""`, 'info');
+  log('log4', `// 대상: <${tag}>${id ? ' #' + id : ''}`);
+  log('log4', `// 자식 ${childCnt}개 제거 — 요소 자체는 DOM에 유지됨`);
 
-  items[0].classList.add('hidden');
-  log('log4', `items[0].classList.add('hidden')   // display: none`, 'info');
-  log('log4', `// DOM에는 존재하지만 화면에서 사라짐`);
+  el.innerHTML = '';
+  focusElement(el);
   updateTree();
-
-  setTimeout(() => {
-    const hidden = document.querySelectorAll('#demo .hidden');
-    hidden.forEach(el => el.remove());
-    log('log4', `document.querySelectorAll('.hidden').forEach(el => el.remove())`);
-    log('log4', `// DOM에서도 완전히 제거됨 (${hidden.length}개)`);
-    updateTree();
-  }, 1000);
 }
 
 function runCode() {
