@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOM 인터랙티브 실습</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #f8f9fa;
+  --panel:   #ffffff;
+  --border:  #dee2e6;
+  --text:    #212529;
+  --muted:   #6c757d;
+  --blue:    #0d6efd;
+  --blue-l:  #cfe2ff;
+  --green:   #198754;
+  --red:     #dc3545;
+  --orange:  #fd7e14;
+  --purple:  #6f42c1;
+}
+
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  padding: 9px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border-bottom: 2px solid #313244;
+}
+.header-logo {
+  width: 26px; height: 26px;
+  background: var(--blue);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 12px; color: white; flex-shrink: 0;
+}
+.header h1  { font-size: 0.93rem; font-weight: 700; color: #89b4fa; }
+.header-sub { font-size: 0.7rem; color: #6c7086; margin-left: 4px; }
+
+.main-layout {
+  display: grid;
+  grid-template-columns: 44% 56%;
+  flex: 1;
+  min-height: 0;
+}
+.panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--panel);
+  border-right: 1.5px solid var(--border);
+}
+.panel-head {
+  padding: 7px 12px;
+  background: #f1f3f5;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.7rem; font-weight: 700;
+  color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.panel-body { flex: 1; overflow-y: auto; padding: 14px; }
+
+.info-bar {
+  background: #1e1e2e; color: #cdd6f4;
+  padding: 5px 14px;
+  font-family: 'Fira Code', Consolas, monospace; font-size: 0.7rem;
+  display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  flex-shrink: 0; min-height: 28px;
+}
+.ib-tag  { color: #f38ba8; font-weight: 700; }
+.ib-id   { color: #f9e2af; }
+.ib-cls  { color: #a6e3a1; }
+.ib-data { color: #89dceb; }
+.ib-dim  { color: #585b70; margin-right: 2px; }
+
+.learn-panel {
+  height: 262px;
+  display: flex; flex-direction: column;
+  flex-shrink: 0;
+  border-top: 2px solid var(--border);
+  background: var(--panel);
+}
+.learn-tabs {
+  display: flex;
+  background: #f8f9fa;
+  border-bottom: 1.5px solid var(--border);
+  flex-shrink: 0; align-items: center;
+}
+.tab-btn {
+  padding: 7px 12px;
+  font-size: 0.76rem; font-weight: 600;
+  color: var(--muted); background: none;
+  border: none; border-bottom: 2px solid transparent;
+  cursor: pointer; transition: all 0.12s;
+  margin-bottom: -1.5px; white-space: nowrap; font-family: inherit;
+}
+.tab-btn:hover           { color: var(--text); background: #e9ecef; }
+.tab-btn.active          { color: var(--blue); border-bottom-color: var(--blue); background: var(--panel); }
+.tab-btn.reset-btn       { margin-left: auto; color: var(--red); }
+.tab-btn.reset-btn:hover { background: #fff0f0; }
+
+.tab-content        { display: none; flex: 1; overflow-y: auto; padding: 10px 14px; gap: 10px; flex-wrap: wrap; align-content: flex-start; }
+.tab-content.active { display: flex; }
+
+.btn {
+  padding: 5px 10px;
+  border-radius: 5px; border: 1px solid transparent;
+  cursor: pointer; font-size: 0.74rem; font-weight: 600;
+  transition: all 0.12s; font-family: inherit; white-space: nowrap;
+}
+.btn-blue   { background: var(--blue);   color: #fff; } .btn-blue:hover   { background: #0b5ed7; }
+.btn-green  { background: var(--green);  color: #fff; } .btn-green:hover  { background: #157347; }
+.btn-red    { background: var(--red);    color: #fff; } .btn-red:hover    { background: #b02a37; }
+.btn-orange { background: var(--orange); color: #fff; } .btn-orange:hover { background: #e86900; }
+.btn-purple { background: var(--purple); color: #fff; } .btn-purple:hover { background: #5a35a8; }
+.btn-ghost  { background: #fff; color: var(--muted); border-color: var(--border); font-size: 0.68rem; padding: 3px 8px; }
+.btn-ghost:hover { background: #f1f3f5; }
+
+.btn-group       { display: flex; flex-direction: column; gap: 4px; min-width: 200px; }
+.btn-group-label {
+  font-size: 0.65rem; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  padding-bottom: 3px; border-bottom: 1px solid var(--border); margin-bottom: 2px;
+}
+
+.log-box {
+  background: #1e1e2e; border-radius: 6px; padding: 8px 11px;
+  min-height: 80px; max-height: 200px; overflow-y: auto;
+  font-family: 'Fira Code', Consolas, monospace; font-size: 0.69rem;
+  flex: 1; min-width: 200px; align-self: flex-start;
+}
+.log-line        { color: #a6e3a1; line-height: 1.7; display: block; }
+.log-line.l-info { color: #89b4fa; }
+.log-line.l-warn { color: #f9e2af; }
+.log-line.l-err  { color: #f38ba8; }
+
+.example-list { display: flex; flex-direction: column; gap: 3px; min-width: 170px; max-width: 200px; }
+.example-label { font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 3px; border-bottom: 1px solid var(--border); margin-bottom: 2px; }
+.example-item {
+  padding: 4px 8px;
+  background: #1e1e2e; color: #89b4fa;
+  border-radius: 4px; border: 1px solid #313244;
+  font-family: 'Fira Code', Consolas, monospace; font-size: 0.67rem;
+  cursor: pointer; line-height: 1.4; white-space: pre;
+  transition: background 0.1s;
+}
+.example-item:hover { background: #313244; border-color: #45475a; }
+
+.editor-col { display: flex; flex-direction: column; flex: 1; gap: 6px; min-width: 260px; }
+textarea.code-editor {
+  flex: 1; min-height: 110px;
+  background: #1e1e2e; color: #cdd6f4;
+  border: 1px solid #45475a; border-radius: 6px;
+  padding: 9px 11px;
+  font-family: 'Fira Code', Consolas, monospace; font-size: 0.75rem; line-height: 1.7;
+  resize: none; outline: none; tab-size: 2;
+}
+textarea.code-editor:focus { border-color: var(--blue); }
+.editor-row { display: flex; gap: 6px; }
+
+.tree-node {
+  display: flex; align-items: baseline; gap: 4px;
+  padding: 2px 6px; border-radius: 4px;
+  cursor: pointer; user-select: none; white-space: nowrap;
+  line-height: 1.6; transition: background 0.1s;
+}
+.tree-node:hover  { background: #f1f3f5; }
+.tree-node.active { background: #fff3cd; outline: 1.5px solid #ffc107; }
+
+.tree-children { margin-left: 14px; padding-left: 7px; border-left: 1.5px solid #dee2e6; }
+
+.t-tag  { color: #d9534f; font-weight: 700; font-size: 0.77rem; font-family: monospace; }
+.t-id   { color: #e8a000; font-size: 0.72rem; font-family: monospace; }
+.t-cls  { color: #28a745; font-size: 0.7rem;  font-family: monospace; }
+.t-txt  { color: #999;    font-size: 0.67rem; font-style: italic; font-family: monospace; }
+.t-data { color: #7952b3; font-size: 0.65rem; font-family: monospace; }
+
+#demo { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; }
+
+#site-header {
+  background: #343a40; color: white;
+  padding: 10px 14px; border-radius: 6px; margin-bottom: 10px;
+}
+#main-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; color: white; }
+#site-nav   { display: flex; gap: 6px; }
+
+.nav-link {
+  padding: 3px 9px; border-radius: 4px;
+  background: rgba(255,255,255,0.15); color: white;
+  cursor: pointer; font-size: 0.81rem; text-decoration: none;
+  transition: background 0.2s; display: inline-block;
+}
+.nav-link:hover { background: rgba(255,255,255,0.28); }
+
+#content { display: grid; grid-template-columns: 1fr 160px; gap: 10px; margin-bottom: 10px; }
+
+#post-section { background: white; border: 1px solid #dee2e6; border-radius: 6px; padding: 12px; }
+#post-section > h2 {
+  font-size: 0.88rem; font-weight: 700;
+  margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #eee;
+}
+#post-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+
+.post-item {
+  padding: 6px 10px; border: 1px solid #dee2e6;
+  border-radius: 4px; cursor: pointer;
+  transition: border-color 0.15s; font-size: 0.82rem;
+}
+.post-item:hover { border-color: var(--blue); }
+
+#sidebar  { background: white; border: 1px solid #dee2e6; border-radius: 6px; padding: 10px; }
+#profile  { display: flex; flex-direction: column; gap: 4px; }
+.user-name { font-weight: 700; font-size: 0.84rem; }
+.user-role {
+  font-size: 0.73rem; color: #6c757d;
+  background: #f8f9fa; padding: 2px 6px;
+  border-radius: 4px; display: inline-block;
+}
+
+#empty-box {
+  border: 2px dashed #ced4da; border-radius: 6px;
+  padding: 10px; min-height: 36px;
+  color: #adb5bd; font-size: 0.75rem; text-align: center;
+}
+#empty-box:empty::before { content: '빈 컨테이너 (createElement 실습용)'; }
+
+#demo .highlight { background-color: #fff176 !important; box-shadow: inset 0 0 0 2px #fbc02d; }
+#demo .active    { border: 3px solid #1565c0 !important; box-shadow: 0 0 0 3px #bbdefb; }
+#demo .hidden    { display: none !important; }
+#demo .important { color: #b71c1c !important; font-weight: bold !important; }
+#demo .selected  { background-color: #1565c0 !important; color: white !important; border-color: transparent !important; }
+#demo .fade      { opacity: 0.2 !important; transition: opacity 0.5s ease !important; }
+
+#demo [data-focused] { outline: 2px dashed #fd7e14 !important; outline-offset: 2px; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-6px); background-color: #d1fae5; }
+  to   { opacity: 1; transform: translateY(0);    background-color: inherit; }
+}
+.new-node { animation: slideIn 0.45s ease forwards; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">D</div>
+  <h1>DOM 인터랙티브 실습<span class="header-sub"> — 보면서 배우는 DOM 조작</span></h1>
+</header>
+
+<div class="main-layout">
+
+  <div class="panel">
+    <div class="panel-head">
+      <span>실제 렌더링</span>
+      <small style="font-size:0.63rem;color:#aaa;font-weight:400;">요소 클릭 → 트리 강조</small>
+    </div>
+    <div class="panel-body">
+      <div id="demo">
+        <div id="app">
+          <header id="site-header" class="card">
+            <h1 id="main-title" class="title" data-level="1">나의 블로그</h1>
+            <nav id="site-nav">
+              <a class="nav-link" data-page="home">홈</a>
+              <a class="nav-link active" data-page="posts">포스트</a>
+            </nav>
+          </header>
+
+          <main id="content">
+            <section id="post-section" class="card">
+              <h2 data-level="2">포스트 목록</h2>
+              <ul id="post-list">
+                <li class="post-item item" data-id="1" data-category="js">JavaScript 기초</li>
+                <li class="post-item item highlight" data-id="2" data-category="css">CSS 레이아웃</li>
+                <li class="post-item item" data-id="3" data-category="js">DOM 조작</li>
+                <li class="post-item item active" data-id="4" data-category="html">HTML 구조</li>
+              </ul>
+            </section>
+
+            <aside id="sidebar">
+              <div id="profile" class="card" data-user="guest">
+                <span class="user-name">방문자</span>
+                <span class="user-role" data-role="reader">독자</span>
+              </div>
+            </aside>
+          </main>
+
+          <div id="empty-box"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <span>DOM 트리 시각화</span>
+    </div>
+    <div class="panel-body" id="tree-root"></div>
+  </div>
+
+</div>
+
+<div class="info-bar" id="info-bar">
+  <span style="color:#585b70;">미리보기에서 요소를 클릭하면 정보가 여기에 표시됩니다</span>
+</div>
+
+<div class="learn-panel">
+  <div class="learn-tabs">
+    <button class="tab-btn active" onclick="switchTab('s1', this)">① 조회</button>
+    <button class="tab-btn" onclick="switchTab('s2', this)">② 조작</button>
+    <button class="tab-btn" onclick="switchTab('s3', this)">③ 노드 추가</button>
+    <button class="tab-btn" onclick="switchTab('s4', this)">④ 노드 제거</button>
+    <button class="tab-btn" onclick="switchTab('editor', this)">코드 에디터</button>
+    <button class="tab-btn reset-btn" onclick="resetDemo()">↺ 초기화</button>
+  </div>
+
+  <div class="tab-content active" id="s1">
+    <div class="btn-group">
+      <div class="btn-group-label">querySelector</div>
+      <button class="btn btn-blue" onclick="s1_qs()">querySelector('#main-title')</button>
+      <button class="btn btn-blue" onclick="s1_qsa()">querySelectorAll('.item') 전체</button>
+      <button class="btn btn-blue" onclick="s1_gbi()">getElementById('post-list')</button>
+    </div>
+    <div class="btn-group">
+      <div class="btn-group-label">트리 탐색</div>
+      <button class="btn btn-purple" onclick="s1_children()">post-list.children</button>
+      <button class="btn btn-purple" onclick="s1_parent()">post-list.parentElement</button>
+      <button class="btn btn-purple" onclick="s1_sibling()">첫 li.nextElementSibling</button>
+    </div>
+    <div class="btn-group">
+      <div class="btn-group-label">속성 조회</div>
+      <button class="btn btn-green" onclick="s1_getAttr()">getAttribute('data-category')</button>
+      <button class="btn btn-green" onclick="s1_dataset()">profile.dataset.user</button>
+    </div>
+    <div class="log-box" id="log1"></div>
+  </div>
+
+  <div class="tab-content" id="s2">
+    <div class="btn-group">
+      <div class="btn-group-label">내용 & 속성 변경</div>
+      <button class="btn btn-blue" onclick="s2_text()">textContent 변경</button>
+      <button class="btn btn-blue" onclick="s2_attr()">setAttribute 변경</button>
+    </div>
+    <div class="btn-group">
+      <div class="btn-group-label">classList (선택된 요소 기준)</div>
+      <button class="btn btn-green"  onclick="s2_add()">classList.add('highlight')</button>
+      <button class="btn btn-red"    onclick="s2_remove()">classList.remove('highlight')</button>
+      <button class="btn btn-orange" onclick="s2_toggle()">classList.toggle('active')</button>
+    </div>
+    <div class="btn-group">
+      <div class="btn-group-label">일괄 조작</div>
+      <button class="btn btn-green"  onclick="s2_hlAll()">모든 .item에 .highlight 추가</button>
+      <button class="btn btn-red"    onclick="s2_hlAllOff()">모든 .highlight 제거</button>
+      <button class="btn btn-orange" onclick="s2_conditional()">data-category="js"에 .important 토글</button>
+      <button class="btn btn-purple" onclick="s2_multi()">여러 class 동시 추가/제거</button>
+    </div>
+    <div class="log-box" id="log2"></div>
+  </div>
+
+  <div class="tab-content" id="s3">
+    <div class="btn-group">
+      <div class="btn-group-label">노드 추가 방법</div>
+      <button class="btn btn-blue"   onclick="s3_create()">createElement + appendChild</button>
+      <button class="btn btn-green"  onclick="s3_inner()">innerHTML로 footer 추가</button>
+      <button class="btn btn-orange" onclick="s3_empty()">빈 컨테이너에 요소 추가</button>
+    </div>
+    <div class="log-box" id="log3"></div>
+  </div>
+
+  <div class="tab-content" id="s4">
+    <div class="btn-group">
+      <div class="btn-group-label">노드 제거</div>
+      <button class="btn btn-red" onclick="s4_removeSelected()">선택된 요소 제거 (클릭 후 실행)</button>
+      <button class="btn btn-red" onclick="s4_removeEven()">짝수 data-id li 제거</button>
+      <button class="btn btn-red" onclick="s4_removeHidden()">hidden 요소 추가 후 제거</button>
+    </div>
+    <div class="log-box" id="log4"></div>
+  </div>
+
+  <div class="tab-content" id="editor">
+    <div class="example-list">
+      <div class="example-label">예시 (클릭 → 삽입)</div>
+      <div class="example-item" onclick="insertCode(`document.querySelector('#main-title')`)">querySelector</div>
+      <div class="example-item" onclick="insertCode(`document.querySelectorAll('.item')\n  .forEach(el => el.classList.toggle('highlight'))`)">querySelectorAll</div>
+      <div class="example-item" onclick="insertCode(`document.getElementById('post-list').children`)">getElementById</div>
+      <div class="example-item" onclick="insertCode(`document.querySelector('.post-item').classList.add('selected')`)">classList.add</div>
+      <div class="example-item" onclick="insertCode(`document.querySelector('.post-item').classList.remove('highlight')`)">classList.remove</div>
+      <div class="example-item" onclick="insertCode(`document.querySelector('.post-item').classList.toggle('active')`)">classList.toggle</div>
+      <div class="example-item" onclick="insertCode(`const li = document.createElement('li')\nli.className = 'post-item item'\nli.textContent = '새 항목'\ndocument.getElementById('post-list').appendChild(li)`)">createElement</div>
+      <div class="example-item" onclick="insertCode(`document.querySelector('.post-item').remove()`)">remove</div>
+    </div>
+    <div class="editor-col">
+      <textarea class="code-editor" id="user-code" spellcheck="false"
+        placeholder="// 코드를 입력하거나 왼쪽 예시를 클릭하세요 (Ctrl+Enter 실행)"></textarea>
+      <div class="editor-row">
+        <button class="btn btn-blue" onclick="runCode()">▶ 실행 (Ctrl+Enter)</button>
+        <button class="btn btn-ghost" onclick="clearCode()">지우기</button>
+      </div>
+    </div>
+    <div class="log-box" id="log-ed"></div>
+  </div>
+
+</div>
+
+<script>
+let focused   = null;
+let treeIdCnt = 0;
+
+const INITIAL_HTML = document.getElementById('demo').innerHTML;
+
+function buildTree(el, depth = 0) {
+  const nodeId = treeIdCnt++;
+  el.dataset.treeRef = nodeId;
+
+  const wrapper = document.createElement('div');
+
+  const row = document.createElement('div');
+  row.className = 'tree-node';
+  row.dataset.treeId = nodeId;
+
+  const tagEl = document.createElement('span');
+  tagEl.className = 't-tag';
+  tagEl.textContent = `<${el.tagName.toLowerCase()}>`;
+  row.appendChild(tagEl);
+
+  if (el.id) {
+    const idEl = document.createElement('span');
+    idEl.className = 't-id';
+    idEl.textContent = ` #${el.id}`;
+    row.appendChild(idEl);
+  }
+
+  if (el.classList.length) {
+    const clsEl = document.createElement('span');
+    clsEl.className = 't-cls';
+    clsEl.textContent = ' .' + [...el.classList].join('.');
+    row.appendChild(clsEl);
+  }
+
+  if (el.children.length === 0) {
+    const txt = el.textContent.trim().slice(0, 20);
+    if (txt) {
+      const txtEl = document.createElement('span');
+      txtEl.className = 't-txt';
+      txtEl.textContent = ` "${txt}"`;
+      row.appendChild(txtEl);
+    }
+  }
+
+  const dataAttrs = [...el.attributes].filter(a =>
+    a.name.startsWith('data-') &&
+    a.name !== 'data-tree-ref' &&
+    a.name !== 'data-focused'
+  );
+  if (dataAttrs.length) {
+    const dataEl = document.createElement('span');
+    dataEl.className = 't-data';
+    dataEl.textContent = ' ' + dataAttrs.map(a => `[${a.name}="${a.value}"]`).join('');
+    row.appendChild(dataEl);
+  }
+
+  row.addEventListener('click', e => {
+    e.stopPropagation();
+    focusElement(el);
+  });
+
+  wrapper.appendChild(row);
+
+  if (el.children.length > 0) {
+    const childGroup = document.createElement('div');
+    childGroup.className = 'tree-children';
+    for (const child of el.children) {
+      childGroup.appendChild(buildTree(child, depth + 1));
+    }
+    wrapper.appendChild(childGroup);
+  }
+
+  return wrapper;
+}
+
+function updateTree() {
+  if (focused && !document.getElementById('demo').contains(focused)) {
+    focused = null;
+  }
+  treeIdCnt = 0;
+  const root = document.getElementById('tree-root');
+  root.innerHTML = '';
+  root.appendChild(buildTree(document.getElementById('demo')));
+}
+
+function focusElement(el) {
+  if (focused) {
+    focused.removeAttribute('data-focused');
+    const prevNode = document.querySelector(`[data-tree-id="${focused.dataset.treeRef}"]`);
+    if (prevNode) prevNode.classList.remove('active');
+  }
+
+  focused = el;
+  el.setAttribute('data-focused', '');
+  el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+  const treeNode = document.querySelector(`[data-tree-id="${el.dataset.treeRef}"]`);
+  if (treeNode) {
+    treeNode.classList.add('active');
+    treeNode.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  updateInfoBar(el);
+}
+
+function updateInfoBar(el) {
+  const bar   = document.getElementById('info-bar');
+  const tag   = el.tagName.toLowerCase();
+  const id    = el.id ? `#${el.id}` : null;
+  const cls   = el.classList.length ? '.' + [...el.classList].join('.') : null;
+  const datas = [...el.attributes]
+    .filter(a => a.name.startsWith('data-') && a.name !== 'data-tree-ref' && a.name !== 'data-focused')
+    .map(a => `${a.name}="${a.value}"`).join(', ');
+
+  bar.innerHTML =
+    `<span class="ib-dim">선택:</span><span class="ib-tag">&lt;${tag}&gt;</span>` +
+    (id    ? `<span><span class="ib-dim">id:</span><span class="ib-id">${id}</span></span>`      : '') +
+    (cls   ? `<span><span class="ib-dim">class:</span><span class="ib-cls">${cls}</span></span>` : '') +
+    (datas ? `<span><span class="ib-dim">data:</span><span class="ib-data">${datas}</span></span>` : '') +
+    `<span><span class="ib-dim">자식:</span>${el.children.length}개</span>`;
+}
+
+function log(id, msg, type = '') {
+  const box = document.getElementById(id);
+  if (!box) return;
+  const p = document.createElement('p');
+  p.className = `log-line${type ? ' l-' + type : ''}`;
+  p.textContent = msg;
+  box.appendChild(p);
+  box.scrollTop = box.scrollHeight;
+}
+
+function clearLog(id) {
+  const box = document.getElementById(id);
+  if (box) box.innerHTML = '';
+}
+
+function s1_qs() {
+  clearLog('log1');
+  const el = document.querySelector('#main-title');
+  log('log1', `const el = document.querySelector('#main-title')`, 'info');
+  log('log1', `el.tagName        // "${el.tagName.toLowerCase()}"`);
+  log('log1', `el.textContent    // "${el.textContent}"`);
+  log('log1', `el.classList      // [${[...el.classList].join(', ')}]`);
+  focusElement(el);
+  updateTree();
+}
+
+function s1_qsa() {
+  clearLog('log1');
+  if (focused) { focused.removeAttribute('data-focused'); focused = null; }
+  const els = document.querySelectorAll('#demo .item');
+  log('log1', `const els = document.querySelectorAll('.item')`, 'info');
+  log('log1', `els.length        // ${els.length}`);
+  els.forEach((el, i) => {
+    el.setAttribute('data-focused', '');
+    log('log1', `els[${i}]  // <${el.tagName.toLowerCase()}>${el.id ? ' #' + el.id : ''}`);
+  });
+  setTimeout(() => { els.forEach(el => el.removeAttribute('data-focused')); updateTree(); }, 2000);
+  updateTree();
+}
+
+function s1_gbi() {
+  clearLog('log1');
+  const el = document.getElementById('post-list');
+  log('log1', `const el = document.getElementById('post-list')`, 'info');
+  log('log1', `el.tagName        // "${el.tagName.toLowerCase()}"`);
+  log('log1', `el.children.length // ${el.children.length}`);
+  focusElement(el);
+  updateTree();
+}
+
+function s1_children() {
+  clearLog('log1');
+  const ul = document.getElementById('post-list');
+  log('log1', `const kids = document.getElementById('post-list').children`, 'info');
+  log('log1', `kids.length       // ${ul.children.length}`);
+  for (const li of ul.children) {
+    log('log1', `  <li data-id="${li.dataset.id}"> "${li.textContent.trim()}"`);
+  }
+  focusElement(ul);
+  updateTree();
+}
+
+function s1_parent() {
+  clearLog('log1');
+  const ul     = document.getElementById('post-list');
+  const parent = ul.parentElement;
+  log('log1', `document.getElementById('post-list').parentElement`, 'info');
+  log('log1', `parent.tagName    // "${parent.tagName.toLowerCase()}"`);
+  log('log1', `parent.id         // "${parent.id}"`);
+  log('log1', `parent.className  // "${parent.className}"`);
+  focusElement(parent);
+  updateTree();
+}
+
+function s1_sibling() {
+  clearLog('log1');
+  const first   = document.querySelector('#post-list .post-item');
+  const sibling = first.nextElementSibling;
+  log('log1', `const first = document.querySelector('#post-list .post-item')`, 'info');
+  log('log1', `first.nextElementSibling.textContent  // "${sibling.textContent.trim()}"`);
+  log('log1', `sibling.dataset.id        // "${sibling.dataset.id}"`);
+  log('log1', `sibling.dataset.category  // "${sibling.dataset.category}"`);
+  focusElement(sibling);
+  updateTree();
+}
+
+function s1_getAttr() {
+  clearLog('log1');
+  const items = document.querySelectorAll('#post-list .post-item');
+  log('log1', `document.querySelectorAll('.post-item').forEach(li => li.getAttribute('data-category'))`, 'info');
+  items.forEach(li => {
+    log('log1', `  "${li.textContent.trim()}"  →  "${li.getAttribute('data-category')}"`);
+  });
+}
+
+function s1_dataset() {
+  clearLog('log1');
+  const profile = document.getElementById('profile');
+  const role    = document.querySelector('.user-role');
+  log('log1', `const profile = document.getElementById('profile')`, 'info');
+  log('log1', `profile.dataset.user      // "${profile.dataset.user}"`);
+  log('log1', `profile.dataset           // { user: "${profile.dataset.user}" }`);
+  log('log1', `role.dataset.role         // "${role.dataset.role}"`);
+  focusElement(profile);
+  updateTree();
+}
+
+function s2_text() {
+  clearLog('log2');
+  const el   = document.getElementById('main-title');
+  const prev = el.textContent;
+  el.textContent = 'DOM으로 변경한 제목!';
+  log('log2', `const el = document.getElementById('main-title')`, 'info');
+  log('log2', `el.textContent = 'DOM으로 변경한 제목!'`);
+  log('log2', `// 이전: "${prev}"`);
+  log('log2', `// 이후: "${el.textContent}"`);
+  focusElement(el);
+  updateTree();
+}
+
+function s2_attr() {
+  clearLog('log2');
+  const el   = document.getElementById('profile');
+  const prev = el.getAttribute('data-user');
+  el.setAttribute('data-user', 'admin');
+  el.querySelector('.user-name').textContent = '관리자';
+  log('log2', `const el = document.getElementById('profile')`, 'info');
+  log('log2', `el.setAttribute('data-user', 'admin')`);
+  log('log2', `// 이전: "${prev}"  →  이후: "${el.dataset.user}"`);
+  focusElement(el);
+  updateTree();
+}
+
+function s2_add() {
+  clearLog('log2');
+  const target = getTarget();
+  target.classList.add('highlight');
+  log('log2', `el.classList.add('highlight')`, 'info');
+  log('log2', `// el: <${target.tagName.toLowerCase()}>${target.id ? ' #' + target.id : ''}`);
+  log('log2', `el.classList  // [${[...target.classList].join(', ')}]`);
+  focusElement(target);
+  updateTree();
+}
+
+function s2_remove() {
+  clearLog('log2');
+  const target = getTarget();
+  target.classList.remove('highlight');
+  log('log2', `el.classList.remove('highlight')`, 'info');
+  log('log2', `el.classList  // [${[...target.classList].join(', ')}]`);
+  focusElement(target);
+  updateTree();
+}
+
+function s2_toggle() {
+  clearLog('log2');
+  const target = getTarget();
+  const added  = target.classList.toggle('active');
+  log('log2', `el.classList.toggle('active')`, 'info');
+  log('log2', `// 반환값: ${added}  (true=추가됨, false=제거됨)`);
+  log('log2', `el.classList  // [${[...target.classList].join(', ')}]`);
+  focusElement(target);
+  updateTree();
+}
+
+function s2_hlAll() {
+  clearLog('log2');
+  const items = document.querySelectorAll('#demo .item');
+  items.forEach(el => el.classList.add('highlight'));
+  log('log2', `document.querySelectorAll('.item').forEach(el => el.classList.add('highlight'))`, 'info');
+  log('log2', `// ${items.length}개 요소에 적용`);
+  updateTree();
+}
+
+function s2_hlAllOff() {
+  clearLog('log2');
+  const items = document.querySelectorAll('#demo .highlight');
+  const count = items.length;
+  items.forEach(el => el.classList.remove('highlight'));
+  log('log2', `document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'))`, 'info');
+  log('log2', `// ${count}개 요소에서 제거`);
+  updateTree();
+}
+
+function s2_conditional() {
+  clearLog('log2');
+  const items = document.querySelectorAll('#demo [data-category="js"]');
+  items.forEach(el => el.classList.toggle('important'));
+  log('log2', `document.querySelectorAll('[data-category="js"]').forEach(el => el.classList.toggle('important'))`, 'info');
+  log('log2', `// 대상 ${items.length}개:`);
+  items.forEach(el => log('log2', `//   "${el.textContent.trim()}"`));
+  updateTree();
+}
+
+function s2_multi() {
+  clearLog('log2');
+  const last = document.querySelector('#post-list .post-item:last-child');
+  last.classList.add('highlight', 'active');
+  log('log2', `el.classList.add('highlight', 'active')`, 'info');
+  log('log2', `el.classList  // [${[...last.classList].join(', ')}]`);
+  focusElement(last);
+  updateTree();
+
+  setTimeout(() => {
+    last.classList.remove('highlight', 'active');
+    last.classList.add('fade');
+    log('log2', `el.classList.remove('highlight', 'active')`);
+    log('log2', `el.classList.add('fade')`);
+    updateTree();
+    setTimeout(() => { last.classList.remove('fade'); updateTree(); }, 700);
+  }, 1500);
+}
+
+function getTarget() {
+  const demo = document.getElementById('demo');
+  return (focused && demo.contains(focused)) ? focused : document.querySelector('#post-list .post-item');
+}
+
+function s3_create() {
+  clearLog('log3');
+  const ul    = document.getElementById('post-list');
+  const newId = ul.children.length + 1;
+
+  const li = document.createElement('li');
+  li.className        = 'post-item item';
+  li.dataset.id       = newId;
+  li.dataset.category = 'new';
+  li.textContent      = `새 포스트 #${newId}`;
+
+  log('log3', `const li = document.createElement('li')`, 'info');
+  log('log3', `li.className = 'post-item item'`);
+  log('log3', `li.dataset.id = ${newId}`);
+  log('log3', `li.textContent = '새 포스트 #${newId}'`);
+  log('log3', `document.getElementById('post-list').appendChild(li)`);
+
+  li.classList.add('new-node');
+  ul.appendChild(li);
+  setTimeout(() => li.classList.remove('new-node'), 500);
+
+  focusElement(li);
+  updateTree();
+}
+
+function s3_inner() {
+  clearLog('log3');
+  const section = document.getElementById('post-section');
+
+  if (section.querySelector('.post-footer')) {
+    log('log3', `// 이미 추가됨 — 초기화 후 다시 시도`, 'warn');
+    return;
+  }
+
+  const footer = document.createElement('div');
+  footer.className = 'post-footer new-node';
+  footer.style.cssText = 'margin-top:8px;padding:6px;background:#f8f9fa;border-radius:4px;font-size:0.77rem;color:#666;';
+  footer.innerHTML = `총 <strong>${document.querySelectorAll('.post-item').length}</strong>개 포스트`;
+  section.appendChild(footer);
+  setTimeout(() => footer.classList.remove('new-node'), 500);
+
+  log('log3', `const footer = document.createElement('div')`, 'info');
+  log('log3', `footer.innerHTML = \`총 <strong>N</strong>개 포스트\``);
+  log('log3', `document.getElementById('post-section').appendChild(footer)`);
+
+  focusElement(footer);
+  updateTree();
+}
+
+function s3_empty() {
+  clearLog('log3');
+  const box = document.getElementById('empty-box');
+  const p   = document.createElement('p');
+  p.className       = 'item important new-node';
+  p.style.margin    = '0';
+  p.textContent     = 'createElement로 추가된 요소!';
+  p.dataset.created = Date.now();
+
+  box.appendChild(p);
+  setTimeout(() => p.classList.remove('new-node'), 500);
+
+  log('log3', `const p = document.createElement('p')`, 'info');
+  log('log3', `p.className = 'item important'`);
+  log('log3', `p.textContent = 'createElement로 추가된 요소!'`);
+  log('log3', `document.getElementById('empty-box').appendChild(p)`);
+
+  focusElement(p);
+  updateTree();
+}
+
+function s4_removeSelected() {
+  clearLog('log4');
+  const demo = document.getElementById('demo');
+  if (!focused || !demo.contains(focused) || focused === demo) {
+    log('log4', `// 먼저 제거할 요소를 클릭해서 선택하세요`, 'warn');
+    return;
+  }
+
+  const tag = focused.tagName.toLowerCase();
+  const id  = focused.id;
+  const el  = focused;
+
+  log('log4', `el.classList.add('fade')`, 'info');
+  log('log4', `// 대상: <${tag}>${id ? ' #' + id : ''}`);
+  log('log4', `setTimeout(() => el.remove(), 500)`);
+
+  el.classList.add('fade');
+  setTimeout(() => {
+    el.remove();
+    focused = null;
+    document.getElementById('info-bar').innerHTML = '<span style="color:#585b70;">요소가 제거되었습니다</span>';
+    updateTree();
+  }, 500);
+}
+
+function s4_removeEven() {
+  clearLog('log4');
+  const items = [...document.querySelectorAll('#post-list .post-item')];
+  const evens = items.filter(li => Number(li.dataset.id) % 2 === 0);
+
+  if (!evens.length) {
+    log('log4', `// 짝수 data-id를 가진 li 없음`, 'warn');
+    return;
+  }
+
+  log('log4', `const evens = [...querySelectorAll('.post-item')].filter(li => li.dataset.id % 2 === 0)`, 'info');
+  log('log4', `// ${evens.length}개 대상:`);
+  evens.forEach(li => {
+    log('log4', `//   data-id="${li.dataset.id}"  "${li.textContent.trim()}"`);
+    li.classList.add('fade');
+    setTimeout(() => { li.remove(); updateTree(); }, 500);
+  });
+}
+
+function s4_removeHidden() {
+  clearLog('log4');
+  const items = document.querySelectorAll('#post-list .post-item');
+  if (!items.length) {
+    log('log4', `// #post-list에 li 없음`, 'warn');
+    return;
+  }
+
+  items[0].classList.add('hidden');
+  log('log4', `items[0].classList.add('hidden')   // display: none`, 'info');
+  log('log4', `// DOM에는 존재하지만 화면에서 사라짐`);
+  updateTree();
+
+  setTimeout(() => {
+    const hidden = document.querySelectorAll('#demo .hidden');
+    hidden.forEach(el => el.remove());
+    log('log4', `document.querySelectorAll('.hidden').forEach(el => el.remove())`);
+    log('log4', `// DOM에서도 완전히 제거됨 (${hidden.length}개)`);
+    updateTree();
+  }, 1000);
+}
+
+function runCode() {
+  const code = document.getElementById('user-code').value.trim();
+  if (!code) return;
+
+  clearLog('log-ed');
+  log('log-ed', code, 'info');
+  log('log-ed', '---');
+
+  try {
+    const result = eval(code);
+    if (result !== undefined) {
+      log('log-ed', `// ${JSON.stringify(result)}`);
+    }
+    updateTree();
+    if (focused && document.getElementById('demo').contains(focused)) {
+      updateInfoBar(focused);
+    }
+  } catch (e) {
+    log('log-ed', `// 오류: ${e.message}`, 'err');
+  }
+}
+
+function clearCode() {
+  document.getElementById('user-code').value = '';
+  clearLog('log-ed');
+}
+
+function insertCode(code) {
+  const ta = document.getElementById('user-code');
+  ta.value = code;
+  ta.focus();
+}
+
+document.getElementById('user-code').addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); runCode(); }
+});
+
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+function resetDemo() {
+  document.getElementById('demo').innerHTML = INITIAL_HTML;
+  focused = null;
+  document.getElementById('info-bar').innerHTML =
+    '<span style="color:#585b70;">미리보기에서 요소를 클릭하면 정보가 여기에 표시됩니다</span>';
+  updateTree();
+  initLinks();
+}
+
+function initLinks() {
+  document.querySelectorAll('#demo a').forEach(a => {
+    a.addEventListener('click', e => e.preventDefault());
+  });
+}
+
+function init() {
+  updateTree();
+  document.getElementById('demo').addEventListener('click', e => {
+    if (e.target === e.currentTarget) return;
+    e.stopPropagation();
+    focusElement(e.target);
+  });
+  initLinks();
+}
+
+init();
+</script>
+</body>
+</html>
