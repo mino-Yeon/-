@@ -35,6 +35,11 @@ h2 {
   resize: vertical;
 }
 
+/* 빈 값 경고 */
+.input-error {
+  border: 1.5px solid #dc3545 !important;
+}
+
 /* 메모 추가 버튼 */
 #memo-form button {
   width: 120px;
