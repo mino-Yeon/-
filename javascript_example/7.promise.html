@@ -426,6 +426,73 @@ xhr1.send();</code></pre>
             </div>
           </div>
 
+          <h3>Promise 상태 직접 확인</h3>
+          <p>Promise는 생성 직후 <code>pending</code> 상태이고, <code>resolve</code> 또는 <code>reject</code>가 호출되면 상태가 바뀝니다.</p>
+
+          <div class="tab-wrap">
+            <div class="tab-btns">
+              <button class="tab-btn active" data-tab="state-fulfilled">fulfilled 확인</button>
+              <button class="tab-btn"        data-tab="state-rejected">rejected 확인</button>
+            </div>
+
+            <div class="tab-content active" id="state-fulfilled">
+              <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">const promise = new Promise((resolve, reject) => {
+  setTimeout(() => resolve("성공"), 3000);
+});
+console.log(promise);
+promise
+  .then(data => {
+    console.log(promise);
+    console.log("then:", data);
+  })
+  .catch(err => {
+    console.log(promise);
+    console.log("catch:", err);
+  });</code></pre>
+</div>
+            </div>
+
+            <div class="tab-content" id="state-rejected">
+              <div class="code-wrap">
+<button class="copy-btn" onclick="copyCode(this)">복사</button>
+<pre><code class="language-javascript">const promise = new Promise((resolve, reject) => {
+  setTimeout(() => reject("실패"), 3000);
+});
+console.log(promise);
+promise
+  .then(data => {
+    console.log(promise);
+    console.log("then:", data);
+  })
+  .catch(err => {
+    console.log(promise);
+    console.log("catch:", err);
+  });</code></pre>
+</div>
+            </div>
+          </div>
+
+          <div class="demo">
+            <div class="demo-label">🔬 데모 — Promise 상태 확인 (3초 후 상태 변경)</div>
+            <div class="demo-row">
+              <button class="demo-btn success" id="stateResolveBtn">▶ fulfilled 실행</button>
+              <button class="demo-btn danger"  id="stateRejectBtn">▶ rejected 실행</button>
+            </div>
+            <div class="console-box">
+              <div class="console-header">
+                <div class="console-dot r"></div>
+                <div class="console-dot y"></div>
+                <div class="console-dot g"></div>
+                <span class="console-title">console</span>
+              </div>
+              <div class="console-body" id="stateLog">
+                <div class="log-line gray" style="font-family:'Courier New',monospace;font-size:0.82rem;">버튼을 눌러 실행하세요.</div>
+              </div>
+            </div>
+          </div>
+
           <h3>XHR 요청을 Promise로 감싸기</h3>
           <p>콜백 방식의 XHR을 Promise로 감싸면, <code>.then()</code> / <code>.catch()</code> / <code>.finally()</code>로 결과를 처리할 수 있습니다.</p>
 
@@ -983,6 +1050,46 @@ loadData();</code></pre>
           xhr.send();
         });
       }
+
+      // ── Promise 상태 확인 데모 ──
+      function switchStateTab(tabId) {
+        const btn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+        const wrap = btn.closest(".tab-wrap");
+        wrap.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        wrap.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(tabId).classList.add("active");
+      }
+
+      document.getElementById("stateResolveBtn").addEventListener("click", () => {
+        const log = "stateLog";
+        clearLog(log);
+        switchStateTab("state-fulfilled");
+        const p = new Promise((resolve) => {
+          setTimeout(() => resolve("성공"), 3000);
+        });
+        addLog(log, `Promise {<pending>}`, "yellow");
+        addLog(log, "// ⏳ 3초 후 resolve...", "gray");
+        p.then(data => {
+          addLog(log, `Promise {<fulfilled>: '성공'}`, "green");
+          addLog(log, `then: ${data}`, "sky");
+        });
+      });
+
+      document.getElementById("stateRejectBtn").addEventListener("click", () => {
+        const log = "stateLog";
+        clearLog(log);
+        switchStateTab("state-rejected");
+        const p = new Promise((_, reject) => {
+          setTimeout(() => reject("실패"), 3000);
+        });
+        addLog(log, `Promise {<pending>}`, "yellow");
+        addLog(log, "// ⏳ 3초 후 reject...", "gray");
+        p.catch(err => {
+          addLog(log, `Promise {<rejected>: '실패'}`, "red");
+          addLog(log, `catch: ${err}`, "red");
+        });
+      });
 
       document.getElementById("resolveBtn").addEventListener("click", () => {
         clearLog("promiseLog");
