@@ -460,7 +460,7 @@ promise
               <div class="code-wrap">
 <button class="copy-btn" onclick="copyCode(this)">복사</button>
 <pre><code class="language-javascript">// Promise를 반환하는 함수로 만들기
-function fetchWithDelay() {
+function request() {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("GET", "https://httpbin.org/delay/2", true);
@@ -471,7 +471,7 @@ function fetchWithDelay() {
 }
 
 // 호출할 때마다 새 Promise 생성
-fetchWithDelay()
+request()
   .then(data  => console.log("응답:", data))
   .catch(err  => console.log("실패:", err))
   .finally(() => console.log("항상 실행"));</code></pre>
@@ -973,7 +973,7 @@ loadData();</code></pre>
       }
 
       // ── Promise 데모 (httpbin delay) ──
-      function fetchWithDelay(forceError) {
+      function request(forceError) {
         return new Promise((resolve, reject) => {
           if (forceError) { setTimeout(() => reject("네트워크 오류 (시뮬레이션)"), 300); return; }
           const xhr = new XMLHttpRequest();
@@ -989,7 +989,7 @@ loadData();</code></pre>
         setPromiseState("pending");
         addLog("promiseLog", "// new Promise() 생성", "gray");
         addLog("promiseLog", "// ⏳ XHR 요청 중... (2초 대기)", "gray");
-        fetchWithDelay(false)
+        request(false)
           .then(data => {
             setPromiseState("fulfilled");
             addLog("promiseLog", `.then(data => console.log("응답:", data))`, "green");
@@ -1011,7 +1011,7 @@ loadData();</code></pre>
         setPromiseState("pending");
         addLog("promiseLog", "// new Promise() 생성", "gray");
         addLog("promiseLog", "// ⏳ 네트워크 오류 시뮬레이션...", "gray");
-        fetchWithDelay(true)
+        request(true)
           .then(data => {
             setPromiseState("fulfilled");
             addLog("promiseLog", `.then(data => console.log("응답:", data))`, "green");
