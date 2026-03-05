@@ -25,6 +25,10 @@ async function getComments(postId) {
   return data.comments;
 }
 
+// ✅ 1단계 확인용 — 완성 후 주석 해제
+// getUsers().then(users => console.log("getUsers():", users));
+// getPosts(1).then(posts => console.log("getPosts(1):", posts));
+// getComments(15).then(comments => console.log("getComments(15):", comments));
 
 /* ------------------------------------------------------------
    2단계: 유저 목록 렌더링 — .then() / .catch() 사용
