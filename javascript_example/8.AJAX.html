@@ -162,8 +162,8 @@
               </tr>
               <tr>
                 <td>데이터 처리</td>
-                <td class="bad">서버가 HTML 페이지를 통째로 반환</td>
-                <td class="good">JSON 등 필요한 데이터만 받아서 직접 처리</td>
+                <td class="bad">응답 데이터를 화면에 출력하는 것 외에 다른 처리 불가</td>
+                <td class="good">응답 데이터를 원하는 방식으로 자유롭게 처리 가능</td>
               </tr>
             </tbody>
           </table>
@@ -270,18 +270,20 @@
               <button class="tab-btn"        data-tab="json-right">✅ await 두 번</button>
             </div>
             <div class="tab-content active" id="json-wrong">
+              <div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">복사</button>
               <pre><code class="language-javascript">async function getUsers() {
   const res = await fetch("https://dummyjson.com/users");
   console.log(res);        // Response 객체
   console.log(res.json()); // Promise — 실제 데이터가 아님!
-}</code></pre>
+}</code></pre></div>
             </div>
             <div class="tab-content" id="json-right">
+              <div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">복사</button>
               <pre><code class="language-javascript">async function getUsers() {
   const res  = await fetch("https://dummyjson.com/users"); // Response 객체
   const data = await res.json();                            // 실제 데이터
   console.log(data); // { users: [...] }
-}</code></pre>
+}</code></pre></div>
             </div>
           </div>
 
@@ -364,6 +366,7 @@ request().then(data => console.log(data));</code></pre>
               <button class="tab-btn"        data-tab="users-fetch">fetch 방식</button>
             </div>
             <div class="tab-content active" id="users-xhr">
+              <div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">복사</button>
               <pre><code class="language-javascript">function getUsers() {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -372,14 +375,15 @@ request().then(data => console.log(data));</code></pre>
     xhr.onerror = () => reject("네트워크 오류");
     xhr.send();
   });
-}</code></pre>
+}</code></pre></div>
             </div>
             <div class="tab-content" id="users-fetch">
+              <div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">복사</button>
               <pre><code class="language-javascript">async function getUsers() {
   const res  = await fetch("https://dummyjson.com/users");
   const data = await res.json();
   return data.users;
-}</code></pre>
+}</code></pre></div>
             </div>
           </div>
 
@@ -390,6 +394,7 @@ request().then(data => console.log(data));</code></pre>
               <button class="tab-btn"        data-tab="posts-fetch">fetch 방식</button>
             </div>
             <div class="tab-content active" id="posts-xhr">
+              <div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">복사</button>
               <pre><code class="language-javascript">function getPosts(userId) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -398,14 +403,15 @@ request().then(data => console.log(data));</code></pre>
     xhr.onerror = () => reject("네트워크 오류");
     xhr.send();
   });
-}</code></pre>
+}</code></pre></div>
             </div>
             <div class="tab-content" id="posts-fetch">
+              <div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">복사</button>
               <pre><code class="language-javascript">async function getPosts(userId) {
   const res  = await fetch(`https://dummyjson.com/posts/user/${userId}`);
   const data = await res.json();
   return data.posts;
-}</code></pre>
+}</code></pre></div>
             </div>
           </div>
 
@@ -416,6 +422,7 @@ request().then(data => console.log(data));</code></pre>
               <button class="tab-btn"        data-tab="comments-fetch">fetch 방식</button>
             </div>
             <div class="tab-content active" id="comments-xhr">
+              <div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">복사</button>
               <pre><code class="language-javascript">function getComments(postId) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -424,14 +431,15 @@ request().then(data => console.log(data));</code></pre>
     xhr.onerror = () => reject("네트워크 오류");
     xhr.send();
   });
-}</code></pre>
+}</code></pre></div>
             </div>
             <div class="tab-content" id="comments-fetch">
+              <div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">복사</button>
               <pre><code class="language-javascript">async function getComments(postId) {
   const res  = await fetch(`https://dummyjson.com/posts/${postId}/comments`);
   const data = await res.json();
   return data.comments;
-}</code></pre>
+}</code></pre></div>
             </div>
           </div>
 
