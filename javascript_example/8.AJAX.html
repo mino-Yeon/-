@@ -656,12 +656,12 @@ console.log(4);</code></pre>
         const btn = document.getElementById("fetchBasicBtn");
         btn.disabled = true;
 
-        addLog(log, 'fetch("https://dummyjson.com/users")', "gray");
+        addLog(log, 'fetch("https://httpbin.org/delay/2")', "gray");
         addLog(log, "// ⏳ 요청 중...", "yellow");
 
-        const res  = await fetch("https://dummyjson.com/users");
+        const res  = await fetch("https://httpbin.org/delay/2");
         const data = await res.json();
-        const preview = JSON.stringify(data.users[0]).slice(0, 70) + "…";
+        const preview = JSON.stringify(data).slice(0, 70) + "…";
         addLog(log, "// ✅ 응답 도착", "green");
         addLog(log, `→ ${preview}`, "sky");
 
