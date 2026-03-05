@@ -22,7 +22,6 @@
         flex-direction: column;
       }
 
-      /* 헤더 */
       header {
         background: linear-gradient(135deg, var(--gray-900), #1e3a5f);
         color: white;
@@ -47,7 +46,6 @@
         color: #94a3b8;
       }
 
-      /* 본문 */
       .container {
         max-width: 960px;
         width: 100%;
@@ -64,14 +62,12 @@
         margin-bottom: 20px;
       }
 
-      /* 그리드 */
       .grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 20px;
       }
 
-      /* 카드 공통 */
       .card {
         background: #fff;
         border-radius: 12px;
@@ -83,14 +79,12 @@
         transition: transform 0.15s, box-shadow 0.15s;
       }
 
-      /* 활성 카드 */
       .card.active { cursor: pointer; text-decoration: none; color: inherit; }
       .card.active:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 24px rgba(0,0,0,0.1);
       }
 
-      /* 비활성 카드 */
       .card.disabled {
         opacity: 0.45;
         cursor: default;
@@ -101,33 +95,13 @@
         align-items: center;
         justify-content: space-between;
       }
-      .card-icon {
-        font-size: 1.6rem;
-      }
-      .card-num {
-        font-size: 0.75rem;
-        color: #cbd5e1;
-        font-weight: 600;
-      }
+      .card-icon { font-size: 1.6rem; }
+      .card-num { font-size: 0.75rem; color: #cbd5e1; font-weight: 600; }
 
-      .card h2 {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #1e293b;
-      }
-      .card p {
-        font-size: 0.85rem;
-        color: #64748b;
-        line-height: 1.6;
-        flex: 1;
-      }
+      .card h2 { font-size: 1rem; font-weight: 700; color: #1e293b; }
+      .card p { font-size: 0.85rem; color: #64748b; line-height: 1.6; flex: 1; }
 
-      /* 태그 영역 */
-      .tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-      }
+      .tags { display: flex; flex-wrap: wrap; gap: 6px; }
       .tag {
         font-size: 0.72rem;
         font-family: "Courier New", monospace;
@@ -138,26 +112,30 @@
         border: 1px solid #e2e8f0;
       }
 
-      /* 활성 카드별 포인트 컬러 */
-      .card.c1 { border-top: 3px solid #ffa07a; }
-      .card.c1 .tag { background: #fff8f0; border-color: #ffd7c2; color: #c2440f; }
+      .card.c1 { border-top: 3px solid #f97316; }
+      .card.c1 .tag { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
 
-      .card.c2 { border-top: 3px solid #38bdf8; }
-      .card.c2 .tag { background: #f0f9ff; border-color: #bae6fd; color: #0284c7; }
+      .card.c2 { border-top: 3px solid #3b82f6; }
+      .card.c2 .tag { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
 
-      .card.c3 { border-top: 3px solid #34d399; }
-      .card.c3 .tag { background: #f0fdf4; border-color: #a7f3d0; color: #047857; }
+      .card.c3 { border-top: 3px solid #22c55e; }
+      .card.c3 .tag { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
 
-      .card.c4 { border-top: 3px solid #f472b6; }
+      .card.c4 { border-top: 3px solid #ec4899; }
       .card.c4 .tag { background: #fdf2f8; border-color: #fbcfe8; color: #be185d; }
 
-      .card.c5 { border-top: 3px solid #2dd4bf; }
-      .card.c5 .tag { background: #f0fdfa; border-color: #99f6e4; color: #0f766e; }
+      .card.c5 { border-top: 3px solid #eab308; }
+      .card.c5 .tag { background: #fefce8; border-color: #fef08a; color: #a16207; }
 
-      .card.c6 { border-top: 3px solid #818cf8; }
+      .card.c6 { border-top: 3px solid #6366f1; }
       .card.c6 .tag { background: #eef2ff; border-color: #c7d2fe; color: #4338ca; }
 
-      /* coming soon 배지 */
+      .card.c7 { border-top: 3px solid #ef4444; }
+      .card.c7 .tag { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+
+      .card.c8 { border-top: 3px solid #8b5cf6; }
+      .card.c8 .tag { background: #f5f3ff; border-color: #ddd6fe; color: #6d28d9; }
+
       .soon {
         font-size: 0.7rem;
         background: #f1f5f9;
@@ -168,9 +146,8 @@
         align-self: flex-start;
       }
 
-      /* 퀴즈 카드 */
-      .card.quiz-card { border-top: 3px solid #a78bfa; }
-      .card.quiz-card .tag { background: #fdf4ff; border-color: #e9d5ff; color: #7e22ce; }
+      .card.quiz-card { border-top: 3px solid #14b8a6; }
+      .card.quiz-card .tag { background: #f0fdfa; border-color: #99f6e4; color: #0f766e; }
 
       footer {
         background-color: var(--gray-900);
@@ -190,10 +167,9 @@
     </header>
 
     <div class="container">
-      <div class="section-label">전체 목록 — 6 / 8 챕터</div>
+      <div class="section-label">전체 목록 — 8 / 8 챕터</div>
       <div class="grid">
 
-        <!-- 1. 기본 문법 -->
         <a class="card active c1" href="1.javascript_basics.html">
           <div class="card-top">
             <div class="card-icon">📝</div>
@@ -209,7 +185,6 @@
           </div>
         </a>
 
-        <!-- 2. Array Helper -->
         <a class="card active c2" href="2.array_helper_methods.html">
           <div class="card-top">
             <div class="card-icon">📦</div>
@@ -225,7 +200,6 @@
           </div>
         </a>
 
-        <!-- 3. DOM -->
         <a class="card active c3" href="3.DOM.html">
           <div class="card-top">
             <div class="card-icon">🌐</div>
@@ -241,7 +215,6 @@
           </div>
         </a>
 
-        <!-- 4. Storage -->
         <a class="card active c4" href="4.storage.html">
           <div class="card-top">
             <div class="card-icon">💾</div>
@@ -257,7 +230,6 @@
           </div>
         </a>
 
-        <!-- 5. Event -->
         <a class="card active c5" href="5.event.html">
           <div class="card-top">
             <div class="card-icon">⚡</div>
@@ -273,7 +245,6 @@
           </div>
         </a>
 
-        <!-- 6. BOM -->
         <a class="card active c6" href="6.BOM.html">
           <div class="card-top">
             <div class="card-icon">🪟</div>
@@ -289,9 +260,37 @@
           </div>
         </a>
 
+        <a class="card active c7" href="7.promise.html">
+          <div class="card-top">
+            <div class="card-icon">🔄</div>
+            <div class="card-num">07</div>
+          </div>
+          <h2>Promise</h2>
+          <p>비동기 처리의 흐름을 이해하고, Promise와 async/await으로 콜백 지옥을 해결합니다.</p>
+          <div class="tags">
+            <span class="tag">Promise</span>
+            <span class="tag">.then/.catch</span>
+            <span class="tag">async/await</span>
+            <span class="tag">chaining</span>
+          </div>
+        </a>
+
+        <a class="card active c8" href="8.AJAX.html">
+          <div class="card-top">
+              <div class="card-icon">📡</div>
+          </div>
+          <h2>AJAX / fetch</h2>
+          <p>fetch API로 서버와 비동기 통신하는 방법을 학습하고, XHR과의 차이를 비교합니다.</p>
+          <div class="tags">
+            <span class="tag">fetch</span>
+            <span class="tag">async/await</span>
+            <span class="tag">.json()</span>
+            <span class="tag">AJAX</span>
+          </div>
+        </a>
+
       </div>
 
-      <!-- 퀴즈 섹션 -->
       <div class="section-label" style="margin-top:40px">실력 확인</div>
       <div class="grid" style="grid-template-columns: repeat(3, 1fr)">
         <a class="card active quiz-card" href="quiz.html">
