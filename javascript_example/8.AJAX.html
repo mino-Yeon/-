@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AJAX / fetch</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root { --accent: #38bdf8; --accent-dark: #0284c7; --accent-bg: #f0f9ff; --accent-border: #bae6fd; }
+
+      body { font-family: sans-serif; background: #f4f6f8; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+
+      header { background: linear-gradient(135deg, #0f172a, #0369a1); color: white; padding: 18px 28px; display: flex; align-items: center; gap: 12px; }
+      header .header-icon { font-size: 1.4rem; }
+      header h1 { font-size: 1.2rem; letter-spacing: 0.02em; }
+      header span { font-size: 0.8rem; background: rgba(255,255,255,0.15); padding: 2px 10px; border-radius: 20px; margin-left: 8px; color: #bae6fd; }
+
+      .layout { display: flex; flex: 1; max-width: 1100px; width: 100%; margin: 0 auto; padding: 24px; gap: 24px; }
+
+      nav.sidebar { width: 200px; flex-shrink: 0; }
+      nav.sidebar .sidebar-inner { position: sticky; top: 24px; background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+      nav.sidebar h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 12px; }
+      nav.sidebar ul { list-style: none; }
+      nav.sidebar ul li { margin-bottom: 4px; }
+      nav.sidebar ul li a { text-decoration: none; color: #555; font-size: 0.88rem; display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 6px; transition: background 0.15s; }
+      nav.sidebar ul li a:hover { background: var(--accent-bg); color: var(--accent-dark); }
+      nav.sidebar ul li a .nav-badge { font-size: 0.72rem; background: #e2e8f0; color: #64748b; padding: 1px 7px; border-radius: 20px; font-family: "Courier New", monospace; }
+      nav.sidebar ul li a:hover .nav-badge { background: var(--accent-border); color: var(--accent-dark); }
+
+      main { flex: 1; min-width: 0; }
+
+      .section { background: #fff; border-radius: 10px; padding: 28px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+      .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--accent-border); }
+      .section-header h2 { font-size: 1.25rem; color: #1e293b; }
+      .badge { font-family: "Courier New", monospace; font-size: 0.82rem; font-weight: bold; background: var(--accent-bg); color: var(--accent-dark); border: 1px solid var(--accent-border); padding: 3px 10px; border-radius: 20px; }
+      .badge + .badge { margin-left: 4px; }
+
+      .section h3 { font-size: 0.95rem; margin: 20px 0 8px; color: #475569; font-weight: 600; }
+      .section p { font-size: 0.95rem; line-height: 1.75; color: #444; margin-bottom: 10px; }
+      .section ul { padding-left: 20px; margin-bottom: 12px; }
+      .section ul li { font-size: 0.95rem; line-height: 1.85; color: #444; list-style: disc; }
+
+      pre { border-radius: 8px; overflow-x: auto; font-size: 0.88rem; line-height: 1.6; margin: 8px 0 4px; }
+      pre code.hljs { border-radius: 8px; }
+      .hljs-comment { color: #98c379 !important; }
+      .hljs-string  { color: #e5c07b !important; }
+      code { font-family: "Courier New", monospace; }
+      p code, li code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.87rem; color: #0369a1; }
+
+      .tip  { background: var(--accent-bg); border-left: 4px solid var(--accent); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 0.9rem; color: #334155; line-height: 1.65; }
+      .warn { background: #fff7ed; border-left: 4px solid #fb923c; padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 0.9rem; color: #7c2d12; line-height: 1.65; }
+
+      /* 비교 테이블 */
+      .compare-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.88rem; }
+      .compare-table th { background: #1e293b; color: #e2e8f0; padding: 10px 16px; text-align: left; }
+      .compare-table th:first-child { border-radius: 8px 0 0 0; }
+      .compare-table th:last-child  { border-radius: 0 8px 0 0; }
+      .compare-table td { padding: 10px 16px; border-bottom: 1px solid #e2e8f0; color: #334155; vertical-align: top; }
+      .compare-table tr:last-child td { border-bottom: none; }
+      .compare-table tr:nth-child(even) td { background: #f8fafc; }
+      .compare-table .bad  { color: #b91c1c; font-weight: 600; }
+      .compare-table .good { color: #15803d; font-weight: 600; }
+
+      /* 탭 */
+      .tab-wrap { margin-top: 16px; }
+      .tab-btns { display: flex; }
+      .tab-btn { padding: 8px 20px; border: 1.5px solid #e2e8f0; background: #f8fafc; font-size: 0.88rem; font-family: inherit; cursor: pointer; color: #64748b; transition: all 0.15s; }
+      .tab-btn:first-child { border-radius: 8px 0 0 0; }
+      .tab-btn:last-child  { border-radius: 0 8px 0 0; border-left: none; }
+      .tab-btn.active { background: #fff; color: var(--accent-dark); border-bottom-color: #fff; font-weight: 600; border-top: 2px solid var(--accent); }
+      .tab-content { border: 1.5px solid #e2e8f0; border-radius: 0 8px 8px 8px; padding: 20px; background: #fff; display: none; }
+      .tab-content.active { display: block; }
+
+      /* 데모 */
+      .demo { background: #f8fafc; border: 1.5px solid var(--accent-border); border-radius: 8px; padding: 20px; margin-top: 12px; }
+      .demo-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-dark); font-weight: bold; margin-bottom: 14px; }
+      .demo-btn { padding: 8px 18px; border-radius: 6px; border: none; font-size: 0.88rem; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+      .demo-btn.primary { background: #0284c7; color: white; }
+      .demo-btn.primary:hover { background: #0369a1; }
+      .demo-btn.success { background: #16a34a; color: white; }
+      .demo-btn.success:hover { background: #15803d; }
+      .demo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+
+      /* 콘솔 패널 */
+      .console-box { background: #0f172a; border-radius: 8px; margin-top: 8px; min-height: 60px; max-height: 200px; overflow-y: auto; }
+      .console-header { display: flex; align-items: center; gap: 8px; padding: 8px 14px 6px; border-bottom: 1px solid #1e293b; }
+      .console-dot { width: 10px; height: 10px; border-radius: 50%; }
+      .console-dot.r { background: #ef4444; }
+      .console-dot.y { background: #eab308; }
+      .console-dot.g { background: #22c55e; }
+      .console-title { font-size: 0.7rem; color: #475569; font-family: "Courier New", monospace; margin-left: 4px; }
+      .console-body { padding: 8px 14px 10px; }
+      .log-line { font-family: "Courier New", monospace; font-size: 0.82rem; line-height: 1.8; }
+      .log-line.green  { color: #86efac; }
+      .log-line.yellow { color: #fde68a; }
+      .log-line.red    { color: #fca5a5; }
+      .log-line.white  { color: #e2e8f0; }
+      .log-line.sky    { color: #7dd3fc; }
+      .log-line.gray   { color: #6b7280; }
+
+      /* 코드 래퍼 — 복사 버튼 */
+      .code-wrap { position: relative; margin: 8px 0; }
+      .copy-btn { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.1); color: #94a3b8; border: 1px solid rgba(255,255,255,0.15); border-radius: 5px; padding: 3px 10px; font-size: 0.75rem; font-family: inherit; cursor: pointer; transition: all 0.15s; z-index: 10; }
+      .copy-btn:hover { background: rgba(255,255,255,0.2); color: #e2e8f0; }
+      .copy-btn.copied { background: #16a34a33; color: #86efac; border-color: #16a34a66; }
+
+      footer { background: #0f172a; color: #475569; text-align: center; padding: 16px; font-size: 0.82rem; }
+    </style>
+  </head>
+  <body>
+
+    <header>
+      <div class="header-icon">🌐</div>
+      <h1>AJAX / fetch <span>학습 문서</span></h1>
+    </header>
+
+    <div class="layout">
+
+      <nav class="sidebar">
+        <div class="sidebar-inner">
+          <h2>목차</h2>
+          <ul>
+            <li><a href="#why-ajax"><span class="nav-badge">필요한 이유</span></a></li>
+            <li><a href="#fetch-basic"><span class="nav-badge">fetch 기본</span></a></li>
+            <li><a href="#json"><span class="nav-badge">.json()</span></a></li>
+            <li><a href="#async-return"><span class="nav-badge">async 반환값</span></a></li>
+            <li><a href="#refactor"><span class="nav-badge">리팩토링</span></a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <main>
+
+        <!-- 1. 비동기 통신 모듈이 필요한 이유 -->
+        <section class="section" id="why-ajax">
+          <div class="section-header">
+            <h2>비동기 통신 모듈이 필요한 이유</h2>
+          </div>
+          <p>HTML에는 서버와 통신할 수 있는 태그가 이미 있습니다. 하지만 이 방식에는 한계가 있습니다.</p>
+
+          <h3><code>&lt;a&gt;</code>, <code>&lt;form&gt;</code> 태그의 한계</h3>
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>구분</th>
+                <th>&lt;a&gt; / &lt;form&gt;</th>
+                <th>fetch (비동기 통신 모듈)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>처리 방식</td>
+                <td class="bad">동기 — 응답 올 때까지 대기</td>
+                <td class="good">비동기 — 응답 기다리지 않고 다음 실행</td>
+              </tr>
+              <tr>
+                <td>페이지 이동</td>
+                <td class="bad">항상 페이지 리로드 발생</td>
+                <td class="good">페이지 리로드 없이 데이터만 교환</td>
+              </tr>
+              <tr>
+                <td>데이터 처리</td>
+                <td class="bad">서버가 HTML 페이지를 통째로 반환</td>
+                <td class="good">JSON 등 필요한 데이터만 받아서 직접 처리</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>직접 확인해보기</h3>
+          <p>같은 서버(2초 딜레이)에 <code>&lt;a&gt;</code> / <code>&lt;form&gt;</code> 방식으로 요청을 보내보세요.</p>
+
+          <div class="tab-wrap">
+            <div class="tab-btns">
+              <button class="tab-btn active" data-tab="demo-a-tag">🔗 &lt;a&gt; 태그</button>
+              <button class="tab-btn"        data-tab="demo-form-tag">📋 &lt;form&gt; 태그</button>
+            </div>
+
+            <div class="tab-content active" id="demo-a-tag">
+              <pre><code class="language-html">&lt;a href="https://httpbin.org/delay/2" target="_blank"&gt;
+  요청 보내기
+&lt;/a&gt;</code></pre>
+              <div class="demo" style="margin-top:12px;">
+                <div class="demo-label">▶ 데모</div>
+                <p style="font-size:0.85rem;color:#64748b;margin-bottom:10px;">클릭하면 새 탭이 열리면서 페이지 전체가 응답 결과로 교체됩니다.</p>
+                <a href="https://httpbin.org/delay/2" target="_blank"
+                   style="display:inline-block;padding:8px 18px;background:#0284c7;color:white;border-radius:6px;text-decoration:none;font-size:0.88rem;">
+                  🔗 요청 보내기 (새 탭)
+                </a>
+              </div>
+            </div>
+
+            <div class="tab-content" id="demo-form-tag">
+              <pre><code class="language-html">&lt;form action="https://httpbin.org/delay/2" method="GET" target="_blank"&gt;
+  &lt;button type="submit"&gt;요청 보내기&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+              <div class="demo" style="margin-top:12px;">
+                <div class="demo-label">▶ 데모</div>
+                <p style="font-size:0.85rem;color:#64748b;margin-bottom:10px;">제출하면 새 탭이 열리면서 페이지 전체가 응답 결과로 교체됩니다.</p>
+                <form action="https://httpbin.org/delay/2" method="GET" target="_blank" style="margin:0;">
+                  <button type="submit" style="padding:8px 18px;background:#0284c7;color:white;border:none;border-radius:6px;font-size:0.88rem;cursor:pointer;">
+                    📋 요청 보내기 (새 탭)
+                  </button>
+                </form>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tip">페이지 전환 없이 데이터만 주고받는 방식을 <strong>AJAX</strong>(Asynchronous JavaScript and XML)라고 합니다. 과거에는 XHR로 구현했지만, 현재는 <strong>fetch</strong>가 표준입니다.</div>
+        </section>
+
+        <!-- 2. fetch 기본 문법 -->
+        <section class="section" id="fetch-basic">
+          <div class="section-header">
+            <h2>fetch 기본 문법</h2>
+            <span class="badge">fetch</span>
+            <span class="badge">Promise</span>
+          </div>
+          <p><code>fetch(url)</code>은 서버에 요청을 보내고 <strong>Promise를 반환</strong>합니다. 응답이 오면 <code>.then()</code>으로 결과를 받아 처리합니다.</p>
+
+          <div class="code-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">복사</button>
+            <pre><code class="language-javascript">fetch("https://httpbin.org/delay/2")  // Promise 반환
+  .then(res  => res.json())           // 응답을 JSON으로 변환 (이것도 Promise)
+  .then(data => console.log(data));   // 실제 데이터 사용</code></pre>
+          </div>
+
+          <h3>async / await으로 쓰면</h3>
+          <div class="code-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">복사</button>
+            <pre><code class="language-javascript">async function request() {
+  const res  = await fetch("https://httpbin.org/delay/2");
+  const data = await res.json();
+  console.log(data);
+}</code></pre>
+          </div>
+
+          <div class="demo">
+            <div class="demo-label">▶ 데모 — fetch 실행</div>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="fetchBasicBtn">▶ 실행</button>
+            </div>
+            <div class="console-box">
+              <div class="console-header">
+                <div class="console-dot r"></div><div class="console-dot y"></div><div class="console-dot g"></div>
+                <span class="console-title">console</span>
+              </div>
+              <div class="console-body" id="fetchBasicLog">
+                <div class="log-line gray">버튼을 눌러 실행하세요.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. .json()도 Promise -->
+        <section class="section" id="json">
+          <div class="section-header">
+            <h2>.json()도 Promise</h2>
+            <span class="badge">res.json()</span>
+            <span class="badge">await</span>
+          </div>
+          <p><code>fetch()</code>가 반환하는 Promise가 fulfilled되면 <strong>Response 객체</strong>를 받습니다. 이 객체 안에 실제 데이터가 있는 게 아니라, 데이터를 꺼내려면 <code>.json()</code>을 한 번 더 호출해야 합니다.</p>
+          <p><code>.json()</code>도 Promise를 반환하기 때문에 <code>await</code>을 두 번 써야 합니다.</p>
+
+          <div class="tab-wrap">
+            <div class="tab-btns">
+              <button class="tab-btn active" data-tab="json-wrong">❌ await 한 번만</button>
+              <button class="tab-btn"        data-tab="json-right">✅ await 두 번</button>
+            </div>
+            <div class="tab-content active" id="json-wrong">
+              <pre><code class="language-javascript">async function getUsers() {
+  const res = await fetch("https://dummyjson.com/users");
+  console.log(res);        // Response 객체
+  console.log(res.json()); // Promise — 실제 데이터가 아님!
+}</code></pre>
+            </div>
+            <div class="tab-content" id="json-right">
+              <pre><code class="language-javascript">async function getUsers() {
+  const res  = await fetch("https://dummyjson.com/users"); // Response 객체
+  const data = await res.json();                            // 실제 데이터
+  console.log(data); // { users: [...] }
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="demo">
+            <div class="demo-label">▶ 데모 — res vs res.json()</div>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="jsonOnceBtn">await 한 번 (res)</button>
+              <button class="demo-btn success" id="jsonTwiceBtn">await 두 번 (data)</button>
+            </div>
+            <div class="console-box">
+              <div class="console-header">
+                <div class="console-dot r"></div><div class="console-dot y"></div><div class="console-dot g"></div>
+                <span class="console-title">console</span>
+              </div>
+              <div class="console-body" id="jsonLog">
+                <div class="log-line gray">버튼을 눌러 실행하세요.</div>
+              </div>
+            </div>
+          </div>
+          <div class="tip"><code>fetch()</code> → Response 객체 → <code>.json()</code> → 실제 데이터, 이 두 단계를 기억하세요.</div>
+        </section>
+
+        <!-- 4. async 함수는 Promise를 반환 -->
+        <section class="section" id="async-return">
+          <div class="section-header">
+            <h2>async 함수는 Promise를 반환</h2>
+            <span class="badge">async</span>
+            <span class="badge">Promise</span>
+          </div>
+          <p><code>async</code> 함수를 호출하면 반환값이 무엇이든 <strong>항상 Promise로 감싸져서 반환</strong>됩니다. 그래서 <code>async</code> 함수 호출 결과에 <code>.then()</code>을 붙일 수 있습니다.</p>
+
+          <div class="code-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">복사</button>
+            <pre><code class="language-javascript">async function request() {
+  // 2초 딜레이 서버에 fetch 요청
+  const res  = await fetch("https://httpbin.org/delay/2");
+  const data = await res.json();
+  return data; // Promise<data> 로 반환됨
+}
+
+const result = request();
+console.log(result); // Promise {<pending>} — 아직 응답 안 옴
+
+// 실제 데이터를 꺼내려면 .then() 또는 await 필요
+request().then(data => console.log(data));</code></pre>
+          </div>
+
+          <div class="demo">
+            <div class="demo-label">▶ 데모 — async 함수 반환값 확인 (2초 딜레이 서버)</div>
+            <p style="font-size:0.85rem;color:#64748b;margin-bottom:10px;">실행 직후 <code>result</code>를 찍으면 <code>Promise {&lt;pending&gt;}</code>이 출력됩니다.<br>2초 뒤 응답이 오면 <code>.then()</code> 콜백이 실행됩니다.</p>
+            <div class="demo-row">
+              <button class="demo-btn primary" id="asyncReturnBtn">▶ 실행</button>
+            </div>
+            <div class="console-box">
+              <div class="console-header">
+                <div class="console-dot r"></div><div class="console-dot y"></div><div class="console-dot g"></div>
+                <span class="console-title">console</span>
+              </div>
+              <div class="console-body" id="asyncReturnLog">
+                <div class="log-line gray">버튼을 눌러 실행하세요.</div>
+              </div>
+            </div>
+          </div>
+          <div class="tip">이것이 실습에서 <code>getUsers().then(users => { ... })</code>가 동작하는 이유입니다. <code>getUsers</code>는 <code>async</code> 함수이고, <code>async</code> 함수는 항상 Promise를 반환하기 때문입니다.</div>
+        </section>
+
+        <!-- 5. 리팩토링 -->
+        <section class="section" id="refactor">
+          <div class="section-header">
+            <h2>리팩토링 — XHR → fetch</h2>
+            <span class="badge">fetch</span>
+            <span class="badge">async/await</span>
+          </div>
+          <p>Promise 학습에서 작성했던 <code>getUsers()</code>, <code>getPosts()</code>, <code>getComments()</code>를 XHR에서 fetch로 교체합니다. 코드가 얼마나 간결해지는지 비교해보세요.</p>
+
+          <h3>getUsers()</h3>
+          <div class="tab-wrap">
+            <div class="tab-btns">
+              <button class="tab-btn active" data-tab="users-xhr">XHR 방식</button>
+              <button class="tab-btn"        data-tab="users-fetch">fetch 방식</button>
+            </div>
+            <div class="tab-content active" id="users-xhr">
+              <pre><code class="language-javascript">function getUsers() {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", "https://dummyjson.com/users", true);
+    xhr.onload = () => resolve(JSON.parse(xhr.responseText).users);
+    xhr.onerror = () => reject("네트워크 오류");
+    xhr.send();
+  });
+}</code></pre>
+            </div>
+            <div class="tab-content" id="users-fetch">
+              <pre><code class="language-javascript">async function getUsers() {
+  const res  = await fetch("https://dummyjson.com/users");
+  const data = await res.json();
+  return data.users;
+}</code></pre>
+            </div>
+          </div>
+
+          <h3>getPosts(userId)</h3>
+          <div class="tab-wrap">
+            <div class="tab-btns">
+              <button class="tab-btn active" data-tab="posts-xhr">XHR 방식</button>
+              <button class="tab-btn"        data-tab="posts-fetch">fetch 방식</button>
+            </div>
+            <div class="tab-content active" id="posts-xhr">
+              <pre><code class="language-javascript">function getPosts(userId) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", `https://dummyjson.com/posts/user/${userId}`, true);
+    xhr.onload = () => resolve(JSON.parse(xhr.responseText).posts);
+    xhr.onerror = () => reject("네트워크 오류");
+    xhr.send();
+  });
+}</code></pre>
+            </div>
+            <div class="tab-content" id="posts-fetch">
+              <pre><code class="language-javascript">async function getPosts(userId) {
+  const res  = await fetch(`https://dummyjson.com/posts/user/${userId}`);
+  const data = await res.json();
+  return data.posts;
+}</code></pre>
+            </div>
+          </div>
+
+          <h3>getComments(postId)</h3>
+          <div class="tab-wrap">
+            <div class="tab-btns">
+              <button class="tab-btn active" data-tab="comments-xhr">XHR 방식</button>
+              <button class="tab-btn"        data-tab="comments-fetch">fetch 방식</button>
+            </div>
+            <div class="tab-content active" id="comments-xhr">
+              <pre><code class="language-javascript">function getComments(postId) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", `https://dummyjson.com/posts/${postId}/comments`, true);
+    xhr.onload = () => resolve(JSON.parse(xhr.responseText).comments);
+    xhr.onerror = () => reject("네트워크 오류");
+    xhr.send();
+  });
+}</code></pre>
+            </div>
+            <div class="tab-content" id="comments-fetch">
+              <pre><code class="language-javascript">async function getComments(postId) {
+  const res  = await fetch(`https://dummyjson.com/posts/${postId}/comments`);
+  const data = await res.json();
+  return data.comments;
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="tip">XHR 방식은 Promise 생성자, XMLHttpRequest 객체, onload/onerror 콜백이 모두 필요했지만, fetch를 사용하면 <strong>3줄</strong>로 동일한 동작을 구현할 수 있습니다.</div>
+        </section>
+
+      </main>
+    </div>
+
+    <footer>
+      <p>AJAX / fetch &nbsp;|&nbsp; 학습용 문서</p>
+    </footer>
+
+    <script>
+      // ── 탭 공통 ──
+      document.querySelectorAll(".tab-wrap").forEach(wrap => {
+        wrap.querySelectorAll(".tab-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            wrap.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            wrap.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById(btn.dataset.tab).classList.add("active");
+          });
+        });
+      });
+
+      // ── 복사 버튼 ──
+      function copyCode(btn) {
+        const code = btn.nextElementSibling.querySelector("code");
+        navigator.clipboard.writeText(code.innerText).then(() => {
+          btn.textContent = "✓ 복사됨";
+          btn.classList.add("copied");
+          setTimeout(() => { btn.textContent = "복사"; btn.classList.remove("copied"); }, 1800);
+        });
+      }
+
+      // ── 로그 헬퍼 ──
+      function addLog(boxId, msg, cls = "white") {
+        const box = document.getElementById(boxId);
+        const line = document.createElement("div");
+        line.className = "log-line " + cls;
+        line.style.cssText = "font-family:'Courier New',monospace;font-size:0.82rem;line-height:1.8;";
+        line.textContent = msg;
+        box.appendChild(line);
+        box.scrollTop = box.scrollHeight;
+      }
+      function clearLog(boxId) {
+        document.getElementById(boxId).innerHTML = "";
+      }
+
+      // ── 2. fetch 기본 데모 ──
+      document.getElementById("fetchBasicBtn").addEventListener("click", async () => {
+        const log = "fetchBasicLog";
+        clearLog(log);
+        const btn = document.getElementById("fetchBasicBtn");
+        btn.disabled = true;
+
+        addLog(log, 'fetch("https://dummyjson.com/users")', "gray");
+        addLog(log, "// ⏳ 요청 중...", "yellow");
+
+        const res  = await fetch("https://dummyjson.com/users");
+        const data = await res.json();
+        const preview = JSON.stringify(data.users[0]).slice(0, 70) + "…";
+        addLog(log, "// ✅ 응답 도착", "green");
+        addLog(log, `→ ${preview}`, "sky");
+
+        btn.disabled = false;
+      });
+
+      // ── 3. .json() 데모 ──
+      document.getElementById("jsonOnceBtn").addEventListener("click", async () => {
+        const log = "jsonLog";
+        clearLog(log);
+        // 탭 전환
+        document.querySelectorAll("#json .tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll("#json .tab-content").forEach(c => c.classList.remove("active"));
+        document.querySelector("#json .tab-btn[data-tab='json-wrong']").classList.add("active");
+        document.getElementById("json-wrong").classList.add("active");
+
+        const res = await fetch("https://dummyjson.com/users");
+        const p = res.json();
+        addLog(log, `console.log(res)        → Response { status: ${res.status}, ok: ${res.ok}, url: "${res.url}" }`, "yellow");
+        addLog(log, `console.log(res.json()) → ${p}`, "red");
+      });
+
+      document.getElementById("jsonTwiceBtn").addEventListener("click", async () => {
+        const log = "jsonLog";
+        clearLog(log);
+        // 탭 전환
+        document.querySelectorAll("#json .tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll("#json .tab-content").forEach(c => c.classList.remove("active"));
+        document.querySelector("#json .tab-btn[data-tab='json-right']").classList.add("active");
+        document.getElementById("json-right").classList.add("active");
+
+        const res  = await fetch("https://dummyjson.com/users");
+        const data = await res.json();
+        const preview = JSON.stringify(data.users[0]).slice(0, 60) + "…";
+        addLog(log, `console.log(data) → { users: [ ${preview} ] }`, "sky");
+      });
+
+      // ── 4. async 반환값 데모 ──
+      async function request() {
+        const res  = await fetch("https://httpbin.org/delay/2");
+        const data = await res.json();
+        return data;
+      }
+
+      document.getElementById("asyncReturnBtn").addEventListener("click", () => {
+        const log = "asyncReturnLog";
+        clearLog(log);
+        const btn = document.getElementById("asyncReturnBtn");
+        btn.disabled = true;
+
+        addLog(log, "const result = request()", "gray");
+        const result = request();
+        addLog(log, `console.log(result)  →  ${result}`, "yellow");
+        addLog(log, "// ⏳ 아직 pending — 2초 뒤 응답 도착 예정", "gray");
+
+        result.then(data => {
+          const preview = JSON.stringify(data).slice(0, 70) + "…";
+          addLog(log, "// ✅ .then() 콜백 실행", "green");
+          addLog(log, `→ ${preview}`, "sky");
+          btn.disabled = false;
+        });
+      });
+    </script>
+
+  </body>
+</html>
