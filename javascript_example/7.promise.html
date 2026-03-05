@@ -111,6 +111,20 @@
 
       /* 코드 블록 래퍼 — 복사 버튼 */
       .code-wrap { position: relative; }
+      /* 순서 예측 버튼 */
+      .order-num-btn {
+        width: 44px; height: 44px; border-radius: 8px; border: 2px solid #e2e8f0;
+        background: #f8fafc; font-size: 1rem; font-weight: 700; color: #334155;
+        cursor: pointer; transition: all 0.15s;
+      }
+      .order-num-btn:hover { border-color: var(--accent); color: var(--accent-dark); background: var(--accent-bg); }
+      .order-num-btn.used { opacity: 0.3; cursor: default; pointer-events: none; }
+      .order-guess-badge {
+        width: 36px; height: 36px; border-radius: 6px; background: var(--accent-bg);
+        border: 1.5px solid var(--accent-border); color: var(--accent-dark);
+        font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: center;
+      }
+
       .copy-btn {
         position: absolute; top: 8px; right: 8px;
         background: rgba(255,255,255,0.1); color: #94a3b8;
@@ -169,6 +183,7 @@
             <li><a href="#xhr-demo"><span class="nav-badge">XHR 실습</span></a></li>
             <li><a href="#callback-hell"><span class="nav-badge">콜백 지옥</span></a></li>
             <li><a href="#promise"><span class="nav-badge">Promise</span></a></li>
+            <li><a href="#exec-order"><span class="nav-badge">실행 순서</span></a></li>
             <li><a href="#promise-fn"><span class="nav-badge">Promise 함수화</span></a></li>
             <li><a href="#chaining"><span class="nav-badge">체이닝</span></a></li>
             <li><a href="#async-await"><span class="nav-badge">async/await</span></a></li>
@@ -572,6 +587,85 @@ request()
           </div>
         </section>
 
+        <!-- 실행 순서 이해하기 -->
+        <section class="section" id="exec-order">
+          <div class="section-header">
+            <h2>실행 순서 이해하기</h2>
+            <span class="badge">Promise</span>
+            <span class="badge">비동기</span>
+          </div>
+          <p>아래 코드를 실행하면 숫자가 어떤 순서로 출력될까요? 예상해본 뒤 실제 결과를 확인해보세요.</p>
+
+          <div class="code-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">복사</button>
+            <pre><code class="language-javascript">function request() {
+  return new Promise((resolve, reject) => {
+    console.log(1);
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", "https://httpbin.org/delay/2", true);
+    xhr.onload = () => resolve(JSON.parse(xhr.responseText));
+    xhr.onerror = () => reject("네트워크 오류");
+    xhr.send();
+    console.log(2);
+  });
+}
+
+console.log(3);
+request()
+  .then(data => console.log(4));
+console.log(5);</code></pre>
+          </div>
+
+          <div class="demo" style="margin-top:16px;">
+            <div class="demo-label">🤔 실행 순서를 예측해보세요</div>
+            <p style="font-size:0.85rem;color:#64748b;margin-bottom:14px;">1, 2, 3, 4, 5를 출력될 것 같은 순서대로 클릭하세요.</p>
+
+            <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+              <button class="order-num-btn" data-num="1">1</button>
+              <button class="order-num-btn" data-num="2">2</button>
+              <button class="order-num-btn" data-num="3">3</button>
+              <button class="order-num-btn" data-num="4">4</button>
+              <button class="order-num-btn" data-num="5">5</button>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+              <div style="font-size:0.85rem;color:#475569;font-weight:600;">내 예측:</div>
+              <div id="orderGuess" style="display:flex;gap:8px;min-height:36px;align-items:center;">
+                <span style="font-size:0.82rem;color:#94a3b8;">순서대로 클릭하세요</span>
+              </div>
+              <button id="orderResetBtn" style="padding:4px 10px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;font-size:0.78rem;color:#64748b;cursor:pointer;">초기화</button>
+            </div>
+
+            <div class="demo-row">
+              <button class="demo-btn primary" id="orderCheckBtn" disabled>▶ 실제 결과 확인</button>
+            </div>
+
+            <div id="orderResult" style="display:none;margin-top:14px;">
+              <div id="orderFeedback" style="font-size:0.88rem;font-weight:600;margin-bottom:10px;padding:10px 14px;border-radius:6px;"></div>
+            </div>
+
+            <div class="console-box" style="margin-top:10px;">
+              <div class="console-header">
+                <div class="console-dot r"></div><div class="console-dot y"></div><div class="console-dot g"></div>
+                <span class="console-title">console</span>
+              </div>
+              <div class="console-body" id="execOrderLog">
+                <div class="log-line gray" style="font-family:'Courier New',monospace;font-size:0.82rem;">버튼을 눌러 실행하세요.</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="execOrderExplain" style="display:none;">
+            <div class="tip" style="margin-top:16px;">
+              <strong>왜 3 → 1 → 2 → 5 → 4 순서일까요?</strong><br><br>
+              <code>console.log(3)</code>은 <code>request()</code> 호출 전이라 가장 먼저 실행됩니다.<br><br>
+              <code>request()</code>가 호출되면 <code>new Promise</code> 내부 코드가 <strong>즉시 동기적으로 실행</strong>되어 <code>console.log(1)</code>이 찍힙니다.<br><br>
+              <code>xhr.send()</code>로 요청을 보낸 뒤에도 Promise 내부 코드는 계속 실행되기 때문에 <code>console.log(2)</code>가 바로 찍힙니다. 이후 Promise를 반환하며 함수가 종료되고, <code>.then()</code> 콜백은 등록만 된 채 <code>console.log(5)</code>가 실행됩니다.<br><br>
+              2초 뒤 응답이 도착하면 <code>onload</code>가 실행되고 <code>resolve()</code>가 호출되어 <code>.then()</code> 콜백이 실행되며 <code>console.log(4)</code>가 마지막으로 찍힙니다.
+            </div>
+          </div>
+        </section>
+
         <!-- 7. Promise 함수화 -->
         <section class="section" id="promise-fn">
           <div class="section-header">
@@ -822,6 +916,87 @@ loadData();</code></pre>
     </footer>
 
     <script>
+      // ── 실행 순서 예측 ──
+      const CORRECT_ORDER = [3, 1, 2, 5, 4];
+      let guessOrder = [];
+
+      function renderGuess() {
+        const box = document.getElementById("orderGuess");
+        box.innerHTML = "";
+        if (guessOrder.length === 0) {
+          box.innerHTML = '<span style="font-size:0.82rem;color:#94a3b8;">순서대로 클릭하세요</span>';
+        } else {
+          guessOrder.forEach(n => {
+            const b = document.createElement("div");
+            b.className = "order-guess-badge";
+            b.textContent = n;
+            box.appendChild(b);
+          });
+        }
+        document.getElementById("orderCheckBtn").disabled = guessOrder.length < 5;
+      }
+
+      document.querySelectorAll(".order-num-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          if (guessOrder.length >= 5) return;
+          guessOrder.push(Number(btn.dataset.num));
+          btn.classList.add("used");
+          renderGuess();
+        });
+      });
+
+      document.getElementById("orderResetBtn").addEventListener("click", () => {
+        guessOrder = [];
+        document.querySelectorAll(".order-num-btn").forEach(b => b.classList.remove("used"));
+        document.getElementById("orderResult").style.display = "none";
+        document.getElementById("execOrderExplain").style.display = "none";
+        document.getElementById("execOrderLog").innerHTML = '<div class="log-line gray" style="font-family:\'Courier New\',monospace;font-size:0.82rem;">버튼을 눌러 실행하세요.</div>';
+        renderGuess();
+      });
+
+      document.getElementById("orderCheckBtn").addEventListener("click", () => {
+        const isCorrect = guessOrder.join() === CORRECT_ORDER.join();
+        const feedback = document.getElementById("orderFeedback");
+        document.getElementById("orderResult").style.display = "block";
+
+        if (isCorrect) {
+          feedback.textContent = "✅ 정답! 정확히 맞혔어요.";
+          feedback.style.cssText = "background:#f0fdf4;color:#15803d;font-size:0.88rem;font-weight:600;padding:10px 14px;border-radius:6px;margin-bottom:10px;";
+        } else {
+          feedback.textContent = `❌ 아쉽네요. 정답은 ${CORRECT_ORDER.join(" → ")} 입니다.`;
+          feedback.style.cssText = "background:#fef2f2;color:#b91c1c;font-size:0.88rem;font-weight:600;padding:10px 14px;border-radius:6px;margin-bottom:10px;";
+        }
+
+        // 실제 데모 실행
+        const log = "execOrderLog";
+        document.getElementById(log).innerHTML = "";
+        const addL = (msg, cls) => {
+          const line = document.createElement("div");
+          line.className = "log-line " + cls;
+          line.style.cssText = "font-family:'Courier New',monospace;font-size:0.82rem;line-height:1.8;";
+          line.textContent = msg;
+          document.getElementById(log).appendChild(line);
+        };
+
+        addL("console.log(3)  →  3", "white");
+        addL("// request() 호출 — new Promise 내부 즉시 실행", "gray");
+        addL("console.log(1)  →  1", "white");
+        addL("// xhr.send() — 요청만 보내고 계속 실행", "yellow");
+        addL("console.log(2)  →  2", "white");
+        addL("// Promise 반환, 함수 종료", "yellow");
+        addL("console.log(5)  →  5", "white");
+        addL("// ⏳ 2초 대기 중...", "gray");
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "https://httpbin.org/delay/2", true);
+        xhr.onload = () => {
+          addL("// ✅ onload — resolve() 호출, .then() 콜백 실행", "green");
+          addL("console.log(4)  →  4", "white");
+          document.getElementById("execOrderExplain").style.display = "block";
+        };
+        xhr.send();
+      });
+
       // ── 탭 공통 ──
       document.querySelectorAll(".tab-wrap").forEach(wrap => {
         wrap.querySelectorAll(".tab-btn").forEach(btn => {
