@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>경사하강법: Batch ↔ (Mini-batch/SGD) + 올바른 Epoch</title>
+    <style>
+      body {
+        font-family: system-ui, Arial;
+        padding: 16px;
+        max-width: 1020px;
+        margin: 0 auto;
+      }
+      .row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      label {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+      }
+      input[type="number"] {
+        width: 110px;
+        padding: 6px;
+      }
+      button {
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      @media (min-width: 980px) {
+        .grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      canvas {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        width: 100%;
+      }
+      .card {
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 12px;
+      }
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      h2 {
+        margin: 0 0 12px;
+      }
+      h3 {
+        margin: 0 0 8px;
+      }
+      .hint {
+        color: #666;
+        font-size: 13px;
+        margin-top: 6px;
+        line-height: 1.35;
+      }
+      .modeBox {
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        padding: 6px 10px;
+        border: 1px dashed #ccc;
+        border-radius: 8px;
+      }
+      .modeBox input {
+        width: auto;
+      }
+      .progressWrap {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 240px;
+      }
+      .barOuter {
+        width: 240px;
+        height: 10px;
+        border: 1px solid #ddd;
+        border-radius: 999px;
+        overflow: hidden;
+        background: #f7f7f7;
+      }
+      .barInner {
+        height: 100%;
+        width: 0%;
+        background: #1f6feb;
+      }
+      .small {
+        font-size: 12px;
+        color: #555;
+      }
+      .sliderWrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 10px;
+        border: 1px dashed #ccc;
+        border-radius: 8px;
+      }
+      input[type="range"] {
+        width: 160px;
+      }
+      .pill {
+        display: inline-block;
+        padding: 2px 8px;
+        border: 1px solid #ddd;
+        border-radius: 999px;
+        font-size: 12px;
+        color: #444;
+        background: #fafafa;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>경사하강법 시뮬레이션: Batch ↔ Mini-batch/SGD (올바른 epoch 정의)</h2>
+
+    <div class="row card" style="margin-bottom: 14px">
+      <label
+        >학습률 lr
+        <input id="lr" type="number" step="0.001" value="0.01" />
+      </label>
+      <label
+        >목표 epoch
+        <input id="epochs" type="number" step="1" value="30" />
+      </label>
+      <label
+        >속도(ms)
+        <input id="delay" type="number" step="1" value="120" />
+      </label>
+
+      <!-- 모드 토글 -->
+      <div class="modeBox">
+        <span style="font-weight: 600">모드</span>
+        <label style="gap: 6px">
+          <input type="radio" name="mode" value="batch" checked />
+          Batch
+        </label>
+        <label style="gap: 6px">
+          <input type="radio" name="mode" value="mini" />
+          Mini/SGD
+        </label>
+      </div>
+
+      <!-- 미니배치 사이즈 -->
+      <div class="sliderWrap" id="batchSizeWrap" style="opacity: 0.45">
+        <span style="font-weight: 600">batch size</span>
+        <input id="batchSize" type="range" min="1" max="5" step="1" value="1" />
+        <span class="pill" id="batchSizeLabel">1</span>
+      </div>
+
+      <!-- epoch 진행률 바 -->
+      <div class="progressWrap">
+        <div class="small">
+          epoch 진행: <span id="epochProgressText">0 / 0</span>
+          <span id="modeTag" class="pill" style="margin-left: 8px">BATCH</span>
+        </div>
+        <div class="barOuter">
+          <div class="barInner" id="bar"></div>
+        </div>
+      </div>
+
+      <button id="start">시작</button>
+      <button id="pause">일시정지</button>
+      <button id="stepBtn">1스텝</button>
+      <button id="reset">리셋</button>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>데이터 + 회귀 직선 (y = w·x + b)</h3>
+        <canvas id="dataCv" width="900" height="360"></canvas>
+        <div class="hint">
+          왼쪽: 현재 w,b로 그려지는 직선이 데이터에 맞춰 이동<br />
+          Mini/SGD 모드에서는 이번 step에서 선택된 샘플(들)을 <b style="color: #e5533d">빨간 점</b>으로 강조
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Convex Loss 곡선: L(w) = MSE(w, b 현재값 고정)</h3>
+        <canvas id="curveCv" width="900" height="360"></canvas>
+        <div class="hint">
+          오른쪽: 현재 b에서의 단면(U자 곡선) 위로 점이 이동<br />
+          Batch는 부드럽고, Mini/SGD는 수렴 근처에서도 지그재그가 관찰됨
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 14px">
+      <div class="mono" id="info"></div>
+    </div>
+
+    <script>
+      // ===== 데이터 =====
+      const data = [
+        { x: 1, y: 1.2 },
+        { x: 2, y: 1.9 },
+        { x: 3, y: 3.1 },
+        { x: 4, y: 3.9 },
+        { x: 5, y: 5.2 },
+      ];
+      const N = data.length;
+
+      // ===== 상태 =====
+      let w = -1.0;
+      let b = 0.0;
+
+      // ✅ 개념 분리
+      let epoch = 0; // 전체 데이터 1회 소진 = 1 epoch (SGD/Mini 기준)
+      let stepCount = 0; // 업데이트 횟수 = iteration(step)
+      let usedInEpoch = 0; // 현재 epoch에서 사용한 데이터 수(인덱스 개수 기준)
+
+      let running = false;
+      let timer = null;
+
+      // 경로 기록(곡선 위 이동)
+      const wPath = []; // {w, loss}
+
+      // Mini/SGD용: 한 epoch 동안 사용할 인덱스 순서(셔플)
+      let order = [];
+      let orderPtr = 0;
+
+      // 이번 step에 실제로 사용한 데이터 인덱스(강조용)
+      let lastPickedIdxs = [];
+
+      // ===== DOM =====
+      const elLr = document.getElementById("lr");
+      const elEpochs = document.getElementById("epochs");
+      const elDelay = document.getElementById("delay");
+      const elInfo = document.getElementById("info");
+
+      const dataCv = document.getElementById("dataCv");
+      const dataCtx = dataCv.getContext("2d");
+
+      const curveCv = document.getElementById("curveCv");
+      const curveCtx = curveCv.getContext("2d");
+
+      const bar = document.getElementById("bar");
+      const epochProgressText = document.getElementById("epochProgressText");
+      const modeTag = document.getElementById("modeTag");
+
+      const batchSizeWrap = document.getElementById("batchSizeWrap");
+      const elBatchSize = document.getElementById("batchSize");
+      const batchSizeLabel = document.getElementById("batchSizeLabel");
+
+      function getMode() {
+        return document.querySelector('input[name="mode"]:checked').value; // "batch" | "mini"
+      }
+
+      // ===== 유틸 =====
+      function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+      }
+
+      function ensureOrderIfNeeded() {
+        if (order.length !== N || orderPtr >= N) {
+          order = Array.from({ length: N }, (_, i) => i);
+          shuffle(order);
+          orderPtr = 0;
+        }
+      }
+
+      function takeBatchIndices(batchSize) {
+        ensureOrderIfNeeded();
+        const idxs = [];
+
+        while (idxs.length < batchSize) {
+          // epoch 소진 시점에 딱 맞게 끊기 위해
+          if (orderPtr >= N) break;
+          idxs.push(order[orderPtr]);
+          orderPtr += 1;
+        }
+        return idxs;
+      }
+
+      // ===== 모델/손실 =====
+      function predict(x, ww = w, bb = b) {
+        return ww * x + bb;
+      }
+
+      function mse(ww = w, bb = b) {
+        let sum = 0;
+        for (const p of data) {
+          const e = predict(p.x, ww, bb) - p.y;
+          sum += e * e;
+        }
+        return sum / N;
+      }
+
+      // ===== gradient =====
+      // Batch: 전체 데이터 기준
+      function gradBatch() {
+        let dw = 0,
+          db = 0;
+        for (const p of data) {
+          const e = predict(p.x) - p.y;
+          dw += e * p.x;
+          db += e;
+        }
+        dw = (2 / N) * dw;
+        db = (2 / N) * db;
+        return { dw, db, pickedIdxs: data.map((_, i) => i) };
+      }
+
+      // Mini/SGD: 배치 인덱스들만 사용
+      function gradMini(batchIdxs) {
+        const m = batchIdxs.length;
+        let dw = 0,
+          db = 0;
+        for (const idx of batchIdxs) {
+          const p = data[idx];
+          const e = predict(p.x) - p.y;
+          dw += e * p.x;
+          db += e;
+        }
+        // 미니배치 평균 손실 기준으로 scaling
+        dw = (2 / m) * dw;
+        db = (2 / m) * db;
+        return { dw, db, pickedIdxs: batchIdxs };
+      }
+
+      // ===== step =====
+      // ✅ epoch 정의:
+      // - Batch: 1 update = 1 epoch
+      // - Mini/SGD: 데이터 N개를 1번씩 사용 완료하면 epoch += 1
+      function step(lr) {
+        const mode = getMode();
+        let dw, db, pickedIdxs;
+
+        if (mode === "batch") {
+          ({ dw, db, pickedIdxs } = gradBatch());
+
+          // 업데이트
+          w -= lr * dw;
+          b -= lr * db;
+
+          stepCount += 1;
+          epoch += 1; // batch는 1번 업데이트가 곧 epoch 1
+          usedInEpoch = 0; // 의미 없지만 UI용
+        } else {
+          const batchSize = Number(elBatchSize.value);
+          const idxs = takeBatchIndices(batchSize);
+          ({ dw, db, pickedIdxs } = gradMini(idxs));
+
+          // 업데이트
+          w -= lr * dw;
+          b -= lr * db;
+
+          stepCount += 1;
+
+          // ✅ 이번 step에서 "사용한 데이터 개수"만큼 누적
+          usedInEpoch += idxs.length;
+
+          // ✅ epoch 완료 조건: N개 모두 사용
+          // 셔플 order가 끝나면(=orderPtr>=N) epoch 완료로 간주
+          if (orderPtr >= N) {
+            epoch += 1;
+            usedInEpoch = 0; // 새 epoch 시작
+            // 다음 epoch용 셔플은 takeBatchIndices에서 자동으로 준비됨
+          }
+        }
+
+        lastPickedIdxs = pickedIdxs;
+        wPath.push({ w, loss: mse() });
+
+        return { mode, dw, db, pickedIdxs };
+      }
+
+      // ===== 왼쪽(데이터) 그리기 =====
+      function toCanvasX(cv, x, minX, maxX) {
+        const pad = 50;
+        return pad + ((x - minX) / (maxX - minX)) * (cv.width - pad * 2);
+      }
+      function toCanvasY(cv, y, minY, maxY) {
+        const pad = 40;
+        return cv.height - pad - ((y - minY) / (maxY - minY)) * (cv.height - pad * 2);
+      }
+
+      function drawData() {
+        dataCtx.clearRect(0, 0, dataCv.width, dataCv.height);
+
+        const xs = data.map((p) => p.x);
+        const ys = data.map((p) => p.y);
+        const minX = Math.min(...xs) - 1;
+        const maxX = Math.max(...xs) + 1;
+
+        const lineYs = [predict(minX), predict(maxX)];
+        const minY = Math.min(...ys, ...lineYs) - 1;
+        const maxY = Math.max(...ys, ...lineYs) + 1;
+
+        // 축
+        dataCtx.strokeStyle = "#ddd";
+        dataCtx.lineWidth = 1;
+        dataCtx.beginPath();
+        dataCtx.moveTo(50, 20);
+        dataCtx.lineTo(50, dataCv.height - 40);
+        dataCtx.lineTo(dataCv.width - 50, dataCv.height - 40);
+        dataCtx.stroke();
+
+        // 점 (picked 강조)
+        for (let i = 0; i < data.length; i++) {
+          const p = data[i];
+          const cx = toCanvasX(dataCv, p.x, minX, maxX);
+          const cy = toCanvasY(dataCv, p.y, minY, maxY);
+
+          const isPicked = lastPickedIdxs.includes(i);
+          dataCtx.fillStyle = isPicked ? "#e5533d" : "#333";
+
+          dataCtx.beginPath();
+          dataCtx.arc(cx, cy, isPicked ? 7 : 5, 0, Math.PI * 2);
+          dataCtx.fill();
+
+          if (isPicked) {
+            dataCtx.strokeStyle = "#fff";
+            dataCtx.lineWidth = 2;
+            dataCtx.stroke();
+          }
+        }
+
+        // 직선
+        dataCtx.strokeStyle = "#1f6feb";
+        dataCtx.lineWidth = 2;
+        dataCtx.beginPath();
+        dataCtx.moveTo(toCanvasX(dataCv, minX, minX, maxX), toCanvasY(dataCv, predict(minX), minY, maxY));
+        dataCtx.lineTo(toCanvasX(dataCv, maxX, minX, maxX), toCanvasY(dataCv, predict(maxX), minY, maxY));
+        dataCtx.stroke();
+      }
+
+      // ===== 오른쪽: Convex Loss Curve =====
+      const W_RANGE = { min: -3, max: 3 };
+      const CURVE_SAMPLES = 200;
+
+      function wToX(ww) {
+        const pad = 50;
+        return pad + ((ww - W_RANGE.min) / (W_RANGE.max - W_RANGE.min)) * (curveCv.width - pad * 2);
+      }
+      function lossToY(loss, minL, maxL) {
+        const pad = 40;
+        return curveCv.height - pad - ((loss - minL) / (maxL - minL || 1)) * (curveCv.height - pad * 2);
+      }
+
+      function drawLossCurve() {
+        curveCtx.clearRect(0, 0, curveCv.width, curveCv.height);
+
+        // 축
+        curveCtx.strokeStyle = "#ddd";
+        curveCtx.lineWidth = 1;
+        curveCtx.beginPath();
+        curveCtx.moveTo(50, 20);
+        curveCtx.lineTo(50, curveCv.height - 40);
+        curveCtx.lineTo(curveCv.width - 50, curveCv.height - 40);
+        curveCtx.stroke();
+
+        // 곡선 샘플링 (현재 b 고정)
+        const bb = b;
+        const samples = [];
+        let minL = Infinity,
+          maxL = -Infinity;
+
+        for (let i = 0; i < CURVE_SAMPLES; i++) {
+          const ww = W_RANGE.min + (i / (CURVE_SAMPLES - 1)) * (W_RANGE.max - W_RANGE.min);
+          const L = mse(ww, bb);
+          samples.push({ w: ww, L });
+          if (L < minL) minL = L;
+          if (L > maxL) maxL = L;
+        }
+
+        // 곡선
+        curveCtx.strokeStyle = "#111";
+        curveCtx.lineWidth = 2;
+        curveCtx.beginPath();
+        samples.forEach((p, i) => {
+          const x = wToX(p.w);
+          const y = lossToY(p.L, minL, maxL);
+          if (i === 0) curveCtx.moveTo(x, y);
+          else curveCtx.lineTo(x, y);
+        });
+        curveCtx.stroke();
+
+        // 경로
+        if (wPath.length >= 2) {
+          curveCtx.strokeStyle = "#ffb000";
+          curveCtx.lineWidth = 2;
+          curveCtx.beginPath();
+          const first = wPath[0];
+          curveCtx.moveTo(wToX(first.w), lossToY(first.loss, minL, maxL));
+          for (let i = 1; i < wPath.length; i++) {
+            curveCtx.lineTo(wToX(wPath[i].w), lossToY(wPath[i].loss, minL, maxL));
+          }
+          curveCtx.stroke();
+        }
+
+        // 현재 점
+        const curLoss = mse(w, bb);
+        const px = wToX(w);
+        const py = lossToY(curLoss, minL, maxL);
+
+        curveCtx.fillStyle = "#e5533d";
+        curveCtx.beginPath();
+        curveCtx.arc(px, py, 6, 0, Math.PI * 2);
+        curveCtx.fill();
+
+        curveCtx.strokeStyle = "#fff";
+        curveCtx.lineWidth = 2;
+        curveCtx.beginPath();
+        curveCtx.arc(px, py, 6, 0, Math.PI * 2);
+        curveCtx.stroke();
+
+        // 라벨
+        curveCtx.fillStyle = "#333";
+        curveCtx.font = "12px system-ui, Arial";
+        curveCtx.fillText("w →", curveCv.width - 80, curveCv.height - 18);
+
+        curveCtx.save();
+        curveCtx.translate(18, 70);
+        curveCtx.rotate(-Math.PI / 2);
+        curveCtx.fillText("Loss(MSE) ↑", 0, 0);
+        curveCtx.restore();
+
+        curveCtx.fillStyle = "#111";
+        curveCtx.font = "13px ui-monospace, Menlo, Consolas, monospace";
+        curveCtx.fillText(`b 고정 단면: b=${bb.toFixed(4)}`, 60, 18);
+        curveCtx.fillText(`현재: w=${w.toFixed(4)}, MSE=${curLoss.toFixed(6)}`, 280, 18);
+      }
+
+      // ===== UI: epoch progress =====
+      function updateEpochUI() {
+        const mode = getMode();
+        const targetEpoch = Number(elEpochs.value);
+
+        // 진행률 바는 "현재 epoch에서 사용한 데이터" 기준(미니 모드)으로만 의미가 큼
+        let used = 0;
+        let total = 0;
+
+        if (mode === "batch") {
+          used = 0;
+          total = 0;
+          bar.style.width = "0%";
+          epochProgressText.textContent = "-";
+          modeTag.textContent = "BATCH";
+        } else {
+          used = orderPtr; // 현재 epoch에서 이미 소비한 인덱스 개수(셔플 order 기준)
+          total = N;
+
+          const pct = (used / total) * 100;
+          bar.style.width = `${pct}%`;
+          epochProgressText.textContent = `${used} / ${total}`;
+          modeTag.textContent = elBatchSize.value === "1" ? "SGD" : `MINI(${elBatchSize.value})`;
+        }
+
+        // 목표 epoch에 도달하면 start 루프에서 멈춤
+        // (표시는 info에서)
+      }
+
+      // ===== 정보 =====
+      let lastStepInfo = { mode: "batch", dw: 0, db: 0, pickedIdxs: [] };
+
+      function drawInfo() {
+        const mode = getMode();
+        const targetEpoch = Number(elEpochs.value);
+
+        const picked =
+          lastStepInfo.pickedIdxs && lastStepInfo.pickedIdxs.length
+            ? lastStepInfo.pickedIdxs.map((i) => `(${data[i].x},${data[i].y})`).join(", ")
+            : "-";
+
+        const modeText =
+          mode === "batch"
+            ? "BATCH (전체 데이터로 1번 업데이트 = epoch 1)"
+            : `MINI/SGD (epoch = 전체 데이터 ${N}개 1회 소진, batch size=${elBatchSize.value})`;
+
+        elInfo.innerHTML = `
+          mode: <b>${modeText}</b><br/>
+          target epoch: <b>${targetEpoch}</b><br/>
+          epoch: <b>${epoch}</b> &nbsp;|&nbsp; iteration(step): <b>${stepCount}</b><br/>
+          (mini 모드) used in current epoch: <b>${orderPtr}</b> / <b>${N}</b><br/>
+          w: <b>${w.toFixed(6)}</b>, b: <b>${b.toFixed(6)}</b><br/>
+          MSE(loss): <b>${mse().toFixed(6)}</b><br/>
+          dw: <b>${lastStepInfo.dw.toFixed(6)}</b>, db: <b>${lastStepInfo.db.toFixed(6)}</b><br/>
+          picked samples: <b>${picked}</b>
+        `;
+      }
+
+      function renderAll() {
+        drawData();
+        drawLossCurve();
+        updateEpochUI();
+        drawInfo();
+      }
+
+      // ===== 컨트롤 =====
+      function reachedTargetEpoch() {
+        return epoch >= Number(elEpochs.value);
+      }
+
+      function start() {
+        if (running) return;
+        running = true;
+
+        const lr = Number(elLr.value);
+        const delay = Math.max(0, Number(elDelay.value));
+
+        timer = setInterval(() => {
+          if (!running) return;
+
+          if (reachedTargetEpoch()) {
+            pause();
+            return;
+          }
+
+          lastStepInfo = step(lr);
+          renderAll();
+        }, delay);
+      }
+
+      function pause() {
+        running = false;
+        if (timer) clearInterval(timer);
+        timer = null;
+      }
+
+      function doOneStep() {
+        if (reachedTargetEpoch()) return;
+        const lr = Number(elLr.value);
+        lastStepInfo = step(lr);
+        renderAll();
+      }
+
+      function reset() {
+        pause();
+
+        w = -1.0;
+        b = 0.0;
+
+        epoch = 0;
+        stepCount = 0;
+        usedInEpoch = 0;
+
+        wPath.length = 0;
+
+        order = [];
+        orderPtr = 0;
+        lastPickedIdxs = [];
+
+        lastStepInfo = { mode: getMode(), dw: 0, db: 0, pickedIdxs: [] };
+
+        // 슬라이더 max를 데이터 크기에 맞춤
+        elBatchSize.max = String(N);
+        if (Number(elBatchSize.value) > N) elBatchSize.value = String(N);
+        batchSizeLabel.textContent = elBatchSize.value;
+
+        wPath.push({ w, loss: mse() });
+        renderAll();
+      }
+
+      document.getElementById("start").addEventListener("click", start);
+      document.getElementById("pause").addEventListener("click", pause);
+      document.getElementById("stepBtn").addEventListener("click", doOneStep);
+      document.getElementById("reset").addEventListener("click", reset);
+
+      // 모드 변경 시 UI 반영 + 리셋(섞이면 보기 안 좋아서)
+      document.querySelectorAll('input[name="mode"]').forEach((el) => {
+        el.addEventListener("change", () => {
+          const mode = getMode();
+          const isMini = mode === "mini";
+          batchSizeWrap.style.opacity = isMini ? "1" : "0.45";
+          reset();
+        });
+      });
+
+      // 배치 사이즈 변경 시 라벨 갱신 + 리셋
+      elBatchSize.addEventListener("input", () => {
+        batchSizeLabel.textContent = elBatchSize.value;
+      });
+      elBatchSize.addEventListener("change", () => {
+        if (getMode() === "mini") reset();
+      });
+
+      // 초기 UI 설정
+      (function init() {
+        elBatchSize.max = String(N);
+        batchSizeLabel.textContent = elBatchSize.value;
+        batchSizeWrap.style.opacity = "0.45"; // batch 모드 기본
+        wPath.push({ w, loss: mse() });
+        renderAll();
+      })();
+    </script>
+  </body>
+</html>

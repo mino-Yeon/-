@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SGD vs Momentum vs Adam 수렴 시뮬레이션</title>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --panel: #f6f7fb;
+        --panel2: #ffffff;
+        --text: #111827;
+        --muted: rgba(17, 24, 39, 0.65);
+        --line: rgba(17, 24, 39, 0.14);
+        --shadow: rgba(17, 24, 39, 0.08);
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Arial,
+          sans-serif;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 18px;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 18px;
+        font-weight: 800;
+      }
+      .panel {
+        background: linear-gradient(180deg, var(--panel), var(--panel2));
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 14px;
+        margin-bottom: 12px;
+        box-shadow: 0 10px 26px var(--shadow);
+      }
+      .controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        align-items: end;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 180px 1fr 120px;
+        gap: 10px;
+        align-items: center;
+      }
+      label {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+      }
+      input[type="range"] {
+        width: 100%;
+      }
+      input[type="number"],
+      input[type="text"] {
+        width: 120px;
+        background: #ffffff;
+        border: 1px solid var(--line);
+        color: var(--text);
+        border-radius: 12px;
+        padding: 10px 10px;
+        font-weight: 700;
+        box-sizing: border-box;
+      }
+      .btns {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      button {
+        background: #ffffff;
+        border: 1px solid var(--line);
+        color: var(--text);
+        padding: 10px 12px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 800;
+      }
+      button:hover {
+        background: #f3f4f6;
+      }
+      .status {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .box {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.9);
+      }
+      .mini {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.6;
+        font-weight: 600;
+      }
+      .kv {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 6px 10px;
+        margin-top: 8px;
+        font-size: 13px;
+      }
+      .k {
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .v {
+        font-variant-numeric: tabular-nums;
+        font-weight: 800;
+      }
+      .canvases {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      canvas {
+        width: 100%;
+        height: 360px;
+        background: #ffffff;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+      }
+      .legend {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        margin-right: 6px;
+        vertical-align: -1px;
+      }
+      .sgd {
+        background: #ff4d4f;
+      }
+      .mom {
+        background: #faad14;
+      }
+      .adam {
+        background: #1677ff;
+      }
+      .data {
+        background: #111827;
+        opacity: 0.75;
+      }
+      .footer {
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 10px;
+        line-height: 1.5;
+        font-weight: 600;
+      }
+      .hint {
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 6px;
+        font-weight: 600;
+      }
+      .tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .tab {
+        background: #ffffff;
+        border: 1px solid var(--line);
+        color: var(--text);
+        padding: 8px 10px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 800;
+        font-size: 13px;
+      }
+      .tab:hover {
+        background: #f3f4f6;
+      }
+      .tab.active {
+        background: #111827;
+        color: #ffffff;
+        border-color: #111827;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>SGD / Momentum / Adam 수렴 시뮬레이션 (초반: Adam > Momentum > SGD, SGD 흔들림 감소)</h1>
+
+      <div class="panel">
+        <div class="controls">
+          <div>
+            <div class="row">
+              <label>Epoch (총 반복)</label>
+              <input id="epochsRange" type="range" min="1" max="200" value="60" />
+              <input id="epochsNum" type="number" min="1" max="200" value="60" />
+            </div>
+
+            <div class="row" style="margin-top: 10px">
+              <label>속도 (ms / step)</label>
+              <div class="hint" style="align-self: center">10~200 정도 추천</div>
+              <input id="msInput" type="text" value="150" inputmode="numeric" />
+            </div>
+
+            <div class="btns">
+              <button id="btnStart">시작</button>
+              <button id="btnPause">일시정지</button>
+              <button id="btnReset">리셋</button>
+              <button id="btnStep">1스텝</button>
+            </div>
+          </div>
+
+          <div class="status">
+            <div class="box">
+              <div class="mini">진행 정보</div>
+              <div class="kv">
+                <div class="k">현재 Epoch</div>
+                <div class="v" id="uiEpoch">0</div>
+                <div class="k">Epoch 내 Step</div>
+                <div class="v" id="uiStep">0</div>
+              </div>
+            </div>
+            <div class="box">
+              <div class="mini">값 표시 (W, MSE)</div>
+              <div class="kv">
+                <div class="k" data-row="sgd">SGD W</div>
+                <div class="v" data-row="sgd" id="uiWsgd">-</div>
+                <div class="k" data-row="sgd">SGD MSE</div>
+                <div class="v" data-row="sgd" id="uiLsgd">-</div>
+
+                <div class="k" data-row="mom">Momentum W</div>
+                <div class="v" data-row="mom" id="uiWmom">-</div>
+                <div class="k" data-row="mom">Momentum MSE</div>
+                <div class="v" data-row="mom" id="uiLmom">-</div>
+
+                <div class="k" data-row="adam">Adam W</div>
+                <div class="v" data-row="adam" id="uiWadam">-</div>
+                <div class="k" data-row="adam">Adam MSE</div>
+                <div class="v" data-row="adam" id="uiLadam">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 탭 UI 추가 -->
+        <div class="tabs" style="margin-top: 10px">
+          <button class="tab active" data-mode="sgd">SGD</button>
+          <button class="tab" data-mode="mom">Momentum</button>
+          <button class="tab" data-mode="all">전체</button>
+        </div>
+
+        <div class="legend">
+          <span><span class="dot data"></span>Data</span>
+          <span><span class="dot sgd"></span>SGD (초반 많이 흔들림 → 후반 덜 흔들림)</span>
+          <span><span class="dot mom"></span>Momentum (중간)</span>
+          <span><span class="dot adam"></span>Adam (초반 가장 빠름)</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="canvases">
+          <div>
+            <div class="mini" style="margin-bottom: 8px">1) 데이터 + 3개의 직선</div>
+            <canvas id="c1" width="900" height="360"></canvas>
+          </div>
+          <div>
+            <div class="mini" style="margin-bottom: 8px">2) Convex Loss 곡선 (전체 데이터 MSE vs W)</div>
+            <canvas id="c2" width="900" height="360"></canvas>
+          </div>
+        </div>
+        <div class="footer">
+          - “정확한 최적화”보다, <b>초반 속도/흔들림 차이</b>가 눈에 띄게 보이도록 파라미터를 의도적으로
+          조정했습니다.<br />
+          - 시작은 <b>멈춘 상태</b>로 시작합니다.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // =========================
+      // Utils
+      // =========================
+      const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+      const randn = () => {
+        let u = 0,
+          v = 0;
+        while (u === 0) u = Math.random();
+        while (v === 0) v = Math.random();
+        return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+      };
+      const toNum = (s, fallback) => {
+        const n = Number(String(s).trim());
+        return Number.isFinite(n) ? n : fallback;
+      };
+
+      // =========================
+      // State
+      // =========================
+      const state = {
+        running: false,
+        epochs: 60,
+        ms: 40, // ms per step (user input)
+        timer: null,
+
+        dataN: 8,
+        epoch: 0,
+        stepInEpoch: 0,
+        stepsPerEpoch: 25,
+
+        trueW: 1.8,
+        xs: [],
+        ys: [],
+
+        w_sgd: -2.5,
+        w_mom: -2.5,
+        w_adam: -2.5,
+
+        v_mom: 0,
+
+        m_adam: 0,
+        v_adam: 0,
+        t_adam: 0,
+      };
+
+      // =========================
+      // UI refs
+      // =========================
+      const c1 = document.getElementById("c1");
+      const c2 = document.getElementById("c2");
+      const g1 = c1.getContext("2d");
+      const g2 = c2.getContext("2d");
+
+      const uiEpoch = document.getElementById("uiEpoch");
+      const uiStep = document.getElementById("uiStep");
+      const uiWsgd = document.getElementById("uiWsgd");
+      const uiLsgd = document.getElementById("uiLsgd");
+      const uiWmom = document.getElementById("uiWmom");
+      const uiLmom = document.getElementById("uiLmom");
+      const uiWadam = document.getElementById("uiWadam");
+      const uiLadam = document.getElementById("uiLadam");
+
+      const epochsRange = document.getElementById("epochsRange");
+      const epochsNum = document.getElementById("epochsNum");
+      const msInput = document.getElementById("msInput");
+
+      const btnStart = document.getElementById("btnStart");
+      const btnPause = document.getElementById("btnPause");
+      const btnReset = document.getElementById("btnReset");
+      const btnStep = document.getElementById("btnStep");
+
+      // =========================
+      // Data init
+      // =========================
+      function makeData() {
+        state.xs = [];
+        state.ys = [];
+        for (let i = 0; i < state.dataN; i++) {
+          const x = -1 + (2 * i) / (state.dataN - 1);
+          const y = state.trueW * x + 0.18 * randn();
+          state.xs.push(x);
+          state.ys.push(y);
+        }
+      }
+
+      function resetAll() {
+        stopTimer();
+        state.running = false;
+        state.epoch = 0;
+        state.stepInEpoch = 0;
+
+        state.w_sgd = -2.5;
+        state.w_mom = -2.5;
+        state.w_adam = -2.5;
+
+        state.v_mom = 0;
+        state.m_adam = 0;
+        state.v_adam = 0;
+        state.t_adam = 0;
+
+        makeData();
+        updateUI();
+        drawAll();
+      }
+
+      // =========================
+      // Loss & Grad
+      // =========================
+      function mseForW(w) {
+        let s = 0;
+        for (let i = 0; i < state.xs.length; i++) {
+          const pred = w * state.xs[i];
+          const e = pred - state.ys[i];
+          s += e * e;
+        }
+        return s / state.xs.length;
+      }
+
+      function gradSample(w, idx) {
+        const x = state.xs[idx];
+        const y = state.ys[idx];
+        return 2 * (w * x - y) * x;
+      }
+
+      // =========================
+      // One step update
+      // 목표: 초반 수렴속도 Adam > Momentum > SGD
+      // + SGD 흔들림은 초반 크고, 수렴 근처로 갈수록 감소
+      // =========================
+      function oneStep() {
+        if (state.epoch >= state.epochs) {
+          stopTimer();
+          state.running = false;
+          return;
+        }
+
+        const idx = Math.floor(Math.random() * state.xs.length);
+
+        // 진행도(초반 1, 후반 0에 가깝게) 만들기:
+        // loss가 낮을수록(수렴 근처) 흔들림 감소하도록.
+        const curLossSGD = mseForW(state.w_sgd);
+        // 대충 스케일: loss가 0에 가까워지면 progress ~ 0, 크면 ~1
+        const progress = clamp(curLossSGD / 3.0, 0, 1); // 3은 "적당한 기준값" (시각용)
+
+        // ---- SGD: 느리고(학습률 낮게), 초반 크게 흔들리고, 후반 덜 흔들리게
+        {
+          const lr = 0.055; // 일부러 느리게 (3등)
+          const g = gradSample(state.w_sgd, idx);
+
+          // progress=1(초반) => wobble 거의 base
+          // progress=0(수렴근처) => wobble base*0.25 (확 줄어듦)
+          const baseWobble = 0.22;
+          const wobbleScale = baseWobble * (0.25 + 0.75 * progress);
+          const wobble = wobbleScale * randn();
+
+          state.w_sgd = state.w_sgd - lr * g + wobble;
+        }
+
+        // ---- Momentum: 중간 (2등) : SGD보다 빠르고, 흔들림은 작게
+        {
+          const lr = 0.095;
+          const beta = 0.9;
+          const g = gradSample(state.w_mom, idx);
+
+          // 약한 노이즈만 (상수)
+          const mild = 0.03 * randn();
+
+          state.v_mom = beta * state.v_mom + (1 - beta) * g;
+          state.w_mom = state.w_mom - lr * state.v_mom + mild;
+        }
+
+        // ---- Adam: 가장 빠르게(1등) : 공격적으로 당겨오되, 노이즈 거의 없음
+        {
+          const lr = 0.3; // 초반 확 당기기
+          const beta1 = 0.85; // 더 빠르게 반응하도록 살짝 낮춤
+          const beta2 = 0.995;
+          const eps = 1e-8;
+
+          state.t_adam += 1;
+          const g = gradSample(state.w_adam, idx);
+
+          state.m_adam = beta1 * state.m_adam + (1 - beta1) * g;
+          state.v_adam = beta2 * state.v_adam + (1 - beta2) * (g * g);
+
+          const mHat = state.m_adam / (1 - Math.pow(beta1, state.t_adam));
+          const vHat = state.v_adam / (1 - Math.pow(beta2, state.t_adam));
+
+          state.w_adam = state.w_adam - (lr * mHat) / (Math.sqrt(vHat) + eps);
+        }
+
+        // progress
+        state.stepInEpoch += 1;
+        if (state.stepInEpoch >= state.stepsPerEpoch) {
+          state.stepInEpoch = 0;
+          state.epoch += 1;
+        }
+      }
+
+      // =========================
+      // Drawing
+      // =========================
+      function clear(ctx, w, h) {
+        ctx.clearRect(0, 0, w, h);
+      }
+
+      function drawAxes(ctx, w, h, pad = 36) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(17,24,39,0.14)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(0.5, 0.5, w - 1, h - 1);
+
+        ctx.beginPath();
+        ctx.moveTo(pad, h - pad);
+        ctx.lineTo(w - pad, h - pad);
+        ctx.moveTo(pad, h - pad);
+        ctx.lineTo(pad, pad);
+        ctx.stroke();
+
+        ctx.strokeStyle = "rgba(17,24,39,0.06)";
+        for (let i = 1; i <= 4; i++) {
+          const x = pad + ((w - 2 * pad) * i) / 5;
+          ctx.beginPath();
+          ctx.moveTo(x, pad);
+          ctx.lineTo(x, h - pad);
+          ctx.stroke();
+        }
+        for (let i = 1; i <= 4; i++) {
+          const y = pad + ((h - 2 * pad) * i) / 5;
+          ctx.beginPath();
+          ctx.moveTo(pad, y);
+          ctx.lineTo(w - pad, y);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      function py1(y, w, h, pad = 36) {
+        let ymin = Infinity,
+          ymax = -Infinity;
+        for (let i = 0; i < state.ys.length; i++) {
+          ymin = Math.min(ymin, state.ys[i]);
+          ymax = Math.max(ymax, state.ys[i]);
+        }
+        const margin = 0.8;
+        ymin -= margin;
+        ymax += margin;
+
+        const t = (y - ymin) / (ymax - ymin);
+        return h - pad - t * (h - 2 * pad);
+      }
+
+      function drawDataAndLines() {
+        const w = c1.width,
+          h = c1.height;
+        clear(g1, w, h);
+        drawAxes(g1, w, h);
+
+        // data points
+        g1.save();
+        g1.fillStyle = "rgba(17,24,39,0.8)";
+        for (let i = 0; i < state.xs.length; i++) {
+          const x = state.xs[i],
+            y = state.ys[i];
+          const px = 36 + ((x + 1) / 2) * (w - 72);
+          const py = py1(y, w, h, 36);
+          g1.beginPath();
+          g1.arc(px, py, 4, 0, Math.PI * 2);
+          g1.fill();
+        }
+        g1.restore();
+
+        function drawLine(wParam, color) {
+          g1.save();
+          g1.strokeStyle = color;
+          g1.lineWidth = 2;
+
+          const x1 = -1,
+            x2 = 1;
+          const y1 = wParam * x1;
+          const y2 = wParam * x2;
+
+          const px1 = 36 + ((x1 + 1) / 2) * (w - 72);
+          const px2 = 36 + ((x2 + 1) / 2) * (w - 72);
+          const py_1 = py1(y1, w, h, 36);
+          const py_2 = py1(y2, w, h, 36);
+
+          g1.beginPath();
+          g1.moveTo(px1, py_1);
+          g1.lineTo(px2, py_2);
+          g1.stroke();
+          g1.restore();
+        }
+
+        if (state.mode === "all" || state.mode === "sgd") drawLine(state.w_sgd, "#ff4d4f");
+        if (state.mode === "all" || state.mode === "mom") drawLine(state.w_mom, "#faad14");
+        if (state.mode === "all") drawLine(state.w_adam, "#1677ff"); // Adam은 전체 탭에서만
+
+        g1.save();
+        g1.fillStyle = "rgba(17,24,39,0.7)";
+        g1.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        g1.fillText("x", w - 26, h - 18);
+        g1.fillText("y", 18, 22);
+        g1.restore();
+      }
+
+      function drawLossCurve() {
+        const w = c2.width,
+          h = c2.height;
+        clear(g2, w, h);
+        drawAxes(g2, w, h);
+
+        const pad = 36;
+        const wMin = -3.5,
+          wMax = 3.5;
+        const samples = 220;
+
+        const loss = [];
+        let lMin = Infinity,
+          lMax = -Infinity;
+        for (let i = 0; i <= samples; i++) {
+          const ww = wMin + ((wMax - wMin) * i) / samples;
+          const ll = mseForW(ww);
+          loss.push([ww, ll]);
+          lMin = Math.min(lMin, ll);
+          lMax = Math.max(lMax, ll);
+        }
+
+        const extra = (lMax - lMin) * 0.12 + 1e-9;
+        lMin -= extra;
+        lMax += extra;
+
+        function mapWtoX(ww) {
+          const t = (ww - wMin) / (wMax - wMin);
+          return pad + t * (w - 2 * pad);
+        }
+        function mapLtoY(ll) {
+          const t = (ll - lMin) / (lMax - lMin);
+          return h - pad - t * (h - 2 * pad);
+        }
+
+        // curve
+        g2.save();
+        g2.strokeStyle = "rgba(17,24,39,0.85)";
+        g2.lineWidth = 2;
+        g2.beginPath();
+        for (let i = 0; i < loss.length; i++) {
+          const x = mapWtoX(loss[i][0]);
+          const y = mapLtoY(loss[i][1]);
+          if (i === 0) g2.moveTo(x, y);
+          else g2.lineTo(x, y);
+        }
+        g2.stroke();
+        g2.restore();
+
+        // markers
+        function marker(ww, color) {
+          const ll = mseForW(ww);
+          const x = mapWtoX(ww);
+          const y = mapLtoY(ll);
+
+          g2.save();
+          g2.fillStyle = color;
+          g2.strokeStyle = "rgba(0,0,0,0.25)";
+          g2.lineWidth = 2;
+          g2.beginPath();
+          g2.arc(x, y, 6, 0, Math.PI * 2);
+          g2.fill();
+          g2.stroke();
+          g2.restore();
+        }
+
+        if (state.mode === "all" || state.mode === "sgd") marker(state.w_sgd, "#ff4d4f");
+        if (state.mode === "all" || state.mode === "mom") marker(state.w_mom, "#faad14");
+        if (state.mode === "all") marker(state.w_adam, "#1677ff");
+
+        g2.save();
+        g2.fillStyle = "rgba(17,24,39,0.7)";
+        g2.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial";
+        g2.fillText("W", w - 26, h - 18);
+        g2.fillText("MSE", 14, 22);
+        g2.restore();
+      }
+
+      function drawAll() {
+        drawDataAndLines();
+        drawLossCurve();
+      }
+
+      // =========================
+      // UI update
+      // =========================
+      function fmt(n) {
+        return Number.isFinite(n) ? n.toFixed(4) : "-";
+      }
+      function updateUI() {
+        uiEpoch.textContent = `${state.epoch} / ${state.epochs}`;
+        uiStep.textContent = `${state.stepInEpoch} / ${state.stepsPerEpoch}`;
+
+        uiWsgd.textContent = fmt(state.w_sgd);
+        uiWmom.textContent = fmt(state.w_mom);
+        uiWadam.textContent = fmt(state.w_adam);
+
+        uiLsgd.textContent = fmt(mseForW(state.w_sgd));
+        uiLmom.textContent = fmt(mseForW(state.w_mom));
+        uiLadam.textContent = fmt(mseForW(state.w_adam));
+      }
+
+      // =========================
+      // Timer control (ms step)
+      // =========================
+      function stopTimer() {
+        if (state.timer) {
+          clearInterval(state.timer);
+          state.timer = null;
+        }
+      }
+
+      function startTimer() {
+        stopTimer();
+        const ms = clamp(toNum(msInput.value, state.ms), 5, 2000);
+        state.ms = ms;
+        msInput.value = String(ms);
+
+        state.timer = setInterval(() => {
+          if (!state.running) return;
+
+          oneStep();
+          updateUI();
+          drawAll();
+
+          if (state.epoch >= state.epochs) {
+            state.running = false;
+            stopTimer();
+          }
+        }, state.ms);
+      }
+
+      // =========================
+      // Wire controls
+      // =========================
+      // =========================
+      // Tabs
+      // =========================
+      function setMode(mode) {
+        state.mode = mode;
+
+        document.querySelectorAll(".tab").forEach((b) => {
+          b.classList.toggle("active", b.dataset.mode === mode);
+        });
+
+        // 값 표시(오른쪽 박스)도 모드에 따라 숨김/표시
+        const showAll = mode === "all";
+        const showSGD = mode === "sgd";
+        const showMOM = mode === "mom";
+
+        // SGD rows
+        document.querySelectorAll("[data-row='sgd']").forEach((el) => {
+          el.style.display = showAll || showSGD ? "" : "none";
+        });
+        // MOM rows
+        document.querySelectorAll("[data-row='mom']").forEach((el) => {
+          el.style.display = showAll || showMOM ? "" : "none";
+        });
+        // ADAM rows (전체 탭에서만)
+        document.querySelectorAll("[data-row='adam']").forEach((el) => {
+          el.style.display = showAll ? "" : "none";
+        });
+
+        drawAll();
+        updateUI();
+      }
+
+      document.querySelectorAll(".tab").forEach((btn) => {
+        btn.addEventListener("click", () => setMode(btn.dataset.mode));
+      });
+
+      function bindRangeAndNumber(rangeEl, numEl, onChange) {
+        const syncFromRange = () => {
+          numEl.value = rangeEl.value;
+          onChange(parseInt(rangeEl.value, 10));
+        };
+        const syncFromNum = () => {
+          let v = parseInt(numEl.value, 10);
+          if (!Number.isFinite(v)) v = parseInt(rangeEl.value, 10);
+          v = clamp(v, parseInt(rangeEl.min, 10), parseInt(rangeEl.max, 10));
+          numEl.value = v;
+          rangeEl.value = v;
+          onChange(v);
+        };
+        rangeEl.addEventListener("input", syncFromRange);
+        numEl.addEventListener("change", syncFromNum);
+      }
+
+      bindRangeAndNumber(epochsRange, epochsNum, (v) => {
+        state.epochs = v;
+        updateUI();
+      });
+
+      msInput.addEventListener("change", () => {
+        // 실행 중이라면 새 ms로 즉시 반영
+        startTimer();
+      });
+
+      btnStart.addEventListener("click", () => {
+        if (state.epoch >= state.epochs) return;
+        state.running = true;
+        startTimer();
+      });
+
+      btnPause.addEventListener("click", () => {
+        state.running = false;
+      });
+
+      btnReset.addEventListener("click", () => {
+        resetAll();
+      });
+
+      btnStep.addEventListener("click", () => {
+        if (state.epoch >= state.epochs) return;
+        state.running = false;
+        oneStep();
+        updateUI();
+        drawAll();
+      });
+
+      // =========================
+      // Start paused
+      // =========================
+      resetAll();
+      startTimer(); // timer는 켜두되 running=false라 아무 것도 안 함 (ms 변경 즉시 반영 목적)
+      setMode("sgd");
+    </script>
+  </body>
+</html>
