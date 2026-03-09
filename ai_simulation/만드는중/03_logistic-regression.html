@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>로지스틱 회귀 — AI 개념 시뮬레이터</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #FFFFFF;
+      color: #1A1A1A;
+      font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      padding: 40px 24px 80px;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; }
+
+    /* ── 헤더 ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #6B7280;
+      text-decoration: none;
+      margin-bottom: 28px;
+      transition: color 0.15s;
+    }
+    .back-link:hover { color: #1A1A1A; }
+
+    .header { margin-bottom: 32px; }
+    .header h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 6px; }
+    .header p  { font-size: 15px; font-weight: 400; color: #6B7280; }
+
+    /* ── 메인 행 ── */
+    .main-row {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    .canvas-wrap { flex: 1; }
+    .section-hint { font-size: 13px; color: #9CA3AF; margin-bottom: 8px; height: 18px; }
+
+    #mainCanvas {
+      display: block;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 10px;
+      background: #FAFAFA;
+      cursor: crosshair;
+    }
+
+    /* ── 시그모이드 패널 ── */
+    .sigmoid-wrap { width: 220px; flex-shrink: 0; }
+    #sigmoidCanvas {
+      display: block;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 10px;
+      background: #FAFAFA;
+    }
+
+    /* ── 컨트롤 행 ── */
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    /* ── 클래스 토글 ── */
+    .toggle-group { display: flex; gap: 8px; }
+    .toggle-btn {
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1.5px solid #E5E7EB;
+      background: #F9FAFB;
+      color: #6B7280;
+      transition: all 0.12s;
+    }
+    .toggle-btn.active-a {
+      background: #DBEAFE;
+      border-color: #2563EB;
+      color: #1D4ED8;
+    }
+    .toggle-btn.active-b {
+      background: #FEE2E2;
+      border-color: #DC2626;
+      color: #B91C1C;
+    }
+
+    /* ── 확률 표시판 ── */
+    .prob-panel {
+      flex: 1;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 10px;
+      padding: 12px 16px;
+      background: #FAFAFA;
+    }
+    .prob-hint {
+      font-size: 11px;
+      color: #9CA3AF;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .prob-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1A1A1A;
+    }
+    .prob-value .prob-num {
+      font-family: 'SF Mono', 'Fira Mono', 'Consolas', monospace;
+      color: #6366F1;
+      font-weight: 600;
+    }
+
+    /* ── Threshold 행 ── */
+    .threshold-row {
+      margin-bottom: 20px;
+    }
+    .threshold-hint {
+      font-size: 13px;
+      color: #6B7280;
+      margin-bottom: 10px;
+    }
+    .threshold-inner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 10px;
+      background: #FAFAFA;
+    }
+    .threshold-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      flex-shrink: 0;
+    }
+    input[type="range"]#thresholdSlider {
+      flex: 1;
+      height: 4px;
+      accent-color: #6366F1;
+      cursor: pointer;
+    }
+    .threshold-val {
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'SF Mono', 'Fira Mono', 'Consolas', monospace;
+      color: #6366F1;
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ── 상태 메시지 ── */
+    #statusMsg {
+      font-size: 12px;
+      color: #F59E0B;
+      min-height: 16px;
+      margin-bottom: 16px;
+    }
+
+    /* ── 버튼 ── */
+    .btn-row { margin-bottom: 40px; }
+    .btn {
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s, transform 0.08s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-secondary { background: #F3F4F6; color: #374151; }
+    .btn-secondary:hover { background: #E5E7EB; }
+
+    /* ── 하단 설명 ── */
+    .footer-desc {
+      border-top: 1px solid #F3F4F6;
+      padding-top: 32px;
+      max-width: 640px;
+    }
+    .footer-desc p { font-size: 14px; color: #6B7280; line-height: 1.7; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 헤더 -->
+  <a href="index.html" class="back-link">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    목록으로
+  </a>
+
+  <div class="header">
+    <h1>로지스틱 회귀</h1>
+    <p>점들 사이에 경계를 그어 어느 쪽에 속하는지를 확률로 예측하는 것</p>
+  </div>
+
+  <!-- 캔버스 + 시그모이드 패널 -->
+  <div class="main-row">
+    <div class="canvas-wrap">
+      <div class="section-hint">두 가지 색으로 점을 찍어보세요. 경계선이 자동으로 그어집니다.</div>
+      <canvas id="mainCanvas" width="680" height="420"></canvas>
+    </div>
+    <div class="sigmoid-wrap">
+      <div class="section-hint">선형 출력값이 S자 곡선을 통해 0~1 사이 확률로 변환됩니다</div>
+      <canvas id="sigmoidCanvas" width="220" height="420"></canvas>
+    </div>
+  </div>
+
+  <!-- 클래스 토글 + 확률 표시판 -->
+  <div class="control-row">
+    <div class="toggle-group">
+      <button class="toggle-btn active-a" id="btnA">클래스 A</button>
+      <button class="toggle-btn" id="btnB">클래스 B</button>
+    </div>
+    <div class="prob-panel">
+      <div class="prob-hint">캔버스 위에 마우스를 올려보세요</div>
+      <div class="prob-value" id="probDisplay">—</div>
+    </div>
+  </div>
+
+  <!-- Threshold 슬라이더 -->
+  <div class="threshold-row">
+    <div class="threshold-hint">경계 기준을 바꾸면 분류 결과가 어떻게 달라지나요?</div>
+    <div class="threshold-inner">
+      <div class="threshold-label">Threshold</div>
+      <input type="range" id="thresholdSlider" min="0" max="1" step="0.01" value="0.5" />
+      <div class="threshold-val" id="thresholdVal">0.50</div>
+    </div>
+  </div>
+
+  <!-- 상태 메시지 -->
+  <div id="statusMsg"></div>
+
+  <!-- 버튼 -->
+  <div class="btn-row">
+    <button class="btn btn-secondary" id="btnReset">초기화</button>
+  </div>
+
+  <!-- 하단 설명 -->
+  <div class="footer-desc">
+    <p>로지스틱 회귀는 선형회귀의 출력값을 시그모이드 함수로 변환해 확률을 만들고, 그 확률이 threshold를 넘으면 한 쪽 클래스로 분류합니다.</p>
+  </div>
+
+</div>
+
+<script>
+  // ── 캔버스 설정 ──
+  const mc   = document.getElementById('mainCanvas');
+  const mctx = mc.getContext('2d');
+  const MW   = mc.width, MH = mc.height;
+  const MP   = { top: 24, right: 24, bottom: 28, left: 28 };
+
+  // 논리 좌표계: x,y ∈ [0,10], y축 수학적 표준 (아래→위)
+  const X_MIN = 0, X_MAX = 10, Y_MIN = 0, Y_MAX = 10;
+
+  function toPixel(lx, ly) {
+    const drawW = MW - MP.left - MP.right;
+    const drawH = MH - MP.top  - MP.bottom;
+    const px = MP.left + (lx - X_MIN) / (X_MAX - X_MIN) * drawW;
+    const py = MH - MP.bottom - (ly - Y_MIN) / (Y_MAX - Y_MIN) * drawH;
+    return [px, py];
+  }
+  function toLogic(px, py) {
+    const drawW = MW - MP.left - MP.right;
+    const drawH = MH - MP.top  - MP.bottom;
+    const lx = (px - MP.left)  / drawW * (X_MAX - X_MIN) + X_MIN;
+    const ly = (MH - MP.bottom - py) / drawH * (Y_MAX - Y_MIN) + Y_MIN;
+    return [lx, ly];
+  }
+
+  // ── 시그모이드 캔버스 ──
+  const sc   = document.getElementById('sigmoidCanvas');
+  const sctx = sc.getContext('2d');
+  const SW   = sc.width, SH = sc.height;
+  const SP   = { top: 28, right: 16, bottom: 28, left: 36 };
+
+  // ── 상태 ──
+  let pointsA = [];       // {lx, ly}
+  let pointsB = [];
+  let selectedClass = 'A';
+  let weights = null;     // {w1, w2, bias} 또는 null
+  let threshold = 0.5;
+  let hoverLogit = null;
+  let hoverProb  = null;
+
+  // ── 시그모이드 ──
+  function sigmoid(z) { return 1 / (1 + Math.exp(-z)); }
+
+  // ── 로지스틱 회귀 학습 (경사하강법, 200 iter) ──
+  function trainLogistic() {
+    const n = pointsA.length + pointsB.length;
+    if (pointsA.length < 2 || pointsB.length < 2) { weights = null; return; }
+
+    let w1 = 0, w2 = 0, bias = 0;
+    const lr = 0.1;
+    const iters = 300;
+
+    // 데이터: A=0, B=1
+    const data = [
+      ...pointsA.map(p => ({ x1: p.lx, x2: p.ly, y: 0 })),
+      ...pointsB.map(p => ({ x1: p.lx, x2: p.ly, y: 1 }))
+    ];
+
+    for (let i = 0; i < iters; i++) {
+      let dw1 = 0, dw2 = 0, db = 0;
+      for (const d of data) {
+        const z    = w1 * d.x1 + w2 * d.x2 + bias;
+        const pred = sigmoid(z);
+        const err  = pred - d.y;
+        dw1 += err * d.x1;
+        dw2 += err * d.x2;
+        db  += err;
+      }
+      w1   -= lr * dw1 / n;
+      w2   -= lr * dw2 / n;
+      bias -= lr * db  / n;
+    }
+    weights = { w1, w2, bias };
+  }
+
+  function predict(lx, ly) {
+    if (!weights) return null;
+    const z = weights.w1 * lx + weights.w2 * ly + weights.bias;
+    return { prob: sigmoid(z), logit: z };
+  }
+
+  // ── 메인 캔버스 그리기 ──
+  function drawMain() {
+    mctx.clearRect(0, 0, MW, MH);
+
+    // 배경
+    mctx.fillStyle = '#FAFAFA';
+    mctx.beginPath(); mctx.roundRect(0, 0, MW, MH, 9); mctx.fill();
+
+    // 영역색 (결정 경계 계산된 경우)
+    if (weights) {
+      drawRegions();
+    }
+
+    // 그리드
+    mctx.strokeStyle = '#F0F0F0'; mctx.lineWidth = 1;
+    for (let gx = 0; gx <= 10; gx += 2) {
+      const [px] = toPixel(gx, 0);
+      mctx.beginPath(); mctx.moveTo(px, MP.top); mctx.lineTo(px, MH - MP.bottom); mctx.stroke();
+    }
+    for (let gy = 0; gy <= 10; gy += 2) {
+      const [, py] = toPixel(0, gy);
+      mctx.beginPath(); mctx.moveTo(MP.left, py); mctx.lineTo(MW - MP.right, py); mctx.stroke();
+    }
+
+    // 결정 경계선
+    if (weights) {
+      drawBoundary();
+    }
+
+    // 데이터 포인트
+    for (const p of pointsA) {
+      const [px, py] = toPixel(p.lx, p.ly);
+      mctx.beginPath(); mctx.arc(px, py, 6, 0, Math.PI * 2);
+      mctx.fillStyle = '#2563EB'; mctx.fill();
+      mctx.strokeStyle = '#FFF'; mctx.lineWidth = 1.5; mctx.stroke();
+    }
+    for (const p of pointsB) {
+      const [px, py] = toPixel(p.lx, p.ly);
+      mctx.beginPath(); mctx.arc(px, py, 6, 0, Math.PI * 2);
+      mctx.fillStyle = '#DC2626'; mctx.fill();
+      mctx.strokeStyle = '#FFF'; mctx.lineWidth = 1.5; mctx.stroke();
+    }
+  }
+
+  function drawRegions() {
+    // 각 픽셀 행을 스캔하며 threshold 기준으로 영역 색 칠하기
+    // 성능상 픽셀 단위 대신 가로 스트라이프로 빠르게 처리
+    const step = 4; // px 단위 스텝
+    for (let py = MP.top; py < MH - MP.bottom; py += step) {
+      for (let px = MP.left; px < MW - MP.right; px += step) {
+        const [lx, ly] = toLogic(px, py);
+        const r = predict(lx, ly);
+        if (!r) continue;
+        if (r.prob >= threshold) {
+          mctx.fillStyle = 'rgba(254,226,226,0.5)'; // 연한 빨강 — 클래스 B
+        } else {
+          mctx.fillStyle = 'rgba(219,234,254,0.5)'; // 연한 파랑 — 클래스 A
+        }
+        mctx.fillRect(px, py, step, step);
+      }
+    }
+  }
+
+  function drawBoundary() {
+    // 결정 경계: σ(w1*x + w2*y + bias) = threshold  →  logit = log(t/(1-t))
+    // w1*x + w2*y + bias = logit_t  →  y = (logit_t - bias - w1*x) / w2
+    const { w1, w2, bias } = weights;
+    const logit_t = Math.log(threshold / (1 - threshold));
+
+    // threshold 극단값 처리
+    if (threshold <= 0 || threshold >= 1) {
+      // 전체 영역 한 쪽으로 분류 — 경계선을 캔버스 끝에 표시
+      const py = threshold <= 0 ? MH - MP.bottom : MP.top;
+      mctx.strokeStyle = '#1A1A1A'; mctx.lineWidth = 2;
+      mctx.setLineDash([]);
+      mctx.beginPath(); mctx.moveTo(MP.left, py); mctx.lineTo(MW - MP.right, py); mctx.stroke();
+      return;
+    }
+
+    mctx.strokeStyle = '#1A1A1A'; mctx.lineWidth = 2;
+    mctx.setLineDash([]);
+
+    if (Math.abs(w2) > 0.001) {
+      // y = (logit_t - bias - w1*x) / w2
+      const x0 = X_MIN, x1 = X_MAX;
+      const y0 = (logit_t - bias - w1 * x0) / w2;
+      const y1 = (logit_t - bias - w1 * x1) / w2;
+      const [px0, py0] = toPixel(x0, y0);
+      const [px1, py1] = toPixel(x1, y1);
+      mctx.beginPath(); mctx.moveTo(px0, py0); mctx.lineTo(px1, py1); mctx.stroke();
+    } else if (Math.abs(w1) > 0.001) {
+      // 수직선: x = (logit_t - bias) / w1
+      const lx = (logit_t - bias) / w1;
+      const [px] = toPixel(lx, 0);
+      mctx.beginPath(); mctx.moveTo(px, MP.top); mctx.lineTo(px, MH - MP.bottom); mctx.stroke();
+    }
+  }
+
+  // ── 시그모이드 패널 그리기 ──
+  function drawSigmoid() {
+    sctx.clearRect(0, 0, SW, SH);
+    sctx.fillStyle = '#FAFAFA';
+    sctx.beginPath(); sctx.roundRect(0, 0, SW, SH, 9); sctx.fill();
+
+    const iW = SW - SP.left - SP.right;
+    const iH = SH - SP.top  - SP.bottom;
+
+    // z축 범위: -6 ~ 6
+    const Z_MIN = -6, Z_MAX = 6;
+
+    function sigPt(z, p) {
+      const cx = SP.left + (z - Z_MIN) / (Z_MAX - Z_MIN) * iW;
+      const cy = SP.top  + (1 - p) * iH;
+      return [cx, cy];
+    }
+
+    // 그리드
+    sctx.strokeStyle = '#F0F0F0'; sctx.lineWidth = 1;
+    for (let g = 0; g <= 4; g++) {
+      const y = SP.top + (g / 4) * iH;
+      sctx.beginPath(); sctx.moveTo(SP.left, y); sctx.lineTo(SW - SP.right, y); sctx.stroke();
+    }
+    for (let g = -6; g <= 6; g += 3) {
+      const [cx] = sigPt(g, 0);
+      sctx.beginPath(); sctx.moveTo(cx, SP.top); sctx.lineTo(cx, SH - SP.bottom); sctx.stroke();
+    }
+
+    // 축 레이블
+    sctx.font = '10px monospace'; sctx.fillStyle = '#C9CAD0'; sctx.textAlign = 'right';
+    sctx.fillText('1.0', SP.left - 4, SP.top + 4);
+    sctx.fillText('0.5', SP.left - 4, SP.top + iH / 2 + 4);
+    sctx.fillText('0.0', SP.left - 4, SP.top + iH + 4);
+
+    // threshold 수평 점선
+    const [, thy] = sigPt(0, threshold);
+    sctx.strokeStyle = '#6366F1'; sctx.lineWidth = 1.5;
+    sctx.setLineDash([4, 3]);
+    sctx.beginPath(); sctx.moveTo(SP.left, thy); sctx.lineTo(SW - SP.right, thy); sctx.stroke();
+    sctx.setLineDash([]);
+
+    // 시그모이드 곡선
+    sctx.strokeStyle = '#1A1A1A'; sctx.lineWidth = 2;
+    sctx.beginPath();
+    for (let i = 0; i <= iW; i++) {
+      const z = Z_MIN + (i / iW) * (Z_MAX - Z_MIN);
+      const p = sigmoid(z);
+      const [cx, cy] = sigPt(z, p);
+      i === 0 ? sctx.moveTo(cx, cy) : sctx.lineTo(cx, cy);
+    }
+    sctx.stroke();
+
+    // hover 점
+    if (hoverLogit !== null) {
+      const clampedZ = Math.max(Z_MIN, Math.min(Z_MAX, hoverLogit));
+      const p = sigmoid(clampedZ);
+      const [cx, cy] = sigPt(clampedZ, p);
+      sctx.beginPath(); sctx.arc(cx, cy, 5, 0, Math.PI * 2);
+      sctx.fillStyle = '#6366F1'; sctx.fill();
+      sctx.strokeStyle = '#FFF'; sctx.lineWidth = 1.5; sctx.stroke();
+    }
+  }
+
+  function render() { drawMain(); drawSigmoid(); }
+
+  // ── 클릭으로 점 추가 ──
+  mc.addEventListener('click', e => {
+    const rect = mc.getBoundingClientRect();
+    const px = (e.clientX - rect.left) * (MW / rect.width);
+    const py = (e.clientY - rect.top)  * (MH / rect.height);
+    const [lx, ly] = toLogic(px, py);
+
+    if (lx < X_MIN || lx > X_MAX || ly < Y_MIN || ly > Y_MAX) return;
+
+    const total = pointsA.length + pointsB.length;
+    if (total >= 20) { showStatus('최대 20개까지 찍을 수 있어요'); return; }
+
+    if (selectedClass === 'A') pointsA.push({ lx, ly });
+    else                        pointsB.push({ lx, ly });
+
+    clearStatus();
+    checkAndTrain();
+    render();
+  });
+
+  function checkAndTrain() {
+    if (pointsA.length < 2 || pointsB.length < 2) {
+      weights = null;
+      if ((pointsA.length > 0 || pointsB.length > 0) &&
+          (pointsA.length < 2 || pointsB.length < 2)) {
+        showStatus('두 클래스 모두 점을 찍어보세요');
+      }
+    } else {
+      clearStatus();
+      trainLogistic();
+    }
+  }
+
+  // ── 마우스 hover ──
+  mc.addEventListener('mousemove', e => {
+    const rect = mc.getBoundingClientRect();
+    const px = (e.clientX - rect.left) * (MW / rect.width);
+    const py = (e.clientY - rect.top)  * (MH / rect.height);
+    const [lx, ly] = toLogic(px, py);
+
+    if (lx < X_MIN || lx > X_MAX || ly < Y_MIN || ly > Y_MAX) {
+      hoverLogit = null; hoverProb = null;
+      updateProbDisplay();
+      drawSigmoid();
+      return;
+    }
+
+    const r = predict(lx, ly);
+    if (r) {
+      hoverLogit = r.logit;
+      hoverProb  = r.prob;
+    } else {
+      hoverLogit = null;
+      hoverProb  = null;
+    }
+    updateProbDisplay();
+    drawSigmoid();
+  });
+
+  mc.addEventListener('mouseleave', () => {
+    hoverLogit = null; hoverProb = null;
+    updateProbDisplay();
+    drawSigmoid();
+  });
+
+  function updateProbDisplay() {
+    const el = document.getElementById('probDisplay');
+    if (hoverProb === null) {
+      el.innerHTML = '—';
+    } else {
+      el.innerHTML = `이 위치가 클래스 B일 확률: <span class="prob-num">${hoverProb.toFixed(2)}</span>`;
+    }
+  }
+
+  // ── 클래스 토글 ──
+  document.getElementById('btnA').addEventListener('click', () => {
+    selectedClass = 'A';
+    document.getElementById('btnA').className = 'toggle-btn active-a';
+    document.getElementById('btnB').className = 'toggle-btn';
+  });
+  document.getElementById('btnB').addEventListener('click', () => {
+    selectedClass = 'B';
+    document.getElementById('btnA').className = 'toggle-btn';
+    document.getElementById('btnB').className = 'toggle-btn active-b';
+  });
+
+  // ── Threshold 슬라이더 ──
+  document.getElementById('thresholdSlider').addEventListener('input', e => {
+    threshold = parseFloat(e.target.value);
+    document.getElementById('thresholdVal').textContent = threshold.toFixed(2);
+    render();
+  });
+
+  // ── 초기화 ──
+  document.getElementById('btnReset').addEventListener('click', () => {
+    pointsA = []; pointsB = [];
+    weights = null;
+    threshold = 0.5;
+    hoverLogit = null; hoverProb = null;
+    selectedClass = 'A';
+    document.getElementById('thresholdSlider').value = '0.5';
+    document.getElementById('thresholdVal').textContent = '0.50';
+    document.getElementById('btnA').className = 'toggle-btn active-a';
+    document.getElementById('btnB').className = 'toggle-btn';
+    clearStatus();
+    updateProbDisplay();
+    render();
+  });
+
+  // ── 상태 메시지 ──
+  let statusTimer = null;
+  function showStatus(msg) {
+    document.getElementById('statusMsg').textContent = msg;
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(clearStatus, 3000);
+  }
+  function clearStatus() {
+    document.getElementById('statusMsg').textContent = '';
+  }
+
+  // ── 초기 렌더 ──
+  render();
+</script>
+</body>
+</html>
