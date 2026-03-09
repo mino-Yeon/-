@@ -77,7 +77,7 @@
 
     /* ── MSE 수치판 ── */
     .mse-panel {
-      width: 180px;
+      width: 210px;
       flex-shrink: 0;
       margin-top: 26px;
     }
@@ -87,13 +87,21 @@
       padding: 20px 18px 18px;
       background: #FAFAFA;
     }
-    .mse-label {
-      font-size: 12px;
+    .mse-formula {
+      font-size: 11px;
       font-weight: 500;
+      font-family: 'SF Mono', 'Fira Mono', 'Consolas', monospace;
       color: #6B7280;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
+      white-space: nowrap;
+    }
+    .mse-desc {
+      font-size: 12px;
+      color: #9CA3AF;
+      line-height: 1.5;
+      margin-bottom: 14px;
+      border-bottom: 1px solid #E5E7EB;
+      padding-bottom: 12px;
     }
     .mse-value {
       font-size: 32px;
@@ -101,17 +109,9 @@
       font-family: 'SF Mono', 'Fira Mono', 'Consolas', monospace;
       color: #6366F1;
       line-height: 1;
-      margin-bottom: 14px;
       letter-spacing: -1px;
     }
     .mse-value.dash { color: #D1D5DB; font-size: 28px; }
-    .mse-tooltip {
-      font-size: 12px;
-      color: #9CA3AF;
-      line-height: 1.5;
-      border-top: 1px solid #E5E7EB;
-      padding-top: 12px;
-    }
 
     /* ── 슬라이더 패널 ── */
     .slider-panel {
@@ -202,12 +202,6 @@
       padding-top: 32px;
       max-width: 640px;
     }
-    .footer-desc h2 {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: #1A1A1A;
-    }
     .footer-desc p {
       font-size: 14px;
       color: #6B7280;
@@ -249,9 +243,9 @@
 
     <div class="mse-panel">
       <div class="mse-card">
-        <div class="mse-label">MSE</div>
+        <div class="mse-formula">MSE = Σ(실제값 - 예측값)² / n</div>
+        <div class="mse-desc">각 점과 선 사이 거리를 제곱해서 평균낸 값입니다</div>
         <div class="mse-value dash" id="mseValue">—</div>
-        <div class="mse-tooltip">MSE: 각 점과 선 사이 거리의 평균. 낮을수록 선이 점들을 잘 설명합니다</div>
       </div>
     </div>
   </div>
