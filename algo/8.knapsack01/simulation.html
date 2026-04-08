@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>0/1 배낭 문제 DP 시뮬레이션</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;
+  background:#1a1e25;color:#e2e8f0;
+  display:flex;flex-direction:column;height:100vh;overflow:hidden;
+}
+
+/* ── 헤더 ── */
+.page-header{
+  background:#2c3e50;border-bottom:3px solid #3498db;
+  padding:0 24px;height:54px;display:flex;align-items:center;gap:16px;flex-shrink:0;
+}
+.back-btn{
+  color:#94a3b8;text-decoration:none;font-size:13px;
+  padding:5px 12px;border:1px solid #34495e;border-radius:5px;
+  transition:color .15s,border-color .15s;white-space:nowrap;
+}
+.back-btn:hover{color:#3498db;border-color:#3498db;}
+.page-title{font-size:17px;font-weight:700;color:#fff;}
+.page-sub{font-size:12px;color:#64748b;margin-top:1px;}
+
+/* ── 탭 ── */
+.tabs{
+  background:#212830;border-bottom:1px solid #2a3444;
+  padding:0 24px;display:flex;flex-shrink:0;
+}
+.tab-btn{
+  padding:11px 22px;font-size:13px;font-weight:500;color:#64748b;
+  cursor:pointer;border:none;background:none;
+  border-bottom:3px solid transparent;margin-bottom:-1px;
+  transition:color .15s,border-color .15s;
+}
+.tab-btn:hover{color:#94a3b8;}
+.tab-btn.active{color:#3498db;border-bottom-color:#3498db;font-weight:600;}
+
+/* ── 콘텐츠 ── */
+.content{flex:1;overflow:hidden;display:flex;min-height:0;}
+.tab-pane{display:none;flex:1;overflow:hidden;}
+.tab-pane.active{display:flex;}
+
+/* ── 패널 ── */
+.left-panel{
+  width:300px;flex-shrink:0;border-right:1px solid #2a3444;
+  overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;
+}
+.right-panel{flex:1;overflow:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;}
+
+/* ── 박스 ── */
+.box{background:#212830;border:1px solid #2a3444;border-radius:8px;padding:12px 14px;}
+.box-title{font-size:11px;font-weight:700;color:#3498db;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+
+/* ── 아이템 테이블 ── */
+.items-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.items-tbl th{background:#2a3444;color:#94a3b8;padding:5px 8px;text-align:center;font-weight:600;}
+.items-tbl td{padding:6px 8px;text-align:center;border-bottom:1px solid #252e3a;color:#e2e8f0;}
+.items-tbl tr:last-child td{border-bottom:none;}
+.items-tbl tr.row-active td{background:#1a2332;color:#3498db;font-weight:700;}
+
+/* ── 시간복잡도 ── */
+.cplx-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.cplx-card{background:#2a3444;border-radius:6px;padding:10px;text-align:center;border:1px solid transparent;}
+.cplx-card.hi{border-color:#3498db;}
+.cplx-lbl{font-size:10px;color:#64748b;margin-bottom:4px;}
+.cplx-val{font-size:18px;font-weight:700;color:#e2e8f0;}
+.cplx-card.hi .cplx-val{color:#3498db;}
+.cplx-sub{font-size:10px;color:#94a3b8;margin-top:3px;}
+
+/* ── 단계 설명 ── */
+.step-desc{font-size:13px;color:#e2e8f0;line-height:1.7;min-height:56px;}
+.step-desc .hl{color:#3498db;font-weight:600;}
+.step-desc .take{color:#2ecc71;font-weight:600;}
+.step-desc .keep{color:#e67e22;font-weight:600;}
+.step-desc .eq{color:#9b59b6;font-weight:600;}
+
+/* ── 수식 박스 ── */
+.formula{
+  background:#1e2530;border:1px solid #2a3444;border-radius:6px;
+  padding:10px 14px;font-family:'Consolas','D2Coding',monospace;font-size:12px;
+  color:#94a3b8;line-height:1.8;
+}
+.formula .var{color:#3498db;}
+.formula .warn{color:#e67e22;font-weight:600;}
+
+/* ── 범례 ── */
+.legend{display:flex;flex-wrap:wrap;gap:8px;font-size:11px;}
+.leg-item{display:flex;align-items:center;gap:5px;color:#94a3b8;}
+.leg-dot{width:14px;height:14px;border-radius:3px;flex-shrink:0;}
+
+/* ── DP 2D 테이블 ── */
+.dp-tbl-wrap{overflow-x:auto;}
+.dp-tbl{border-collapse:separate;border-spacing:3px;font-size:13px;}
+.dp-tbl th{color:#64748b;font-size:10px;padding:3px 6px;text-align:center;white-space:nowrap;}
+.dp-tbl .rh{
+  font-size:10px;color:#64748b;text-align:right;padding-right:6px;
+  white-space:nowrap;line-height:1.4;
+}
+.dp-tbl .rh.active-rh{color:#3498db;font-weight:700;}
+.dp-cell{
+  width:50px;height:42px;text-align:center;vertical-align:middle;
+  border-radius:5px;border:1.5px solid #2a3444;background:#1e2530;
+  font-weight:500;color:#64748b;transition:background .18s,border-color .18s,color .18s;
+}
+.dp-cell.c-zero{background:#1e2530;color:#4a5568;}
+.dp-cell.c-empty{background:#191d24;border-color:#1e2530;color:#2a3444;}
+.dp-cell.c-done{background:#1a2a1e;border-color:#2a4030;color:#a3d4b0;}
+.dp-cell.c-ref-keep{background:#2a1e0a;border-color:#e67e22;color:#e67e22;box-shadow:0 0 8px rgba(230,126,34,.35);}
+.dp-cell.c-ref-take{background:#0a2a1a;border-color:#2ecc71;color:#2ecc71;box-shadow:0 0 8px rgba(46,204,113,.35);}
+.dp-cell.c-current{background:#0a1e3a;border-color:#3498db;color:#3498db;font-weight:700;box-shadow:0 0 10px rgba(52,152,219,.4);}
+.dp-cell.c-written{background:#0e2040;border-color:#5dade2;color:#fff;font-weight:700;}
+.dp-cell.c-final{background:#1e0a3a;border-color:#9b59b6;color:#c39bd3;font-weight:700;box-shadow:0 0 10px rgba(155,89,182,.4);}
+
+/* ── 비교 박스 ── */
+.cmp-box{background:#212830;border:1px solid #2a3444;border-radius:8px;padding:14px 16px;min-height:110px;}
+.cmp-title{font-size:11px;font-weight:700;color:#3498db;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;}
+.cmp-options{display:grid;grid-template-columns:1fr 32px 1fr;gap:10px;align-items:center;}
+.cmp-opt{background:#2a3444;border-radius:6px;padding:10px 12px;border:1.5px solid #34495e;transition:border-color .2s,opacity .2s;}
+.cmp-opt.winner{border-color:#2ecc71;background:#0a2a16;}
+.cmp-opt.loser{opacity:.45;}
+.cmp-opt-lbl{font-size:10px;color:#64748b;margin-bottom:5px;}
+.cmp-formula{font-size:11px;color:#94a3b8;font-family:'Consolas','D2Coding',monospace;margin-bottom:3px;}
+.cmp-value{font-size:22px;font-weight:700;}
+.cmp-vs{font-size:13px;color:#4a5568;text-align:center;}
+.cmp-result{
+  margin-top:10px;padding:9px 14px;border-radius:6px;
+  font-size:13px;font-weight:600;text-align:center;
+  background:#0a2a16;border:1px solid #2ecc71;color:#2ecc71;
+}
+.cmp-result.r-keep{background:#2a1a06;border-color:#e67e22;color:#e67e22;}
+.cmp-result.r-eq{background:#1a0a2a;border-color:#9b59b6;color:#9b59b6;}
+.cmp-skip{
+  background:#252e3a;border-radius:6px;padding:12px 16px;
+  font-size:13px;color:#94a3b8;text-align:center;line-height:1.6;
+}
+.cmp-empty{color:#4a5568;font-size:13px;text-align:center;padding:24px 0;}
+
+/* ── 1D 설명 ── */
+.explain-body{font-size:12px;color:#94a3b8;line-height:1.8;}
+.explain-body .em{color:#e2e8f0;font-weight:600;}
+.explain-body .warn{color:#e67e22;font-weight:600;}
+.explain-body code{font-family:'Consolas','D2Coding',monospace;background:#2a3444;padding:1px 5px;border-radius:3px;color:#3498db;font-size:11px;}
+.divider{border:none;border-top:1px solid #2a3444;margin:8px 0;}
+
+/* ── 1D 배열 ── */
+.arr1d-wrap{overflow-x:auto;}
+.arr1d{display:flex;gap:3px;min-width:max-content;}
+.arr1d-cell{
+  width:52px;height:54px;border-radius:6px;background:#1e2530;
+  border:1.5px solid #2a3444;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;transition:all .18s;
+}
+.arr1d-cell .cidx{font-size:9px;color:#4a5568;margin-bottom:3px;}
+.arr1d-cell .cval{font-size:16px;font-weight:700;color:#e2e8f0;}
+.arr1d-cell.a-current{border-color:#3498db;background:#0a1e3a;box-shadow:0 0 10px rgba(52,152,219,.4);}
+.arr1d-cell.a-current .cval{color:#3498db;}
+.arr1d-cell.a-ref{border-color:#2ecc71;background:#0a2a16;box-shadow:0 0 8px rgba(46,204,113,.3);}
+.arr1d-cell.a-ref .cval{color:#2ecc71;}
+.arr1d-cell.a-done{border-color:#2a4030;background:#1a2a1e;}
+.arr1d-cell.a-done .cval{color:#a3d4b0;}
+.arr1d-cell.a-skip{opacity:.3;}
+.arr1d-cell.a-final{border-color:#9b59b6;background:#1e0a3a;box-shadow:0 0 10px rgba(155,89,182,.4);}
+.arr1d-cell.a-final .cval{color:#c39bd3;}
+
+/* ── 방향 표시 ── */
+.dir-bar{
+  display:none;align-items:center;gap:8px;
+  padding:7px 12px;background:#2a1a06;border-radius:6px;
+  border:1px solid #c0862a;font-size:12px;color:#e67e22;
+}
+.dir-bar.show{display:flex;}
+
+/* ── 컨트롤 ── */
+.controls{
+  background:#212830;border-top:1px solid #2a3444;
+  padding:10px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.btn{
+  padding:6px 14px;border-radius:5px;border:1px solid #34495e;
+  background:#2c3e50;color:#e2e8f0;font-size:13px;cursor:pointer;
+  font-family:inherit;transition:background .15s;white-space:nowrap;
+}
+.btn:hover{background:#34495e;}
+.btn.primary{background:#3498db;border-color:#3498db;color:#fff;}
+.btn.primary:hover{background:#2980b9;}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+.ctrl-sep{width:1px;height:22px;background:#2a3444;}
+.step-ctr{font-size:12px;color:#64748b;margin-left:auto;}
+.speed-lbl{font-size:12px;color:#64748b;}
+input[type=range]{width:90px;accent-color:#3498db;}
+</style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="page-header">
+  <a class="back-btn" href="../index.html">← 목록</a>
+  <div>
+    <div class="page-title">0/1 배낭 문제 (Knapsack DP)</div>
+    <div class="page-sub">2차원 DP → 1차원 DP 공간 최적화 과정 시각화</div>
+  </div>
+</div>
+
+<!-- 탭 -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('2d')">📊 2차원 DP</button>
+  <button class="tab-btn" onclick="switchTab('1d')">📈 1차원 DP (공간 최적화)</button>
+</div>
+
+<!-- 콘텐츠 -->
+<div class="content">
+
+  <!-- ===== 2D 탭 ===== -->
+  <div class="tab-pane active" id="pane-2d">
+    <div class="left-panel">
+
+      <div class="box">
+        <div class="box-title">아이템 정보 &nbsp;(배낭 용량 M = 8)</div>
+        <table class="items-tbl" id="itbl-2d">
+          <thead><tr><th>아이템</th><th>무게 w</th><th>가치 v</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>2</td><td>3</td></tr>
+            <tr><td>2</td><td>3</td><td>4</td></tr>
+            <tr><td>3</td><td>4</td><td>5</td></tr>
+            <tr><td>4</td><td>5</td><td>7</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box">
+        <div class="box-title">시간 복잡도 비교</div>
+        <div class="cplx-grid">
+          <div class="cplx-card">
+            <div class="cplx-lbl">완전 탐색 (부분집합)</div>
+            <div class="cplx-val">O(2ᴺ)</div>
+            <div class="cplx-sub">2⁴ = 16가지 경우</div>
+          </div>
+          <div class="cplx-card hi">
+            <div class="cplx-lbl">동적 프로그래밍</div>
+            <div class="cplx-val">O(N·M)</div>
+            <div class="cplx-sub">4 × 9 = 36번 연산</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#64748b;margin-top:8px;line-height:1.6;">
+          N이 커질수록 차이가 폭발적으로 증가합니다.<br>
+          (N=30 기준: 2³⁰ ≈ 10억 vs 30×M)
+        </div>
+      </div>
+
+      <div class="box" style="flex:1">
+        <div class="box-title">현재 단계</div>
+        <div class="step-desc" id="desc-2d">▶ 재생 또는 → 키로 시작하세요.</div>
+      </div>
+
+    </div>
+    <div class="right-panel">
+
+      <div class="formula">
+        d[<span class="var">i</span>][<span class="var">j</span>] = max(
+          d[<span class="var">i</span>-1][<span class="var">j</span>-w[<span class="var">i</span>]] + v[<span class="var">i</span>],&nbsp;&nbsp;<span style="color:#2ecc71">← 아이템 i를 넣을 때</span>
+          d[<span class="var">i</span>-1][<span class="var">j</span>]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#e67e22">← 아이템 i를 넣지 않을 때</span>
+        )&nbsp;&nbsp;단, j &lt; w[i] 이면 넣을 수 없으므로 d[i-1][j] 그대로
+      </div>
+
+      <div class="legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#1e2530;border:1.5px solid #2a3444"></div>미계산</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#1a2a1e;border:1.5px solid #2a4030"></div>계산 완료</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#0a2a1a;border:1.5px solid #2ecc71"></div>넣을 때 참조</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#2a1e0a;border:1.5px solid #e67e22"></div>넣지 않을 때 참조</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#0a1e3a;border:1.5px solid #3498db"></div>계산 중</div>
+      </div>
+
+      <div class="dp-tbl-wrap">
+        <table class="dp-tbl" id="tbl-2d"></table>
+      </div>
+
+      <div class="cmp-box" id="cmp-2d">
+        <div class="cmp-empty">시뮬레이션을 진행하면 비교 과정이 여기에 표시됩니다.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== 1D 탭 ===== -->
+  <div class="tab-pane" id="pane-1d">
+    <div class="left-panel">
+
+      <div class="box">
+        <div class="box-title">왜 1차원으로 압축 가능할까?</div>
+        <div class="explain-body">
+          <div>2차원 점화식:</div>
+          <div style="margin:6px 0"><code>d[i][j] = max(d[i-1][j-w]+v, d[i-1][j])</code></div>
+          <div><span class="em">i행은 오직 i-1행만 참조</span>합니다.</div>
+          <div>→ 1차원 배열 하나로 덮어써도 OK!</div>
+          <hr class="divider">
+          <div style="margin-bottom:4px"><span class="warn">⚠ j는 반드시 큰 값 → 작은 값 순서로!</span></div>
+          <div style="font-size:11px;margin-bottom:3px">왼→오 순서라면: <code>dp[j-w]</code>가 이미<br>이번 아이템으로 업데이트된 값</div>
+          <div style="font-size:11px;color:#e67e22">→ 같은 아이템을 두 번 선택하는 오류!</div>
+          <hr class="divider">
+          <div style="font-size:11px;color:#94a3b8">오→왼 순서라면: <code>dp[j-w]</code>는 아직<br>이번 아이템으로 업데이트되기 전 값</div>
+          <div style="font-size:11px;color:#2ecc71">→ 이전 행(i-1행)의 값과 동일하게 유지 ✓</div>
+        </div>
+      </div>
+
+      <div class="box">
+        <div class="box-title">아이템 정보 &nbsp;(M = 8)</div>
+        <table class="items-tbl" id="itbl-1d">
+          <thead><tr><th>아이템</th><th>무게 w</th><th>가치 v</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>2</td><td>3</td></tr>
+            <tr><td>2</td><td>3</td><td>4</td></tr>
+            <tr><td>3</td><td>4</td><td>5</td></tr>
+            <tr><td>4</td><td>5</td><td>7</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box" style="flex:1">
+        <div class="box-title">현재 단계</div>
+        <div class="step-desc" id="desc-1d">▶ 재생 또는 → 키로 시작하세요.</div>
+      </div>
+
+    </div>
+    <div class="right-panel">
+
+      <div class="formula">
+        dp[<span class="var">j</span>] = max(dp[<span class="var">j</span>-w[<span class="var">i</span>]] + v[<span class="var">i</span>], dp[<span class="var">j</span>])
+        &nbsp;&nbsp;j : <span class="warn">M → w[i] 역방향 순회</span>
+      </div>
+
+      <div class="dir-bar" id="dir-bar">
+        <span>◀ 역방향 순회 중</span>
+        <span id="dir-range" style="margin-left:8px;color:#fff;font-weight:600;"></span>
+        <span id="dir-pos" style="margin-left:auto;font-size:11px;"></span>
+      </div>
+
+      <div class="box">
+        <div class="box-title">1차원 DP 배열 &nbsp;dp[0 .. 8]</div>
+        <div class="arr1d-wrap">
+          <div class="arr1d" id="arr1d"></div>
+        </div>
+      </div>
+
+      <div class="cmp-box" id="cmp-1d">
+        <div class="cmp-empty">시뮬레이션을 진행하면 비교 과정이 여기에 표시됩니다.</div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- .content -->
+
+<!-- 컨트롤 -->
+<div class="controls">
+  <button class="btn" id="btn-prev" onclick="doPrev()">◀ 이전</button>
+  <button class="btn primary" id="btn-play" onclick="togglePlay()">▶ 재생</button>
+  <button class="btn" id="btn-next" onclick="doNext()">다음 ▶</button>
+  <button class="btn" id="btn-reset" onclick="doReset()">↺ 리셋</button>
+  <div class="ctrl-sep"></div>
+  <span class="speed-lbl">속도</span>
+  <input type="range" min="1" max="10" value="5" oninput="setSpeed(this.value)">
+  <span class="step-ctr" id="step-ctr">1 / 1</span>
+</div>
+
+<script>
+/* ========================================================
+   데이터
+======================================================== */
+const N = 4, M = 8;
+const ITEMS = [{w:2,v:3},{w:3,v:4},{w:4,v:5},{w:5,v:7}];
+
+/* ========================================================
+   2D 스텝 생성
+======================================================== */
+function genSteps2D() {
+  const steps = [];
+  const d = Array.from({length:N+1}, ()=>new Array(M+1).fill(0));
+  const comp = Array.from({length:N+1}, ()=>new Array(M+1).fill(false));
+  for (let j=0;j<=M;j++) comp[0][j]=true;
+
+  steps.push({
+    phase:'init', i:0, j:-1,
+    d:snap2d(d), comp:snapComp(comp),
+    desc:'<span class="hl">초기화</span>: d[0][j] = 0 &nbsp;(아이템이 0개일 때 모든 용량에서 최대 가치 = 0)'
+  });
+
+  for (let i=1;i<=N;i++) {
+    const {w,v}=ITEMS[i-1];
+    for (let j=0;j<=M;j++) {
+      const keepVal = d[i-1][j];
+      if (j < w) {
+        // 넣을 수 없음 → 단일 스텝
+        steps.push({
+          phase:'skip', i, j, w, v,
+          keepVal, takeRef:null, takeVal:null, chosen:'keep', result:keepVal,
+          d:snap2d(d), comp:snapComp(comp),
+          desc:`용량 <b>${j}</b> &lt; 아이템 ${i} 무게 <b>${w}</b> → 넣을 수 없음<br>d[${i}][${j}] = d[${i-1}][${j}] = <b>${keepVal}</b>`
+        });
+        d[i][j]=keepVal; comp[i][j]=true;
+      } else {
+        const takeRef = d[i-1][j-w];
+        const takeVal = takeRef + v;
+        const chosen = takeVal>keepVal?'take':takeVal===keepVal?'equal':'keep';
+        const result = Math.max(keepVal,takeVal);
+
+        // 비교 스텝 (아직 d[i][j] 미기록)
+        steps.push({
+          phase:'compare', i, j, w, v,
+          keepVal, takeRef, takeVal, chosen, result,
+          d:snap2d(d), comp:snapComp(comp),
+          desc:`<span class="hl">d[${i}][${j}]</span> 계산 시작 (아이템 ${i}: w=${w}, v=${v})<br>` +
+               `<span class="take">①</span> 넣을 때: d[${i-1}][${j-w}] + ${v} = ${takeRef} + ${v} = ${takeVal}<br>` +
+               `<span class="keep">②</span> 넣지 않을 때: d[${i-1}][${j}] = ${keepVal}`
+        });
+
+        // 기록 스텝
+        d[i][j]=result; comp[i][j]=true;
+        const aLabel = chosen==='take'
+          ?`<span class="take">아이템 ${i} 선택!</span>`
+          :chosen==='keep'
+          ?`<span class="keep">아이템 ${i} 미선택</span>`
+          :`<span class="eq">동일 → 미선택</span>`;
+        steps.push({
+          phase:'write', i, j, w, v,
+          keepVal, takeRef, takeVal, chosen, result,
+          d:snap2d(d), comp:snapComp(comp),
+          desc:`d[${i}][${j}] = max(${takeVal}, ${keepVal}) = <b>${result}</b> &nbsp;→ ${aLabel}`
+        });
+      }
+    }
+  }
+
+  steps.push({
+    phase:'done', i:N, j:M,
+    result:d[N][M],
+    d:snap2d(d), comp:snapComp(comp),
+    desc:`<span class="take">완료!</span> 최대 가치 = d[${N}][${M}] = <b>${d[N][M]}</b>`
+  });
+  return steps;
+}
+
+function snap2d(d){ return d.map(r=>[...r]); }
+function snapComp(c){ return c.map(r=>[...r]); }
+
+/* ========================================================
+   1D 스텝 생성
+======================================================== */
+function genSteps1D() {
+  const steps = [];
+  const dp = new Array(M+1).fill(0);
+
+  steps.push({
+    phase:'init', i:-1, j:-1,
+    dp:[...dp],
+    desc:'<span class="hl">초기화</span>: dp[0..8] = 0'
+  });
+
+  for (let i=0;i<N;i++) {
+    const {w,v}=ITEMS[i];
+    steps.push({
+      phase:'item-start', i, j:-1, w, v,
+      dp:[...dp],
+      desc:`<span class="hl">아이템 ${i+1}</span> 처리 시작 (무게 ${w}, 가치 ${v})<br>j = ${M} → ${w} 역방향 순회`
+    });
+    for (let j=M;j>=w;j--) {
+      const keepVal=dp[j], takeRef=dp[j-w], takeVal=takeRef+v;
+      const chosen=takeVal>keepVal?'take':takeVal===keepVal?'equal':'keep';
+      const result=Math.max(keepVal,takeVal);
+
+      steps.push({
+        phase:'compare', i, j, w, v,
+        keepVal, takeRef, takeVal, chosen, result,
+        dp:[...dp],
+        desc:`<span class="hl">dp[${j}]</span> 검토 (아이템 ${i+1}: w=${w}, v=${v})<br>` +
+             `<span class="take">새 후보</span>: dp[${j-w}] + ${v} = ${takeRef} + ${v} = ${takeVal}<br>` +
+             `<span class="keep">현재값</span>: dp[${j}] = ${keepVal}`
+      });
+
+      dp[j]=result;
+      const aLabel=chosen==='take'
+        ?`<span class="take">아이템 ${i+1} 선택!</span>`
+        :chosen==='keep'
+        ?`<span class="keep">기존 유지</span>`
+        :`<span class="eq">동일 → 유지</span>`;
+      steps.push({
+        phase:'write', i, j, w, v,
+        keepVal, takeRef, takeVal, chosen, result,
+        dp:[...dp],
+        desc:`dp[${j}] = max(${takeVal}, ${keepVal}) = <b>${result}</b> &nbsp;→ ${aLabel}`
+      });
+    }
+  }
+
+  steps.push({
+    phase:'done', i:N-1, j:-1,
+    result:dp[M],
+    dp:[...dp],
+    desc:`<span class="take">완료!</span> 최대 가치 = dp[${M}] = <b>${dp[M]}</b>`
+  });
+  return steps;
+}
+
+/* ========================================================
+   테이블/배열 초기화
+======================================================== */
+function initTable2D() {
+  const tbl = document.getElementById('tbl-2d');
+  let html = '<thead><tr><th></th>';
+  for (let j=0;j<=M;j++) html+=`<th>j=${j}</th>`;
+  html+='</tr></thead><tbody>';
+  for (let i=0;i<=N;i++) {
+    const lbl = i===0
+      ?'없음<br><small style="color:#4a5568">기저</small>'
+      :`아이템${i}<br><small style="color:#4a5568">w=${ITEMS[i-1].w} v=${ITEMS[i-1].v}</small>`;
+    html+=`<tr><td class="rh" id="rh-${i}">${lbl}</td>`;
+    for (let j=0;j<=M;j++) html+=`<td class="dp-cell" id="c-${i}-${j}">0</td>`;
+    html+='</tr>';
+  }
+  html+='</tbody>';
+  tbl.innerHTML=html;
+}
+
+function initArr1D() {
+  const wrap = document.getElementById('arr1d');
+  let html='';
+  for (let j=0;j<=M;j++) {
+    html+=`<div class="arr1d-cell" id="a1d-${j}">
+      <div class="cidx">j=${j}</div>
+      <div class="cval">0</div>
+    </div>`;
+  }
+  wrap.innerHTML=html;
+}
+
+/* ========================================================
+   렌더 2D
+======================================================== */
+function render2D() {
+  const step=steps2D[ci['2d']];
+  const {phase,d,comp,i,j}=step;
+
+  // 행 헤더 강조
+  for (let ri=0;ri<=N;ri++) {
+    const rh=document.getElementById(`rh-${ri}`);
+    if (rh) rh.classList.toggle('active-rh', ri===i && i>0 && phase!=='done');
+  }
+
+  // 아이템 테이블 강조
+  const rows2d=document.querySelectorAll('#itbl-2d tbody tr');
+  rows2d.forEach((r,idx)=>r.classList.toggle('row-active', idx===i-1 && i>0 && phase!=='done'));
+
+  // 셀 렌더링
+  for (let ri=0;ri<=N;ri++) {
+    for (let rj=0;rj<=M;rj++) {
+      const cell=document.getElementById(`c-${ri}-${rj}`);
+      if (!cell) continue;
+      cell.className='dp-cell';
+      cell.textContent=comp[ri][rj]?d[ri][rj]:'';
+
+      if (ri===0) {
+        cell.classList.add('c-zero');
+        cell.textContent='0';
+      } else if (phase==='done' && ri===N && rj===M) {
+        cell.classList.add('c-final');
+      } else if (phase!=='done' && ri===i && rj===j) {
+        if (phase==='compare') {
+          cell.classList.add('c-current');
+          cell.textContent='?';
+        } else {
+          // write 또는 skip
+          cell.classList.add('c-written');
+        }
+      } else if ((phase==='compare'||phase==='skip') && ri===i-1 && rj===j) {
+        cell.classList.add('c-ref-keep');
+      } else if (phase==='compare' && step.takeVal!==null && ri===i-1 && rj===j-step.w) {
+        cell.classList.add('c-ref-take');
+      } else if (!comp[ri][rj]) {
+        cell.classList.add('c-empty');
+        cell.textContent='';
+      } else {
+        cell.classList.add('c-done');
+      }
+    }
+  }
+
+  document.getElementById('desc-2d').innerHTML=step.desc;
+  renderCmp2D(step);
+  updateCtrl();
+}
+
+function renderCmp2D(step) {
+  const box=document.getElementById('cmp-2d');
+  const {phase,i,j,w,v,keepVal,takeRef,takeVal,chosen,result}=step;
+
+  if (phase==='init') {
+    box.innerHTML='<div class="cmp-empty">시뮬레이션을 진행하면 비교 과정이 표시됩니다.</div>';
+    return;
+  }
+  if (phase==='done') {
+    box.innerHTML=`<div class="cmp-empty">최종 답 &nbsp;<b style="color:#c39bd3;font-size:22px">d[${N}][${M}] = ${step.result}</b></div>`;
+    return;
+  }
+
+  let html=`<div class="cmp-title">d[${i}][${j}] 계산 과정</div>`;
+
+  if (phase==='skip') {
+    html+=`<div class="cmp-skip">
+      용량 <b style="color:#e2e8f0">${j}</b> &lt; 아이템 ${i} 무게 <b style="color:#e2e8f0">${w}</b> &nbsp;→ 배낭에 넣을 수 없음<br>
+      <span style="font-size:18px;font-weight:700;color:#e2e8f0;margin-top:8px;display:block">
+        d[${i}][${j}] = d[${i-1}][${j}] = ${keepVal}
+      </span>
+    </div>`;
+    box.innerHTML=html; return;
+  }
+
+  const isWrite=(phase==='write');
+  const wK=isWrite&&(chosen==='keep'||chosen==='equal');
+  const wT=isWrite&&(chosen==='take'||chosen==='equal');
+
+  html+=`<div class="cmp-options">
+    <div class="cmp-opt ${wT?'winner':''} ${isWrite&&!wT?'loser':''}">
+      <div class="cmp-opt-lbl">① 아이템 ${i} 넣을 때</div>
+      <div class="cmp-formula">d[${i-1}][${j-w}] + v[${i}]</div>
+      <div class="cmp-formula">${takeRef} + ${v} =</div>
+      <div class="cmp-value" style="color:#2ecc71">${takeVal}</div>
+    </div>
+    <div class="cmp-vs">vs</div>
+    <div class="cmp-opt ${wK?'winner':''} ${isWrite&&!wK?'loser':''}">
+      <div class="cmp-opt-lbl">② 아이템 ${i} 넣지 않을 때</div>
+      <div class="cmp-formula">d[${i-1}][${j}]</div>
+      <div class="cmp-value" style="color:#e67e22">${keepVal}</div>
+    </div>
+  </div>`;
+
+  if (isWrite) {
+    const rc=chosen==='take'?'':chosen==='keep'?'r-keep':'r-eq';
+    const rt=chosen==='take'?`아이템 ${i} 선택!`:chosen==='keep'?`아이템 ${i} 미선택`:`동일 (미선택)`;
+    html+=`<div class="cmp-result ${rc}">max(${takeVal}, ${keepVal}) = <b>${result}</b> &nbsp;→ ${rt}</div>`;
+  }
+
+  box.innerHTML=html;
+}
+
+/* ========================================================
+   렌더 1D
+======================================================== */
+function render1D() {
+  const step=steps1D[ci['1d']];
+  const {phase,dp,i,j}=step;
+
+  // 셀 렌더링
+  for (let k=0;k<=M;k++) {
+    const cell=document.getElementById(`a1d-${k}`);
+    if (!cell) continue;
+    cell.className='arr1d-cell';
+    cell.querySelector('.cval').textContent=dp[k];
+
+    if (phase==='done') {
+      cell.classList.add(k===M?'a-final':'a-done');
+    } else if (phase==='compare'||phase==='write') {
+      const {w}=step;
+      if (k===j) cell.classList.add('a-current');
+      else if (k===j-w) cell.classList.add('a-ref');
+      else if (phase==='write' && k>j && k<=M) cell.classList.add('a-done');
+      else if (k<w) cell.classList.add('a-skip');
+    } else if (phase==='item-start') {
+      // 이미 처리된 셀들 표시
+      cell.classList.add('a-done');
+    }
+  }
+
+  // 아이템 테이블 강조
+  const rows1d=document.querySelectorAll('#itbl-1d tbody tr');
+  rows1d.forEach((r,idx)=>r.classList.toggle('row-active',
+    idx===i && phase!=='init' && phase!=='done'));
+
+  // 방향 바
+  const dirBar=document.getElementById('dir-bar');
+  const dirRange=document.getElementById('dir-range');
+  const dirPos=document.getElementById('dir-pos');
+  if ((phase==='compare'||phase==='write'||phase==='item-start') && step.w!==undefined) {
+    dirBar.classList.add('show');
+    dirRange.textContent=`j = ${M} → ${step.w}`;
+    if (phase==='compare'||phase==='write') dirPos.textContent=`현재 j = ${j}`;
+    else dirPos.textContent='';
+  } else {
+    dirBar.classList.remove('show');
+  }
+
+  document.getElementById('desc-1d').innerHTML=step.desc;
+  renderCmp1D(step);
+  updateCtrl();
+}
+
+function renderCmp1D(step) {
+  const box=document.getElementById('cmp-1d');
+  const {phase}=step;
+
+  if (phase==='init'||phase==='item-start') {
+    box.innerHTML='<div class="cmp-empty">비교 과정이 여기에 표시됩니다.</div>';
+    return;
+  }
+  if (phase==='done') {
+    box.innerHTML=`<div class="cmp-empty">최종 답 &nbsp;<b style="color:#c39bd3;font-size:22px">dp[${M}] = ${step.result}</b></div>`;
+    return;
+  }
+
+  const {i,j,w,v,keepVal,takeRef,takeVal,chosen,result}=step;
+  const isWrite=(phase==='write');
+  const wK=isWrite&&(chosen==='keep'||chosen==='equal');
+  const wT=isWrite&&(chosen==='take'||chosen==='equal');
+
+  let html=`<div class="cmp-title">dp[${j}] 업데이트 검토 &nbsp;(아이템 ${i+1}: w=${w}, v=${v})</div>
+  <div class="cmp-options">
+    <div class="cmp-opt ${wT?'winner':''} ${isWrite&&!wT?'loser':''}">
+      <div class="cmp-opt-lbl">새 후보 (아이템 ${i+1} 추가)</div>
+      <div class="cmp-formula">dp[${j-w}] + v[${i+1}]</div>
+      <div class="cmp-formula">${takeRef} + ${v} =</div>
+      <div class="cmp-value" style="color:#2ecc71">${takeVal}</div>
+    </div>
+    <div class="cmp-vs">vs</div>
+    <div class="cmp-opt ${wK?'winner':''} ${isWrite&&!wK?'loser':''}">
+      <div class="cmp-opt-lbl">현재값 유지</div>
+      <div class="cmp-formula">dp[${j}]</div>
+      <div class="cmp-value" style="color:#e67e22">${keepVal}</div>
+    </div>
+  </div>`;
+
+  if (isWrite) {
+    const rc=chosen==='take'?'':chosen==='keep'?'r-keep':'r-eq';
+    const rt=chosen==='take'?`아이템 ${i+1} 선택!`:chosen==='keep'?`기존 유지`:`동일 (유지)`;
+    html+=`<div class="cmp-result ${rc}">max(${takeVal}, ${keepVal}) = <b>${result}</b> &nbsp;→ ${rt}</div>`;
+  }
+
+  box.innerHTML=html;
+}
+
+/* ========================================================
+   컨트롤
+======================================================== */
+const steps2D=genSteps2D();
+const steps1D=genSteps1D();
+let curTab='2d';
+const ci={'2d':0,'1d':0};
+let playing=false, timer=null, speedMs=600;
+
+function getSteps(){ return curTab==='2d'?steps2D:steps1D; }
+function getCi(){ return ci[curTab]; }
+function setCi(v){ ci[curTab]=v; }
+
+function render(){ curTab==='2d'?render2D():render1D(); }
+
+function doNext(){
+  if(getCi()<getSteps().length-1){ setCi(getCi()+1); render(); }
+  else stopPlay();
+}
+function doPrev(){
+  if(getCi()>0){ setCi(getCi()-1); render(); }
+}
+function doReset(){ stopPlay(); setCi(0); render(); }
+
+function togglePlay(){ playing?stopPlay():startPlay(); }
+function startPlay(){
+  playing=true;
+  document.getElementById('btn-play').textContent='⏸ 일시정지';
+  timer=setInterval(()=>{
+    if(getCi()>=getSteps().length-1) stopPlay(); else doNext();
+  },speedMs);
+}
+function stopPlay(){
+  playing=false; clearInterval(timer);
+  document.getElementById('btn-play').textContent='▶ 재생';
+}
+function setSpeed(v){ speedMs=Math.round(1300-v*110); if(playing){stopPlay();startPlay();} }
+
+function updateCtrl(){
+  const steps=getSteps(), idx=getCi();
+  document.getElementById('step-ctr').textContent=`${idx+1} / ${steps.length}`;
+  document.getElementById('btn-prev').disabled=idx===0;
+  document.getElementById('btn-next').disabled=idx===steps.length-1;
+}
+
+function switchTab(tab){
+  stopPlay(); curTab=tab;
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>
+    b.classList.toggle('active',(i===0&&tab==='2d')||(i===1&&tab==='1d')));
+  document.querySelectorAll('.tab-pane').forEach((p,i)=>
+    p.classList.toggle('active',(i===0&&tab==='2d')||(i===1&&tab==='1d')));
+  render();
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT') return;
+  if(e.key==='ArrowRight') doNext();
+  else if(e.key==='ArrowLeft') doPrev();
+  else if(e.key===' '){ e.preventDefault(); togglePlay(); }
+  else if(e.key==='r'||e.key==='R') doReset();
+});
+
+/* ========================================================
+   초기화
+======================================================== */
+initTable2D();
+initArr1D();
+render();
+</script>
+</body>
+</html>
