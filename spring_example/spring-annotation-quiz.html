@@ -543,13 +543,17 @@
       <span class="chip">@Repository</span>
       <span class="chip">@Autowired</span>
       <span class="chip">@Bean</span>
+      <span class="chip">@Primary</span>
+      <span class="chip">@Qualifier</span>
+      <span class="chip">@Scope</span>
+      <span class="chip">@Value</span>
     </div>
   </header>
 
   <div class="progress-bar-wrap">
     <span class="progress-label">진행도</span>
     <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-    <span class="progress-count" id="progress-count">0 / 7</span>
+    <span class="progress-count" id="progress-count">0 / 11</span>
   </div>
 
   <div id="quiz-container"></div>
@@ -560,7 +564,7 @@
 
   <div id="final-result">
     <div class="score-ring" id="score-ring">
-      <span class="score-num" id="score-num">0/7</span>
+      <span class="score-num" id="score-num">0/11</span>
     </div>
     <div class="final-title" id="final-title"></div>
     <div class="final-msg" id="final-msg"></div>
@@ -643,6 +647,31 @@ const QUIZZES = [
   },
   {
     id: 5,
+    title: "설정 파일 값 주입",
+    desc: "application.properties에 정의된 값을 클래스 필드에 직접 주입할 수 있습니다. 하드코딩 대신 외부 설정 파일로 값을 관리할 때 사용합니다.",
+    lines: [
+      { num: 1,  parts: [{ t: "cmt", v: "# application.properties" }] },
+      { num: 2,  parts: [{ t: "text", v: "app.name=MyShop" }] },
+      { num: 3,  parts: [{ t: "text", v: "app.max-upload-size=10" }] },
+      { num: 4,  parts: [{ t: "text", v: "app.admin-email=admin@myshop.com" }] },
+      { num: 5,  parts: [] },
+      { num: 6,  parts: [{ t: "blank", key: "q5b1", answer: "@Component", hint: "Bean으로 등록해야 @Value 주입이 동작함" }] },
+      { num: 7,  parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "AppProperties" }, { t: "text", v: " {" }] },
+      { num: 8,  parts: [] },
+      { num: 9,  parts: [{ t: "text", v: "    " }, { t: "blank", key: "q5b2", answer: "@Value", hint: "properties 파일의 값을 필드에 주입" }, { t: "str", v: '("${app.name}")' }] },
+      { num: 10, parts: [{ t: "text", v: "    " }, { t: "kword", v: "private " }, { t: "type", v: "String " }, { t: "param", v: "appName" }, { t: "text", v: ";" }] },
+      { num: 11, parts: [] },
+      { num: 12, parts: [{ t: "text", v: "    " }, { t: "blank", key: "q5b3", answer: "@Value", hint: "숫자 타입에도 자동 변환되어 주입됨" }, { t: "str", v: '("${app.max-upload-size}")' }] },
+      { num: 13, parts: [{ t: "text", v: "    " }, { t: "kword", v: "private " }, { t: "type", v: "int " }, { t: "param", v: "maxUploadSize" }, { t: "text", v: ";" }] },
+      { num: 14, parts: [] },
+      { num: 15, parts: [{ t: "text", v: "    " }, { t: "blank", key: "q5b4", answer: "@Value", hint: "기본값은 콜론(:)으로 지정 가능" }, { t: "str", v: '("${app.admin-email:no-email}")' }] },
+      { num: 16, parts: [{ t: "text", v: "    " }, { t: "kword", v: "private " }, { t: "type", v: "String " }, { t: "param", v: "adminEmail" }, { t: "text", v: ";" }] },
+      { num: 17, parts: [] },
+      { num: 18, parts: [{ t: "text", v: "}" }] },
+    ]
+  },
+  {
+    id: 6,
     title: "컨트롤러 URL 매핑 — GET / POST",
     desc: "클래스에 공통 경로를 설정하고, 각 메서드에 HTTP 메서드(GET/POST)를 구분하는 어노테이션을 붙입니다.",
     lines: [
@@ -661,7 +690,7 @@ const QUIZZES = [
     ]
   },
   {
-    id: 6,
+    id: 7,
     title: "쿼리 파라미터 바인딩",
     desc: "URL 쿼리 파라미터(?name=value)를 메서드 파라미터에 바인딩하는 어노테이션입니다. 예: GET /search?keyword=spring&page=1",
     lines: [
@@ -679,7 +708,7 @@ const QUIZZES = [
     ]
   },
   {
-    id: 7,
+    id: 8,
     title: "폼 데이터 객체 바인딩",
     desc: "HTML form으로 전송된 데이터를 DTO/VO 객체에 한 번에 바인딩하는 어노테이션입니다. 단일 값을 받는 방식과 달리 객체 단위로 처리합니다.",
     lines: [
@@ -704,6 +733,59 @@ const QUIZZES = [
       { num: 19, parts: [{ t: "text", v: "        " }, { t: "kword", v: "return " }, { t: "str", v: '"redirect:/member/list"' }, { t: "text", v: ";" }] },
       { num: 20, parts: [{ t: "text", v: "    }" }] },
       { num: 21, parts: [{ t: "text", v: "}" }] },
+    ]
+  },
+  {
+    id: 9,
+    title: "같은 타입 Bean이 여러 개일 때 — 우선순위 지정",
+    desc: "같은 타입의 Bean이 두 개 이상 등록되면 스프링은 어떤 Bean을 주입할지 몰라 오류가 납니다. 그 중 하나를 기본 Bean으로 지정하는 어노테이션을 사용해보세요.",
+    lines: [
+      { num: 1,  parts: [{ t: "kword", v: "public interface " }, { t: "cls", v: "NotificationService" }, { t: "text", v: " {}" }] },
+      { num: 2,  parts: [] },
+      { num: 3,  parts: [{ t: "cmt", v: "// 두 Bean 중 기본으로 사용할 구현체 지정" }] },
+      { num: 4,  parts: [{ t: "blank", key: "q8b1", answer: "@Primary", hint: "같은 타입 Bean이 여럿일 때 우선 주입될 Bean 지정" }] },
+      { num: 5,  parts: [{ t: "blank", key: "q8b2", answer: "@Service", hint: "비즈니스 계층 어노테이션" }] },
+      { num: 6,  parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "EmailNotificationService" }, { t: "kword", v: " implements " }, { t: "cls", v: "NotificationService" }, { t: "text", v: " {}" }] },
+      { num: 7,  parts: [] },
+      { num: 8,  parts: [{ t: "blank", key: "q8b3", answer: "@Service", hint: "비즈니스 계층 어노테이션" }] },
+      { num: 9,  parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "SmsNotificationService" }, { t: "kword", v: " implements " }, { t: "cls", v: "NotificationService" }, { t: "text", v: " {}" }] },
+      { num: 10, parts: [] },
+      { num: 11, parts: [{ t: "blank", key: "q8b4", answer: "@Service", hint: "비즈니스 계층 어노테이션" }] },
+      { num: 12, parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "AlertManager" }, { t: "text", v: " {" }] },
+      { num: 13, parts: [] },
+      { num: 14, parts: [{ t: "text", v: "    " }, { t: "blank", key: "q8b5", answer: "@Autowired", hint: "Bean 자동 주입 — @Primary가 붙은 Bean이 선택됨" }] },
+      { num: 15, parts: [{ t: "text", v: "    " }, { t: "kword", v: "private " }, { t: "type", v: "NotificationService " }, { t: "param", v: "notificationService" }, { t: "text", v: ";" }] },
+      { num: 16, parts: [{ t: "text", v: "}" }] },
+    ]
+  },
+  {
+    id: 10,
+    title: "같은 타입 Bean이 여러 개일 때 — 이름으로 콕 집기",
+    desc: "우선순위 지정 방식과 달리, 주입받는 쪽에서 Bean 이름을 직접 명시해 원하는 Bean을 선택할 수 있습니다.",
+    lines: [
+      { num: 1,  parts: [{ t: "blank", key: "q9b1", answer: "@Service", hint: "비즈니스 계층 어노테이션" }] },
+      { num: 2,  parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "PaymentProcessor" }, { t: "text", v: " {" }] },
+      { num: 3,  parts: [] },
+      { num: 4,  parts: [{ t: "text", v: "    " }, { t: "blank", key: "q9b2", answer: "@Autowired", hint: "Bean 자동 주입" }] },
+      { num: 5,  parts: [{ t: "text", v: "    " }, { t: "cmt", v: "// 특정 이름의 Bean을 콕 집어 주입" }] },
+      { num: 6,  parts: [{ t: "text", v: "    " }, { t: "blank", key: "q9b3", answer: "@Qualifier", hint: "Bean 이름을 직접 지정해 주입할 때 사용" }, { t: "str", v: '("kakaoPayService")' }] },
+      { num: 7,  parts: [{ t: "text", v: "    " }, { t: "kword", v: "private " }, { t: "type", v: "PayService " }, { t: "param", v: "payService" }, { t: "text", v: ";" }] },
+      { num: 8,  parts: [{ t: "text", v: "}" }] },
+    ]
+  },
+  {
+    id: 11,
+    title: "Bean의 생명주기 범위 설정",
+    desc: "스프링 Bean은 기본적으로 컨테이너당 하나의 인스턴스만 생성됩니다. 요청할 때마다 새 인스턴스가 필요하다면 범위(scope)를 별도로 지정해야 합니다.",
+    lines: [
+      { num: 1,  parts: [{ t: "cmt", v: "// 기본값: singleton — 컨테이너에 인스턴스 1개" }] },
+      { num: 2,  parts: [{ t: "blank", key: "q10b1", answer: "@Component", hint: "Bean으로 등록하는 기본 어노테이션" }] },
+      { num: 3,  parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "SingletonBean" }, { t: "text", v: " {}" }] },
+      { num: 4,  parts: [] },
+      { num: 5,  parts: [{ t: "cmt", v: "// getBean() 호출마다 새 인스턴스 생성" }] },
+      { num: 6,  parts: [{ t: "blank", key: "q10b2", answer: "@Component", hint: "Bean으로 등록하는 기본 어노테이션" }] },
+      { num: 7,  parts: [{ t: "blank", key: "q10b3", answer: "@Scope", hint: "Bean의 생명주기 범위를 지정" }, { t: "str", v: '("prototype")' }] },
+      { num: 8,  parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "PrototypeBean" }, { t: "text", v: " {}" }] },
     ]
   },
 ];
