@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spring 어노테이션 퀴즈</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2128;
+    --border: #30363d;
+    --green: #3fb950;
+    --green-dim: #1a4a26;
+    --blue: #58a6ff;
+    --blue-dim: #1a3550;
+    --orange: #f78166;
+    --yellow: #e3b341;
+    --purple: #d2a8ff;
+    --red: #f85149;
+    --red-dim: #4a1a1a;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text-dim: #484f58;
+    --correct: #3fb950;
+    --wrong: #f85149;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* 배경 그리드 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(63,185,80,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(63,185,80,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 헤더 */
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+    padding: 40px 0 32px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--green);
+    margin-bottom: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  .logo::before { content: '🍃'; }
+
+  h1 {
+    font-size: clamp(24px, 5vw, 36px);
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+
+  h1 span { color: var(--green); }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* 어노테이션 칩 모음 */
+  .annotation-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: 20px 0 0;
+  }
+
+  .chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--purple);
+    transition: all 0.2s;
+  }
+
+  /* 진행 바 */
+  .progress-bar-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .progress-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), #56d364);
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+
+  .progress-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--green);
+    white-space: nowrap;
+  }
+
+  /* 문제 카드 */
+  .quiz-section {
+    margin-bottom: 24px;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+    margin-bottom: 16px;
+  }
+
+  .question-card.correct { border-color: var(--correct); }
+  .question-card.wrong { border-color: var(--wrong); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .q-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .q-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .q-status {
+    font-size: 18px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .question-card.correct .q-status { opacity: 1; }
+  .question-card.wrong .q-status { opacity: 1; }
+
+  .card-body {
+    padding: 20px;
+  }
+
+  /* 문제 설명 */
+  .q-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    line-height: 1.7;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border-radius: 6px;
+    border-left: 3px solid var(--blue);
+  }
+
+  /* 코드 블록 */
+  .code-block {
+    background: #010409;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    overflow-x: auto;
+    counter-reset: line;
+    position: relative;
+  }
+
+  .code-line {
+    display: flex;
+    gap: 16px;
+    min-height: 24px;
+  }
+
+  .line-num {
+    color: var(--text-dim);
+    user-select: none;
+    min-width: 20px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .line-content { flex: 1; white-space: pre-wrap; word-break: break-all; }
+
+  /* 문법 색상 */
+  .kw { color: var(--purple); }       /* 어노테이션 @ */
+  .anno { color: var(--green); font-weight: 600; }   /* 어노테이션 이름 */
+  .cls { color: var(--yellow); }      /* 클래스 이름 */
+  .type { color: var(--blue); }       /* 타입 */
+  .str { color: var(--orange); }      /* 문자열 */
+  .cmt { color: var(--text-dim); font-style: italic; } /* 주석 */
+  .kword { color: #ff7b72; }          /* public, private 등 */
+  .method { color: #d2a8ff; }         /* 메서드 */
+  .param { color: #ffa657; }          /* 파라미터 */
+
+  /* 빈칸 인풋 */
+  .blank {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .blank input {
+    background: var(--blue-dim);
+    border: 1px solid var(--blue);
+    border-radius: 4px;
+    color: var(--blue);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 1px 8px;
+    outline: none;
+    transition: all 0.2s;
+    min-width: 60px;
+    width: auto;
+  }
+
+  .blank input:focus {
+    border-color: var(--green);
+    background: rgba(63,185,80,0.1);
+    color: var(--green);
+    box-shadow: 0 0 0 2px rgba(63,185,80,0.15);
+  }
+
+  .blank input.correct-input {
+    border-color: var(--correct);
+    background: var(--green-dim);
+    color: var(--correct);
+  }
+
+  .blank input.wrong-input {
+    border-color: var(--wrong);
+    background: var(--red-dim);
+    color: var(--wrong);
+  }
+
+  /* 힌트 */
+  .hint-area {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .hint-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-muted);
+    font-size: 11px;
+    padding: 3px 8px;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .hint-btn:hover {
+    border-color: var(--yellow);
+    color: var(--yellow);
+  }
+
+  .hint-text {
+    color: var(--yellow);
+    display: none;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .hint-text.show { display: inline; }
+
+  /* 정답 확인 버튼 */
+  .check-btn {
+    display: block;
+    width: 100%;
+    margin-top: 16px;
+    padding: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+
+  .check-btn:hover {
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(63,185,80,0.05);
+  }
+
+  /* 결과 패널 */
+  .result-panel {
+    display: none;
+    margin-top: 12px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .result-panel.show { display: block; }
+
+  .result-panel.correct-panel {
+    background: var(--green-dim);
+    border: 1px solid var(--correct);
+    color: #7ee787;
+  }
+
+  .result-panel.wrong-panel {
+    background: var(--red-dim);
+    border: 1px solid var(--wrong);
+    color: #ffa198;
+  }
+
+  .result-panel strong {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+
+  /* 최종 결과 */
+  #final-result {
+    display: none;
+    text-align: center;
+    padding: 48px 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-top: 32px;
+  }
+
+  #final-result.show { display: block; }
+
+  .score-ring {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(var(--green) var(--pct, 0%), var(--surface2) 0%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    position: relative;
+  }
+
+  .score-ring::after {
+    content: '';
+    position: absolute;
+    inset: 10px;
+    border-radius: 50%;
+    background: var(--surface);
+  }
+
+  .score-num {
+    position: relative;
+    z-index: 1;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--green);
+  }
+
+  .final-title {
+    font-size: 22px;
+    font-weight: 900;
+    margin-bottom: 8px;
+  }
+
+  .final-msg {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  .retry-btn {
+    background: var(--green);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .retry-btn:hover {
+    background: #56d364;
+    transform: translateY(-1px);
+  }
+
+  /* 전체 제출 */
+  #submit-all-wrap {
+    text-align: center;
+    margin-top: 32px;
+  }
+
+  #submit-all {
+    background: linear-gradient(135deg, var(--green), #56d364);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 48px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 0.02em;
+  }
+
+  #submit-all:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(63,185,80,0.3);
+  }
+
+  /* 섹션 레이블 */
+  .section-label {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-left: 2px;
+  }
+
+  @media (max-width: 600px) {
+    .code-block { font-size: 11px; }
+    .blank input { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo">Spring Framework Annotation Quiz</div>
+    <h1>Spring <span>어노테이션</span> 빈칸 퀴즈</h1>
+    <p class="subtitle">코드의 빈칸에 올바른 어노테이션을 입력하세요<br>각 문제마다 정답 확인 버튼으로 바로 채점할 수 있습니다</p>
+    <div class="annotation-chips">
+      <span class="chip">@Configuration</span>
+      <span class="chip">@RequestMapping</span>
+      <span class="chip">@GetMapping</span>
+      <span class="chip">@PostMapping</span>
+      <span class="chip">@RequestParam</span>
+      <span class="chip">@ModelAttribute</span>
+      <span class="chip">@Component</span>
+      <span class="chip">@ComponentScan</span>
+      <span class="chip">@Service</span>
+      <span class="chip">@Controller</span>
+      <span class="chip">@Repository</span>
+      <span class="chip">@Autowired</span>
+      <span class="chip">@Bean</span>
+    </div>
+  </header>
+
+  <div class="progress-bar-wrap">
+    <span class="progress-label">진행도</span>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <span class="progress-count" id="progress-count">0 / 7</span>
+  </div>
+
+  <div id="quiz-container"></div>
+
+  <div id="submit-all-wrap">
+    <button id="submit-all" onclick="submitAll()">🎯 최종 채점하기</button>
+  </div>
+
+  <div id="final-result">
+    <div class="score-ring" id="score-ring">
+      <span class="score-num" id="score-num">0/7</span>
+    </div>
+    <div class="final-title" id="final-title"></div>
+    <div class="final-msg" id="final-msg"></div>
+    <button class="retry-btn" onclick="location.reload()">🔄 다시 풀기</button>
+  </div>
+
+</div>
+
+<script>
+const QUIZZES = [
+  {
+    id: 1,
+    title: "설정 클래스와 Bean 등록",
+    desc: "Java 기반 설정 클래스를 작성합니다. 이 클래스는 스프링 컨테이너에게 '나는 설정 파일이야!'라고 알려주고, 직접 Bean을 등록하는 방법을 사용합니다.",
+    lines: [
+      { num: 1, parts: [{ t: "cmt", v: "// 스프링 설정 클래스 선언" }] },
+      { num: 2, parts: [{ t: "blank", key: "b1", answer: "@Configuration", hint: "Java 설정 파일임을 나타내는 어노테이션" }, { t: "text", v: "" }] },
+      { num: 3, parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "AppConfig" }, { t: "text", v: " {" }] },
+      { num: 4, parts: [] },
+      { num: 5, parts: [{ t: "text", v: "    " }, { t: "cmt", v: "// DataSource Bean을 직접 등록" }] },
+      { num: 6, parts: [{ t: "text", v: "    " }, { t: "blank", key: "b2", answer: "@Bean", hint: "메서드가 반환하는 객체를 Bean으로 등록" }] },
+      { num: 7, parts: [{ t: "text", v: "    " }, { t: "kword", v: "public " }, { t: "type", v: "DataSource " }, { t: "method", v: "dataSource" }, { t: "text", v: "() {" }] },
+      { num: 8, parts: [{ t: "text", v: "        " }, { t: "kword", v: "return new " }, { t: "cls", v: "HikariDataSource" }, { t: "text", v: "();" }] },
+      { num: 9, parts: [{ t: "text", v: "    }" }] },
+      { num: 10, parts: [{ t: "text", v: "}" }] },
+    ]
+  },
+  {
+    id: 2,
+    title: "컴포넌트 스캔과 컴포넌트 등록",
+    desc: "지정한 패키지를 탐색하여 특정 어노테이션이 붙은 클래스를 자동으로 Bean으로 등록하는 방식입니다. 가장 기본적인 Bean 등록 어노테이션도 함께 사용합니다.",
+    lines: [
+      { num: 1, parts: [{ t: "cmt", v: "// basePackages에서 @Component 계열 어노테이션을 스캔" }] },
+      { num: 2, parts: [{ t: "blank", key: "b1", answer: "@ComponentScan", hint: "지정 패키지를 탐색해 Bean을 자동 등록" }, { t: "str", v: '("com.example")' }] },
+      { num: 3, parts: [{ t: "blank", key: "b2", answer: "@Configuration", hint: "설정 클래스임을 명시" }] },
+      { num: 4, parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "ScanConfig" }, { t: "text", v: " {}" }] },
+      { num: 5, parts: [] },
+      { num: 6, parts: [{ t: "cmt", v: "// 유틸리티 클래스 — 특정 계층에 속하지 않을 때" }] },
+      { num: 7, parts: [{ t: "blank", key: "b3", answer: "@Component", hint: "일반 컴포넌트 Bean 등록 (가장 기본)" }] },
+      { num: 8, parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "FileUploadUtil" }, { t: "text", v: " {" }] },
+      { num: 9, parts: [{ t: "text", v: "    " }, { t: "cmt", v: "// ..." }] },
+      { num: 10, parts: [{ t: "text", v: "}" }] },
+    ]
+  },
+  {
+    id: 3,
+    title: "3계층 아키텍처 — 역할별 어노테이션",
+    desc: "스프링 MVC는 역할에 따라 3개의 계층으로 나뉩니다. 각 계층에 맞는 어노테이션을 사용하면 가독성과 AOP 적용이 쉬워집니다. 어떤 계층에 어떤 어노테이션을 쓸까요?",
+    lines: [
+      { num: 1, parts: [{ t: "cmt", v: "// ① 프레젠테이션 계층 — HTTP 요청 처리" }] },
+      { num: 2, parts: [{ t: "blank", key: "b1", answer: "@Controller", hint: "웹 요청을 처리하는 계층" }] },
+      { num: 3, parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "UserController" }, { t: "text", v: " { ... }" }] },
+      { num: 4, parts: [] },
+      { num: 5, parts: [{ t: "cmt", v: "// ② 비즈니스 로직 계층" }] },
+      { num: 6, parts: [{ t: "blank", key: "b2", answer: "@Service", hint: "비즈니스 로직을 담당하는 계층" }] },
+      { num: 7, parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "UserService" }, { t: "text", v: " { ... }" }] },
+      { num: 8, parts: [] },
+      { num: 9, parts: [{ t: "cmt", v: "// ③ 데이터 접근 계층 — DB 예외를 DataAccessException으로 변환" }] },
+      { num: 10, parts: [{ t: "blank", key: "b3", answer: "@Repository", hint: "데이터 접근(DAO) 계층" }] },
+      { num: 11, parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "UserRepository" }, { t: "text", v: " { ... }" }] },
+    ]
+  },
+  {
+    id: 4,
+    title: "의존성 자동 주입",
+    desc: "스프링 컨테이너가 타입에 맞는 Bean을 자동으로 찾아 주입해주는 어노테이션입니다. 필드, 생성자, Setter에 모두 적용 가능합니다.",
+    lines: [
+      { num: 1,  parts: [{ t: "blank", key: "b1", answer: "@Service", hint: "비즈니스 계층 어노테이션" }] },
+      { num: 2,  parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "OrderService" }, { t: "text", v: " {" }] },
+      { num: 3,  parts: [] },
+      { num: 4,  parts: [{ t: "text", v: "    " }, { t: "kword", v: "private " }, { t: "type", v: "OrderRepository " }, { t: "param", v: "orderRepo" }, { t: "text", v: ";" }] },
+      { num: 5,  parts: [] },
+      { num: 6,  parts: [{ t: "text", v: "    " }, { t: "cmt", v: "// 생성자 주입 방식 (권장)" }] },
+      { num: 7,  parts: [{ t: "text", v: "    " }, { t: "blank", key: "b2", answer: "@Autowired", hint: "생성자에도 동일하게 적용 가능" }] },
+      { num: 8,  parts: [{ t: "text", v: "    " }, { t: "kword", v: "public " }, { t: "method", v: "OrderService" }, { t: "text", v: "(" }, { t: "type", v: "PaymentService " }, { t: "param", v: "ps" }, { t: "text", v: ") {" }] },
+      { num: 9,  parts: [{ t: "text", v: "        " }, { t: "text", v: "this.paymentService = ps;" }] },
+      { num: 10, parts: [{ t: "text", v: "    }" }] },
+      { num: 11, parts: [{ t: "text", v: "}" }] },
+    ]
+  },
+  {
+    id: 5,
+    title: "컨트롤러 URL 매핑 — GET / POST",
+    desc: "클래스에 공통 경로를 설정하고, 각 메서드에 HTTP 메서드(GET/POST)를 구분하는 어노테이션을 붙입니다.",
+    lines: [
+      { num: 1,  parts: [{ t: "blank", key: "b1", answer: "@Controller", hint: "MVC 컨트롤러 어노테이션" }] },
+      { num: 2,  parts: [{ t: "blank", key: "b2", answer: "@RequestMapping", hint: "클래스 공통 URL 경로 설정" }, { t: "str", v: '("/board")' }] },
+      { num: 3,  parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "BoardController" }, { t: "text", v: " {" }] },
+      { num: 4,  parts: [] },
+      { num: 5,  parts: [{ t: "text", v: "    " }, { t: "cmt", v: "// GET /board/list" }] },
+      { num: 6,  parts: [{ t: "text", v: "    " }, { t: "blank", key: "b3", answer: "@GetMapping", hint: "HTTP GET 요청 처리" }, { t: "str", v: '("/list")' }] },
+      { num: 7,  parts: [{ t: "text", v: "    " }, { t: "kword", v: "public " }, { t: "type", v: "String " }, { t: "method", v: "list" }, { t: "text", v: "(" }, { t: "type", v: "Model " }, { t: "param", v: "model" }, { t: "text", v: ") { ... }" }] },
+      { num: 8,  parts: [] },
+      { num: 9,  parts: [{ t: "text", v: "    " }, { t: "cmt", v: "// POST /board/write" }] },
+      { num: 10, parts: [{ t: "text", v: "    " }, { t: "blank", key: "b4", answer: "@PostMapping", hint: "HTTP POST 요청 처리" }, { t: "str", v: '("/write")' }] },
+      { num: 11, parts: [{ t: "text", v: "    " }, { t: "kword", v: "public " }, { t: "type", v: "String " }, { t: "method", v: "write" }, { t: "text", v: "() { ... }" }] },
+      { num: 12, parts: [{ t: "text", v: "}" }] },
+    ]
+  },
+  {
+    id: 6,
+    title: "쿼리 파라미터 바인딩",
+    desc: "URL 쿼리 파라미터(?name=value)를 메서드 파라미터에 바인딩하는 어노테이션입니다. 예: GET /search?keyword=spring&page=1",
+    lines: [
+      { num: 1, parts: [{ t: "blank", key: "b1", answer: "@Controller", hint: "컨트롤러 어노테이션" }] },
+      { num: 2, parts: [{ t: "blank", key: "b2", answer: "@RequestMapping", hint: "공통 경로" }, { t: "str", v: '("/search")' }] },
+      { num: 3, parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "SearchController" }, { t: "text", v: " {" }] },
+      { num: 4, parts: [] },
+      { num: 5, parts: [{ t: "text", v: "    " }, { t: "blank", key: "b3", answer: "@GetMapping", hint: "GET 요청 매핑" }] },
+      { num: 6, parts: [{ t: "text", v: "    " }, { t: "kword", v: "public " }, { t: "type", v: "String " }, { t: "method", v: "search" }, { t: "text", v: "(" }] },
+      { num: 7, parts: [{ t: "text", v: "            " }, { t: "blank", key: "b4", answer: "@RequestParam", hint: "URL 쿼리 파라미터를 파라미터에 바인딩" }, { t: "str", v: '("keyword") ' }, { t: "type", v: "String " }, { t: "param", v: "keyword" }, { t: "text", v: "," }] },
+      { num: 8, parts: [{ t: "text", v: "            " }, { t: "blank", key: "b5", answer: "@RequestParam", hint: "defaultValue로 기본값 설정 가능" }, { t: "str", v: '(value="page", defaultValue="1") ' }, { t: "type", v: "int " }, { t: "param", v: "page" }, { t: "text", v: ") {" }] },
+      { num: 9, parts: [{ t: "text", v: "        " }, { t: "kword", v: "return " }, { t: "str", v: '"search/result"' }, { t: "text", v: ";" }] },
+      { num: 10, parts: [{ t: "text", v: "    }" }] },
+      { num: 11, parts: [{ t: "text", v: "}" }] },
+    ]
+  },
+  {
+    id: 7,
+    title: "폼 데이터 객체 바인딩",
+    desc: "HTML form으로 전송된 데이터를 DTO/VO 객체에 한 번에 바인딩하는 어노테이션입니다. 단일 값을 받는 방식과 달리 객체 단위로 처리합니다.",
+    lines: [
+      { num: 1,  parts: [{ t: "blank", key: "b1", answer: "@Controller", hint: "컨트롤러" }] },
+      { num: 2,  parts: [{ t: "blank", key: "b2", answer: "@RequestMapping", hint: "공통 URL 경로" }, { t: "str", v: '("/member")' }] },
+      { num: 3,  parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "MemberController" }, { t: "text", v: " {" }] },
+      { num: 4,  parts: [] },
+      { num: 5,  parts: [{ t: "text", v: "    " }, { t: "blank", key: "b3", answer: "@Autowired", hint: "서비스 Bean 주입" }] },
+      { num: 6,  parts: [{ t: "text", v: "    " }, { t: "kword", v: "private " }, { t: "type", v: "MemberService " }, { t: "param", v: "memberService" }, { t: "text", v: ";" }] },
+      { num: 7,  parts: [] },
+      { num: 8,  parts: [{ t: "text", v: "    " }, { t: "cmt", v: "// GET /member/join — 가입 폼 페이지" }] },
+      { num: 9,  parts: [{ t: "text", v: "    " }, { t: "blank", key: "b4", answer: "@GetMapping", hint: "GET 요청" }, { t: "str", v: '("/join")' }] },
+      { num: 10, parts: [{ t: "text", v: "    " }, { t: "kword", v: "public " }, { t: "type", v: "String " }, { t: "method", v: "joinForm" }, { t: "text", v: "() {" }] },
+      { num: 11, parts: [{ t: "text", v: "        " }, { t: "kword", v: "return " }, { t: "str", v: '"member/join"' }, { t: "text", v: ";" }] },
+      { num: 12, parts: [{ t: "text", v: "    }" }] },
+      { num: 13, parts: [] },
+      { num: 14, parts: [{ t: "text", v: "    " }, { t: "cmt", v: "// POST /member/join — 폼 제출 처리" }] },
+      { num: 15, parts: [{ t: "text", v: "    " }, { t: "blank", key: "b5", answer: "@PostMapping", hint: "POST 요청" }, { t: "str", v: '("/join")' }] },
+      { num: 16, parts: [{ t: "text", v: "    " }, { t: "kword", v: "public " }, { t: "type", v: "String " }, { t: "method", v: "join" }, { t: "text", v: "(" }] },
+      { num: 17, parts: [{ t: "text", v: "            " }, { t: "blank", key: "b6", answer: "@ModelAttribute", hint: "폼 데이터를 객체에 자동 바인딩" }, { t: "type", v: " MemberDto " }, { t: "param", v: "dto" }, { t: "text", v: ") {" }] },
+      { num: 18, parts: [{ t: "text", v: "        memberService.join(dto);" }] },
+      { num: 19, parts: [{ t: "text", v: "        " }, { t: "kword", v: "return " }, { t: "str", v: '"redirect:/member/list"' }, { t: "text", v: ";" }] },
+      { num: 20, parts: [{ t: "text", v: "    }" }] },
+      { num: 21, parts: [{ t: "text", v: "}" }] },
+    ]
+  },
+];
+
+// 상태
+const state = {
+  checked: {},   // qid -> true/false
+};
+
+function buildCode(lines) {
+  return lines.map(line => {
+    const lineDiv = document.createElement('div');
+    lineDiv.className = 'code-line';
+
+    const numSpan = document.createElement('span');
+    numSpan.className = 'line-num';
+    numSpan.textContent = line.num;
+    lineDiv.appendChild(numSpan);
+
+    const contentSpan = document.createElement('span');
+    contentSpan.className = 'line-content';
+
+    (line.parts || []).forEach(part => {
+      if (part.t === 'blank') {
+        const blankWrap = document.createElement('span');
+        blankWrap.className = 'blank';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = 'input-' + part.key;
+        input.dataset.answer = part.answer;
+        input.placeholder = '?';
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('autocorrect', 'off');
+        input.setAttribute('autocapitalize', 'off');
+        input.setAttribute('spellcheck', 'false');
+        // 입력 폭 자동 조절
+        input.addEventListener('input', function() {
+          this.style.width = Math.max(60, this.value.length * 9 + 24) + 'px';
+        });
+        // Enter 키로 다음 빈칸으로
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') {
+            const all = document.querySelectorAll('.blank input');
+            const idx = Array.from(all).indexOf(this);
+            if (idx < all.length - 1) all[idx + 1].focus();
+          }
+        });
+        blankWrap.appendChild(input);
+        contentSpan.appendChild(blankWrap);
+      } else {
+        const span = document.createElement('span');
+        if (part.t === 'text') {
+          span.textContent = part.v;
+        } else {
+          span.className = part.t;
+          span.textContent = part.v;
+          // 어노테이션 @ 붙이기
+          if (part.t === 'anno') span.textContent = '@' + part.v;
+        }
+        contentSpan.appendChild(span);
+      }
+    });
+
+    lineDiv.appendChild(contentSpan);
+    return lineDiv;
+  });
+}
+
+function renderQuizzes() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = '';
+
+  QUIZZES.forEach((q) => {
+    const section = document.createElement('div');
+    section.className = 'quiz-section';
+
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = 'card-' + q.id;
+
+    // 카드 헤더
+    const header = document.createElement('div');
+    header.className = 'card-header';
+    header.innerHTML = `
+      <span class="q-number">Q${q.id}</span>
+      <span class="q-title">${q.title}</span>
+      <span class="q-status" id="status-${q.id}"></span>
+    `;
+    card.appendChild(header);
+
+    // 카드 바디
+    const body = document.createElement('div');
+    body.className = 'card-body';
+
+    // 설명
+    const desc = document.createElement('div');
+    desc.className = 'q-desc';
+    desc.textContent = q.desc;
+    body.appendChild(desc);
+
+    // 코드 블록
+    const codeBlock = document.createElement('div');
+    codeBlock.className = 'code-block';
+    const codeLines = buildCode(q.lines);
+    codeLines.forEach(l => codeBlock.appendChild(l));
+    body.appendChild(codeBlock);
+
+    // 힌트 영역
+    const blanks = q.lines.flatMap(l => (l.parts || []).filter(p => p.t === 'blank'));
+    const hintArea = document.createElement('div');
+    hintArea.className = 'hint-area';
+    hintArea.innerHTML = `<span>빈칸 수: ${blanks.length}개</span>`;
+
+    blanks.forEach((b, i) => {
+      const hintBtn = document.createElement('button');
+      hintBtn.className = 'hint-btn';
+      hintBtn.textContent = `힌트 ${i + 1}`;
+      const hintSpan = document.createElement('span');
+      hintSpan.className = 'hint-text';
+      hintSpan.id = 'hint-' + b.key;
+      hintSpan.textContent = '→ ' + b.hint;
+      hintBtn.addEventListener('click', () => hintSpan.classList.toggle('show'));
+      hintArea.appendChild(hintBtn);
+      hintArea.appendChild(hintSpan);
+    });
+    body.appendChild(hintArea);
+
+    // 개별 채점 버튼
+    const checkBtn = document.createElement('button');
+    checkBtn.className = 'check-btn';
+    checkBtn.id = 'check-btn-' + q.id;
+    checkBtn.textContent = '✅ 이 문제 채점하기';
+    checkBtn.addEventListener('click', () => checkQuestion(q));
+    body.appendChild(checkBtn);
+
+    // 결과 패널
+    const resultPanel = document.createElement('div');
+    resultPanel.className = 'result-panel';
+    resultPanel.id = 'result-' + q.id;
+    body.appendChild(resultPanel);
+
+    card.appendChild(body);
+    section.appendChild(card);
+    container.appendChild(section);
+  });
+
+  updateProgress();
+}
+
+function normalize(str) {
+  return str.trim().replace(/\s+/g, '');
+}
+
+function checkQuestion(q) {
+  const blanks = q.lines.flatMap(l => (l.parts || []).filter(p => p.t === 'blank'));
+  let allCorrect = true;
+  const wrongList = [];
+
+  blanks.forEach(b => {
+    const input = document.getElementById('input-' + b.key);
+    if (!input) return;
+    const val = normalize(input.value);
+    const ans = normalize(b.answer);
+    input.classList.remove('correct-input', 'wrong-input');
+    if (val === ans) {
+      input.classList.add('correct-input');
+    } else {
+      input.classList.add('wrong-input');
+      allCorrect = false;
+      wrongList.push({ hint: b.hint, answer: b.answer });
+    }
+    input.disabled = true;
+  });
+
+  const card = document.getElementById('card-' + q.id);
+  const statusEl = document.getElementById('status-' + q.id);
+  const resultPanel = document.getElementById('result-' + q.id);
+  const checkBtn = document.getElementById('check-btn-' + q.id);
+
+  checkBtn.style.display = 'none';
+
+  if (allCorrect) {
+    card.classList.add('correct');
+    statusEl.textContent = '✅';
+    resultPanel.className = 'result-panel correct-panel show';
+    resultPanel.innerHTML = '🎉 정답입니다! 모든 어노테이션을 올바르게 입력했습니다.';
+    state.checked[q.id] = true;
+  } else {
+    card.classList.add('wrong');
+    statusEl.textContent = '❌';
+    let wrongHtml = '❌ 틀린 항목이 있습니다:<br>';
+    wrongList.forEach(w => {
+      wrongHtml += `&nbsp;&nbsp;• ${w.hint} → <strong>${w.answer}</strong><br>`;
+    });
+    resultPanel.className = 'result-panel wrong-panel show';
+    resultPanel.innerHTML = wrongHtml;
+    state.checked[q.id] = false;
+  }
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = QUIZZES.length;
+  const done = Object.keys(state.checked).length;
+  const correct = Object.values(state.checked).filter(Boolean).length;
+  document.getElementById('progress-fill').style.width = (done / total * 100) + '%';
+  document.getElementById('progress-count').textContent = `${correct} / ${total} 정답`;
+}
+
+function submitAll() {
+  // 아직 안 채점된 문제 채점
+  QUIZZES.forEach(q => {
+    if (state.checked[q.id] === undefined) checkQuestion(q);
+  });
+
+  // 최종 결과
+  const total = QUIZZES.length;
+  const correct = Object.values(state.checked).filter(Boolean).length;
+  const pct = Math.round(correct / total * 100);
+
+  const ring = document.getElementById('score-ring');
+  ring.style.setProperty('--pct', pct + '%');
+  document.getElementById('score-num').textContent = `${correct}/${total}`;
+
+  let title, msg;
+  if (pct === 100) { title = '🏆 완벽합니다!'; msg = '모든 어노테이션을 정확히 이해하고 있습니다. 훌륭해요!'; }
+  else if (pct >= 70) { title = '👏 잘 했어요!'; msg = `${total - correct}개를 다시 확인해보세요. 거의 다 왔습니다!`; }
+  else if (pct >= 40) { title = '📚 조금 더 연습이 필요해요'; msg = '어노테이션의 역할과 계층 구조를 다시 정리해보세요.'; }
+  else { title = '💪 다시 도전해봐요!'; msg = '각 어노테이션의 역할을 하나씩 정리하고 다시 시도해보세요.'; }
+
+  document.getElementById('final-title').textContent = title;
+  document.getElementById('final-msg').textContent = msg;
+  document.getElementById('final-result').classList.add('show');
+  document.getElementById('submit-all-wrap').style.display = 'none';
+  document.getElementById('final-result').scrollIntoView({ behavior: 'smooth' });
+}
+
+// 초기화
+renderQuizzes();
+</script>
+</body>
+</html>
