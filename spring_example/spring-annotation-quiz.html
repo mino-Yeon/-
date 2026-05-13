@@ -590,10 +590,10 @@ const QUIZZES = [
   },
   {
     id: 2,
-    title: "컴포넌트 스캔과 컴포넌트 등록",
+    title: "Bean 자동 등록 방식",
     desc: "지정한 패키지를 탐색하여 특정 어노테이션이 붙은 클래스를 자동으로 Bean으로 등록하는 방식입니다. 가장 기본적인 Bean 등록 어노테이션도 함께 사용합니다.",
     lines: [
-      { num: 1, parts: [{ t: "cmt", v: "// basePackages에서 @Component 계열 어노테이션을 스캔" }] },
+      { num: 1, parts: [{ t: "cmt", v: "// basePackages 하위의 Bean을 자동으로 탐색 및 등록" }] },
       { num: 2, parts: [{ t: "blank", key: "b1", answer: "@ComponentScan", hint: "지정 패키지를 탐색해 Bean을 자동 등록" }, { t: "str", v: '("com.example")' }] },
       { num: 3, parts: [{ t: "blank", key: "b2", answer: "@Configuration", hint: "설정 클래스임을 명시" }] },
       { num: 4, parts: [{ t: "kword", v: "public class " }, { t: "cls", v: "ScanConfig" }, { t: "text", v: " {}" }] },
