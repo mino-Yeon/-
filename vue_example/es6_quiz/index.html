@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ES6 문법 퀴즈</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Pretendard:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #171a23;
+    --bg3: #1e2130;
+    --border: #2a2f45;
+    --border2: #353b55;
+    --text: #e2e6f3;
+    --text2: #8b92b0;
+    --text3: #555d7a;
+    --accent: #7c6af7;
+    --accent2: #5b4fd4;
+    --accent-bg: rgba(124,106,247,0.10);
+    --green: #3ecf8e;
+    --green-bg: rgba(62,207,142,0.10);
+    --red: #f97171;
+    --red-bg: rgba(249,113,113,0.10);
+    --yellow: #f5c842;
+    --yellow-bg: rgba(245,200,66,0.10);
+    --blue: #60aff5;
+    --blue-bg: rgba(96,175,245,0.10);
+    --code-keyword: #c792ea;
+    --code-string: #c3e88d;
+    --code-comment: #546e7a;
+    --code-fn: #82aaff;
+    --code-var: #f78c6c;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --mono: 'JetBrains Mono', 'Consolas', monospace;
+    --sans: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── 헤더 ── */
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 0 0;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+  .header-top {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .site-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+  .site-sub {
+    font-size: 13px;
+    color: var(--text3);
+  }
+  .progress-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    font-size: 12px;
+    color: var(--text3);
+    min-width: 48px;
+    text-align: right;
+    font-family: var(--mono);
+  }
+
+  /* ── 문제 번호 네비게이션 ── */
+  .q-nav {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding-bottom: 14px;
+  }
+  .q-nav-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 6px;
+  }
+  .q-nav-label {
+    font-size: 10px;
+    color: var(--text3);
+    margin-right: 2px;
+    white-space: nowrap;
+  }
+  .q-nav-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    color: var(--text2);
+    font-size: 11px;
+    font-family: var(--mono);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .q-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .q-nav-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .q-nav-btn.correct { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+  .q-nav-btn.wrong { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+
+  /* ── 메인 레이아웃 ── */
+  .main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  /* ── 문제 카드 ── */
+  .q-card {
+    display: none;
+    animation: fadeIn 0.2s ease;
+  }
+  .q-card.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .q-num-badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .q-topic-tag {
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: var(--accent-bg);
+    color: var(--accent);
+    border: 1px solid rgba(124,106,247,0.25);
+  }
+  .q-new-tag {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid rgba(62,207,142,0.25);
+  }
+
+  .q-desc {
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.7;
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    background: var(--bg2);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+
+  /* ── 코드 블록 ── */
+  .code-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 640px) {
+    .code-section { grid-template-columns: 1fr; }
+  }
+  .code-col { }
+  .code-col-label {
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+    padding-left: 2px;
+  }
+  .code-block {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.9;
+    overflow-x: auto;
+    white-space: pre;
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "calt" 0;
+  }
+  .ck { color: var(--code-keyword); }
+  .cs { color: var(--code-string); }
+  .cc { color: var(--code-comment); font-style: italic; }
+  .cf { color: var(--code-fn); }
+  .cv { color: var(--code-var); }
+  .blank-inline {
+    display: inline-block;
+    min-width: 80px;
+    background: rgba(124,106,247,0.12);
+    border-bottom: 1.5px solid var(--accent);
+    color: var(--accent);
+    padding: 0 6px;
+    border-radius: 3px 3px 0 0;
+    font-style: normal;
+  }
+
+  /* ── 빈칸 입력 영역 ── */
+  .blanks-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .blank-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .blank-num {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text3);
+    min-width: 20px;
+  }
+  .blank-label {
+    font-size: 12px;
+    color: var(--text2);
+    min-width: 200px;
+    flex: 1;
+  }
+  .blank-input {
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 7px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    min-width: 160px;
+    width: 220px;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "calt" 0;
+  }
+  .blank-input:focus { border-color: var(--accent); background: var(--bg2); }
+  .blank-input.correct {
+    border-color: var(--green);
+    background: var(--green-bg);
+    color: var(--green);
+  }
+  .blank-input.wrong {
+    border-color: var(--red);
+    background: var(--red-bg);
+    color: var(--red);
+  }
+
+  /* ── 버튼 행 ── */
+  .btn-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border2);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-hint {
+    background: var(--blue-bg);
+    color: var(--blue);
+    border-color: rgba(96,175,245,0.3);
+  }
+  .btn-hint:hover { background: rgba(96,175,245,0.18); }
+
+  .btn-check {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    font-weight: 500;
+  }
+  .btn-check:hover { background: var(--accent2); border-color: var(--accent2); }
+
+  .btn-show-answer {
+    background: transparent;
+    color: var(--text3);
+    border-color: var(--border);
+    font-size: 12px;
+    padding: 7px 12px;
+  }
+  .btn-show-answer:hover { color: var(--text2); border-color: var(--border2); }
+
+  .btn-nav {
+    background: transparent;
+    color: var(--text2);
+    border-color: var(--border);
+    margin-left: auto;
+  }
+  .btn-nav:hover { border-color: var(--border2); color: var(--text); }
+  .btn-nav.primary {
+    background: var(--accent-bg);
+    color: var(--accent);
+    border-color: rgba(124,106,247,0.3);
+  }
+  .btn-nav.primary:hover { background: rgba(124,106,247,0.18); }
+
+  /* ── 힌트 박스 ── */
+  .hint-box {
+    background: var(--blue-bg);
+    border: 1px solid rgba(96,175,245,0.25);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--blue);
+    line-height: 1.7;
+    margin-bottom: 12px;
+    display: none;
+  }
+  .hint-box.show { display: block; }
+  .hint-icon { opacity: 0.7; margin-right: 4px; }
+
+  /* ── 결과 박스 ── */
+  .result-box {
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    display: none;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .result-box.show { display: flex; }
+  .result-box.ok { background: var(--green-bg); border: 1px solid rgba(62,207,142,0.3); color: var(--green); }
+  .result-box.ng { background: var(--red-bg); border: 1px solid rgba(249,113,113,0.3); color: var(--red); }
+  .result-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .result-text { flex: 1; }
+  .result-title { font-weight: 600; margin-bottom: 2px; }
+  .result-wrong-list { font-family: var(--mono); font-size: 12px; margin-top: 6px; opacity: 0.85; }
+
+  /* ── 해설 박스 ── */
+  .explain-box {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.75;
+    display: none;
+  }
+  .explain-box.show { display: block; }
+  .explain-title {
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .explain-box code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--code-keyword);
+  }
+
+  /* ── 하단 네비 ── */
+  .bottom-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── 결과 화면 ── */
+  .score-screen {
+    display: none;
+    text-align: center;
+    padding: 60px 24px;
+  }
+  .score-screen.show { display: block; }
+  .score-ring {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid var(--accent);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    background: var(--accent-bg);
+  }
+  .score-num { font-size: 36px; font-weight: 600; color: var(--accent); font-family: var(--mono); }
+  .score-denom { font-size: 13px; color: var(--text3); }
+  .score-msg { font-size: 16px; color: var(--text); margin-bottom: 8px; }
+  .score-sub { font-size: 13px; color: var(--text2); margin-bottom: 32px; }
+  .btn-restart {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    font-family: var(--sans);
+    font-size: 14px;
+    padding: 10px 28px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .btn-restart:hover { background: var(--accent2); }
+
+  /* ── 문제 구분선 타이틀 (주제 그룹 표시) ── */
+  .topic-divider {
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .topic-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-top">
+    <span class="site-title">ES6 문법 퀴즈</span>
+    <span class="site-sub">예제 코드로 익히는 ES6+ 핵심 문법</span>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <span class="progress-label" id="progressLabel">0 / 0</span>
+  </div>
+  <nav class="q-nav" id="qNav" aria-label="문제 번호 이동"></nav>
+</header>
+
+<main class="main" id="main">
+  <!-- 문제 카드들이 JS로 삽입됨 -->
+</main>
+
+<script>
+/* ═══════════════════════════════════════════
+   문제 데이터
+═══════════════════════════════════════════ */
+const questions = [
+
+  /* ── 1. let / const ── */
+  {
+    topic: 'let / const', topicShort: 'let·const',
+    desc: '<code>var</code>는 블록 스코프가 없어 예상치 못한 버그가 생깁니다. 아래 코드에서 각 변수에 맞는 선언 키워드를 골라 빈칸을 채워보세요.',
+    before: `<span class="ck">var</span> count = <span class="cs">0</span>
+<span class="ck">var</span> PI    = <span class="cs">3.14159</span>
+<span class="ck">var</span> title = <span class="cs">'ES6 학습'</span>
+count = count + <span class="cs">1</span>`,
+    after: `<span class="blank-inline">①</span> count = <span class="cs">0</span>        <span class="cc">// 나중에 증가시킴</span>
+<span class="blank-inline">②</span> PI    = <span class="cs">3.14159</span>   <span class="cc">// 절대 안 바뀜</span>
+<span class="blank-inline">③</span> title = <span class="cs">'ES6 학습'</span> <span class="cc">// 안 바뀜</span>
+count = count + <span class="cs">1</span>`,
+    blanks: [
+      { label: '① count — 값이 다시 할당됨', answer: 'let' },
+      { label: '② PI — 절대 변하지 않는 상수', answer: 'const' },
+      { label: '③ title — 재할당 없는 문자열', answer: 'const' },
+    ],
+    hint: '다시 = 으로 값을 바꿀 변수 → let, 절대 바뀌지 않는 값 → const.',
+    explain: '<code>var</code>는 함수 스코프라 if·for 블록 밖에서도 접근되어 버그를 만들기 쉽습니다. <code>let</code>과 <code>const</code>는 블록 스코프({} 단위)로 동작합니다. <code>const</code>는 재할당이 불가하지만, <code>const count = ref(0)</code>처럼 ref 객체 자체를 고정해도 <code>.value</code>로 내부 값은 바꿀 수 있습니다.',
+  },
+  {
+    topic: 'Property Shorthand', topicShort: 'P.Shorthand',
+    desc: '객체를 만들 때도 Property Shorthand를 씁니다. 아래는 사용자 정보를 모아 객체를 만드는 코드입니다.',
+    before: `<span class="ck">const</span> name  = <span class="cs">'김철수'</span>
+<span class="ck">const</span> age   = <span class="cs">25</span>
+<span class="ck">const</span> email = <span class="cs">'chul@example.com'</span>
+
+<span class="ck">const</span> user = {
+  name:  name,
+  age:   age,
+  email: email,
+  role:  <span class="cs">'admin'</span>  <span class="cc">// role은 다른 값</span>
+}`,
+    after: `<span class="ck">const</span> name  = <span class="cs">'김철수'</span>
+<span class="ck">const</span> age   = <span class="cs">25</span>
+<span class="ck">const</span> email = <span class="cs">'chul@example.com'</span>
+
+<span class="ck">const</span> user = {
+  <span class="blank-inline">①</span>,
+  <span class="blank-inline">②</span>,
+  <span class="blank-inline">③</span>,
+  role: <span class="cs">'admin'</span>
+}`,
+    blanks: [
+      { label: '① name: name 단축', answer: 'name' },
+      { label: '② age: age 단축',   answer: 'age' },
+      { label: '③ email: email 단축', answer: 'email' },
+    ],
+    hint: '키와 변수명이 같을 때만 단축 가능합니다. role: \'admin\'처럼 값이 변수가 아닌 경우엔 단축할 수 없어요.',
+    explain: 'Property Shorthand는 변수명과 키 이름이 동일할 때만 쓸 수 있습니다. <code>role: \'admin\'</code>처럼 키 이름과 값이 다르거나 리터럴이면 그대로 써야 합니다.',
+  },
+
+  /* ── 3. Concise Method ── */
+  {
+    topic: 'Concise Method', topicShort: 'C.Method',
+    desc: '객체를 생성할 때 메서드(함수인 속성)는 <code>function</code> 키워드와 콜론을 생략한 단축 메서드 표현으로 쓸 수 있습니다.',
+    before: `<span class="ck">const</span> actions = {
+  increment: <span class="ck">function</span>() {
+    count.value++
+  },
+  decrement: <span class="ck">function</span>() {
+    count.value--
+  },
+  reset: <span class="ck">function</span>() {
+    count.value = <span class="cs">0</span>
+  }
+}`,
+    after: `<span class="ck">const</span> actions = {
+  <span class="blank-inline">①</span>() {
+    count.value++
+  },
+  <span class="blank-inline">②</span>() {
+    count.value--
+  },
+  <span class="blank-inline">③</span>() {
+    count.value = <span class="cs">0</span>
+  }
+}`,
+    blanks: [
+      { label: '① increment: function() 을 단축하면?', answer: 'increment' },
+      { label: '② decrement: function() 을 단축하면?', answer: 'decrement' },
+      { label: '③ reset: function() 을 단축하면?',     answer: 'reset' },
+    ],
+    hint: '키이름: function() {} → 키이름() {} 으로 줄입니다. 콜론과 function 키워드 둘 다 사라지고 이름 바로 뒤에 ()가 옵니다.',
+    explain: 'Concise Method(단축 메서드): <code>{ name: function() {} }</code> → <code>{ name() {} }</code>. 객체 생성 시 메서드를 담을 때 <code>function</code> 키워드와 콜론(:)을 생략하고 <code>메서드명() {}</code> 형태로 씁니다.',
+  },
+
+  /* ── 4. Template String ── */
+  {
+    topic: 'Template String', topicShort: 'Template',
+    desc: '문자열과 변수를 합칠 때 <code>+</code> 연산자 대신 백틱과 <code>${}</code>를 사용합니다.',
+    before: `<span class="ck">const</span> name  = <span class="cs">'김철수'</span>
+<span class="ck">const</span> count = <span class="cs">5</span>
+<span class="ck">const</span> type  = <span class="cs">'개'</span>
+
+<span class="ck">const</span> msg = <span class="cs">'안녕하세요, '</span> + name +
+             <span class="cs">'님! 총 '</span> + count + type + <span class="cs">'입니다.'</span>`,
+    after: `<span class="ck">const</span> name  = <span class="cs">'김철수'</span>
+<span class="ck">const</span> count = <span class="cs">5</span>
+<span class="ck">const</span> type  = <span class="cs">'개'</span>
+
+<span class="ck">const</span> msg = <span class="blank-inline">①</span>안녕하세요, <span class="blank-inline">②</span>님! 총 <span class="blank-inline">③</span>입니다.<span class="blank-inline">④</span>`,
+    blanks: [
+      { label: '① 백틱으로 문자열 시작',            answer: '`' },
+      { label: '② name 변수 삽입',                  answer: '${name}' },
+      { label: '③ count와 type을 삽입 (2가지 방법)', answers: ['${count}${type}', '${count+type}'], answer: '${count}${type}', spaceInsensitive: true },
+      { label: '④ 백틱으로 문자열 끝',              answer: '`' },
+    ],
+    hint: '백틱(`)으로 감싸고 변수는 ${변수명}으로 끼워 넣습니다. 백틱은 키보드 숫자 1 왼쪽의 키입니다.',
+    explain: 'Template Literal: 백틱(``) 안에 <code>${표현식}</code>으로 변수나 계산 결과를 바로 삽입합니다. + 연결보다 가독성이 훨씬 좋고, 여러 줄 문자열도 자연스럽게 쓸 수 있습니다.',
+  },
+  {
+    topic: 'Default Parameter', topicShort: 'DefaultParam',
+    desc: '함수를 호출할 때 인자가 없어도 동작하도록 파라미터에 기본값을 지정할 수 있습니다.',
+    before: `<span class="ck">function</span> <span class="cf">fetchItems</span>(page, size, order) {
+  <span class="ck">if</span> (page  === <span class="ck">undefined</span>) page  = <span class="cs">1</span>
+  <span class="ck">if</span> (size  === <span class="ck">undefined</span>) size  = <span class="cs">10</span>
+  <span class="ck">if</span> (order === <span class="ck">undefined</span>) order = <span class="cs">'desc'</span>
+  <span class="cc">// 실제 요청 로직...</span>
+}`,
+    after: `<span class="ck">function</span> <span class="cf">fetchItems</span>(<span class="blank-inline">①</span>, <span class="blank-inline">②</span>, <span class="blank-inline">③</span>) {
+  <span class="cc">// 실제 요청 로직...</span>
+}`,
+    blanks: [
+      { label: '① page 기본값 1',       answer: "page = 1",      spaceInsensitive: true },
+      { label: '② size 기본값 10',      answer: "size = 10",     spaceInsensitive: true },
+      { label: "③ order 기본값 'desc'", answers: ["order = 'desc'", "order = \"desc\""], answer: "order = 'desc'", spaceInsensitive: true },
+    ],
+    hint: '파라미터 선언부에서 = 기본값을 바로 씁니다. function fn(a = 1, b = \'기본\') {} 형태입니다.',
+    explain: 'Default Parameter: <code>function fn(a = 1)</code>처럼 파라미터 자리에 기본값을 직접 씁니다. 해당 인자를 전달하지 않거나 <code>undefined</code>를 전달하면 기본값이 사용됩니다.',
+  },
+
+  /* ── 6. Arrow Function ── */
+  {
+    topic: 'Arrow Function', topicShort: 'Arrow Fn',
+    desc: '함수를 변수에 담거나 콜백으로 전달할 때 화살표 함수를 씁니다. 기본 형태를 익혀보세요.',
+    before: `<span class="ck">const</span> greet = <span class="ck">function</span>(name) {
+  <span class="ck">return</span> <span class="cs">\`안녕, \${name}!\`</span>
+}
+
+<span class="ck">const</span> double = <span class="ck">function</span>(n) {
+  <span class="ck">return</span> n * <span class="cs">2</span>
+}`,
+    after: `<span class="ck">const</span> greet  = (name) <span class="blank-inline">①</span>
+
+<span class="ck">const</span> double = (n) <span class="blank-inline">②</span>`,
+    blanks: [
+      { label: '① (name) 뒤에 오는 코드', answer: "=> `안녕, ${name}!`", spaceInsensitive: true },
+      { label: '② (n) 뒤에 오는 코드',   answer: '=> n*2',             answers: ['=> n*2', '=> n * 2'], spaceInsensitive: true },
+    ],
+    hint: 'function 키워드와 { return }을 생략하고 => 뒤에 반환할 표현식을 바로 씁니다. (name) => `안녕, ${name}!` 형태입니다.',
+    explain: '화살표 함수: <code>function(n) { return n*2 }</code> → <code>(n) => n*2</code>. <code>function</code> 키워드가 없어지고 괄호 뒤에 <code>=></code>가 옵니다. 반환값이 표현식 하나라면 중괄호와 <code>return</code>을 모두 생략합니다. 파라미터가 하나면 괄호도 생략 가능: <code>n => n*2</code>.',
+  },
+  {
+    topic: 'Destructuring — Array', topicShort: 'Destruct.Arr',
+    desc: '<b>Destructuring(구조분해)</b>: 배열 안에 담긴 여러 값을 순서대로 변수로 꺼내는 것입니다.',
+    before: `<span class="cc">// 배열로 묶인 좌표 데이터 풀기</span>
+<span class="ck">const</span> point = [<span class="cs">37.5665</span>, <span class="cs">126.9780</span>, <span class="cs">0</span>]
+
+<span class="ck">const</span> x = point[<span class="cs">0</span>]
+<span class="ck">const</span> y = point[<span class="cs">1</span>]
+<span class="ck">const</span> z = point[<span class="cs">2</span>]
+
+<span class="cc">// Object.entries() 결과 풀기</span>
+<span class="ck">const</span> user = { name: <span class="cs">'김철수'</span>, age: <span class="cs">25</span> }
+Object.entries(user).forEach(<span class="ck">function</span>(entry) {
+  <span class="ck">const</span> key   = entry[<span class="cs">0</span>]
+  <span class="ck">const</span> value = entry[<span class="cs">1</span>]
+  console.log(key, value)
+})`,
+    after: `<span class="cc">// ✅ 배열 구조분해</span>
+<span class="ck">const</span> point = [<span class="cs">37.5665</span>, <span class="cs">126.9780</span>, <span class="cs">0</span>]
+<span class="blank-inline">①</span> = point
+
+<span class="cc">// ✅ forEach 파라미터에서 바로 구조분해</span>
+<span class="ck">const</span> user = { name: <span class="cs">'김철수'</span>, age: <span class="cs">25</span> }
+Object.entries(user).forEach(<span class="blank-inline">②</span> => {
+  console.log(key, value)
+})`,
+    blanks: [
+      { label: '① point 배열에서 x, y, z 순서대로 꺼내기 (const 포함)', answer: 'const [x, y, z]', spaceInsensitive: true },
+      { label: '② entry 배열에서 key, value를 파라미터에서 바로 구조분해', answer: '([key, value])', spaceInsensitive: true },
+    ],
+    hint: 'const [변수1, 변수2] = 배열 형태로 씁니다. 순서대로 변수에 할당됩니다. 파라미터 자리에서도 ([a, b]) => {} 처럼 바로 구조분해할 수 있어요.',
+    explain: '<b>Destructuring(배열)</b>: <code>const [a, b] = 배열</code>로 배열 요소를 순서대로 변수로 꺼냅니다. 객체 구조분해는 키 이름으로 꺼내지만, 배열 구조분해는 인덱스 순서로 꺼냅니다. <code>Object.entries()</code>는 <code>[\'키\', 값]</code> 쌍의 배열을 반환하므로 배열 구조분해와 자주 같이 씁니다.',
+  },
+
+  /* ── 10-3. Destructuring — Object (이름 변경 · 기본값) ── */
+  {
+    topic: 'Destructuring — Object', topicShort: 'Destruct.Obj',
+    desc: '객체 구조분해에서 <b>그냥 꺼내기</b>와 <b>이름을 바꿔서 꺼내기</b>를 연습합니다. API 응답이 snake_case일 때 camelCase로 바꾸며 꺼내는 데 유용합니다.',
+    before: `<span class="ck">const</span> response = {
+  user_name: <span class="cs">'김철수'</span>,
+  user_age:  <span class="cs">25</span>
+}
+
+<span class="cc">// 그냥 꺼내기</span>
+<span class="ck">const</span> user_name = response.user_name
+<span class="ck">const</span> user_age  = response.user_age
+
+<span class="cc">// 꺼내면서 이름 바꾸기</span>
+<span class="ck">const</span> name = response.user_name
+<span class="ck">const</span> age  = response.user_age
+
+console.log(user_name, user_age)
+console.log(name, age)`,
+    after: `<span class="ck">const</span> response = {
+  user_name: <span class="cs">'김철수'</span>,
+  user_age:  <span class="cs">25</span>
+}
+
+<span class="cc">// 그냥 꺼내기 (키 이름 그대로 변수가 됨)</span>
+<span class="ck">const</span> <span class="blank-inline">①</span> = response
+
+<span class="cc">// 꺼내면서 이름 바꾸기 (user_name → name)</span>
+<span class="ck">const</span> { user_name: <span class="blank-inline">②</span>, user_age: <span class="blank-inline">③</span> } = response
+
+console.log(user_name, user_age)
+console.log(name, age)`,
+    blanks: [
+      { label: '① user_name, user_age를 그대로 꺼내기', answer: '{ user_name, user_age }', spaceInsensitive: true },
+      { label: '② user_name을 name 이라는 변수명으로 꺼내기', answer: 'name' },
+      { label: '③ user_age를 age 라는 변수명으로 꺼내기',     answer: 'age' },
+    ],
+    hint: '그냥 꺼낼 땐 { 키이름 }, 이름을 바꿀 땐 { 원래키: 새변수명 } 으로 씁니다.',
+    explain: '구조분해 그냥 꺼내기: <code>const { user_name } = obj</code> → 키 이름과 같은 변수가 생깁니다. 이름 바꿔 꺼내기: <code>const { user_name: name } = obj</code> → user_name 속성을 name 변수로 꺼냅니다. API 응답이 snake_case일 때 camelCase로 바꾸며 꺼내는 데 자주 씁니다.',
+  },
+
+  /* ── 11. Spread Syntax — Object ── */
+  {
+    topic: 'Spread Syntax — Object', topicShort: 'Spread.Obj',
+    desc: '<b>Spread(객체)</b>: <code>...</code>으로 객체의 모든 속성을 펼쳐 새 객체를 만듭니다. 상태를 업데이트하거나 옵션 객체를 합칠 때 씁니다.',
+    before: `<span class="ck">const</span> defaults = { page: <span class="cs">1</span>, size: <span class="cs">10</span>, sort: <span class="cs">'asc'</span> }
+<span class="ck">const</span> userOpt  = { size: <span class="cs">20</span>, filter: <span class="cs">'active'</span> }
+
+<span class="cc">// 두 객체를 일일이 복사해서 합침</span>
+<span class="ck">const</span> options = {
+  page:   defaults.page,
+  size:   userOpt.size,
+  sort:   defaults.sort,
+  filter: userOpt.filter
+}
+
+<span class="cc">// userOpt에 새 속성을 추가한 객체 만들기</span>
+<span class="ck">const</span> newUserOpt = {
+  size:   userOpt.size,
+  filter: userOpt.filter,
+  sort:   <span class="cs">'desc'</span>          <span class="cc">// sort 속성 추가</span>
+}`,
+    after: `<span class="ck">const</span> defaults = { page: <span class="cs">1</span>, size: <span class="cs">10</span>, sort: <span class="cs">'asc'</span> }
+<span class="ck">const</span> userOpt  = { size: <span class="cs">20</span>, filter: <span class="cs">'active'</span> }
+
+<span class="cc">// ✅ 스프레드로 객체 합치기 (뒤쪽이 앞쪽을 덮어씀)</span>
+<span class="ck">const</span> options = { <span class="blank-inline">①</span>, <span class="blank-inline">②</span> }
+
+<span class="cc">// ✅ userOpt에 sort 속성을 추가한 새 객체</span>
+<span class="ck">const</span> newUserOpt = { <span class="blank-inline">③</span>, sort: <span class="cs">'desc'</span> }`,
+    blanks: [
+      { label: '① defaults 객체를 펼치기',              answer: '...defaults' },
+      { label: '② userOpt 객체를 펼치기 (뒤쪽이 우선)', answer: '...userOpt' },
+      { label: '③ userOpt를 펼쳐서 속성 추가',          answer: '...userOpt' },
+    ],
+    hint: '{ ...객체명 } 으로 객체 전체를 펼칩니다. 같은 키가 있으면 뒤쪽에 쓴 것이 앞쪽을 덮어씁니다. 새 객체가 만들어져 원본은 변하지 않습니다.',
+    explain: '<b>Spread(객체)</b>: <code>{ ...obj1, ...obj2 }</code>는 두 객체를 합친 새 객체를 만듭니다. 같은 키가 있으면 나중에 나온 쪽이 덮어씁니다. <code>{ ...state, loading: true }</code>처럼 특정 속성만 바꿔 새 객체를 만드는 패턴에서 자주 씁니다.',
+  },
+
+  /* ── 12. Spread Syntax — Array ── */
+  {
+    topic: 'Spread Syntax — Array', topicShort: 'Spread.Arr',
+    desc: '<b>Spread(배열)</b>: <code>...</code>으로 배열의 모든 요소를 펼쳐 새 배열을 만듭니다.',
+    before: `<span class="ck">const</span> list1 = [<span class="cs">1</span>, <span class="cs">2</span>, <span class="cs">3</span>]
+<span class="ck">const</span> list2 = [<span class="cs">4</span>, <span class="cs">5</span>]
+
+<span class="cc">// 배열 합치기 (concat)</span>
+<span class="ck">const</span> merged = list1.concat(list2)
+
+<span class="cc">// 배열 복사 (slice)</span>
+<span class="ck">const</span> copy = list1.slice()
+
+<span class="cc">// 맨 앞/맨 뒤에 요소 추가</span>
+<span class="ck">const</span> withFirst = [<span class="cs">0</span>].concat(list1)
+<span class="ck">const</span> withLast  = list1.concat([<span class="cs">99</span>])`,
+    after: `<span class="ck">const</span> list1 = [<span class="cs">1</span>, <span class="cs">2</span>, <span class="cs">3</span>]
+<span class="ck">const</span> list2 = [<span class="cs">4</span>, <span class="cs">5</span>]
+
+<span class="cc">// ✅ 스프레드로 배열 합치기</span>
+<span class="ck">const</span> merged = [<span class="blank-inline">①</span>, <span class="blank-inline">②</span>]
+
+<span class="cc">// ✅ 배열 얕은 복사</span>
+<span class="ck">const</span> copy = [<span class="blank-inline">③</span>]
+
+<span class="cc">// ✅ 맨 앞/맨 뒤에 요소 추가</span>
+<span class="ck">const</span> withFirst = [<span class="cs">0</span>, <span class="blank-inline">④</span>]
+<span class="ck">const</span> withLast  = [<span class="blank-inline">⑤</span>, <span class="cs">99</span>]`,
+    blanks: [
+      { label: '① list1 배열을 펼치기',              answer: '...list1' },
+      { label: '② list2 배열을 펼치기',              answer: '...list2' },
+      { label: '③ list1을 펼쳐 복사하기',            answer: '...list1' },
+      { label: '④ list1을 펼쳐 0 뒤에 붙이기',      answer: '...list1' },
+      { label: '⑤ list1을 펼쳐 99 앞에 붙이기',     answer: '...list1' },
+    ],
+    hint: '[ ...배열명 ] 으로 배열 전체를 새 배열 안에 펼칩니다. [ ...arr1, ...arr2 ]는 두 배열을 합친 새 배열입니다. 원본 배열은 변하지 않습니다.',
+    explain: '<b>Spread(배열)</b>: <code>[...arr1, ...arr2]</code>는 concat(), <code>[...arr]</code>은 slice()와 같은 결과지만 더 간결합니다. 원본 배열을 건드리지 않고 새 배열을 만들 때 씁니다.',
+  },
+
+
+  /* ── 9. Ternary Operator ── */
+  {
+    topic: 'Ternary Operator', topicShort: 'Ternary',
+    desc: '조건에 따라 값을 고를 때 삼항 연산자를 씁니다. if/else를 한 줄로 줄일 수 있습니다.',
+    before: `<span class="ck">let</span> statusText
+<span class="ck">if</span> (isLoggedIn.value) {
+  statusText = <span class="cs">'로그인됨'</span>
+} <span class="ck">else</span> {
+  statusText = <span class="cs">'로그아웃'</span>
+}
+
+<span class="ck">let</span> btnLabel
+<span class="ck">if</span> (isLoading.value) {
+  btnLabel = <span class="cs">'로딩 중...'</span>
+} <span class="ck">else</span> {
+  btnLabel = <span class="cs">'제출'</span>
+}`,
+    after: `<span class="ck">const</span> statusText = <span class="blank-inline">①</span> ? <span class="blank-inline">②</span> : <span class="blank-inline">③</span>
+
+<span class="ck">const</span> btnLabel   = <span class="blank-inline">④</span> ? <span class="blank-inline">⑤</span> : <span class="blank-inline">⑥</span>`,
+    blanks: [
+      { label: '① statusText 조건', answer: 'isLoggedIn.value' },
+      { label: '② 참일 때 값',      answer: "'로그인됨'" },
+      { label: '③ 거짓일 때 값',    answer: "'로그아웃'" },
+      { label: '④ btnLabel 조건',   answer: 'isLoading.value' },
+      { label: '⑤ 참일 때 값',      answer: "'로딩 중...'" },
+      { label: '⑥ 거짓일 때 값',    answer: "'제출'" },
+    ],
+    hint: '조건 ? 참일때값 : 거짓일때값 형태입니다.',
+    explain: '삼항 연산자: <code>조건 ? 참 : 거짓</code>. if/else를 한 줄로 표현할 수 있어 간결합니다. 단, 중첩 삼항은 가독성이 떨어지므로 피하는 게 좋습니다.',
+  },
+  {
+    topic: 'Ternary Operator', topicShort: 'Ternary',
+    desc: '삼항 연산자를 Template Literal과 함께 쓰는 패턴입니다.',
+    before: `<span class="ck">const</span> count = <span class="cs">3</span>
+
+<span class="ck">let</span> summary
+<span class="ck">if</span> (count === <span class="cs">0</span>) {
+  summary = <span class="cs">'항목이 없습니다.'</span>
+} <span class="ck">else</span> {
+  summary = <span class="cs">'총 '</span> + count + <span class="cs">'개 항목이 있습니다.'</span>
+}`,
+    after: `<span class="ck">const</span> count = <span class="cs">3</span>
+
+<span class="ck">const</span> summary = count === <span class="cs">0</span>
+  ? <span class="blank-inline">①</span>
+  : <span class="blank-inline">②</span>`,
+    blanks: [
+      { label: '① 0개일 때 문자열',  answer: "'항목이 없습니다.'" },
+      { label: '② 개수 포함 문자열 — 템플릿 리터럴로', answer: '`총 ${count}개 항목이 있습니다.`' },
+    ],
+    hint: '삼항 연산자의 참/거짓 값 자리에 Template Literal을 넣을 수 있어요. ② 는 백틱으로 시작합니다.',
+    explain: '삼항 연산자와 Template Literal은 자주 함께 씁니다. <code>count === 0 ? \'없음\' : \`총 ${count}개\`</code>처럼 각 분기에서 다른 형태의 문자열을 반환할 수 있습니다.',
+  },
+
+  /* ── 10. Optional Chaining ── */
+  {
+    topic: 'Optional Chaining', topicShort: 'Opt.Chain',
+    desc: '객체가 null이거나 중첩 속성이 없을 때, 에러 없이 안전하게 접근하려고 씁니다.',
+    before: `<span class="cc">// null이면 에러 발생!</span>
+<span class="ck">const</span> city = user.profile.address.city
+
+<span class="cc">// 안전하게 하려면 if 중첩</span>
+<span class="ck">let</span> city
+<span class="ck">if</span> (user &&
+    user.profile &&
+    user.profile.address) {
+  city = user.profile.address.city
+}`,
+    after: `<span class="cc">// ✅ 옵셔널 체이닝으로 한 줄에</span>
+<span class="ck">const</span> city = user<span class="blank-inline">①</span>profile<span class="blank-inline">②</span>address<span class="blank-inline">③</span>city`,
+    blanks: [
+      { label: '① user 뒤 — null이면 멈추는 접근자',    answer: '?.' },
+      { label: '② profile 뒤 — null이면 멈추는 접근자', answer: '?.' },
+      { label: '③ address 뒤 — null이면 멈추는 접근자', answer: '?.' },
+    ],
+    hint: '?.을 쓰면 앞 값이 null/undefined일 때 에러 대신 undefined를 반환하고 체이닝을 멈춥니다.',
+    explain: 'Optional Chaining(<code>?.</code>): 앞 값이 <code>null</code>/<code>undefined</code>면 에러 없이 <code>undefined</code>를 반환합니다. API 응답 전 데이터가 아직 없는 상태에서 중첩 속성에 접근할 때 유용합니다.',
+  },
+  {
+    topic: 'Nullish Coalescing', topicShort: '??',
+    desc: '<code>hasMeal</code>은 true/false만 의미있는 값이므로 null/undefined일 때만 기본값이 필요합니다. <code>myName</code>은 문자열이 있어야 하므로 null/undefined/빈 문자열 등 falsy이면 기본값이 필요합니다. 각 상황에 맞는 연산자를 골라보세요.',
+    before: `<span class="ck">const</span> hasMeal1 = <span class="ck">false</span>  <span class="cc">// false 자체가 의미있는 값</span>
+<span class="ck">const</span> hasMeal2 = <span class="ck">null</span>   <span class="cc">// 진짜 누락</span>
+
+<span class="ck">let</span> meal1
+<span class="ck">if</span> (hasMeal1 == <span class="ck">undefined</span> || hasMeal1 == <span class="ck">null</span>) meal1 = <span class="cs">'값 누락'</span>
+<span class="ck">let</span> meal2
+<span class="ck">if</span> (hasMeal2 == <span class="ck">undefined</span> || hasMeal2 == <span class="ck">null</span>) meal2 = <span class="cs">'값 누락'</span>
+
+<span class="ck">const</span> myName1 = <span class="cs">"김싸피"</span>  <span class="cc">// 문자열 있음</span>
+<span class="ck">const</span> myName2 = <span class="cs">""</span>       <span class="cc">// 빈 문자열 → 기본값 필요</span>
+
+<span class="ck">let</span> name1
+<span class="ck">if</span> (!myName1) name1 = <span class="cs">'이름없음'</span>
+<span class="ck">let</span> name2
+<span class="ck">if</span> (!myName2) name2 = <span class="cs">'이름없음'</span>`,
+    after: `<span class="ck">const</span> hasMeal1 = <span class="ck">false</span>
+<span class="ck">const</span> hasMeal2 = <span class="ck">null</span>
+
+<span class="cc">// null/undefined일 때만 기본값 → ①</span>
+<span class="ck">const</span> meal1 = hasMeal1 <span class="blank-inline">①</span> <span class="cs">'값 누락'</span>  <span class="cc">// → false</span>
+<span class="ck">const</span> meal2 = hasMeal2 <span class="blank-inline">①</span> <span class="cs">'값 누락'</span>  <span class="cc">// → '값 누락'</span>
+
+<span class="ck">const</span> myName1 = <span class="cs">"김싸피"</span>
+<span class="ck">const</span> myName2 = <span class="cs">""</span>
+
+<span class="cc">// falsy이면 기본값 → ②</span>
+<span class="ck">const</span> name1 = myName1 <span class="blank-inline">②</span> <span class="cs">'이름없음'</span>  <span class="cc">// → '김싸피'</span>
+<span class="ck">const</span> name2 = myName2 <span class="blank-inline">②</span> <span class="cs">'이름없음'</span>  <span class="cc">// → '이름없음'</span>`,
+    blanks: [
+      { label: '① null/undefined일 때만 기본값 — 어떤 연산자?', answer: '??' },
+      { label: '② falsy(빈 문자열 포함)면 기본값 — 어떤 연산자?', answer: '||' },
+    ],
+    hint: 'null/undefined만 걸러내고 싶으면 ?? — false는 그대로 통과. 빈 문자열("")도 기본값으로 바꾸고 싶으면 || 를 씁니다.',
+    explain: '<code>??</code>: null 또는 undefined일 때만 오른쪽 반환. false는 의미있는 값이므로 그대로 통과됩니다. <code>||</code>: falsy(null, undefined, false, 0, "")이면 오른쪽 반환. 빈 문자열도 "없음"으로 처리해야 할 때 씁니다.',
+  },
+];
+
+/* ═══════════════════════════════════════════
+   상태
+═══════════════════════════════════════════ */
+let currentIdx = 0;
+const state = questions.map(() => ({ checked: false, correct: false, hintOpen: false }));
+
+/* ═══════════════════════════════════════════
+   네비게이션 렌더
+═══════════════════════════════════════════ */
+function renderNav() {
+  const nav = document.getElementById('qNav');
+  // 주제별 그룹
+  const groups = {};
+  questions.forEach((q, i) => {
+    if (!groups[q.topicShort]) groups[q.topicShort] = [];
+    groups[q.topicShort].push(i);
+  });
+
+  let html = '';
+  for (const [label, idxArr] of Object.entries(groups)) {
+    html += `<div class="q-nav-group">
+      <span class="q-nav-label">${label}</span>`;
+    idxArr.forEach(i => {
+      let cls = i === currentIdx ? 'active' : '';
+      if (state[i].checked) cls = state[i].correct ? 'correct' : 'wrong';
+      if (i === currentIdx && state[i].checked) cls += (state[i].correct ? ' active correct' : ' active wrong');
+      html += `<button class="q-nav-btn ${cls}" onclick="goTo(${i})" aria-label="${i+1}번 문제">${i+1}</button>`;
+    });
+    html += `</div>`;
+  }
+  nav.innerHTML = html;
+
+  // 진행도
+  const done = state.filter(s => s.checked).length;
+  document.getElementById('progressFill').style.width = (done / questions.length * 100) + '%';
+  document.getElementById('progressLabel').textContent = `${done} / ${questions.length}`;
+}
+
+/* ═══════════════════════════════════════════
+   문제 카드 렌더 (최초 1회만)
+═══════════════════════════════════════════ */
+function renderCards() {
+  const main = document.getElementById('main');
+  let html = '';
+  questions.forEach((q, i) => {
+    const blanksHtml = q.blanks.map((b, bi) => `
+      <div class="blank-row">
+        <span class="blank-num">${bi+1}.</span>
+        <span class="blank-label">${b.label}</span>
+        <input type="text" class="blank-input" id="q${i}_b${bi}"
+          placeholder="" autocomplete="off" spellcheck="false"
+          autocorrect="off" autocapitalize="none"
+          onkeydown="if(event.key==='Enter') checkAnswer(${i})" />
+      </div>`).join('');
+
+    html += `<div class="q-card ${i===0?'active':''}" id="qcard_${i}">
+      <div class="topic-divider">${q.topic}</div>
+      <div class="q-meta">
+        <span class="q-num-badge">Q${i+1}</span>
+        <span class="q-topic-tag">${q.topicShort}</span>
+      </div>
+      <div class="q-desc">${q.desc}</div>
+      <div class="code-section">
+        <div class="code-col">
+          <div class="code-col-label">ES6 적용 전</div>
+          <div class="code-block">${q.before}</div>
+        </div>
+        <div class="code-col">
+          <div class="code-col-label">ES6 적용 후 (빈칸 채우기)</div>
+          <div class="code-block">${q.after}</div>
+        </div>
+      </div>
+      <div class="blanks-wrap">${blanksHtml}</div>
+      <div class="btn-row">
+        <button class="btn btn-hint" onclick="toggleHint(${i})">💡 힌트 보기</button>
+        <button class="btn btn-check" onclick="checkAnswer(${i})">✓ 정답 확인</button>
+        <button class="btn btn-show-answer" onclick="showAnswer(${i})">정답 보기</button>
+        <div style="margin-left:auto; display:flex; gap:8px;">
+          ${i > 0 ? `<button class="btn btn-nav" onclick="goTo(${i-1})">← 이전</button>` : ''}
+          ${i < questions.length-1
+            ? `<button class="btn btn-nav primary" onclick="goTo(${i+1})">다음 →</button>`
+            : `<button class="btn btn-nav primary" onclick="showScore()">결과 보기 →</button>`}
+        </div>
+      </div>
+      <div class="hint-box" id="hint_${i}">${q.hint}</div>
+      <div class="result-box" id="result_${i}"></div>
+      <div class="explain-box" id="explain_${i}">
+        <div class="explain-title">해설</div>
+        ${q.explain}
+      </div>
+      <div class="bottom-nav">
+        ${i > 0 ? `<button class="btn btn-nav" onclick="goTo(${i-1})">← 이전 문제</button>` : '<span></span>'}
+        ${i < questions.length-1
+          ? `<button class="btn btn-nav primary" style="margin-left:auto" onclick="goTo(${i+1})">다음 문제 →</button>`
+          : `<button class="btn btn-nav primary" style="margin-left:auto" onclick="showScore()">결과 확인 →</button>`}
+      </div>
+    </div>`;
+  });
+
+  // 결과 화면
+  html += `<div class="score-screen" id="scoreScreen">
+    <div class="score-ring">
+      <span class="score-num" id="scoreNum">0</span>
+      <span class="score-denom" id="scoreDenom">/ ${questions.length}</span>
+    </div>
+    <div class="score-msg" id="scoreMsg"></div>
+    <div class="score-sub" id="scoreSub"></div>
+    <button class="btn-restart" onclick="restart()">처음부터 다시</button>
+  </div>`;
+
+  main.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════
+   인터랙션
+═══════════════════════════════════════════ */
+function goTo(idx) {
+  document.getElementById('qcard_' + currentIdx).classList.remove('active');
+  document.getElementById('scoreScreen').classList.remove('show');
+  currentIdx = idx;
+  document.getElementById('qcard_' + idx).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  renderNav();
+}
+
+function toggleHint(i) {
+  const box = document.getElementById('hint_' + i);
+  state[i].hintOpen = !state[i].hintOpen;
+  box.classList.toggle('show', state[i].hintOpen);
+}
+
+function checkAnswer(i) {
+  const q = questions[i];
+  let allOk = true;
+  const wrong = [];
+
+  q.blanks.forEach((b, bi) => {
+    const inp = document.getElementById(`q${i}_b${bi}`);
+    // => 가 브라우저에서 ⇒ 등으로 자동변환될 경우를 대비해 정규화
+    const val = inp.value.trim()
+      .replace(/\u21D2/g, '=>')   // ⇒
+      .replace(/\u2192/g, '=>')   // →
+      .replace(/\uFE65/g, '>')    // ﹥
+      .replace(/\uFF1E/g, '>');   // ＞
+    const validAnswers = b.answers ? b.answers : [b.answer];
+    // spaceInsensitive 플래그가 있으면 공백 제거 후 비교
+    const normalize = s => b.spaceInsensitive ? s.replace(/\s/g, '') : s;
+    const ok = validAnswers.some(a => normalize(val) === normalize(a));
+    inp.classList.remove('correct', 'wrong');
+    inp.classList.add(ok ? 'correct' : 'wrong');
+    if (!ok) { allOk = false; wrong.push(`${bi+1}번: 정답은 "${b.answer}"`); }
+  });
+
+  state[i].checked = true;
+  state[i].correct = allOk;
+
+  const rb = document.getElementById('result_' + i);
+  const eb = document.getElementById('explain_' + i);
+
+  if (allOk) {
+    rb.className = 'result-box show ok';
+    rb.innerHTML = `<span class="result-icon">✓</span><div class="result-text"><div class="result-title">정답입니다!</div></div>`;
+  } else {
+    rb.className = 'result-box show ng';
+    rb.innerHTML = `<span class="result-icon">✗</span><div class="result-text">
+      <div class="result-title">틀렸어요. 다시 확인해보세요.</div>
+      <div class="result-wrong-list">${wrong.join('<br>')}</div>
+    </div>`;
+  }
+  eb.classList.add('show');
+  renderNav();
+}
+
+function showAnswer(i) {
+  const q = questions[i];
+  q.blanks.forEach((b, bi) => {
+    const inp = document.getElementById(`q${i}_b${bi}`);
+    inp.value = b.answer;
+    inp.classList.remove('correct', 'wrong');
+    inp.classList.add('correct');
+  });
+  if (!state[i].checked) {
+    state[i].checked = true;
+    state[i].correct = false;
+  }
+  const eb = document.getElementById('explain_' + i);
+  eb.classList.add('show');
+  const rb = document.getElementById('result_' + i);
+  if (!rb.classList.contains('show')) {
+    rb.className = 'result-box show ng';
+    rb.innerHTML = `<span class="result-icon">📖</span><div class="result-text"><div class="result-title">정답을 확인했습니다. 이해하고 다시 도전해보세요!</div></div>`;
+  }
+  renderNav();
+}
+
+function showScore() {
+  document.getElementById('qcard_' + currentIdx).classList.remove('active');
+  const correct = state.filter(s => s.correct).length;
+  const total = questions.length;
+  document.getElementById('scoreNum').textContent = correct;
+  document.getElementById('scoreDenom').textContent = `/ ${total}`;
+  const msgs = [
+    [total, total, '완벽해요! ES6 문법을 완전히 익혔습니다.'],
+    [Math.ceil(total*0.8), total-1, '훌륭해요! 거의 다 맞았어요. 틀린 문제만 복습하면 완벽합니다.'],
+    [Math.ceil(total*0.5), Math.ceil(total*0.8)-1, '잘 하고 있어요! 조금 더 연습하면 금방 익숙해집니다.'],
+    [0, Math.ceil(total*0.5)-1, '처음이라 어렵죠. 힌트를 참고하면서 다시 도전해보세요!'],
+  ];
+  const [,, msg] = msgs.find(([min, max]) => correct >= min && correct <= max) || msgs[3];
+  document.getElementById('scoreMsg').textContent = msg;
+  document.getElementById('scoreSub').textContent = `${total - correct}문제 틀렸습니다.`;
+  document.getElementById('scoreScreen').classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restart() {
+  state.forEach(s => { s.checked = false; s.correct = false; s.hintOpen = false; });
+  questions.forEach((q, i) => {
+    q.blanks.forEach((b, bi) => {
+      const inp = document.getElementById(`q${i}_b${bi}`);
+      if (inp) { inp.value = ''; inp.classList.remove('correct', 'wrong'); }
+    });
+    document.getElementById('hint_' + i).classList.remove('show');
+    document.getElementById('result_' + i).classList.remove('show');
+    document.getElementById('explain_' + i).classList.remove('show');
+  });
+  document.getElementById('scoreScreen').classList.remove('show');
+  currentIdx = 0;
+  document.getElementById('qcard_0').classList.add('active');
+  renderNav();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ═══════════════════════════════════════════
+   초기화
+═══════════════════════════════════════════ */
+renderCards();
+renderNav();
+</script>
+</body>
+</html>
