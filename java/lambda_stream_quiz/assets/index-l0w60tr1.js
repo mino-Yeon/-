@@ -13,18 +13,24 @@ difficulty: easy
 ---
 
 ### 요구사항
-숫자 42를 반환하는 \`Supplier<Integer>\`를 람다로 생성하라.
+숫자 42를 반환하는 \`Supplier<Integer>\`를 람다로 만들어 \`printValue\` 메서드에 전달하라.
 
 ### 코드
 \`\`\`java
-Supplier<Integer> supplier = {{BLANK1}};
+static void printValue(Supplier<Integer> supplier) {
+    System.out.println(supplier.get());
+}
+
+public static void main(String[] args) {
+    printValue({{BLANK1}});
+}
 \`\`\`
 
 ### 정답
 - BLANK1: \`() -> 42\`
 
 ### 해설
-\`Supplier<T>\`는 매개변수를 받지 않고 값을 반환하는 함수형 인터페이스입니다. 추상 메서드는 \`T get()\`이며, 람다로 표현할 때는 괄호 안에 아무것도 넣지 않고 \`() -> 반환할값\` 형태로 작성합니다.
+\`Supplier<T>\`는 매개변수를 받지 않고 값을 반환하는 함수형 인터페이스입니다. 추상 메서드는 \`T get()\`이며, 람다로 표현할 때는 괄호 안에 아무것도 넣지 않고 \`() -> 반환할값\` 형태로 작성합니다. \`printValue\` 메서드는 이 \`Supplier\`를 받아서 내부에서 \`supplier.get()\`을 호출해 값을 꺼내 씁니다.
 
 ---
 
@@ -34,11 +40,17 @@ difficulty: easy
 ---
 
 ### 요구사항
-"Hello, Java!"라는 문자열을 반환하는 \`Supplier<String>\`을 람다로 생성하라.
+"Hello, Java!"라는 문자열을 반환하는 \`Supplier<String>\`을 람다로 만들어 \`printGreeting\` 메서드에 전달하라.
 
 ### 코드
 \`\`\`java
-Supplier<String> greeting = {{BLANK1}};
+static void printGreeting(Supplier<String> supplier) {
+    System.out.println(supplier.get());
+}
+
+public static void main(String[] args) {
+    printGreeting({{BLANK1}});
+}
 \`\`\`
 
 ### 정답
@@ -55,18 +67,24 @@ difficulty: easy
 ---
 
 ### 요구사항
-전달받은 문자열을 그대로 콘솔에 출력하는 \`Consumer<String>\`을 람다로 생성하라.
+전달받은 문자열을 그대로 콘솔에 출력하는 \`Consumer<String>\`을 람다로 만들어 \`runWithMessage\` 메서드에 전달하라.
 
 ### 코드
 \`\`\`java
-Consumer<String> printer = {{BLANK1}};
+static void runWithMessage(Consumer<String> consumer) {
+    consumer.accept("hello");
+}
+
+public static void main(String[] args) {
+    runWithMessage({{BLANK1}});
+}
 \`\`\`
 
 ### 정답
 - BLANK1: \`s -> System.out.println(s)\`
 
 ### 해설
-\`Consumer<T>\`는 값을 받아서 처리만 하고 아무것도 반환하지 않는 함수형 인터페이스입니다. 추상 메서드는 \`void accept(T t)\`이며, 매개변수 하나를 받아 그 값을 사용하는 동작을 람다 본문에 작성합니다.
+\`Consumer<T>\`는 값을 받아서 처리만 하고 아무것도 반환하지 않는 함수형 인터페이스입니다. 추상 메서드는 \`void accept(T t)\`이며, 매개변수 하나를 받아 그 값을 사용하는 동작을 람다 본문에 작성합니다. \`runWithMessage\` 메서드가 내부에서 \`consumer.accept("hello")\`를 호출하면서 문자열 \`"hello"\`를 람다에 넘겨줍니다.
 
 ---
 
@@ -76,18 +94,24 @@ difficulty: easy
 ---
 
 ### 요구사항
-전달받은 정수에 100을 더한 값을 콘솔에 출력하는 \`Consumer<Integer>\`를 람다로 생성하라.
+전달받은 정수에 100을 더한 값을 콘솔에 출력하는 \`Consumer<Integer>\`를 람다로 만들어 \`runWithNumber\` 메서드에 전달하라.
 
 ### 코드
 \`\`\`java
-Consumer<Integer> plusHundredPrinter = {{BLANK1}};
+static void runWithNumber(Consumer<Integer> consumer) {
+    consumer.accept(7);
+}
+
+public static void main(String[] args) {
+    runWithNumber({{BLANK1}});
+}
 \`\`\`
 
 ### 정답
 - BLANK1: \`n -> System.out.println(n + 100)\`
 
 ### 해설
-\`Consumer\`는 값을 그대로 쓸 수도 있지만, 이 문제처럼 받은 값을 가공한 뒤 사용하는 것도 가능합니다. 중요한 것은 여전히 반환값이 없다는 점입니다.
+\`Consumer\`는 값을 그대로 쓸 수도 있지만, 이 문제처럼 받은 값을 가공한 뒤 사용하는 것도 가능합니다. 중요한 것은 여전히 반환값이 없다는 점입니다. \`runWithNumber\`가 넘기는 \`7\`이 람다의 매개변수로 들어와 \`n + 100\`이 계산됩니다.
 
 ---
 
@@ -97,18 +121,24 @@ difficulty: easy
 ---
 
 ### 요구사항
-정수를 받아서 그 값의 제곱을 반환하는 \`Function<Integer, Integer>\`를 람다로 생성하라.
+정수를 받아서 그 값의 제곱을 반환하는 \`Function<Integer, Integer>\`를 람다로 만들어 \`printSquare\` 메서드에 전달하라.
 
 ### 코드
 \`\`\`java
-Function<Integer, Integer> square = {{BLANK1}};
+static void printSquare(Function<Integer, Integer> function) {
+    System.out.println(function.apply(5));
+}
+
+public static void main(String[] args) {
+    printSquare({{BLANK1}});
+}
 \`\`\`
 
 ### 정답
 - BLANK1: \`n -> n * n\`
 
 ### 해설
-\`Function<T, R>\`은 T 타입 값을 받아 R 타입 값으로 변환하는 함수형 인터페이스입니다. 추상 메서드는 \`R apply(T t)\`이며, 이번 문제는 T와 R이 둘 다 \`Integer\`인 경우입니다.
+\`Function<T, R>\`은 T 타입 값을 받아 R 타입 값으로 변환하는 함수형 인터페이스입니다. 추상 메서드는 \`R apply(T t)\`이며, 이번 문제는 T와 R이 둘 다 \`Integer\`인 경우입니다. \`printSquare\`가 \`function.apply(5)\`를 호출하면 \`5\`가 람다에 전달되어 \`5 * 5\`가 계산됩니다.
 
 ---
 
@@ -118,11 +148,17 @@ difficulty: easy
 ---
 
 ### 요구사항
-문자열을 받아서 그 문자열의 길이를 반환하는 \`Function<String, Integer>\`를 람다로 생성하라.
+문자열을 받아서 그 문자열의 길이를 반환하는 \`Function<String, Integer>\`를 람다로 만들어 \`printLength\` 메서드에 전달하라.
 
 ### 코드
 \`\`\`java
-Function<String, Integer> lengthOf = {{BLANK1}};
+static void printLength(Function<String, Integer> function) {
+    System.out.println(function.apply("banana"));
+}
+
+public static void main(String[] args) {
+    printLength({{BLANK1}});
+}
 \`\`\`
 
 ### 정답
@@ -139,18 +175,24 @@ difficulty: easy
 ---
 
 ### 요구사항
-정수를 받아서 짝수인지 판별하는 \`Predicate<Integer>\`를 람다로 생성하라.
+정수를 받아서 짝수인지 판별하는 \`Predicate<Integer>\`를 람다로 만들어 \`checkNumber\` 메서드에 전달하라.
 
 ### 코드
 \`\`\`java
-Predicate<Integer> isEven = {{BLANK1}};
+static void checkNumber(Predicate<Integer> predicate) {
+    System.out.println(predicate.test(4));
+}
+
+public static void main(String[] args) {
+    checkNumber({{BLANK1}});
+}
 \`\`\`
 
 ### 정답
 - BLANK1: \`n -> n % 2 == 0\`
 
 ### 해설
-\`Predicate<T>\`는 값을 받아서 참/거짓을 판별하는 함수형 인터페이스입니다. 추상 메서드는 \`boolean test(T t)\`이며, 람다 본문은 반드시 \`boolean\` 값으로 평가되는 식이어야 합니다.
+\`Predicate<T>\`는 값을 받아서 참/거짓을 판별하는 함수형 인터페이스입니다. 추상 메서드는 \`boolean test(T t)\`이며, 람다 본문은 반드시 \`boolean\` 값으로 평가되는 식이어야 합니다. \`checkNumber\`가 \`predicate.test(4)\`를 호출하면 \`4\`가 람다에 전달되어 짝수인지 판별됩니다.
 
 ---
 
@@ -160,11 +202,17 @@ difficulty: easy
 ---
 
 ### 요구사항
-문자열을 받아서 길이가 5 이상인지 판별하는 \`Predicate<String>\`을 람다로 생성하라.
+문자열을 받아서 길이가 5 이상인지 판별하는 \`Predicate<String>\`을 람다로 만들어 \`checkWord\` 메서드에 전달하라.
 
 ### 코드
 \`\`\`java
-Predicate<String> isLongEnough = {{BLANK1}};
+static void checkWord(Predicate<String> predicate) {
+    System.out.println(predicate.test("apple"));
+}
+
+public static void main(String[] args) {
+    checkWord({{BLANK1}});
+}
 \`\`\`
 
 ### 정답
@@ -1027,11 +1075,11 @@ String targetId = "u02";
 
 ### 해설
 \`orElse\`는 \`Optional\` 안에 값이 있으면 그 값을 그대로 반환하고, 값이 없으면 괄호 안에 넣은 기본값을 대신 반환합니다. \`ifPresent\`와 달리 반환값이 있으므로, 꺼낸 값을 다른 로직에 계속 활용해야 하는 상황에 적합합니다. 이 문제는 \`filter\`로 조건에 맞는 회원을 찾고, \`map\`으로 닉네임만 뽑아낸 뒤, \`findFirst\`로 첫 결과를 \`Optional\`로 받아, 마지막으로 \`orElse\`까지 이어지는 전체 흐름을 종합적으로 연습합니다.
-`;function ne(e){let t=null,n=e,r=e.match(/^# 사전 준비\n([\s\S]*?)\n---\n\n/);r?(t=r[1].trim(),n=e.slice(r[0].length)):n=n.replace(/^---\n/,``);let i=n.split(/\n---\n\n(?=id: )/).map(ie).filter(Boolean);return{intro:t,problems:i}}var re={Supplier:`T get()`,Consumer:`void accept(T t)`,Function:`R apply(T t)`,Predicate:`boolean test(T t)`};function w(e){let t=e.match(/\b(Supplier|Consumer|Function|Predicate)(<[^>]*>)?\s+\w+\s*=/);if(!t)return null;let n=t[1];return{name:n,typeLabel:n+(t[2]||``),signature:re[n]}}function ie(e){let t=e.match(/^id:\s*(.+)\ntitle:\s*(.+)\ndifficulty:\s*(.+)\n---\n\n([\s\S]*)$/);if(!t)return null;let[,n,r,i,a]=t,o=ae(a),s=o.코드||``,c=ce(s),l=c.length===0,u=le(o.정답||``);return{id:n.trim(),title:r.trim(),difficulty:i.trim(),requirement:(o.요구사항||``).trim(),code:oe(s),execData:o[`실행용 데이터`]?oe(o[`실행용 데이터`]):null,answers:u,explanation:(o.해설||``).trim(),refCode:o[`참고 코드`]?oe(o[`참고 코드`]):null,refCodeNote:o[`참고 코드`]?se(o[`참고 코드`]):``,blanks:c,isReferenceType:l,functionalInterface:w(s)}}function ae(e){let t=[`요구사항`,`코드`,`실행용 데이터`,`정답`,`해설`,`참고 코드`],n={},r=RegExp(`### (${t.join(`|`)})\\n`,`g`),i=[...e.matchAll(r)];for(let t=0;t<i.length;t++){let r=i[t][1],a=i[t].index+i[t][0].length,o=t+1<i.length?i[t+1].index:e.length;n[r]=e.slice(a,o).trim()}return n}function oe(e){let t=e.match(/```java\n([\s\S]*?)```/);return t?t[1].replace(/\n$/,``):e}function se(e){let t=e.indexOf("```",e.indexOf("```")+3);return t>=0?e.slice(t+3).trim():``}function ce(e){let t=[...e.matchAll(/\{\{(BLANK\d+)\}\}/g)],n=new Set,r=[];for(let e of t)n.has(e[1])||(n.add(e[1]),r.push(e[1]));return r}function le(e){let t={},n=e.split(`
+`;function ne(e){let t=null,n=e,r=e.match(/^# 사전 준비\n([\s\S]*?)\n---\n\n/);r?(t=r[1].trim(),n=e.slice(r[0].length)):n=n.replace(/^---\n/,``);let i=n.split(/\n---\n\n(?=id: )/).map(ie).filter(Boolean);return{intro:t,problems:i}}var re={Supplier:`T get()`,Consumer:`void accept(T t)`,Function:`R apply(T t)`,Predicate:`boolean test(T t)`};function w(e){let t=e.match(/\b(Supplier|Consumer|Function|Predicate)(<[^>]*>)?\s+\w+\s*[=)]/);if(!t)return null;let n=t[1];return{name:n,typeLabel:n+(t[2]||``),signature:re[n]}}function ie(e){let t=e.match(/^id:\s*(.+)\ntitle:\s*(.+)\ndifficulty:\s*(.+)\n---\n\n([\s\S]*)$/);if(!t)return null;let[,n,r,i,a]=t,o=ae(a),s=o.코드||``,c=ce(s),l=c.length===0,u=le(o.정답||``);return{id:n.trim(),title:r.trim(),difficulty:i.trim(),requirement:(o.요구사항||``).trim(),code:oe(s),execData:o[`실행용 데이터`]?oe(o[`실행용 데이터`]):null,answers:u,explanation:(o.해설||``).trim(),refCode:o[`참고 코드`]?oe(o[`참고 코드`]):null,refCodeNote:o[`참고 코드`]?se(o[`참고 코드`]):``,blanks:c,isReferenceType:l,functionalInterface:w(s)}}function ae(e){let t=[`요구사항`,`코드`,`실행용 데이터`,`정답`,`해설`,`참고 코드`],n={},r=RegExp(`### (${t.join(`|`)})\\n`,`g`),i=[...e.matchAll(r)];for(let t=0;t<i.length;t++){let r=i[t][1],a=i[t].index+i[t][0].length,o=t+1<i.length?i[t+1].index:e.length;n[r]=e.slice(a,o).trim()}return n}function oe(e){let t=e.match(/```java\n([\s\S]*?)```/);return t?t[1].replace(/\n$/,``):e}function se(e){let t=e.indexOf("```",e.indexOf("```")+3);return t>=0?e.slice(t+3).trim():``}function ce(e){let t=[...e.matchAll(/\{\{(BLANK\d+)\}\}/g)],n=new Set,r=[];for(let e of t)n.has(e[1])||(n.add(e[1]),r.push(e[1]));return r}function le(e){let t={},n=e.split(`
 `);for(let e of n){let n=e.match(/^-\s*(BLANK\d+):\s*`(.+)`\s*$/);n&&(t[n[1]]=n[2])}return t}function ue(e){if(e==null)return``;let t=String(e);return t=t.replace(/\s+/g,``),t=t.replace(/(^|[(,])\(([a-zA-Z_$][a-zA-Z0-9_$]*)\)->/g,`$1$2->`),t=T(t),t}function T(e){let t=[...e.matchAll(/(?<![\w.$])(\([a-zA-Z_$][\w$]*(?:,[a-zA-Z_$][\w$]*)*\)|\(\)|[a-zA-Z_$][\w$]*)->/g)];if(t.length===0)return e;let n=``,r=0;for(let i=0;i<t.length;i++){let a=t[i],o=a[1],s=a.index+a[0].length,c=de(e,s,i+1<t.length?t[i+1].index:e.length),l=e.slice(r,a.index),u=e.slice(s,c);u=E(u);let{newParamPart:d,newBody:f}=fe(o,u);n+=l+d+`->`+f,r=c}return n+=e.slice(r),n}function E(e){if(!e.startsWith(`{`)||!e.endsWith(`}`))return e;let t=e.slice(1,-1),n=t.match(/^return(.+);$/);return n?n[1]:t.endsWith(`;`)&&!t.slice(0,-1).includes(`;`)?t.slice(0,-1):e}function de(e,t,n){if(e[t]===`{`){let r=0;for(let i=t;i<n;i++)if(e[i]===`{`)r++;else if(e[i]===`}`&&(r--,r===0))return i+1;return n}let r=0;for(let i=t;i<n;i++){let t=e[i];if(t===`(`||t===`[`)r++;else if(t===`)`||t===`]`){if(r===0)return i;r--}else if(t===`,`&&r===0)return i}return n}function fe(e,t){let n;if(e.startsWith(`(`)){let t=e.slice(1,-1);n=t===``?[]:t.split(`,`).map(e=>e.trim())}else n=[e];if(n.length===0)return{newParamPart:`()`,newBody:t};let r=t;return n.forEach((e,t)=>{let n=`$${t+1}`,i=RegExp(`(?<![a-zA-Z0-9_$])${pe(e)}(?![a-zA-Z0-9_$])`,`g`);r=r.replace(i,n)}),{newParamPart:n.length===1?`$1`:`(${n.map((e,t)=>`$${t+1}`).join(`,`)})`,newBody:r}}function pe(e){return e.replace(/[.*+?^${}()|[\]\\]/g,`\\$&`)}function me(e,t){return ue(e)===ue(t)}function D(e,t){if(!e.execData)return null;let n=e.code;for(let r of e.blanks){let e=t[r];if(!e||!e.trim())return null;n=n.split(`{{${r}}}`).join(e)}let r=[e.execData,n],i=n.trim().split(`
 `)[0].match(/^[\w<>,\s\[\]]+\s+(\w+)\s*=/);return i&&r.push(`System.out.println(${i[1]});`),r.join(`
 
-`)}var O={easy:`쉬움`,medium:`보통`,hard:`어려움`};function he({level:e}){return(0,x.jsx)(`span`,{className:`diff-badge diff-${e}`,children:O[e]||e})}function ge({text:e,disabled:t,label:n}){let[r,i]=(0,b.useState)(!1);return(0,x.jsx)(`button`,{className:`copy-btn`,onClick:()=>{t||!e||(navigator.clipboard&&navigator.clipboard.writeText&&navigator.clipboard.writeText(e).catch(()=>{}),i(!0),setTimeout(()=>i(!1),1500))},disabled:t,title:t?`빈칸을 모두 채우면 복사할 수 있어요`:`실행 가능한 코드로 복사`,children:r?`복사됨 ✓`:n||`복사`})}function _e({children:e}){return(0,x.jsx)(`pre`,{className:`code-block`,children:(0,x.jsx)(`code`,{children:e})})}function ve({code:e,values:t,results:n,onChange:r}){let i=[],a=0,o=/\{\{(BLANK\d+)\}\}/g,s,c=0;for(;(s=o.exec(e))!==null;){i.push((0,x.jsx)(`span`,{children:e.slice(a,s.index)},c++));let o=s[1],l=n?n[o]:void 0,u=t[o]||``;i.push((0,x.jsx)(`input`,{className:`blank-input`+(l===!0?` blank-correct`:l===!1?` blank-wrong`:``),value:u,onChange:e=>r(o,e.target.value),spellCheck:!1,style:{width:Math.max(u.length,6)+2+`ch`},placeholder:`입력`},c++)),a=s.index+s[0].length}return i.push((0,x.jsx)(`span`,{children:e.slice(a)},c++)),(0,x.jsx)(`pre`,{className:`code-block`,children:(0,x.jsx)(`code`,{children:i})})}function ye({problem:e,chapterTitle:t,onSolved:n,isSolved:r,onPrev:i,onNext:a,hasPrev:o,hasNext:s,currentIndex:c,totalCount:l}){let[u,d]=(0,b.useState)({}),[f,p]=(0,b.useState)(null),[m,h]=(0,b.useState)(!1),[g,_]=(0,b.useState)(!1);(0,b.useMemo)(()=>{d({}),p(null),h(!1),_(!1)},[e.id]);let v=(e,t)=>{d(n=>({...n,[e]:t})),p(null)},y=()=>{let t={},r=!0;for(let n of e.blanks){let i=me(u[n]||``,e.answers[n]||``);t[n]=i,i||(r=!1)}p(t),r&&n(e.id)},ee=e.blanks.every(e=>(u[e]||``).trim().length>0),S=(0,b.useMemo)(()=>D(e,u),[e,u]);if(e.isReferenceType)return(0,x.jsxs)(`div`,{className:`problem-view`,children:[(0,x.jsxs)(`div`,{className:`problem-header`,children:[(0,x.jsxs)(`div`,{className:`problem-header-top`,children:[(0,x.jsx)(`span`,{className:`chapter-crumb`,children:t}),(0,x.jsxs)(`span`,{className:`position-badge`,children:[c+1,` / `,l]}),(0,x.jsx)(he,{level:e.difficulty}),(0,x.jsx)(`span`,{className:`ref-tag`,children:`참고 예제`})]}),(0,x.jsx)(`h2`,{children:e.title})]}),(0,x.jsx)(xe,{label:`요구사항`,children:(0,x.jsx)(`p`,{children:e.requirement})}),(0,x.jsx)(xe,{label:`코드`,action:(0,x.jsx)(ge,{text:e.code,label:`복사`}),children:(0,x.jsx)(_e,{children:e.code})}),(0,x.jsx)(xe,{label:`해설`,children:(0,x.jsx)(`p`,{children:e.explanation})}),(0,x.jsx)(be,{onPrev:i,onNext:a,hasPrev:o,hasNext:s})]});let C=f&&Object.values(f).every(Boolean);return(0,x.jsxs)(`div`,{className:`problem-view`,children:[(0,x.jsxs)(`div`,{className:`problem-header`,children:[(0,x.jsxs)(`div`,{className:`problem-header-top`,children:[(0,x.jsx)(`span`,{className:`chapter-crumb`,children:t}),(0,x.jsxs)(`span`,{className:`position-badge`,children:[c+1,` / `,l]}),(0,x.jsx)(he,{level:e.difficulty}),r&&(0,x.jsx)(`span`,{className:`solved-tag`,children:`✓ 완료`})]}),(0,x.jsx)(`h2`,{children:e.title})]}),(0,x.jsx)(xe,{label:`요구사항`,children:(0,x.jsx)(`p`,{children:e.requirement})}),e.functionalInterface&&(0,x.jsxs)(`div`,{className:`fi-signature`,children:[(0,x.jsx)(`span`,{className:`fi-name`,children:e.functionalInterface.typeLabel}),(0,x.jsx)(`span`,{className:`fi-arrow`,children:`→`}),(0,x.jsx)(`code`,{className:`fi-method`,children:e.functionalInterface.signature})]}),(0,x.jsx)(xe,{label:`코드`,action:e.execData?(0,x.jsx)(ge,{text:S,disabled:!ee||!S}):null,children:(0,x.jsx)(ve,{code:e.code,values:u,results:f,onChange:v})}),(0,x.jsxs)(`div`,{className:`action-row`,children:[(0,x.jsx)(`button`,{className:`check-btn`,onClick:y,disabled:!ee,children:`정답 확인`}),f&&(0,x.jsx)(`span`,{className:C?`result-ok`:`result-fail`,children:C?`정답입니다! 🎉`:`다시 확인해보세요`})]}),f&&(0,x.jsxs)(x.Fragment,{children:[(0,x.jsx)(xe,{label:`해설`,action:(0,x.jsx)(`button`,{className:`toggle-btn`,onClick:()=>h(e=>!e),children:m?`접기`:`해설 보기`}),children:m&&(0,x.jsxs)(x.Fragment,{children:[(0,x.jsxs)(`div`,{className:`answer-box`,children:[(0,x.jsx)(`div`,{className:`answer-box-title`,children:`정답`}),e.blanks.map(t=>(0,x.jsxs)(`div`,{className:`answer-line`,children:[e.blanks.length>1&&(0,x.jsx)(`span`,{className:`answer-blank-id`,children:t}),(0,x.jsx)(`code`,{children:e.answers[t]})]},t))]}),(0,x.jsx)(`p`,{children:e.explanation})]})}),e.refCode&&(0,x.jsx)(xe,{label:`참고 코드`,action:(0,x.jsx)(`button`,{className:`toggle-btn`,onClick:()=>_(e=>!e),children:g?`접기`:`펼치기`}),children:g&&(0,x.jsxs)(x.Fragment,{children:[(0,x.jsx)(_e,{children:e.refCode}),e.refCodeNote&&(0,x.jsx)(`p`,{className:`ref-note`,children:e.refCodeNote})]})})]}),(0,x.jsx)(be,{onPrev:i,onNext:a,hasPrev:o,hasNext:s})]})}function be({onPrev:e,onNext:t,hasPrev:n,hasNext:r}){return(0,x.jsxs)(`div`,{className:`nav-row`,children:[(0,x.jsx)(`button`,{onClick:e,disabled:!n,children:`← 이전 문제`}),(0,x.jsx)(`button`,{onClick:t,disabled:!r,children:`다음 문제 →`})]})}function xe({label:e,action:t,children:n}){return(0,x.jsxs)(`div`,{className:`section`,children:[(0,x.jsxs)(`div`,{className:`section-head`,children:[(0,x.jsx)(`span`,{className:`section-label`,children:e}),t]}),n]})}function Se({intro:e}){if(!e)return null;let t=e.split("```java\n"),n=t[0],r=t.slice(1);return(0,x.jsxs)(`div`,{className:`intro-box`,children:[(0,x.jsx)(`div`,{className:`intro-title`,children:`📦 사전 준비`}),n.trim()&&(0,x.jsx)(`p`,{children:n.trim()}),r.map((e,t)=>{let n=e.indexOf("```"),r=e.slice(0,n).replace(/\n$/,``),i=e.slice(n+3);return(0,x.jsxs)(b.Fragment,{children:[(0,x.jsxs)(`div`,{className:`intro-code-wrap`,children:[(0,x.jsx)(_e,{children:r}),(0,x.jsx)(ge,{text:r,label:`복사`})]}),i.trim()&&!i.trim().startsWith("```java")&&(0,x.jsx)(`p`,{children:i.trim()})]},t)})]})}function Ce({chapters:e,onSelect:t}){return(0,x.jsxs)(`div`,{className:`chapter-list`,children:[(0,x.jsxs)(`div`,{className:`hero`,children:[(0,x.jsx)(`span`,{className:`hero-eyebrow`,children:`JAVA PRACTICE`}),(0,x.jsx)(`h1`,{children:`람다 · 스트림 · Optional`}),(0,x.jsx)(`p`,{className:`subtitle`,children:`빈칸을 채우며 손으로 익히는 함수형 문법 연습`})]}),(0,x.jsx)(`div`,{className:`chapter-cards`,children:e.map((e,n)=>(0,x.jsxs)(`button`,{className:`chapter-card`,onClick:()=>t(n),children:[(0,x.jsx)(`span`,{className:`chapter-num`,children:String(n+1).padStart(2,`0`)}),(0,x.jsxs)(`div`,{className:`chapter-card-body`,children:[(0,x.jsx)(`span`,{className:`chapter-title`,children:e.title}),(0,x.jsxs)(`span`,{className:`chapter-count`,children:[e.problems.length,`문제`]})]}),(0,x.jsx)(`span`,{className:`chapter-arrow`,children:`→`})]},e.key))})]})}function we({chapter:e,solvedIds:t,onSelectProblem:n,onBack:r}){let i=e.problems.filter(e=>!e.isReferenceType&&t.has(e.id)).length,a=e.problems.filter(e=>!e.isReferenceType).length;return(0,x.jsxs)(`div`,{className:`problem-list`,children:[(0,x.jsx)(`button`,{className:`back-btn`,onClick:r,children:`← 챕터 목록`}),(0,x.jsx)(`h2`,{children:e.title}),(0,x.jsx)(`div`,{className:`progress-line`,children:a>0?`${i} / ${a} 문제 완료`:``}),(0,x.jsx)(Se,{intro:e.intro}),(0,x.jsx)(`ul`,{className:`problem-items`,children:e.problems.map((e,r)=>(0,x.jsx)(`li`,{children:(0,x.jsxs)(`button`,{className:`problem-item`,onClick:()=>n(r),children:[(0,x.jsx)(`span`,{className:`problem-item-num`,children:r+1}),(0,x.jsx)(`span`,{className:`problem-item-title`,children:e.title}),(0,x.jsx)(he,{level:e.difficulty}),e.isReferenceType?(0,x.jsx)(`span`,{className:`ref-tag small`,children:`참고`}):t.has(e.id)?(0,x.jsx)(`span`,{className:`solved-dot`,children:`✓`}):(0,x.jsx)(`span`,{className:`unsolved-dot`})]})},e.id))})]})}function Te(){let e=[{key:`ch1`,title:`1단계 · 함수형 인터페이스`,raw:ee},{key:`ch2`,title:`2단계 · map / filter 빈칸 채우기`,raw:S},{key:`ch3`,title:`3단계 · 연산 선택과 구성`,raw:C},{key:`ch4`,title:`4단계 · 최종연산 직접 선택`,raw:te}],t=(0,b.useMemo)(()=>e.map(({key:e,title:t,raw:n})=>{let{intro:r,problems:i}=ne(n);return{key:e,title:t,intro:r,problems:i}}),[]),[n,r]=(0,b.useState)({screen:`chapters`}),[i,a]=(0,b.useState)(new Set),o=e=>{a(t=>new Set(t).add(e))},s;if(n.screen===`chapters`)s=(0,x.jsx)(Ce,{chapters:t,onSelect:e=>r({screen:`list`,chapterIdx:e})});else{let e=t[n.chapterIdx];if(n.screen===`list`)s=(0,x.jsx)(we,{chapter:e,solvedIds:i,onSelectProblem:e=>r({screen:`problem`,chapterIdx:n.chapterIdx,problemIdx:e}),onBack:()=>r({screen:`chapters`})});else{let t=e.problems[n.problemIdx],a=n.problemIdx>0,c=n.problemIdx<e.problems.length-1;s=(0,x.jsxs)(x.Fragment,{children:[(0,x.jsxs)(`button`,{className:`back-btn`,onClick:()=>r({screen:`list`,chapterIdx:n.chapterIdx}),children:[`← `,e.title,` 목록`]}),(0,x.jsx)(ye,{problem:t,chapterTitle:e.title,onSolved:o,isSolved:i.has(t.id),hasPrev:a,hasNext:c,currentIndex:n.problemIdx,totalCount:e.problems.length,onPrev:()=>r({...n,problemIdx:n.problemIdx-1}),onNext:()=>r({...n,problemIdx:n.problemIdx+1})})]})}}return(0,x.jsxs)(`div`,{className:`app-root`,children:[(0,x.jsx)(`style`,{children:Ee}),(0,x.jsx)(`div`,{className:`app`,children:s})]})}var Ee=`
+`)}var O={easy:`쉬움`,medium:`보통`,hard:`어려움`};function he({level:e}){return(0,x.jsx)(`span`,{className:`diff-badge diff-${e}`,children:O[e]||e})}function ge({text:e,disabled:t,label:n}){let[r,i]=(0,b.useState)(!1);return(0,x.jsx)(`button`,{className:`copy-btn`,onClick:()=>{t||!e||(navigator.clipboard&&navigator.clipboard.writeText&&navigator.clipboard.writeText(e).catch(()=>{}),i(!0),setTimeout(()=>i(!1),1500))},disabled:t,title:t?`빈칸을 모두 채우면 복사할 수 있어요`:`실행 가능한 코드로 복사`,children:r?`복사됨 ✓`:n||`복사`})}function _e({children:e}){return(0,x.jsx)(`pre`,{className:`code-block`,children:(0,x.jsx)(`code`,{children:e})})}function ve({code:e,values:t,results:n,onChange:r}){let i=[],a=0,o=/\{\{(BLANK\d+)\}\}/g,s,c=0;for(;(s=o.exec(e))!==null;){i.push((0,x.jsx)(`span`,{children:e.slice(a,s.index)},c++));let o=s[1],l=n?n[o]:void 0,u=t[o]||``;i.push((0,x.jsx)(`input`,{className:`blank-input`+(l===!0?` blank-correct`:l===!1?` blank-wrong`:``),value:u,onChange:e=>r(o,e.target.value),spellCheck:!1,style:{width:Math.max(u.length,6)+2+`ch`},placeholder:`입력`},c++)),a=s.index+s[0].length}return i.push((0,x.jsx)(`span`,{children:e.slice(a)},c++)),(0,x.jsx)(`pre`,{className:`code-block`,children:(0,x.jsx)(`code`,{children:i})})}function ye({problem:e,chapterTitle:t,onSolved:n,isSolved:r,onPrev:i,onNext:a,hasPrev:o,hasNext:s,currentIndex:c,totalCount:l}){let[u,d]=(0,b.useState)({}),[f,p]=(0,b.useState)(null),[m,h]=(0,b.useState)(!1),[g,_]=(0,b.useState)(!1);(0,b.useMemo)(()=>{d({}),p(null),h(!1),_(!1)},[e.id]);let v=(e,t)=>{d(n=>({...n,[e]:t})),p(null)},y=()=>{let t={},r=!0;for(let n of e.blanks){let i=me(u[n]||``,e.answers[n]||``);t[n]=i,i||(r=!1)}p(t),r&&n(e.id)},ee=e.blanks.every(e=>(u[e]||``).trim().length>0),S=(0,b.useMemo)(()=>D(e,u),[e,u]);if(e.isReferenceType){let n=e.execData?D(e,{}):e.code;return(0,x.jsxs)(`div`,{className:`problem-view`,children:[(0,x.jsxs)(`div`,{className:`problem-header`,children:[(0,x.jsxs)(`div`,{className:`problem-header-top`,children:[(0,x.jsx)(`span`,{className:`chapter-crumb`,children:t}),(0,x.jsxs)(`span`,{className:`position-badge`,children:[c+1,` / `,l]}),(0,x.jsx)(he,{level:e.difficulty}),(0,x.jsx)(`span`,{className:`ref-tag`,children:`참고 예제`})]}),(0,x.jsx)(`h2`,{children:e.title})]}),(0,x.jsx)(xe,{label:`요구사항`,children:(0,x.jsx)(`p`,{children:e.requirement})}),(0,x.jsx)(xe,{label:`코드`,action:(0,x.jsx)(ge,{text:n,label:`복사`}),children:(0,x.jsx)(_e,{children:e.code})}),(0,x.jsx)(xe,{label:`해설`,children:(0,x.jsx)(`p`,{children:e.explanation})}),(0,x.jsx)(be,{onPrev:i,onNext:a,hasPrev:o,hasNext:s})]})}let C=f&&Object.values(f).every(Boolean);return(0,x.jsxs)(`div`,{className:`problem-view`,children:[(0,x.jsxs)(`div`,{className:`problem-header`,children:[(0,x.jsxs)(`div`,{className:`problem-header-top`,children:[(0,x.jsx)(`span`,{className:`chapter-crumb`,children:t}),(0,x.jsxs)(`span`,{className:`position-badge`,children:[c+1,` / `,l]}),(0,x.jsx)(he,{level:e.difficulty}),r&&(0,x.jsx)(`span`,{className:`solved-tag`,children:`✓ 완료`})]}),(0,x.jsx)(`h2`,{children:e.title})]}),(0,x.jsx)(xe,{label:`요구사항`,children:(0,x.jsx)(`p`,{children:e.requirement})}),e.functionalInterface&&(0,x.jsxs)(`div`,{className:`fi-signature`,children:[(0,x.jsx)(`span`,{className:`fi-name`,children:e.functionalInterface.typeLabel}),(0,x.jsx)(`span`,{className:`fi-arrow`,children:`→`}),(0,x.jsx)(`code`,{className:`fi-method`,children:e.functionalInterface.signature})]}),(0,x.jsx)(xe,{label:`코드`,action:e.execData?(0,x.jsx)(ge,{text:S,disabled:!ee||!S}):null,children:(0,x.jsx)(ve,{code:e.code,values:u,results:f,onChange:v})}),(0,x.jsxs)(`div`,{className:`action-row`,children:[(0,x.jsx)(`button`,{className:`check-btn`,onClick:y,disabled:!ee,children:`정답 확인`}),f&&(0,x.jsx)(`span`,{className:C?`result-ok`:`result-fail`,children:C?`정답입니다! 🎉`:`다시 확인해보세요`})]}),f&&(0,x.jsxs)(x.Fragment,{children:[(0,x.jsx)(xe,{label:`해설`,action:(0,x.jsx)(`button`,{className:`toggle-btn`,onClick:()=>h(e=>!e),children:m?`접기`:`해설 보기`}),children:m&&(0,x.jsxs)(x.Fragment,{children:[(0,x.jsxs)(`div`,{className:`answer-box`,children:[(0,x.jsx)(`div`,{className:`answer-box-title`,children:`정답`}),e.blanks.map(t=>(0,x.jsxs)(`div`,{className:`answer-line`,children:[e.blanks.length>1&&(0,x.jsx)(`span`,{className:`answer-blank-id`,children:t}),(0,x.jsx)(`code`,{children:e.answers[t]})]},t))]}),(0,x.jsx)(`p`,{children:e.explanation})]})}),e.refCode&&(0,x.jsx)(xe,{label:`참고 코드`,action:(0,x.jsx)(`button`,{className:`toggle-btn`,onClick:()=>_(e=>!e),children:g?`접기`:`펼치기`}),children:g&&(0,x.jsxs)(x.Fragment,{children:[(0,x.jsx)(_e,{children:e.refCode}),e.refCodeNote&&(0,x.jsx)(`p`,{className:`ref-note`,children:e.refCodeNote})]})})]}),(0,x.jsx)(be,{onPrev:i,onNext:a,hasPrev:o,hasNext:s})]})}function be({onPrev:e,onNext:t,hasPrev:n,hasNext:r}){return(0,x.jsxs)(`div`,{className:`nav-row`,children:[(0,x.jsx)(`button`,{onClick:e,disabled:!n,children:`← 이전 문제`}),(0,x.jsx)(`button`,{onClick:t,disabled:!r,children:`다음 문제 →`})]})}function xe({label:e,action:t,children:n}){return(0,x.jsxs)(`div`,{className:`section`,children:[(0,x.jsxs)(`div`,{className:`section-head`,children:[(0,x.jsx)(`span`,{className:`section-label`,children:e}),t]}),n]})}function Se({intro:e}){if(!e)return null;let t=e.split("```java\n"),n=t[0],r=t.slice(1);return(0,x.jsxs)(`div`,{className:`intro-box`,children:[(0,x.jsx)(`div`,{className:`intro-title`,children:`📦 사전 준비`}),n.trim()&&(0,x.jsx)(`p`,{children:n.trim()}),r.map((e,t)=>{let n=e.indexOf("```"),r=e.slice(0,n).replace(/\n$/,``),i=e.slice(n+3);return(0,x.jsxs)(b.Fragment,{children:[(0,x.jsxs)(`div`,{className:`intro-code-wrap`,children:[(0,x.jsx)(_e,{children:r}),(0,x.jsx)(ge,{text:r,label:`복사`})]}),i.trim()&&!i.trim().startsWith("```java")&&(0,x.jsx)(`p`,{children:i.trim()})]},t)})]})}function Ce({chapters:e,onSelect:t}){return(0,x.jsxs)(`div`,{className:`chapter-list`,children:[(0,x.jsxs)(`div`,{className:`hero`,children:[(0,x.jsx)(`span`,{className:`hero-eyebrow`,children:`JAVA PRACTICE`}),(0,x.jsx)(`h1`,{children:`람다 · 스트림 · Optional`}),(0,x.jsx)(`p`,{className:`subtitle`,children:`빈칸을 채우며 손으로 익히는 함수형 문법 연습`})]}),(0,x.jsx)(`div`,{className:`chapter-cards`,children:e.map((e,n)=>(0,x.jsxs)(`button`,{className:`chapter-card`,onClick:()=>t(n),children:[(0,x.jsx)(`span`,{className:`chapter-num`,children:String(n+1).padStart(2,`0`)}),(0,x.jsxs)(`div`,{className:`chapter-card-body`,children:[(0,x.jsx)(`span`,{className:`chapter-title`,children:e.title}),(0,x.jsxs)(`span`,{className:`chapter-count`,children:[e.problems.length,`문제`]})]}),(0,x.jsx)(`span`,{className:`chapter-arrow`,children:`→`})]},e.key))})]})}function we({chapter:e,solvedIds:t,onSelectProblem:n,onBack:r}){let i=e.problems.filter(e=>!e.isReferenceType&&t.has(e.id)).length,a=e.problems.filter(e=>!e.isReferenceType).length;return(0,x.jsxs)(`div`,{className:`problem-list`,children:[(0,x.jsx)(`button`,{className:`back-btn`,onClick:r,children:`← 챕터 목록`}),(0,x.jsx)(`h2`,{children:e.title}),(0,x.jsx)(`div`,{className:`progress-line`,children:a>0?`${i} / ${a} 문제 완료`:``}),(0,x.jsx)(Se,{intro:e.intro}),(0,x.jsx)(`ul`,{className:`problem-items`,children:e.problems.map((e,r)=>(0,x.jsx)(`li`,{children:(0,x.jsxs)(`button`,{className:`problem-item`,onClick:()=>n(r),children:[(0,x.jsx)(`span`,{className:`problem-item-num`,children:r+1}),(0,x.jsx)(`span`,{className:`problem-item-title`,children:e.title}),(0,x.jsx)(he,{level:e.difficulty}),e.isReferenceType?(0,x.jsx)(`span`,{className:`ref-tag small`,children:`참고`}):t.has(e.id)?(0,x.jsx)(`span`,{className:`solved-dot`,children:`✓`}):(0,x.jsx)(`span`,{className:`unsolved-dot`})]})},e.id))})]})}function Te(){let e=[{key:`ch1`,title:`1단계 · 함수형 인터페이스`,raw:ee},{key:`ch2`,title:`2단계 · map / filter 빈칸 채우기`,raw:S},{key:`ch3`,title:`3단계 · 연산 선택과 구성`,raw:C},{key:`ch4`,title:`4단계 · 최종연산 직접 선택`,raw:te}],t=(0,b.useMemo)(()=>e.map(({key:e,title:t,raw:n})=>{let{intro:r,problems:i}=ne(n);return{key:e,title:t,intro:r,problems:i}}),[]),[n,r]=(0,b.useState)({screen:`chapters`}),[i,a]=(0,b.useState)(new Set),o=e=>{a(t=>new Set(t).add(e))},s;if(n.screen===`chapters`)s=(0,x.jsx)(Ce,{chapters:t,onSelect:e=>r({screen:`list`,chapterIdx:e})});else{let e=t[n.chapterIdx];if(n.screen===`list`)s=(0,x.jsx)(we,{chapter:e,solvedIds:i,onSelectProblem:e=>r({screen:`problem`,chapterIdx:n.chapterIdx,problemIdx:e}),onBack:()=>r({screen:`chapters`})});else{let t=e.problems[n.problemIdx],a=n.problemIdx>0,c=n.problemIdx<e.problems.length-1;s=(0,x.jsxs)(x.Fragment,{children:[(0,x.jsxs)(`button`,{className:`back-btn`,onClick:()=>r({screen:`list`,chapterIdx:n.chapterIdx}),children:[`← `,e.title,` 목록`]}),(0,x.jsx)(ye,{problem:t,chapterTitle:e.title,onSolved:o,isSolved:i.has(t.id),hasPrev:a,hasNext:c,currentIndex:n.problemIdx,totalCount:e.problems.length,onPrev:()=>r({...n,problemIdx:n.problemIdx-1}),onNext:()=>r({...n,problemIdx:n.problemIdx+1})})]})}}return(0,x.jsxs)(`div`,{className:`app-root`,children:[(0,x.jsx)(`style`,{children:Ee}),(0,x.jsx)(`div`,{className:`app`,children:s})]})}var Ee=`
 :root {
   --bg: #16161d;
   --bg-panel: #1e1e28;
