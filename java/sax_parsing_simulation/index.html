@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SAX Parsing 시뮬레이터 (characters 1회 호출)</title>
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          "Noto Sans KR",
+          Arial,
+          sans-serif;
+        margin: 24px;
+        line-height: 1.5;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+      }
+      .sub {
+        color: #555;
+        margin: 0 0 16px;
+        font-size: 14px;
+      }
+
+      .panel {
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 14px;
+        background: #fff;
+        max-width: 980px;
+      }
+
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin: 10px 0;
+      }
+
+      button {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        background: #fff;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid #ddd;
+        font-size: 12px;
+        color: #333;
+        background: #fafafa;
+      }
+
+      .hint {
+        color: #666;
+        font-size: 13px;
+      }
+
+      .pill {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        padding: 6px 10px;
+        border: 1px solid #e5e5e5;
+        border-radius: 999px;
+        background: #fff;
+      }
+      input[type="range"] {
+        width: 180px;
+      }
+      .small {
+        font-size: 12px;
+        color: #666;
+      }
+
+      .xmlView {
+        border: 1px solid #e5e5e5;
+        border-radius: 12px;
+        padding: 12px;
+        background: #0b1020;
+        color: #e6edf3;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 13px;
+        overflow: auto;
+        max-height: 300px;
+        white-space: pre-wrap;
+      }
+
+      .tok {
+        padding: 1px 2px;
+        border-radius: 6px;
+      }
+      .tok.current {
+        outline: 2px solid #ffffff66;
+        background: #ffffff14;
+      }
+
+      .kv {
+        display: grid;
+        grid-template-columns: 190px 1fr;
+        gap: 6px 10px;
+        margin-top: 10px;
+        font-size: 13px;
+      }
+      .kv .k {
+        color: #666;
+      }
+      .kv .v {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .books {
+        border: 1px solid #e5e5e5;
+        border-radius: 12px;
+        padding: 10px;
+        background: #fff;
+        max-height: 220px;
+        overflow: auto;
+        margin-top: 12px;
+      }
+      .bookItem {
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 8px;
+        margin: 8px 0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>SAX Parsing 시뮬레이터</h1>
+    <p class="sub">
+      XML을 순서대로 읽다가 이벤트가 발생하면 <code>startElement</code> / <code>characters</code> /
+      <code>endElement</code>가 호출되는 느낌을 보여줍니다.
+      <br />
+      ✅ 이번 버전은 <code>&lt;title&gt;Java&lt;/title&gt;</code>처럼 텍스트가 짧으면
+      <b>characters가 “한 번” 호출되는 시뮬레이션</b>입니다.
+    </p>
+
+    <div class="panel">
+      <div class="row">
+        <button id="buildBtn">이벤트 생성</button>
+        <button id="stepBtn" disabled>한 단계씩 실행</button>
+        <button id="runBtn" disabled>전체 실행</button>
+        <button id="resetBtn">초기화</button>
+
+        <span class="pill">
+          <span class="badge">속도</span>
+          <input id="speed" type="range" min="60" max="900" step="60" value="240" />
+          <span id="speedText" class="small">240ms</span>
+        </span>
+
+        <span class="badge">현재 이벤트</span>
+        <span id="currentEvent" class="hint">-</span>
+      </div>
+
+      <div class="row">
+        <span class="badge">현재 읽는 위치</span>
+        <span class="hint">아래 XML에서 <b>하이라이트</b>가 “지금 읽는 토큰”입니다.</span>
+      </div>
+
+      <div id="xmlView" class="xmlView"></div>
+
+      <div class="kv">
+        <div class="k">현재 태그(currentTag)</div>
+        <div id="currentTag" class="v">-</div>
+
+        <div class="k">문자 누적(charBuffer)</div>
+        <div id="charBuffer" class="v">""</div>
+
+        <div class="k">현재 만드는 Book(currentBook)</div>
+        <div id="bookState" class="v">{"title": null, "price": null}</div>
+      </div>
+
+      <div class="row" style="margin-top: 14px">
+        <span class="badge">ArrayList&lt;Book&gt; books</span>
+        <span class="hint"><code>&lt;/book&gt;</code>마다 완성되어 add 됩니다.</span>
+      </div>
+      <div id="booksList" class="books"></div>
+    </div>
+
+    <script>
+      // =========================
+      // ✅ 화면에 보여줄 XML (입력창 제거: 한 군데만 보이도록)
+      // =========================
+      const XML_TEXT = `<books>
+  <book>
+    <title>Java</title>
+    <price>30000</price>
+  </book>
+  <book>
+    <title>Spring</title>
+    <price>42000</price>
+  </book>
+  <book>
+    <title>Vue</title>
+    <price>25000</price>
+  </book>
+</books>`;
+
+      // =========================
+      // 상태
+      // =========================
+      const state = {
+        currentTag: null,
+        charBuf: "",
+        currentBook: null,
+        books: [],
+        events: [],
+        pointer: -1,
+      };
+
+      // =========================
+      // DefaultHandler(교육용)
+      // =========================
+      function startElement(qName, attrs = {}) {
+        state.currentTag = qName;
+        state.charBuf = "";
+
+        if (qName === "book") {
+          state.currentBook = { title: null, price: null };
+        }
+
+        ui.setCurrentEvent(`[startElement] <${qName}> attrs=${JSON.stringify(attrs)}`);
+        ui.sync();
+      }
+
+      function characters(text) {
+        // ✅ 이번 버전: 텍스트 토큰당 characters "한 번" 호출
+        state.charBuf += text;
+        ui.setCurrentEvent(
+          `[characters] "${text.replace(/\n/g, "\\n")}" (누적="${state.charBuf.replace(/\n/g, "\\n")}")`,
+        );
+        ui.sync();
+      }
+
+      function endElement(qName) {
+        const value = state.charBuf.trim();
+
+        if (state.currentBook) {
+          if (qName === "title") state.currentBook.title = value || null;
+          if (qName === "price") state.currentBook.price = value ? Number(value) : null;
+        }
+
+        if (qName === "book" && state.currentBook) {
+          state.books.push(state.currentBook);
+          state.currentBook = null;
+          ui.setCurrentEvent(`[endElement] </book> → ✅ books.add(완성된 Book) (books.size=${state.books.length})`);
+        } else {
+          ui.setCurrentEvent(`[endElement] </${qName}> (확정값="${value}")`);
+        }
+
+        state.currentTag = null;
+        state.charBuf = "";
+        ui.sync();
+      }
+
+      // =========================
+      // 토큰화 + 이벤트 생성
+      // =========================
+      function tokenize(xml) {
+        return xml.match(/<[^>]+>|[^<]+/g) || [];
+      }
+
+      function buildSaxEventsFromTokens(tokens) {
+        const events = [];
+
+        for (let i = 0; i < tokens.length; i++) {
+          const tok = tokens[i];
+
+          if (tok.startsWith("<")) {
+            if (tok.startsWith("<?") || tok.startsWith("<!")) continue;
+
+            // </tag>
+            const endMatch = tok.match(/^<\/\s*([^\s>]+)\s*>$/);
+            if (endMatch) {
+              events.push({ type: "end", qName: endMatch[1], tokenIndex: i });
+              continue;
+            }
+
+            // <tag ...>
+            const startMatch = tok.match(/^<\s*([^\s/>]+)([^>]*)>$/);
+            if (startMatch) {
+              const qName = startMatch[1];
+              const attrPart = startMatch[2] || "";
+              const attrs = {};
+              const attrRegex = /([a-zA-Z_:][\w:.-]*)\s*=\s*"([^"]*)"/g;
+              let m;
+              while ((m = attrRegex.exec(attrPart)) !== null) {
+                attrs[m[1]] = m[2];
+              }
+
+              const selfClosing = /\/\s*>$/.test(tok);
+
+              events.push({ type: "start", qName, attrs, tokenIndex: i });
+              if (selfClosing) events.push({ type: "end", qName, tokenIndex: i });
+              continue;
+            }
+          } else {
+            // 텍스트
+            if (tok.trim() === "") continue;
+
+            // ✅ 이번 버전: 쪼개지 않고 "한 번"만 characters로 넣는다
+            events.push({ type: "chars", text: tok, tokenIndex: i });
+          }
+        }
+
+        return events;
+      }
+
+      // =========================
+      // 실행 엔진
+      // =========================
+      let running = false;
+      let timer = null;
+
+      function applyEvent(ev) {
+        ui.highlightToken(ev.tokenIndex);
+
+        if (ev.type === "start") startElement(ev.qName, ev.attrs);
+        if (ev.type === "chars") characters(ev.text);
+        if (ev.type === "end") endElement(ev.qName);
+      }
+
+      function stepOnce() {
+        if (state.pointer + 1 >= state.events.length) {
+          ui.setCurrentEvent("✅ 이벤트 처리 완료");
+          ui.disableRunControls();
+          return;
+        }
+
+        state.pointer++;
+        applyEvent(state.events[state.pointer]);
+
+        if (state.pointer + 1 >= state.events.length) {
+          ui.setCurrentEvent("✅ 이벤트 처리 완료");
+          ui.disableRunControls();
+        }
+      }
+
+      function runAll() {
+        if (running) return;
+        running = true;
+
+        const delay = Number(ui.speed.value);
+
+        const tick = () => {
+          if (!running) return;
+          if (state.pointer + 1 >= state.events.length) {
+            running = false;
+            ui.setCurrentEvent("✅ 이벤트 처리 완료");
+            ui.disableRunControls();
+            return;
+          }
+          stepOnce();
+          timer = setTimeout(tick, delay);
+        };
+
+        tick();
+      }
+
+      function stopRun() {
+        running = false;
+        if (timer) clearTimeout(timer);
+        timer = null;
+      }
+
+      // =========================
+      // UI
+      // =========================
+      const ui = {
+        xmlView: document.getElementById("xmlView"),
+
+        buildBtn: document.getElementById("buildBtn"),
+        stepBtn: document.getElementById("stepBtn"),
+        runBtn: document.getElementById("runBtn"),
+        resetBtn: document.getElementById("resetBtn"),
+
+        speed: document.getElementById("speed"),
+        speedText: document.getElementById("speedText"),
+
+        currentEvent: document.getElementById("currentEvent"),
+        currentTag: document.getElementById("currentTag"),
+        charBuffer: document.getElementById("charBuffer"),
+        bookState: document.getElementById("bookState"),
+        booksList: document.getElementById("booksList"),
+
+        tokenSpans: [],
+
+        setCurrentEvent(text) {
+          this.currentEvent.textContent = text;
+        },
+
+        sync() {
+          this.currentTag.textContent = state.currentTag ?? "-";
+          this.charBuffer.textContent = JSON.stringify(state.charBuf);
+          this.bookState.textContent = JSON.stringify(state.currentBook ?? { title: null, price: null });
+          this.renderBooks();
+        },
+
+        renderBooks() {
+          const books = state.books;
+          if (books.length === 0) {
+            this.booksList.innerHTML = `<div class="hint">아직 추가된 Book이 없습니다. (<code>&lt;/book&gt;</code>까지 진행해보세요)</div>`;
+            return;
+          }
+          this.booksList.innerHTML = books
+            .map((b, idx) => `<div class="bookItem">#${idx + 1} ${JSON.stringify(b)}</div>`)
+            .join("");
+        },
+
+        disableRunControls() {
+          this.stepBtn.disabled = true;
+          this.runBtn.disabled = true;
+        },
+
+        enableRunControls() {
+          this.stepBtn.disabled = false;
+          this.runBtn.disabled = false;
+        },
+
+        renderXmlTokens(tokens) {
+          this.xmlView.innerHTML = "";
+          this.tokenSpans = [];
+
+          tokens.forEach((t, idx) => {
+            const sp = document.createElement("span");
+            sp.className = "tok";
+            sp.textContent = t;
+            sp.dataset.idx = String(idx);
+            this.xmlView.appendChild(sp);
+            this.tokenSpans.push(sp);
+          });
+        },
+
+        highlightToken(tokenIndex) {
+          this.tokenSpans.forEach((sp) => sp.classList.remove("current"));
+          const target = this.tokenSpans[tokenIndex];
+          if (target) {
+            target.classList.add("current");
+            target.scrollIntoView({ block: "nearest", inline: "nearest" });
+          }
+        },
+      };
+
+      // =========================
+      // 버튼 동작
+      // =========================
+      ui.buildBtn.addEventListener("click", () => {
+        stopRun();
+
+        // 초기화
+        state.currentTag = null;
+        state.charBuf = "";
+        state.currentBook = null;
+        state.books = [];
+        state.events = [];
+        state.pointer = -1;
+
+        // 토큰 + 이벤트 생성
+        const tokens = tokenize(XML_TEXT);
+        state.events = buildSaxEventsFromTokens(tokens);
+
+        // XML 한 번만 보여주기 (input 제거)
+        ui.renderXmlTokens(tokens);
+        ui.highlightToken(0);
+
+        ui.sync();
+        ui.enableRunControls();
+        ui.setCurrentEvent(`📦 이벤트 생성 완료 (총 ${state.events.length}개). 실행을 시작하세요.`);
+      });
+
+      ui.stepBtn.addEventListener("click", () => stepOnce());
+      ui.runBtn.addEventListener("click", () => runAll());
+
+      ui.resetBtn.addEventListener("click", () => {
+        stopRun();
+
+        state.currentTag = null;
+        state.charBuf = "";
+        state.currentBook = null;
+        state.books = [];
+        state.events = [];
+        state.pointer = -1;
+
+        ui.xmlView.innerHTML = "";
+        ui.disableRunControls();
+        ui.sync();
+        ui.setCurrentEvent("🔄 초기화 완료. 다시 '이벤트 생성'을 누르세요.");
+      });
+
+      ui.speed.addEventListener("input", () => {
+        ui.speedText.textContent = `${ui.speed.value}ms`;
+      });
+
+      // 초기 상태
+      ui.disableRunControls();
+      ui.sync();
+      ui.setCurrentEvent("준비됨: '이벤트 생성'을 누르면 XML 하이라이트가 시작됩니다.");
+    </script>
+  </body>
+</html>
