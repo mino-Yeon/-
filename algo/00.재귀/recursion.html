@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>재귀 시뮬레이션 - 호출과 복귀</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f0f2f5;color:#333;height:100vh;display:flex;flex-direction:column;}
+.header{background:#2c3e50;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:16px;}
+.header h1{font-size:18px;white-space:nowrap;} .header .sub{font-size:13px;color:#94a3b8;}
+.controls{background:#34495e;padding:10px 24px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.controls button{background:#3498db;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:13px;font-family:inherit;}
+.controls button:hover{background:#2980b9;}
+.controls button.playing{background:#e74c3c;}
+.controls button.preset{background:#475569;}
+.controls button.preset:hover{background:#64748b;}
+.controls button.preset.on{background:#8b5cf6;}
+.controls button.quiz{background:#16a34a;}
+.controls button.quiz:hover{background:#15803d;}
+.controls select{padding:4px 8px;border-radius:4px;font-size:13px;font-family:inherit;}
+.sep{width:1px;height:24px;background:#4a6278;margin:0 4px;}
+.controls label{color:#cbd5e1;font-size:13px;}
+.controls input[type=range]{width:80px;vertical-align:middle;}
+.step-info{color:#94a3b8;font-size:13px;margin-left:auto;}
+.main{display:flex;flex:1;overflow:hidden;}
+.code-panel{width:38%;min-width:320px;background:#1e1e1e;display:flex;flex-direction:column;transition:width .3s,min-width .3s;}
+.code-panel.collapsed{width:40px;min-width:40px;}
+.code-panel.collapsed .code-body{display:none;}
+.code-panel.collapsed .panel-hd span{display:none;}
+.panel-hd{background:#2d2d2d;color:#94a3b8;padding:8px 16px;font-size:12px;font-weight:600;border-bottom:1px solid #3d3d3d;cursor:pointer;user-select:none;display:flex;align-items:center;gap:8px;}
+.panel-hd:hover{background:#3d3d3d;}
+.panel-hd::before{content:'◀';font-size:10px;transition:transform .3s;}
+.code-panel.collapsed .panel-hd::before{transform:rotate(180deg);}
+.code-body{flex:1;overflow-y:auto;padding:8px 0;}
+.cl{display:flex;padding:1px 0;font-family:'Consolas','D2Coding',monospace;font-size:13px;line-height:1.6;transition:background .15s;}
+.cl.active{background:#264f78;}
+.cl.active .ln{color:#fff;}
+.ln{width:36px;text-align:right;padding-right:10px;color:#555;user-select:none;flex-shrink:0;}
+.lc{color:#d4d4d4;white-space:pre;}
+.kw{color:#569cd6;}.tp{color:#4ec9b0;}.nm{color:#b5cea8;}.st{color:#ce9178;}.cm{color:#6a9955;}
+.viz-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.vs{border-bottom:1px solid #ddd;}
+.vs .sh{background:#e8ecf0;padding:5px 16px;font-size:12px;font-weight:600;color:#64748b;display:flex;align-items:center;gap:8px;}
+.vs .sb{padding:10px 16px;background:#fff;}
+.var-c{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.vb{display:inline-flex;padding:5px 12px;border-radius:6px;font-size:14px;font-weight:600;font-family:'Consolas','D2Coding',monospace;}
+.v-n{background:#fef3c7;color:#92400e;} .v-i{background:#dbeafe;color:#1d4ed8;} .v-d{background:#f3e8ff;color:#6d28d9;}
+/* 콜스택 */
+.stk-c{display:flex;align-items:flex-end;gap:2px;flex-wrap:wrap;min-height:62px;}
+.frm{border:2px solid #cbd5e1;border-radius:6px;padding:4px 10px;background:#f8fafc;text-align:center;min-width:96px;font-family:'Consolas','D2Coding',monospace;}
+.frm .fn{font-size:14px;font-weight:700;color:#334155;}
+.frm .fi{font-size:11px;color:#64748b;margin-top:1px;}
+.frm.main-frm{background:#f1f5f9;border-style:dashed;}
+.frm.top{border-color:#f59e0b;background:#fef3c7;box-shadow:0 0 8px rgba(245,158,11,.35);}
+.frm.top .fn{color:#92400e;}
+.frm.top .fi{color:#b45309;font-weight:700;}
+.frm.dying{border-color:#ef4444;background:#fee2e2;}
+.frm.dying .fn{color:#b91c1c;}
+.arw{color:#cbd5e1;font-size:14px;padding:0 2px 12px;}
+.stk-note{font-size:12px;color:#94a3b8;margin-left:10px;padding-bottom:14px;}
+/* 트리 */
+.tree-sec{flex:1;display:flex;flex-direction:column;min-height:0;}
+.tree-sec .sb{flex:1;overflow:auto;padding:8px;position:relative;}
+.tree-sec .sb svg{display:block;margin:0 auto;}
+.tree-node{transition:fill .2s,stroke .2s;}
+.tn-unvisited{fill:#f0f0f0;stroke:#ccc;stroke-width:1.5;}
+.tn-active{fill:#fbbf24;stroke:#f59e0b;stroke-width:2.5;}
+.tn-onpath{fill:#93c5fd;stroke:#3b82f6;stroke-width:2;}
+.tn-completed{fill:#86efac;stroke:#22c55e;stroke-width:2;}
+.tn-back{fill:#e2e8f0;stroke:#94a3b8;stroke-width:1;}
+.te-unvisited{stroke:#e5e7eb;stroke-width:1;}
+.te-active{stroke:#f59e0b;stroke-width:2.5;}
+.te-onpath{stroke:#3b82f6;stroke-width:2;}
+.te-completed{stroke:#22c55e;stroke-width:1.5;}
+.te-back{stroke:#cbd5e1;stroke-width:1;}
+.edge-lbl{fill:#7c3aed;font-family:'Consolas','D2Coding',monospace;font-weight:600;text-anchor:middle;dominant-baseline:central;}
+.node-lbl{fill:#334155;font-family:'Consolas','D2Coding',monospace;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none;}
+.seq-bg{fill:#0ea5e9;stroke:#fff;stroke-width:1.5;}
+.seq-lbl{fill:#fff;font-family:'Consolas','D2Coding',monospace;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none;}
+.tree-legend{font-size:11px;color:#64748b;margin-left:auto;display:flex;gap:10px;align-items:center;}
+.tree-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:3px;vertical-align:-1px;}
+.desc{font-size:14px;line-height:1.5;min-height:38px;display:flex;align-items:center;}
+.ac-pr{color:#2563eb;font-weight:600;}.ac-lp{color:#7c3aed;font-weight:600;}.ac-call{color:#ea580c;font-weight:600;}
+.ac-base{color:#16a34a;font-weight:600;}.ac-ret{color:#dc2626;font-weight:600;}
+.out-sec{max-height:170px;}
+.out-sec .sb{display:flex;flex-direction:column;}
+.ob{flex:1;overflow-y:auto;font-family:'Consolas','D2Coding',monospace;font-size:12px;line-height:1.6;max-height:126px;background:#1a1a2e;color:#a5f3fc;padding:8px 12px;border-radius:4px;}
+.ob .new{color:#fbbf24;font-weight:700;}
+.ob .sq{color:#64748b;display:inline-block;width:40px;}
+.kbd-help{color:#64748b;font-size:11px;margin-left:8px;}
+.viz-panel.tree-expanded .vs:not(.tree-sec):not(.desc-sec){display:none;}
+.viz-panel.tree-expanded .tree-sec{flex:1;}
+.tree-toggle{background:#64748b;color:#fff;border:none;padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px;}
+.tree-toggle:hover{background:#475569;}
+.resizer{width:6px;background:#34495e;cursor:col-resize;transition:background .15s;flex-shrink:0;}
+.resizer:hover,.resizer.dragging{background:#3498db;}
+body.resizing{cursor:col-resize;user-select:none;}
+body.resizing *{pointer-events:none;}
+body.resizing .resizer{pointer-events:auto;}
+.code-panel.collapsed+.resizer{display:none;}
+/* 예측 테스트 */
+.mask{position:fixed;inset:0;background:rgba(15,23,42,.6);display:none;align-items:center;justify-content:center;z-index:200;}
+.mask.on{display:flex;}
+.modal{background:#fff;border-radius:10px;width:min(720px,92vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.modal-hd{background:#2c3e50;color:#fff;padding:12px 20px;display:flex;align-items:center;gap:10px;}
+.modal-hd h3{font-size:15px;}
+.modal-hd .x{margin-left:auto;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;line-height:1;}
+.modal-hd .x:hover{color:#fff;}
+.modal-bd{padding:16px 20px;overflow-y:auto;}
+.modal-bd p{font-size:13px;color:#64748b;margin-bottom:8px;line-height:1.6;}
+.modal-bd textarea{width:100%;height:190px;font-family:'Consolas','D2Coding',monospace;font-size:13px;padding:10px;border:1px solid #cbd5e1;border-radius:6px;resize:vertical;line-height:1.5;}
+.modal-ft{padding:12px 20px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;gap:8px;align-items:center;}
+.modal-ft button{border:none;padding:7px 16px;border-radius:5px;cursor:pointer;font-size:13px;font-family:inherit;}
+.btn-go{background:#16a34a;color:#fff;} .btn-go:hover{background:#15803d;}
+.btn-cl{background:#e2e8f0;color:#475569;} .btn-cl:hover{background:#cbd5e1;}
+.score{margin-left:auto;font-size:14px;font-weight:700;}
+.rtab{width:100%;border-collapse:collapse;font-family:'Consolas','D2Coding',monospace;font-size:12.5px;margin-top:10px;}
+.rtab th{background:#e8ecf0;color:#475569;padding:6px 8px;text-align:left;font-size:11px;}
+.rtab td{padding:5px 8px;border-bottom:1px solid #eef2f6;}
+.rtab tr.ok td{background:#f0fdf4;} .rtab tr.no td{background:#fef2f2;}
+.rtab .mk{width:28px;text-align:center;font-weight:700;}
+.rtab tr.ok .mk{color:#16a34a;} .rtab tr.no .mk{color:#dc2626;}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>재귀 - 호출과 복귀 (Recursion)</h1>
+  <span class="sub" id="hsub"></span>
+</div>
+<div class="controls">
+  <button onclick="doReset()">⏮ 처음</button>
+  <button onclick="prev()">◀ 이전</button>
+  <button id="playBtn" onclick="togglePlay()">▶ 재생</button>
+  <button onclick="next()">다음 ▶</button>
+  <div class="sep"></div>
+  <button onclick="skipOut()">⏩ 다음 출력</button>
+  <div class="sep"></div>
+  <button class="preset" id="p1" onclick="preset(2,3)">문제 1</button>
+  <button class="preset" id="p2" onclick="preset(3,2)">문제 2</button>
+  <label>종료 n = <select id="bSel" onchange="changeParam()"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+  <label>i ≤ <select id="lSel" onchange="changeParam()"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></label>
+  <div class="sep"></div>
+  <button class="quiz" onclick="openQuiz()">🎯 예측 테스트</button>
+  <div class="sep"></div>
+  <label>속도: <input type="range" id="spd" min="1" max="10" value="5" oninput="spVal=+this.value"></label>
+  <span class="step-info" id="si">준비</span>
+  <span class="kbd-help">←→ 이전/다음 · Space 다음 · Enter 재생 · S 다음출력 · R 처음 · T 트리최대화</span>
+</div>
+<div class="main">
+  <div class="code-panel" id="codePanel">
+    <div class="panel-hd" onclick="toggleCode()"><span>Java Code</span></div>
+    <div class="code-body" id="cb"></div>
+  </div>
+  <div class="resizer" id="resizer"></div>
+  <div class="viz-panel">
+    <div class="vs"><div class="sh">변수 상태</div><div class="sb"><div class="var-c" id="vc"></div></div></div>
+    <div class="vs"><div class="sh">콜스택 (호출 스택) &nbsp;<span style="color:#7c3aed;font-size:11px;">* 각 호출은 자기만의 n, i를 따로 가진다</span></div><div class="sb"><div class="stk-c" id="sc"></div></div></div>
+    <div class="vs desc-sec"><div class="sh">실행 설명</div><div class="sb"><div class="desc" id="dc">▶ 재생 또는 다음 버튼으로 시작하세요.</div></div></div>
+    <div class="vs tree-sec"><div class="sh">재귀 호출 트리 (노드 = func(n), 간선 = i 선택 · 파란 번호 = 출력 순서)
+      <span class="tree-legend"><span><i style="background:#fbbf24"></i>실행중</span><span><i style="background:#93c5fd"></i>스택에 있음</span><span><i style="background:#86efac"></i>기저조건 도달</span><span><i style="background:#e2e8f0"></i>종료됨</span></span>
+      <button class="tree-toggle" id="treeToggle" onclick="toggleTreeExpand()">⤢ 최대화</button></div><div class="sb" id="tc"></div></div>
+    <div class="vs out-sec"><div class="sh">콘솔 출력 <span id="oc">(0개)</span></div><div class="sb"><div class="ob" id="ob"></div></div></div>
+  </div>
+</div>
+
+<div class="mask" id="mask">
+  <div class="modal">
+    <div class="modal-hd"><h3>🎯 예측 테스트 — 출력 결과를 한 줄씩 순서대로 적어보세요</h3><button class="x" onclick="closeQuiz()">×</button></div>
+    <div class="modal-bd">
+      <p id="qhint"></p>
+      <textarea id="qta" placeholder="n=0, i=1&#10;n=1, i=1&#10;..." spellcheck="false"></textarea>
+      <div id="qres"></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-go" onclick="gradeQuiz()">채점하기</button>
+      <button class="btn-cl" onclick="clearQuiz()">지우기</button>
+      <button class="btn-cl" onclick="closeQuiz()">닫기</button>
+      <span class="score" id="qscore"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== 파라미터 ===== */
+let BASE=2, LOOP=3;
+const L_FUNC=3,L_IF=5,L_RET=6,L_FOR=10,L_PRINT=11,L_CALL=12,L_ENDFOR=13,L_ENDFUNC=14,L_MAIN=17;
+
+function buildSrc(){return [
+'public class RecursionTest {',
+'',
+'    static void func(int n) {',
+'        // 기저조건 (종료조건)',
+'        if (n == '+BASE+') {',
+'            return;',
+'        }',
+'',
+'        // 반복파트 (유도파트)',
+'        for (int i = 1; i <= '+LOOP+'; i++) {',
+'            System.out.println("n=" + n + ", i=" + i);',
+'            func(n + 1);',
+'        }',
+'    }',
+'',
+'    public static void main(String[] args) {',
+'        func(0);',
+'    }',
+'}'];}
+
+function hl(t){t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');let cm='';t=t.replace(/(\/\/.*)$/gm,function(m){cm=m;return '\x00CM';});let ss=[];t=t.replace(/"([^"]*)"/g,function(m){ss.push(m);return '\x00S'+(ss.length-1);});t=t.replace(/\b(public|class|static|void|int|if|return|for)\b/g,'<span class="kw">$1</span>');t=t.replace(/\b(String|System)\b/g,'<span class="tp">$1</span>');t=t.replace(/\b(\d+)\b/g,'<span class="nm">$1</span>');ss.forEach((s,i)=>{t=t.replace('\x00S'+i,'<span class="st">'+s+'</span>');});if(cm)t=t.replace('\x00CM','<span class="cm">'+cm+'</span>');return t;}
+function initCode(){document.getElementById('cb').innerHTML=buildSrc().map((l,i)=>`<div class="cl" id="L${i+1}"><span class="ln">${i+1}</span><span class="lc">${hl(l)}</span></div>`).join('');}
+function toggleCode(){const p=document.getElementById('codePanel');p.classList.toggle('collapsed');if(p.classList.contains('collapsed')){p.style.width='';p.style.minWidth='';}}
+
+/* ===== 트리 =====
+   노드 id는 전위순회(preorder) 순번 → 루트를 제외한 노드 id가 곧 출력 순번이 된다. */
+let treeData=null;
+function buildTree(){
+  let nid=0;const all=[];
+  function b(d,ci,pid){const n={id:nid++,d:d,ci:ci,pi:pid,ch:[]};all.push(n);if(d<BASE)for(let i=0;i<LOOP;i++)n.ch.push(b(d+1,i,n.id));return n;}
+  const root=b(0,-1,-1);
+  const leaves=Math.pow(LOOP,BASE);
+  const lsp=leaves<=9?96:leaves<=16?70:leaves<=32?48:leaves<=64?32:leaves<=128?22:15;
+  const lh=BASE<=2?100:BASE<=3?84:66;
+  let li=0;
+  function pos(n){if(!n.ch.length){n.x=li*lsp+44;li++;}else{n.ch.forEach(pos);n.x=(n.ch[0].x+n.ch[n.ch.length-1].x)/2;}n.y=n.d*lh+36;}
+  pos(root);
+  const r=leaves<=9?24:leaves<=16?20:leaves<=32?16:leaves<=64?12:9;
+  return{root,all,w:li*lsp+80,h:(BASE+1)*lh+24,r:r,lsp:lsp};
+}
+function initTree(td){
+  const{root,all,w,h,r}=td;let s='';
+  const fs=Math.max(9,Math.round(r*0.95)), efs=Math.max(9,Math.round(r*0.72)), sr=Math.max(7,Math.round(r*0.55));
+  function draw(n){
+    n.ch.forEach(c=>{
+      s+=`<line id="E${c.id}" x1="${n.x}" y1="${n.y}" x2="${c.x}" y2="${c.y}" class="te-unvisited"/>`;
+      const dx=c.x-n.x, dy=c.y-n.y, L=Math.hypot(dx,dy)||1;
+      const px=dy/L, py=-dx/L;               // 간선에 수직인 단위벡터 (항상 오른쪽 방향)
+      const sg=dx>=0?1:-1, o1=8, o2=sr+3;   // 라벨은 바깥쪽, 순번 배지는 안쪽에 배치
+      const vert=Math.abs(dx)<8;            // 수직에 가까운 간선은 아래로 내려 형제 라벨과 겹치지 않게
+      const lx=vert?n.x:(n.x+dx*0.42+sg*px*o1), ly=n.y+dy*0.42+(vert?0:sg*py*o1);
+      if(r>=11)s+=`<text id="EL${c.id}" x="${lx}" y="${ly}" class="edge-lbl" style="font-size:${efs}px;opacity:.25" text-anchor="${vert?'middle':(sg>0?'start':'end')}">i=${c.ci+1}</text>`;
+      const sx=n.x+dx*0.70-sg*px*o2, sy=n.y+dy*0.70-sg*py*o2;
+      s+=`<g id="SQ${c.id}" style="opacity:0"><circle cx="${sx}" cy="${sy}" r="${sr}" class="seq-bg"/><text x="${sx}" y="${sy}" class="seq-lbl" style="font-size:${Math.max(8,sr)}px">${c.id}</text></g>`;
+      draw(c);
+    });
+    s+=`<circle id="N${n.id}" cx="${n.x}" cy="${n.y}" r="${r}" class="tree-node tn-unvisited"/>`;
+    s+=`<text id="NL${n.id}" x="${n.x}" y="${n.y}" class="node-lbl" style="font-size:${fs}px">${n.d}</text>`;
+  }
+  draw(root);
+  document.getElementById('tc').innerHTML=`<svg width="${w}" height="${h}">${s}</svg>`;
+}
+
+/* ===== 정답(출력) 목록 ===== */
+let ANS=[];
+function buildAns(td){
+  ANS=[];
+  const byId={};td.all.forEach(n=>byId[n.id]=n);
+  for(let k=1;k<td.all.length;k++){const n=byId[k];ANS[k-1]=`n=${byId[n.pi].d}, i=${n.ci+1}`;}
+}
+
+/* ===== 스텝 생성 =====
+   각 스텝: {l:코드라인, n, i, path:[자식인덱스...], nid:현재노드, oc:출력개수, a:액션, d:설명, dying:종료중여부} */
+let steps=[],ci=-1,playing=false,timer=null,spVal=5;
+
+function genSteps(){
+  const S=[];const td=buildTree();initTree(td);buildAns(td);
+  let out=0,path=[],frames=[],maxv=-1;
+  const findNode=p=>{let n=td.root;for(const i of p)n=n.ch[i];return n;};
+  function push(o){S.push(Object.assign({path:[...path],frames:frames.map(f=>({n:f.n,i:f.i})),oc:out,mv:maxv},o));}
+
+  push({l:L_MAIN,n:'-',i:'-',nid:-1,a:'start',
+    d:`<span class="ac-call">main()</span> 에서 <b>func(0)</b> 호출 — 재귀의 시작`});
+
+  function func(n){
+    const node=findNode(path);
+    if(node.id>maxv)maxv=node.id;
+    frames.push({n:n,i:'-'});
+    push({l:L_FUNC,n:n,i:'-',nid:node.id,a:'call',
+      d:`<span class="ac-call">func(${n})</span> 시작 — 새로운 스택 프레임이 쌓이고 이 호출만의 <b>n=${n}</b>, <b>i</b> 가 생긴다`});
+
+    if(n===BASE){
+      push({l:L_IF,n:n,i:'-',nid:node.id,a:'basechk',
+        d:`if (n == ${BASE}) → <b>${n} == ${BASE}</b> 참 &nbsp; <span class="ac-base">기저조건 도달!</span>`});
+      push({l:L_RET,n:n,i:'-',nid:node.id,a:'base',dying:true,
+        d:`<span class="ac-ret">return;</span> — for문에 들어가지 못하므로 <b>아무것도 출력하지 않고</b> 바로 종료`});
+      frames.pop();
+      return;
+    }
+    push({l:L_IF,n:n,i:'-',nid:node.id,a:'basechk',
+      d:`if (n == ${BASE}) → <b>${n} == ${BASE}</b> 거짓 → for문으로 진행`});
+
+    const top=frames[frames.length-1];
+    for(let i=1;i<=LOOP;i++){
+      top.i=i;
+      push({l:L_FOR,n:n,i:i,nid:node.id,a:'loop',
+        d:`<span class="ac-lp">for문</span>: i=${i} (i ≤ ${LOOP} 이므로 반복 실행)`});
+
+      const child=node.ch[i-1];
+      out++;
+      push({l:L_PRINT,n:n,i:i,nid:node.id,a:'print',
+        d:`<span class="ac-pr">출력 (${out}번째)</span> → <b>n=${n}, i=${i}</b>`});
+
+      push({l:L_CALL,n:n,i:i,nid:node.id,a:'recurse',
+        d:`<span class="ac-call">func(${n} + 1)</span> 호출 — 여기서 func(${n})은 <b>멈춘 채로 기다린다</b>`});
+
+      path.push(i-1);
+      func(n+1);
+      path.pop();
+
+      if(i<LOOP){
+        push({l:L_CALL,n:n,i:i,nid:node.id,a:'return',
+          d:`func(${n+1}) 종료 → <b>func(${n})의 i=${i} 지점으로 복귀</b> &nbsp; ⇒ i가 ${i+1}로 증가하여 for문 계속`});
+      }else{
+        push({l:L_CALL,n:n,i:i,nid:node.id,a:'return',
+          d:`func(${n+1}) 종료 → func(${n})로 복귀. i=${i}는 마지막 값이므로 for문을 빠져나간다`});
+      }
+    }
+    top.i='-';
+    push({l:L_ENDFOR,n:n,i:LOOP+1,nid:node.id,a:'loopend',
+      d:`i=${LOOP+1} 이므로 <b>i ≤ ${LOOP} 조건 불만족</b> → <span class="ac-lp">for문 종료</span>`});
+    push({l:L_ENDFUNC,n:n,i:'-',nid:node.id,a:'end',dying:true,
+      d:`<span class="ac-ret">func(${n}) 종료</span> — 스택에서 제거되고 ${n===0?'main으로 복귀 (프로그램 끝)':'호출한 func('+(n-1)+')로 복귀'}`});
+    frames.pop();
+  }
+
+  func(0);
+  return{steps:S,tree:td};
+}
+
+/* ===== 렌더 ===== */
+function renderTree(s){
+  if(!treeData)return;
+  const cur=s?s.nid:-1, mv=s?s.mv:-1;
+  const pathIds=new Set();
+  if(s&&cur>=0){let n=treeData.root;pathIds.add(n.id);for(const i of s.path){n=n.ch[i];pathIds.add(n.id);}pathIds.delete(cur);}
+  const oc=s?s.oc:0;
+  treeData.all.forEach(node=>{
+    let st;
+    if(!s)st='unvisited';
+    else if(node.id===cur)st=s.dying?(node.d===BASE?'completed':'back'):'active';
+    else if(pathIds.has(node.id))st='onpath';
+    else if(node.id<=mv)st=(node.d===BASE?'completed':'back');
+    else st='unvisited';
+    const c=document.getElementById('N'+node.id);if(c)c.setAttribute('class','tree-node tn-'+st);
+    const e=document.getElementById('E'+node.id);if(e)e.setAttribute('class','te-'+st);
+    const el=document.getElementById('EL'+node.id);if(el)el.style.opacity=(st==='unvisited'?'.25':'1');
+    const sq=document.getElementById('SQ'+node.id);if(sq)sq.style.opacity=(node.id>0&&node.id<=oc)?'1':'0';
+  });
+  if(s&&cur>=0){const ac=document.getElementById('N'+cur);if(ac)ac.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});}
+}
+function renderStack(s){
+  const sc=document.getElementById('sc');
+  let h='<div class="frm main-frm"><div class="fn">main()</div><div class="fi">시작점</div></div>';
+  if(s&&s.frames.length){
+    s.frames.forEach((f,idx)=>{
+      const isTop=idx===s.frames.length-1;
+      const cls='frm'+(isTop?' top':'')+(isTop&&s.dying?' dying':'');
+      h+='<span class="arw">▶</span>';
+      h+=`<div class="${cls}"><div class="fn">func(${f.n})</div><div class="fi">n=${f.n} · i=${f.i}</div></div>`;
+    });
+    h+=`<span class="stk-note">깊이 ${s.frames.length} · 오른쪽 끝이 지금 실행 중인 호출</span>`;
+  }else{
+    h+='<span class="stk-note">아직 func가 호출되지 않았습니다</span>';
+  }
+  sc.innerHTML=h;
+}
+function render(){
+  document.querySelectorAll('.cl.active').forEach(e=>e.classList.remove('active'));
+  if(ci>=0){const el=document.getElementById('L'+steps[ci].l);if(el){el.classList.add('active');el.scrollIntoView({block:'nearest',behavior:'smooth'});}}
+  if(ci<0){
+    document.getElementById('vc').innerHTML='<span class="vb v-n">n = -</span><span class="vb v-i">i = -</span><span class="vb v-d">재귀 깊이 = 0</span>';
+    renderStack(null);
+    document.getElementById('dc').innerHTML='<span>▶ 재생 또는 다음 버튼으로 시작하세요.</span>';
+    document.getElementById('ob').innerHTML='';
+    document.getElementById('oc').textContent='(0개)';
+    document.getElementById('si').textContent=`0 / ${steps.length}`;
+    renderTree(null);
+    return;
+  }
+  const s=steps[ci];
+  document.getElementById('vc').innerHTML=
+    `<span class="vb v-n">n = ${s.n}</span><span class="vb v-i">i = ${s.i}</span><span class="vb v-d">재귀 깊이 = ${s.frames.length}</span>`;
+  renderStack(s);
+  document.getElementById('dc').innerHTML='<span>'+s.d+'</span>';
+  const ob=document.getElementById('ob');
+  let oh='';
+  for(let k=0;k<s.oc;k++)oh+=`<div${(k===s.oc-1&&s.a==='print')?' class="new"':''}><span class="sq">${k+1}.</span>${ANS[k]}</div>`;
+  ob.innerHTML=oh;ob.scrollTop=ob.scrollHeight;
+  document.getElementById('oc').textContent=`(${s.oc}개)`;
+  document.getElementById('si').textContent=`${ci+1} / ${steps.length}`;
+  renderTree(s);
+}
+
+/* ===== 컨트롤 ===== */
+function totalPrints(){let t=0,p=1;for(let d=0;d<BASE;d++){p*=LOOP;t+=p;}return t;}
+function updateHeader(){
+  let f=[];let p=1;for(let d=0;d<BASE;d++){p*=LOOP;f.push(LOOP+(d>0?'<sup>'+(d+1)+'</sup>':''));}
+  document.getElementById('hsub').innerHTML=
+    `RecursionTest.java &nbsp;|&nbsp; 기저조건 <b>n == ${BASE}</b>, 반복 <b>i = 1 ~ ${LOOP}</b> &nbsp;|&nbsp; 총 출력 = ${f.join(' + ')} = <b>${totalPrints()}</b>줄`;
+  document.getElementById('p1').classList.toggle('on',BASE===2&&LOOP===3);
+  document.getElementById('p2').classList.toggle('on',BASE===3&&LOOP===2);
+}
+function rebuild(){ci=-1;initCode();const g=genSteps();steps=g.steps;treeData=g.tree;updateHeader();render();}
+function changeParam(){stop();BASE=+document.getElementById('bSel').value;LOOP=+document.getElementById('lSel').value;rebuild();closeQuiz();}
+function preset(b,l){document.getElementById('bSel').value=b;document.getElementById('lSel').value=l;changeParam();}
+function doReset(){stop();ci=-1;render();}
+function prev(){stop();if(ci>-1){ci--;render();}}
+function next(){if(ci<steps.length-1){ci++;render();}else stop();}
+function togglePlay(){playing?stop():start();}
+function start(){if(ci>=steps.length-1)ci=-1;playing=true;const b=document.getElementById('playBtn');b.textContent='⏸ 정지';b.classList.add('playing');tick();}
+function stop(){playing=false;clearTimeout(timer);timer=null;const b=document.getElementById('playBtn');b.textContent='▶ 재생';b.classList.remove('playing');}
+function tick(){if(!playing)return;const d=1100-spVal*100;timer=setTimeout(()=>{next();if(playing&&ci<steps.length-1)tick();else stop();},d);}
+function skipOut(){stop();for(let i=ci+1;i<steps.length;i++){if(steps[i].a==='print'){ci=i;render();return;}}ci=steps.length-1;render();}
+
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('mask').classList.contains('on')){if(e.key==='Escape')closeQuiz();return;}
+  if(e.target.tagName==='TEXTAREA')return;
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();next();}
+  else if(e.key==='ArrowLeft'){e.preventDefault();prev();}
+  else if(e.key==='Enter'){e.preventDefault();togglePlay();}
+  else if(e.key==='r'||e.key==='R'){if(document.activeElement.tagName!=='SELECT')doReset();}
+  else if(e.key==='s'||e.key==='S')skipOut();
+  else if(e.key==='t'||e.key==='T')toggleTreeExpand();
+});
+
+/* ===== 리사이저 ===== */
+(function(){
+  const resizer=document.getElementById('resizer'),codePanel=document.getElementById('codePanel');
+  let startX,startW;
+  resizer.addEventListener('mousedown',function(e){
+    if(codePanel.classList.contains('collapsed'))return;
+    startX=e.clientX;startW=codePanel.offsetWidth;
+    document.body.classList.add('resizing');resizer.classList.add('dragging');
+    document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);
+  });
+  function onMove(e){const w=Math.max(200,Math.min(startW+e.clientX-startX,window.innerWidth-300));codePanel.style.width=w+'px';codePanel.style.minWidth=w+'px';}
+  function onUp(){document.body.classList.remove('resizing');resizer.classList.remove('dragging');document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);}
+})();
+
+function toggleTreeExpand(){
+  const vp=document.querySelector('.viz-panel'),btn=document.getElementById('treeToggle');
+  vp.classList.toggle('tree-expanded');
+  btn.textContent=vp.classList.contains('tree-expanded')?'⤡ 축소':'⤢ 최대화';
+}
+
+/* ===== 예측 테스트 ===== */
+function openQuiz(){
+  stop();
+  document.getElementById('qhint').innerHTML=
+    `기저조건 <b>n == ${BASE}</b>, 반복 <b>i = 1 ~ ${LOOP}</b> 일 때 출력되는 <b>${totalPrints()}줄</b>을 순서대로 적어보세요. (형식: <code>n=0, i=1</code> · 띄어쓰기는 채점에 영향 없음)`;
+  document.getElementById('mask').classList.add('on');
+  document.getElementById('qta').focus();
+}
+function closeQuiz(){document.getElementById('mask').classList.remove('on');}
+function clearQuiz(){document.getElementById('qta').value='';document.getElementById('qres').innerHTML='';document.getElementById('qscore').textContent='';}
+function norm(s){return s.replace(/\s+/g,'').toLowerCase();}
+function gradeQuiz(){
+  const lines=document.getElementById('qta').value.split('\n').map(x=>x.trim()).filter(x=>x.length);
+  const rows=Math.max(lines.length,ANS.length);
+  let ok=0,h='<table class="rtab"><tr><th></th><th>#</th><th>내 예측</th><th>정답</th></tr>';
+  for(let k=0;k<rows;k++){
+    const mine=lines[k]===undefined?'':lines[k];
+    const ans=ANS[k]===undefined?'(없음 — 줄이 더 많음)':ANS[k];
+    const good=ANS[k]!==undefined&&norm(mine)===norm(ANS[k]);
+    if(good)ok++;
+    h+=`<tr class="${good?'ok':'no'}"><td class="mk">${good?'✓':'✗'}</td><td>${k+1}</td><td>${mine||'(비어 있음)'}</td><td>${ans}</td></tr>`;
+  }
+  h+='</table>';
+  document.getElementById('qres').innerHTML=h;
+  const sc=document.getElementById('qscore');
+  sc.textContent=`${ok} / ${ANS.length} 줄 정답`;
+  sc.style.color=(ok===ANS.length&&lines.length===ANS.length)?'#16a34a':'#dc2626';
+}
+
+rebuild();
+</script>
+</body>
+</html>
