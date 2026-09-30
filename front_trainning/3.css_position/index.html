@@ -7,6 +7,12 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <!-- 부모(보라색) 높이 토글 버튼 -->
+    <div class="toggle-bar">
+      <button id="toggle-height-btn" class="toggle-height-btn">보라색 부모 높이 키우기 (300px → 600px)</button>
+      <span id="height-label" class="height-label">현재 부모 높이: 300px</span>
+    </div>
+
     <section id="first-section" class="first-section">
       <article>1</article>
       <article class="second-article">2</article>
@@ -171,6 +177,20 @@
       </article>
     </section>
   </body>
+  <script>
+    // 보라색 부모(.first-section)의 높이를 토글
+    const parent = document.getElementById("first-section");
+    const toggleBtn = document.getElementById("toggle-height-btn");
+    const heightLabel = document.getElementById("height-label");
+
+    toggleBtn.addEventListener("click", function () {
+      const isTall = parent.classList.toggle("tall");
+      toggleBtn.textContent = isTall
+        ? "보라색 부모 높이 줄이기 (600px → 300px)"
+        : "보라색 부모 높이 키우기 (300px → 600px)";
+      heightLabel.textContent = "현재 부모 높이: " + (isTall ? "600px" : "300px");
+    });
+  </script>
   <script>
     document.addEventListener("contextmenu", function (e) {
       e.preventDefault();
