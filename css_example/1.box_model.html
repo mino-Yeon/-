@@ -23,6 +23,10 @@
   /* NAV */
   nav { display: flex; background: var(--bg3); border-bottom: 2px solid var(--border); position: sticky; top: 0; z-index: 100; }
   nav button { flex: 1; padding: 14px 8px; background: none; border: none; border-bottom: 3px solid transparent; color: #aaa; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  /* 목록으로 돌아가기 — 탭이 가로로 스크롤돼도 왼쪽에 고정 */
+  nav .nav-back { position: sticky; left: 0; z-index: 1; flex-shrink: 0; display: flex; align-items: center; gap: 6px; padding: 0 16px; background: var(--bg3); border-right: 1px solid var(--border); border-bottom: 3px solid transparent; color: #aaa; font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: color .2s, background .2s; }
+  nav .nav-back:hover { color: #ddd; background: #22223a; }
+  nav .nav-back:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
   nav button.active { color: var(--cc); border-bottom-color: var(--cc); }
   nav button:hover:not(.active) { background: #ffffff06; color: #ddd; }
 
@@ -127,6 +131,7 @@
 <body>
 
 <nav>
+  <a class="nav-back" href="index.html" title="CSS 학습 센터 목록으로 돌아가기"><span aria-hidden="true">←</span> 목록</a>
   <button class="active" onclick="tab('intro',this)">📦 개념</button>
   <button onclick="tab('interactive',this)">🎮 인터랙티브</button>
   <button onclick="tab('boxsizing',this)">⚙️ box-sizing</button>
