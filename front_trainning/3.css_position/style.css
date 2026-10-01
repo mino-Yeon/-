@@ -13,6 +13,33 @@ body {
   display: flex;
   height: 300px;
   position: relative;
+  transition: height 0.4s; /* 높이가 바뀔 때 부드럽게 (3번 박스가 따라오는 게 눈에 보이도록) */
+}
+
+/* 부모 높이 토글용 클래스 (JS로 붙였다 뗐다 함) */
+.first-section.tall {
+  height: 600px;
+}
+
+/* 높이 토글 버튼 영역 */
+.toggle-bar {
+  padding: 10px;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toggle-height-btn {
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.height-label {
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .first-section > article {
