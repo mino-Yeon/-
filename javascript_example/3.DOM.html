@@ -593,13 +593,13 @@ if (title.style.color === 'blue') {
   title.style.backgroundColor = 'aqua'
 }`,
           desc: `class 없이 <code>style</code>로 속성을 <b>하나씩</b> 바꿉니다. 실행을 여러 번 눌러 보세요. 되돌릴 때도 값을 다시 하나하나 적어야 하고, 되돌린 뒤에도 트리에는 <code>style="…"</code> 속성이 그대로 남아 있어요.`,
-          try: `바꿀 속성이 하나 더 늘어나면 몇 줄을 고쳐야 할지 세어 보세요. 다 봤으면 <b>초기화</b>를 누르고 ②로 넘어가세요.` },
+          try: `바꿀 속성이 하나 더 늘어나면 몇 줄을 고쳐야 할지 세어 보세요. 다 봤으면 ②로 넘어가 비교해 보세요.` },
         { label: '② class 사용',
           code: `const title = document.querySelector('h2')
 title.classList.toggle('deco')`,
           css: `.deco { font-size: 30px; color: blue; background-color: aqua; }`,
           desc: `꾸밈은 CSS의 <code>.deco</code>에 모아 두고, JS는 <b>클래스 이름만</b> 붙였다 뗍니다. 다시 실행하면 원래 모습으로 정확히 돌아와요.`,
-          try: `①을 실행한 채로 ②를 실행하면? 인라인 <code>style</code>이 클래스보다 우선해요.` },
+          try: `실행을 여러 번 누르면서, 트리에서 <code>style</code> 대신 <code>class</code> 속성만 바뀌는 걸 확인해 보세요.` },
       ] },
     { title: 'classList.add',
       code: `document.querySelector('.post-item').classList.add('highlight')`,
@@ -675,6 +675,7 @@ const VOID = new Set(['area','base','br','col','embed','hr','img','input','link'
    4. iframe 준비
    ════════════════════════════════════════════════════════════ */
 function loadFrame() {
+  win = null; doc = null;
   frame.srcdoc = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 <style>${DEMO_STYLE}</style></head><body>${DEMO_BODY}</body></html>`;
@@ -858,6 +859,7 @@ function setHover(list) {
 }
 
 function select(el, scrollTree = true) {
+  if (!win) return;
   selected = el;
   win.$0 = el;
   updateHighlights();
@@ -1202,8 +1204,12 @@ function showLessonInfo(l, vi = 0) {
   infoEl.querySelector('h4').textContent = l.title;
   infoEl.querySelectorAll('.variant-tabs button').forEach(b => b.addEventListener('click', () => {
     const i = +b.dataset.i;
+    if (i === vi) return;
     showLessonInfo(l, i);
     setCode(l.variants[i].code);
+    // 앞 버전이 남긴 인라인 style 등이 비교를 방해하지 않도록 매번 깨끗한 상태에서 시작
+    addEntry('e-sys', document.createTextNode(`${l.variants[i].label} 버전으로 바꾸면서 실습 페이지를 처음 상태로 되돌렸어요`));
+    loadFrame();
     codeEl.focus({ preventScroll: true });
   }));
 }
