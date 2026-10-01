@@ -107,6 +107,16 @@ code, kbd { font-family: var(--mono); font-size: 0.92em; }
 .btn-reset:hover { background: rgba(255,255,255,0.28); }
 .topbar :focus-visible { outline-color: #fff; }
 
+/* ── 목록으로 돌아가기 (헤더 왼쪽) ── */
+.site-back {
+  display: inline-flex; align-items: center; gap: 6px; align-self: stretch;
+  margin: -10px 0; padding-right: 18px;
+  border-right: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 600;
+  text-decoration: none; white-space: nowrap; transition: color .15s;
+}
+.site-back:hover { color: #fff; }
+
 /* ── 위쪽 작업 영역 ── */
 .workspace {
   display: grid;
@@ -362,6 +372,7 @@ kbd { border: 1px solid var(--code-line); border-bottom-width: 2px; border-radiu
 <body>
 
 <header class="topbar">
+  <a class="site-back" href="index.html" title="JavaScript 학습 가이드 목록으로 돌아가기"><span aria-hidden="true">←</span> 목록</a>
   <div class="brand">
     <div class="brand-icon" aria-hidden="true">🌐</div>
     <h1>DOM</h1>

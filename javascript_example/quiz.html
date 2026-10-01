@@ -87,11 +87,19 @@
       ic { background:#f1f5f9; padding:2px 6px; border-radius:4px; color:#0284c7; font-family:"Courier New",monospace; font-size:0.88rem; }
 
       footer { background: var(--gray-900); color: #475569; text-align: center; padding: 16px; font-size: 0.82rem; }
+          /* ── 목록으로 돌아가기 ── */
+      header { position: relative; }
+      .site-back { position: absolute; top: 16px; left: 24px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 6px; color: rgba(255,255,255,0.75); font-size: 0.85rem; font-weight: 600; text-decoration: none; transition: color 0.15s, background 0.15s; }
+      .site-back:hover { color: #fff; background: rgba(255,255,255,0.1); }
+      .result-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+      .home-btn { padding: 10px 28px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #334155; font-size: 0.92rem; text-decoration: none; }
+      .home-btn:hover { background: #f1f5f9; }
     </style>
   </head>
   <body>
 
     <header>
+      <a class="site-back" href="index.html" title="JavaScript 학습 가이드 목록으로 돌아가기"><span aria-hidden="true">←</span> 목록</a>
       <div class="label">Quiz</div>
       <h1>✏️ JavaScript 퀴즈</h1>
       <p>기본 문법 · Array Helper Methods — 총 24문제</p>
@@ -459,7 +467,10 @@ console.log(sum); // 60</code></pre></div>
           <div class="item"><strong id="rWrong"></strong>오답</div>
           <div class="item"><strong id="rSkip"></strong>직접 확인</div>
         </div>
-        <button class="retry-btn" onclick="location.reload()">다시 풀기</button>
+        <div class="result-actions">
+          <button class="retry-btn" onclick="location.reload()">다시 풀기</button>
+          <a class="home-btn" href="index.html">목록으로</a>
+        </div>
       </div>
     </div>
 

@@ -231,6 +231,24 @@
         padding: 16px;
         font-size: 0.82rem;
       }
+          /* ── 목록으로 돌아가기 (목차 상자 맨 위) ── */
+      .back-wrap { margin: -4px -4px 14px; padding-bottom: 12px; border-bottom: 1px solid #eef0f3; }
+      .back-link { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 6px; color: #475569; font-size: 0.88rem; font-weight: 700; text-decoration: none; transition: background 0.15s, color 0.15s; }
+      .back-link:hover { background: #f1f5f9; color: #1d4ed8; }
+
+      /* ── 본문 끝: 이전 / 목록 / 다음 챕터 ── */
+      .chapter-nav { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; margin-top: 8px; }
+      .cn-card { display: flex; flex-direction: column; gap: 4px; padding: 16px 20px; background: #fff; border: 1px solid transparent; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); color: #1e293b; text-decoration: none; transition: border-color 0.15s, box-shadow 0.15s; }
+      .cn-card:hover { border-color: #1d4ed8; box-shadow: 0 4px 14px rgba(0,0,0,0.09); }
+      .cn-next { text-align: right; }
+      .cn-label { font-size: 0.78rem; color: #94a3b8; }
+      .cn-title { font-size: 0.98rem; font-weight: 700; }
+      .cn-home { display: flex; align-items: center; padding: 0 16px; border-radius: 8px; color: #64748b; font-size: 0.85rem; font-weight: 700; text-decoration: none; }
+      .cn-home:hover { background: #fff; color: #1e293b; }
+      .cn-quiz { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; border-left: 4px solid #14b8a6; }
+      .cn-quiz:hover { border-color: #14b8a6; }
+      .cn-quiz .cn-title { color: #0f766e; }
+      .back-link:focus-visible, .chapter-nav a:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
     </style>
   </head>
   <body>
@@ -244,6 +262,7 @@
 
       <nav class="sidebar-left">
         <div class="sidebar-inner">
+          <div class="back-wrap"><a class="back-link" href="index.html" title="JavaScript 학습 가이드 목록으로 돌아가기"><span aria-hidden="true">←</span> 전체 목록</a></div>
           <h2>목차</h2>
           <ul>
             <li><a href="#push-pop"><span class="nav-badge">push·pop</span></a></li>
@@ -650,6 +669,15 @@ console.log(r1, r2);</code></pre>
           </div>
           <div class="tip"><code>some</code>은 조건을 만족하는 요소를 찾는 순간, <code>every</code>는 조건을 만족하지 않는 요소를 찾는 순간 즉시 종료합니다.</div>
         </section>
+
+
+        <!-- 챕터 이동 -->
+        <nav class="chapter-nav" aria-label="챕터 이동">
+          <a class="cn-card cn-prev" href="1.javascript_basics.html"><span class="cn-label">← 이전 챕터</span><span class="cn-title">📝 기본 문법</span></a>
+          <a class="cn-home" href="index.html">목록</a>
+          <a class="cn-card cn-next" href="3.DOM.html"><span class="cn-label">다음 챕터 →</span><span class="cn-title">🌐 DOM</span></a>
+          <a class="cn-card cn-quiz" href="quiz.html"><span><span class="cn-label">기본 문법과 배열 메서드를 다 봤다면</span><br><span class="cn-title">✏️ 퀴즈로 실력 확인하기</span></span><span class="cn-title" aria-hidden="true">→</span></a>
+        </nav>
 
       </main>
 

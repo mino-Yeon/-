@@ -102,6 +102,24 @@
       .demo-status.err { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
 
       footer { background: #0f172a; color: #475569; text-align: center; padding: 16px; font-size: 0.82rem; }
+          /* ── 목록으로 돌아가기 (목차 상자 맨 위) ── */
+      .back-wrap { margin: -4px -4px 14px; padding-bottom: 12px; border-bottom: 1px solid #eef0f3; }
+      .back-link { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 6px; color: #475569; font-size: 0.88rem; font-weight: 700; text-decoration: none; transition: background 0.15s, color 0.15s; }
+      .back-link:hover { background: #f1f5f9; color: #be185d; }
+
+      /* ── 본문 끝: 이전 / 목록 / 다음 챕터 ── */
+      .chapter-nav { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; margin-top: 8px; }
+      .cn-card { display: flex; flex-direction: column; gap: 4px; padding: 16px 20px; background: #fff; border: 1px solid transparent; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); color: #1e293b; text-decoration: none; transition: border-color 0.15s, box-shadow 0.15s; }
+      .cn-card:hover { border-color: #be185d; box-shadow: 0 4px 14px rgba(0,0,0,0.09); }
+      .cn-next { text-align: right; }
+      .cn-label { font-size: 0.78rem; color: #94a3b8; }
+      .cn-title { font-size: 0.98rem; font-weight: 700; }
+      .cn-home { display: flex; align-items: center; padding: 0 16px; border-radius: 8px; color: #64748b; font-size: 0.85rem; font-weight: 700; text-decoration: none; }
+      .cn-home:hover { background: #fff; color: #1e293b; }
+      .cn-quiz { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; border-left: 4px solid #14b8a6; }
+      .cn-quiz:hover { border-color: #14b8a6; }
+      .cn-quiz .cn-title { color: #0f766e; }
+      .back-link:focus-visible, .chapter-nav a:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
     </style>
   </head>
   <body>
@@ -115,6 +133,7 @@
 
       <nav class="sidebar">
         <div class="sidebar-inner">
+          <div class="back-wrap"><a class="back-link" href="index.html" title="JavaScript 학습 가이드 목록으로 돌아가기"><span aria-hidden="true">←</span> 전체 목록</a></div>
           <h2>목차</h2>
           <ul>
             <li><a href="#overview"><span class="nav-badge">개요</span></a></li>
@@ -397,6 +416,14 @@ if (savedContent) textarea.value   = savedContent;</code></pre>
             로그인 토큰처럼 서버에서 확인이 필요한 정보는 Cookie, 아이디 저장이나 UI 상태처럼 클라이언트에서만 쓰는 정보는 Web Storage를 사용하는 것이 일반적입니다.
           </div>
         </section>
+
+
+        <!-- 챕터 이동 -->
+        <nav class="chapter-nav" aria-label="챕터 이동">
+          <a class="cn-card cn-prev" href="3.DOM.html"><span class="cn-label">← 이전 챕터</span><span class="cn-title">🌐 DOM</span></a>
+          <a class="cn-home" href="index.html">목록</a>
+          <a class="cn-card cn-next" href="5.event.html"><span class="cn-label">다음 챕터 →</span><span class="cn-title">⚡ Event</span></a>
+        </nav>
 
       </main>
     </div>
