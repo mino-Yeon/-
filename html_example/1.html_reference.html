@@ -20,7 +20,7 @@
     .toc {
       width: 200px; flex-shrink: 0;
       background: #fff; border-radius: 10px;
-      padding: 16px; position: sticky; top: 20px;
+      padding: 16px; position: sticky; top: 60px;
       box-shadow: 0 2px 10px rgba(0,0,0,.07);
     }
     .toc-title { font-size: 11px; font-weight: bold; color: #aaa; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
@@ -74,9 +74,59 @@
     .cmp-table tr:nth-child(even) td { background: #f8f9fa; }
     .o { color: #27ae60; font-weight: bold; }
     .x { color: #e74c3c; font-weight: bold; }
+      /* ══════════════════════════════════════════
+       챕터 공통: 상단 고정 바 + 하단 이전/다음 이동
+    ══════════════════════════════════════════ */
+    html { scroll-padding-top: 56px; } /* 목차 링크로 이동할 때 제목이 바에 가려지지 않게 */
+    .site-bar {
+      position: sticky; top: 0; z-index: 500;
+      height: 40px; display: flex; align-items: center; gap: 14px;
+      padding: 0 24px; background: #151b20; border-bottom: 1px solid rgba(255,255,255,.08);
+      font-family: 'Segoe UI', sans-serif; font-size: 13px; line-height: 1; color: #b2bec3;
+    }
+    .site-back {
+      display: inline-flex; align-items: center; gap: 6px; align-self: stretch;
+      padding-right: 16px; border-right: 1px solid rgba(255,255,255,.12);
+      color: #dfe6e9; font-weight: bold; text-decoration: none; white-space: nowrap; transition: color .2s;
+    }
+    .site-back:hover { color: #fff; }
+    .site-current { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .site-step { margin-left: auto; font-size: 12px; color: #74818a; white-space: nowrap; }
+
+    .chapter-nav {
+      max-width: 960px; margin: 48px auto 0; padding: 0 20px 48px;
+      display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .chapter-nav a { text-decoration: none; color: #2d3436; }
+    .cn-card {
+      display: flex; flex-direction: column; gap: 4px; padding: 14px 18px;
+      background: #fff; border: 1px solid #dfe6e9; border-radius: 10px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .cn-card:hover { border-color: #74b9ff; box-shadow: 0 4px 14px rgba(0,0,0,.06); }
+    .cn-next { text-align: right; }
+    .cn-label { font-size: 12px; color: #888; }
+    .cn-title { font-size: 15px; font-weight: bold; }
+    .cn-home {
+      display: flex; align-items: center; padding: 0 18px; border-radius: 10px;
+      font-size: 13px; font-weight: bold; color: #636e72 !important;
+    }
+    .cn-home:hover { background: #fff; color: #2d3436 !important; }
+    .site-bar a:focus-visible, .chapter-nav a:focus-visible { outline: 2px solid #74b9ff; outline-offset: 2px; border-radius: 4px; }
+    @media (max-width: 640px) {
+      .chapter-nav { grid-template-columns: 1fr 1fr; }
+      .cn-home { grid-column: 1 / -1; grid-row: 2; justify-content: center; padding: 10px; }
+    }
   </style>
 </head>
 <body>
+
+<nav class="site-bar" aria-label="학습 메뉴">
+  <a class="site-back" href="index.html" title="HTML 기초 학습 목록으로 돌아가기"><span aria-hidden="true">←</span> 목록</a>
+  <span class="site-current">📄 HTML 핵심 정리</span>
+  <span class="site-step">1 / 5</span>
+</nav>
 
 <div class="page-header">
   <h1>📄 HTML 핵심 정리</h1>
@@ -415,6 +465,13 @@
 
   </main>
 </div>
+
+
+<nav class="chapter-nav" aria-label="챕터 이동">
+  <span></span>
+  <a class="cn-home" href="index.html">목록</a>
+  <a class="cn-card cn-next" href="2.semanticLayout.html"><span class="cn-label">다음 챕터 →</span><span class="cn-title">🏗 시맨틱 레이아웃</span></a>
+</nav>
 
 </body>
 </html>
