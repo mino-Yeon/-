@@ -9,6 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; }
+/* 코드 글꼴의 합자 끄기: === 이 한 덩어리 기호로 보이지 않고 = = = 그대로 보이게 */
+*, *::before, *::after { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
 
 :root {
   --bg: #e9edf3;
@@ -261,7 +263,7 @@ body.dragging .stage iframe { pointer-events: none; }
   padding: 10px 16px 10px;
   border-bottom: 1px solid var(--code-line);
   font-size: 13px; line-height: 1.6;
-  max-height: 45%; overflow-y: auto;
+  max-height: 58%; overflow-y: auto;
 }
 .lesson-info h4 { margin: 0 0 2px; font-size: 14px; font-weight: 700; color: #fff; }
 .lesson-info p { margin: 0; color: #c3c9d6; }
@@ -270,6 +272,21 @@ body.dragging .stage iframe { pointer-events: none; }
   margin-top: 6px; color: #b2f2bb;
 }
 .lesson-info .try::before { content: '바꿔 보기 '; font-weight: 700; color: #8ce99a; }
+.info-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 2px; }
+.info-head h4 { margin: 0; }
+.variant-tabs { display: inline-flex; padding: 2px; border-radius: 7px; background: #151925; border: 1px solid var(--code-line); }
+.variant-tabs button {
+  padding: 3px 12px; border: 0; border-radius: 5px; background: transparent;
+  color: #9aa3b8; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.variant-tabs button:hover { color: #fff; }
+.variant-tabs button.on { background: #4c6ef5; color: #fff; }
+.css-snippet {
+  margin: 6px 0 0; padding: 5px 10px; border-radius: 6px;
+  background: #151925; border: 1px solid var(--code-line);
+  font-family: var(--mono); font-size: 12px; line-height: 1.6; color: #a5d8ff; white-space: pre-wrap;
+}
+.css-cap { margin-right: 10px; padding: 1px 6px; border-radius: 3px; background: #2f3650; font-family: var(--sans); font-size: 11px; color: #c3c9d6; }
 
 textarea#code {
   flex: 1; min-height: 60px; resize: none;
@@ -289,6 +306,7 @@ textarea#code:focus-visible { box-shadow: inset 0 0 0 2px #4c6ef5; }
 .btn-run {
   padding: 6px 18px; border: 0; border-radius: 6px;
   background: #4c6ef5; color: #fff; font-weight: 700; font-size: 13px; cursor: pointer;
+  white-space: nowrap; flex-shrink: 0;
 }
 .btn-run:hover { background: #5c7cfa; }
 .kbd-hint { font-size: 12px; color: var(--code-dim); white-space: nowrap; }
@@ -459,6 +477,7 @@ const DEMO_STYLE = `
   .highlight { background: #fff3bf; border-color: #fab005; }
   .important { color: #c92a2a; font-weight: 700; }
   .hidden    { display: none; }
+  .deco      { font-size: 30px; color: blue; background-color: aqua; }
 `;
 
 const DEMO_BODY = `
@@ -559,9 +578,32 @@ const LESSONS = [
       try: `<code>.style.borderRadius = '0'</code>처럼 CSS 속성은 카멜케이스로 씁니다.` },
   ]},
   { group: '클래스', items: [
+    { title: 'style vs classList',
+      variants: [
+        { label: '① class 없이',
+          code: `const title = document.querySelector('h2')
+
+if (title.style.color === 'blue') {
+  title.style.fontSize = '16px'
+  title.style.color = 'black'
+  title.style.backgroundColor = 'white'
+} else {
+  title.style.fontSize = '30px'
+  title.style.color = 'blue'
+  title.style.backgroundColor = 'aqua'
+}`,
+          desc: `class 없이 <code>style</code>로 속성을 <b>하나씩</b> 바꿉니다. 실행을 여러 번 눌러 보세요. 되돌릴 때도 값을 다시 하나하나 적어야 하고, 되돌린 뒤에도 트리에는 <code>style="…"</code> 속성이 그대로 남아 있어요.`,
+          try: `바꿀 속성이 하나 더 늘어나면 몇 줄을 고쳐야 할지 세어 보세요. 다 봤으면 <b>초기화</b>를 누르고 ②로 넘어가세요.` },
+        { label: '② class 사용',
+          code: `const title = document.querySelector('h2')
+title.classList.toggle('deco')`,
+          css: `.deco { font-size: 30px; color: blue; background-color: aqua; }`,
+          desc: `꾸밈은 CSS의 <code>.deco</code>에 모아 두고, JS는 <b>클래스 이름만</b> 붙였다 뗍니다. 다시 실행하면 원래 모습으로 정확히 돌아와요.`,
+          try: `①을 실행한 채로 ②를 실행하면? 인라인 <code>style</code>이 클래스보다 우선해요.` },
+      ] },
     { title: 'classList.add',
       code: `document.querySelector('.post-item').classList.add('highlight')`,
-      desc: `클래스를 추가합니다. 이 페이지에는 <code>highlight</code>, <code>important</code>, <code>hidden</code> 클래스가 CSS로 미리 준비되어 있어요.`,
+      desc: `클래스를 추가합니다. 이 페이지에는 <code>highlight</code>, <code>important</code>, <code>hidden</code>, <code>deco</code> 클래스가 CSS로 미리 준비되어 있어요.`,
       try: `<code>add('highlight', 'important')</code>처럼 여러 개를 한 번에 넣어 보세요.` },
     { title: 'classList.remove',
       code: `document.querySelector('.post-item').classList.remove('highlight')`,
@@ -1145,9 +1187,25 @@ let activeBtn = null;
 
 function setCode(code) { codeEl.value = code; }
 function clearActiveLesson() { if (activeBtn) activeBtn.classList.remove('active'); activeBtn = null; }
-function showLessonInfo(l) {
-  infoEl.innerHTML = `<h4></h4><p>${l.desc}</p>${l.try ? `<p class="try">${l.try}</p>` : ''}`;
+function esc(t) { return t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
+function showLessonInfo(l, vi = 0) {
+  const v = l.variants ? l.variants[vi] : l;
+  const tabs = l.variants
+    ? `<div class="variant-tabs" role="tablist">${l.variants.map((x, i) =>
+        `<button role="tab" aria-selected="${i === vi}" class="${i === vi ? 'on' : ''}" data-i="${i}">${x.label}</button>`).join('')}</div>`
+    : '';
+  infoEl.innerHTML =
+    `<div class="info-head"><h4></h4>${tabs}</div>` +
+    `<p>${v.desc}</p>` +
+    (v.css ? `<pre class="css-snippet"><span class="css-cap">미리 만든 CSS</span>${esc(v.css)}</pre>` : '') +
+    (v.try ? `<p class="try">${v.try}</p>` : '');
   infoEl.querySelector('h4').textContent = l.title;
+  infoEl.querySelectorAll('.variant-tabs button').forEach(b => b.addEventListener('click', () => {
+    const i = +b.dataset.i;
+    showLessonInfo(l, i);
+    setCode(l.variants[i].code);
+    codeEl.focus({ preventScroll: true });
+  }));
 }
 
 LESSONS.forEach((g, gi) => {
@@ -1163,7 +1221,7 @@ LESSONS.forEach((g, gi) => {
     b.addEventListener('click', () => {
       clearActiveLesson();
       activeBtn = b; b.classList.add('active');
-      setCode(item.code);
+      setCode(item.variants ? item.variants[0].code : item.code);
       showLessonInfo(item);
       codeEl.focus({ preventScroll: true });
     });
