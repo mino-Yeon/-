@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DOM 실습실</title>
+<title>DOM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -57,33 +57,35 @@ button, input, textarea { font: inherit; color: inherit; }
 code, kbd { font-family: var(--mono); font-size: 0.92em; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* ── 상단 바 ── */
+/* ── 상단 바: 다른 챕터와 같은 헤더 (03 DOM = 초록) ── */
 .topbar {
   display: flex; align-items: center; gap: 20px;
-  padding: 10px 18px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--line);
+  padding: 10px 28px;
+  background: linear-gradient(135deg, #0f172a, #22c55e);
+  color: #fff;
 }
-.brand { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
-.brand strong { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
-.brand span { font-size: 12px; color: var(--muted); }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand-icon { font-size: 1.4rem; line-height: 1; }
+.brand h1 { margin: 0; font-size: 1.2rem; letter-spacing: 0.02em; white-space: nowrap; }
 
 .selector-lab {
   flex: 1; display: flex; align-items: center; gap: 8px;
   max-width: 720px; margin-left: auto;
 }
-.selector-lab label { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.selector-lab label { font-size: 13px; font-weight: 600; white-space: nowrap; color: #fff; }
 .selector-lab input {
   flex: 1; min-width: 120px;
   font-family: var(--mono); font-size: 13px;
   padding: 7px 10px;
-  border: 1.5px solid var(--line); border-radius: 6px;
-  background: var(--surface-2);
+  border: 1.5px solid rgba(255,255,255,0.25); border-radius: 6px;
+  background: rgba(255,255,255,0.12); color: #fff;
 }
-.selector-lab input:focus { outline: none; border-color: var(--match); background: #fff; }
-.sel-status { font-size: 12.5px; color: var(--muted); white-space: nowrap; min-width: 84px; }
-.sel-status.ok { color: var(--match); font-weight: 600; }
-.sel-status.bad { color: var(--del); }
+.selector-lab input::placeholder { color: rgba(255,255,255,0.6); }
+.selector-lab input:focus { outline: none; border-color: #fff; background: #fff; color: var(--ink); }
+.selector-lab input:focus::placeholder { color: #8a94a6; }
+.sel-status { font-size: 12.5px; color: rgba(255,255,255,0.8); white-space: nowrap; min-width: 84px; }
+.sel-status.ok { color: #fff; font-weight: 700; }
+.sel-status.bad { color: #ffe3e3; font-weight: 700; }
 
 .btn-quiet {
   padding: 6px 10px; border-radius: 6px;
@@ -94,13 +96,16 @@ code, kbd { font-family: var(--mono); font-size: 0.92em; }
 .btn-quiet:disabled { opacity: 0.45; cursor: default; }
 .btn-quiet.dark { background: transparent; border-color: var(--code-line); color: var(--code-dim); }
 .btn-quiet.dark:hover { color: var(--code-ink); background: var(--code-bg-2); }
+.topbar .btn-quiet { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); color: #fff; }
+.topbar .btn-quiet:hover:not(:disabled) { background: rgba(255,255,255,0.28); }
 
 .btn-reset {
   padding: 7px 14px; border-radius: 6px;
-  border: 1.5px solid #f1c0c0; background: #fff5f5; color: #c92a2a;
+  border: 1.5px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.15); color: #fff;
   font-weight: 600; font-size: 13px; cursor: pointer;
 }
-.btn-reset:hover { background: #ffe3e3; }
+.btn-reset:hover { background: rgba(255,255,255,0.28); }
+.topbar :focus-visible { outline-color: #fff; }
 
 /* ── 위쪽 작업 영역 ── */
 .workspace {
@@ -358,8 +363,8 @@ kbd { border: 1px solid var(--code-line); border-bottom-width: 2px; border-radiu
 
 <header class="topbar">
   <div class="brand">
-    <strong>DOM 실습실</strong>
-    <span>코드를 실행하면 화면과 트리가 함께 바뀌어요</span>
+    <div class="brand-icon" aria-hidden="true">🌐</div>
+    <h1>DOM</h1>
   </div>
   <div class="selector-lab">
     <label for="sel-input">선택자 실험</label>
