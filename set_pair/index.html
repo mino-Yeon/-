@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>조 편성기</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --bg:#EDF0F4; --surface:#FFFFFF; --surface-2:#F5F7FA; --ink:#18202C; --muted:#5D6878; --line:#D4DAE3;
+  --accent:#2347D6; --accent-soft:#E5EAFB; --warn:#9A4F08; --warn-soft:#FFF1DC; --danger:#BE3328;
+  font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  color:var(--ink); background:var(--bg);
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#11151C;--surface:#1A2029;--surface-2:#212835;--ink:#E6EBF2;--muted:#97A2B2;--line:#2F3846;
+    --accent:#86A0FF;--accent-soft:#25304E;--warn:#F2AA55;--warn-soft:#3A2C18;--danger:#FF8074;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);line-height:1.55;font-size:15px}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  max-width:1080px;margin:0 auto;padding:20px 20px 8px}
+.brand{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0}
+.class-switch{display:flex;gap:8px;align-items:center}
+.class-switch select{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:160px}
+
+.tabs{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{border:0;background:none;padding:12px 14px;font-weight:600;color:var(--muted);cursor:pointer;
+  border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--accent)}
+
+main{max-width:1080px;margin:0 auto;padding:20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px}
+h2{font-size:17px;margin:0 0 4px;font-weight:700}
+.hint{color:var(--muted);font-size:13.5px;margin:0 0 12px}
+.muted{color:var(--muted);font-weight:400}
+
+button.btn,.actions button,.run-row button,.panel > .btn-row button{
+  padding:9px 16px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);cursor:pointer;font-weight:600}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (prefers-color-scheme:dark){button.primary{color:#0E1424}}
+button.danger{color:var(--danger);border-color:var(--danger);background:transparent}
+button:disabled{opacity:.5;cursor:default}
+button.link{border:0;background:none;color:var(--accent);cursor:pointer;padding:0;font-weight:600}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+textarea,input[type=text],.field input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2)}
+textarea{min-height:120px;resize:vertical;line-height:1.6}
+
+.mode-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.mode{text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);cursor:pointer}
+.mode strong{display:block;font-size:15px}
+.mode span{font-size:12.5px;color:var(--muted)}
+.mode.on{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+
+.fields{display:grid;gap:10px;margin-bottom:18px}
+.field span{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+.check{display:flex;gap:8px;align-items:center;font-size:14px}
+
+.att-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);cursor:pointer;font-size:14px}
+.chip.off{text-decoration:line-through;color:var(--muted);background:transparent;border-style:dashed}
+i.tag{font-style:normal;font-size:11px;font-weight:700;color:var(--accent);margin-left:5px}
+
+.run-row{display:flex;align-items:center;gap:14px;margin-top:18px;flex-wrap:wrap}
+.run-row button.primary{padding:11px 26px;font-size:16px}
+
+.result-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start;margin-bottom:14px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.teams{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.team{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:start;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}
+.team .no{font-size:26px;font-weight:800;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums;letter-spacing:-.03em;padding-top:2px}
+.team .members{display:flex;flex-direction:column;font-weight:600;font-size:16px}
+.team.warn{background:var(--warn-soft);border-color:var(--warn)}
+.team .rep{grid-column:1/-1;margin:4px 0 0;font-size:12.5px;color:var(--warn)}
+.result{animation:pop .25s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.result{animation:none}}
+
+.roster{width:100%;border-collapse:collapse}
+.roster td{padding:7px 4px;border-top:1px solid var(--line)}
+.roster td:first-child{font-weight:600}
+.roster td:last-child{text-align:right;width:1%}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:4px 10px;font-size:13px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--accent);color:#fff}
+@media (prefers-color-scheme:dark){.seg button.on{color:#0E1424}}
+.x{border:0;background:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cols .panel{margin-bottom:0}
+.stack{display:grid;gap:16px;margin-bottom:16px}
+
+details.round{border-top:1px solid var(--line);padding:10px 0}
+details.round summary{cursor:pointer;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+details.round summary b{font-size:15px}
+.round-body{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px 16px;margin:10px 0 6px;font-size:14px}
+.round-foot{display:flex;justify-content:flex-end}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);
+  padding:10px 18px;border-radius:8px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw}
+.toast.show{opacity:1}
+
+@media (max-width:720px){
+  .mode-row{grid-template-columns:1fr}
+  .cols{grid-template-columns:1fr}
+  main{padding:14px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 class="brand">조 편성기</h1>
+  <div class="class-switch">
+    <select id="classSelect" aria-label="반 선택"></select>
+    <button class="btn" data-action="class-new">새 반</button>
+  </div>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="assign">조 편성</button>
+  <button data-tab="roster">명단</button>
+  <button data-tab="history">이력</button>
+  <button data-tab="settings">반 관리·백업</button>
+</nav>
+<main id="main"></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===================== 데이터 ===================== */
+const STORE_KEY = 'team-maker:v1';
+const collator = new Intl.Collator('ko');
+const MODES = {
+  penetrate: { label: '관통 프로젝트', short: '관통', size: 2, roles: true,  desc: '2인 1조, 홀수면 한 조는 3명' },
+  ilta:      { label: '일타싸피',     short: '일타싸피', size: 2, roles: false, desc: '2인 1조, 홀수면 한 조는 3명' },
+  battle:    { label: '배틀싸피',     short: '배틀싸피', size: 3, roles: false, desc: '3인 1조, 남는 인원은 2인 조로' },
+};
+
+let storageOK = true;
+function load() {
+  try { const s = localStorage.getItem(STORE_KEY); return s ? JSON.parse(s) : null; }
+  catch (e) { storageOK = false; return null; }
+}
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(db)); storageOK = true; }
+  catch (e) { storageOK = false; toast('브라우저에 저장하지 못했습니다. 백업 파일로 내보내 두세요.'); }
+}
+let db = load() || { classes: [], currentId: null };
+const ui = { tab: 'assign', mode: 'penetrate', project: '', useRoles: true, result: null };
+
+const cur = () => db.classes.find(c => c.id === db.currentId) || null;
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const pad = n => String(n).padStart(2, '0');
+const esc = s => String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const $ = sel => document.querySelector(sel);
+
+/** 쉼표·공백·줄바꿈·세미콜론 등 어떤 구분자든 이름 목록으로 */
+function parseNames(text) {
+  const out = [];
+  for (const raw of String(text).split(/[\s,，、;；·\/|"'`]+/)) {
+    const n = raw.trim();
+    if (n && !out.includes(n)) out.push(n);
+  }
+  return out;
+}
+
+function newClass(name, names) {
+  const c = { id: uid(), name: name || `새 반 ${db.classes.length + 1}`, createdAt: today(),
+              students: names.map(n => ({ name: n, role: null })), absent: [], history: [] };
+  db.classes.push(c); db.currentId = c.id; ui.result = null; save();
+  return c;
+}
+
+/* ===================== 편성 로직 ===================== */
+const pairKey = (a, b) => a < b ? a + '\u0001' + b : b + '\u0001' + a;
+function eachPair(team, fn) {
+  for (let i = 0; i < team.length; i++) for (let j = i + 1; j < team.length; j++) fn(team[i], team[j]);
+}
+/** 이력 → 쌍별로 같은 조였던 프로젝트 목록 (3인조는 내부 2인 조합 3개로 쪼개 기록) */
+function pairInfo(c) {
+  const m = new Map();
+  for (const h of c.history) for (const t of h.teams) eachPair(t, (a, b) => {
+    const k = pairKey(a, b);
+    if (!m.has(k)) m.set(k, []);
+    m.get(k).push(h.project);
+  });
+  return m;
+}
+
+function makeSizes(n, size) {
+  if (n <= 0) return [];
+  if (size === 2) {
+    if (n < 4) return [n];
+    const s = Array(Math.floor(n / 2)).fill(2);
+    if (n % 2) s[s.length - 1] = 3;
+    return s;
+  }
+  if (n <= 3) return [n];
+  const r = n % 3;
+  if (r === 0) return Array(n / 3).fill(3);
+  if (r === 2) return [...Array((n - 2) / 3).fill(3), 2];
+  return [...Array((n - 4) / 3).fill(3), 2, 2];
+}
+function describeSizes(sizes) {
+  const cnt = {};
+  sizes.forEach(s => cnt[s] = (cnt[s] || 0) + 1);
+  return Object.keys(cnt).sort((a, b) => b - a).map(s => `${s}인 ${cnt[s]}조`).join(', ');
+}
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function teamCost(t, ctx) {
+  let c = 0;
+  eachPair(t, (a, b) => { const n = ctx.pc.get(pairKey(a, b)) || 0; c += n * n * 10; });
+  if (ctx.useRoles) {
+    let L = 0;
+    for (const x of t) if (ctx.roleMap.get(x) === 'leader') L++;
+    c += Math.abs(L - 1) * 1000;   // 리더 조건이 겹침 회피보다 우선
+  }
+  return c;
+}
+/** 무작위 시작 + 교환 탐색. 겹침 0이 불가능하면 겹침이 가장 적은 배치를 돌려줌 */
+function optimize(people, sizes, ctx) {
+  let best = { cost: Infinity, teams: null };
+  const R = 40, ITER = Math.max(2000, people.length * 150);
+  const rnd = n => Math.floor(Math.random() * n);
+  for (let r = 0; r < R; r++) {
+    const arr = shuffle(people.slice());
+    const teams = []; let k = 0;
+    for (const s of sizes) { teams.push(arr.slice(k, k + s)); k += s; }
+    const costs = teams.map(t => teamCost(t, ctx));
+    let total = costs.reduce((x, y) => x + y, 0);
+    for (let it = 0; it < ITER && total > 0 && teams.length > 1; it++) {
+      const a = rnd(teams.length), b = rnd(teams.length);
+      if (a === b) continue;
+      const i = rnd(teams[a].length), j = rnd(teams[b].length);
+      [teams[a][i], teams[b][j]] = [teams[b][j], teams[a][i]];
+      const ca = teamCost(teams[a], ctx), cb = teamCost(teams[b], ctx);
+      const delta = ca + cb - costs[a] - costs[b];
+      if (delta <= 0) { costs[a] = ca; costs[b] = cb; total += delta; }
+      else [teams[a][i], teams[b][j]] = [teams[b][j], teams[a][i]];
+    }
+    if (total < best.cost) best = { cost: total, teams: teams.map(t => t.slice()) };
+    if (best.cost === 0) break;
+  }
+  return best;
+}
+
+function run() {
+  const c = cur(), mode = MODES[ui.mode];
+  const present = c.students.filter(s => !c.absent.includes(s.name)).map(s => s.name);
+  if (present.length < 2) return;
+  const info = pairInfo(c);
+  const pc = new Map([...info].map(([k, v]) => [k, v.length]));
+  const roleMap = new Map(c.students.map(s => [s.name, s.role]));
+  const useRoles = mode.roles && ui.useRoles && present.some(n => roleMap.get(n) === 'leader');
+  const sizes = makeSizes(present.length, mode.size);
+  const best = optimize(present, sizes, { pc, roleMap, useRoles });
+
+  // 표시용: 조 안은 가나다순, 조끼리는 첫 사람 기준 가나다순
+  const teams = best.teams.map(t => t.slice().sort(collator.compare)).sort((a, b) => collator.compare(a[0], b[0]));
+  let repeats = 0;
+  teams.forEach(t => eachPair(t, (a, b) => { if (pc.get(pairKey(a, b))) repeats++; }));
+  const roleIssue = useRoles && teams.some(t => t.filter(n => roleMap.get(n) === 'leader').length !== 1);
+  ui.result = { mode: ui.mode, project: ui.project.trim() || mode.short, teams, repeats, roleIssue, useRoles, saved: false, date: today() };
+}
+
+function resultTitle(r) {
+  const s = MODES[r.mode].short;
+  return r.project === s ? s : `${s} - ${r.project}`;
+}
+function resultText(r) {
+  return `[${resultTitle(r)}] ${r.date}\n` + r.teams.map((t, i) => `${pad(i + 1)}조 ${t.join(' ')}`).join('\n');
+}
+
+/* ===================== 화면 ===================== */
+function render() {
+  const sel = $('#classSelect');
+  sel.innerHTML = db.classes.map(c => `<option value="${c.id}" ${c.id === db.currentId ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+  sel.hidden = !db.classes.length;
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === ui.tab));
+  $('#tabs').hidden = !db.classes.length;
+
+  const c = cur();
+  if (!c) { $('#main').innerHTML = viewEmpty(); return; }
+  if (!c.absent) c.absent = [];
+  $('#main').innerHTML = ({ assign: viewAssign, roster: viewRoster, history: viewHistory, settings: viewSettings })[ui.tab](c);
+}
+
+function viewEmpty() {
+  return `<section class="panel">
+    <h2>첫 반 만들기</h2>
+    <p class="hint">반 이름과 교육생 명단을 넣으세요. 이름은 쉼표, 공백, 줄바꿈 어떤 걸로 구분해도 됩니다.</p>
+    <div class="fields">
+      <label class="field"><span>반 이름</span><input id="newClassName" placeholder="예: 14기 서울 5반"></label>
+      <label class="field"><span>교육생 명단</span><textarea id="newClassNames" data-preview="newClassPreview" placeholder="김경민, 김민선, 김연미 ..."></textarea></label>
+      <p class="hint" id="newClassPreview"></p>
+    </div>
+    <div class="btn-row"><button class="primary" data-action="create-class">반 만들기</button>
+    <button class="btn" data-action="open-file">백업 파일 불러오기</button></div>
+  </section>`;
+}
+
+function sortedStudents(c) { return c.students.slice().sort((a, b) => collator.compare(a.name, b.name)); }
+
+function viewAssign(c) {
+  if (!c.students.length) return `<section class="panel"><h2>명단이 비어 있습니다</h2>
+    <p class="hint">명단 탭에서 교육생 이름을 붙여넣으면 바로 조를 짤 수 있습니다.</p>
+    <button class="btn" data-action="go" data-tab="roster">명단 입력하기</button></section>`;
+  const mode = MODES[ui.mode];
+  const present = c.students.filter(s => !c.absent.includes(s.name));
+  const leaders = present.filter(s => s.role === 'leader').length;
+  const sizes = makeSizes(present.length, mode.size);
+  return `<section class="panel">
+    <div class="mode-row" role="radiogroup" aria-label="편성 방식">
+      ${Object.entries(MODES).map(([k, m]) => `<button class="mode ${k === ui.mode ? 'on' : ''}" role="radio" aria-checked="${k === ui.mode}" data-action="set-mode" data-mode="${k}"><strong>${m.label}</strong><span>${m.desc}</span></button>`).join('')}
+    </div>
+    <div class="fields">
+      <label class="field"><span>프로젝트명 (이력에 기록됩니다)</span><input id="projectInput" value="${esc(ui.project)}" placeholder="예: 자바, DB, 스프링 — 비우면 '${mode.short}'"></label>
+      ${mode.roles ? `<label class="check"><input type="checkbox" id="useRoles" ${ui.useRoles ? 'checked' : ''}> 한 조에 리더 한 명씩 배치 <span class="muted">(출석한 리더 ${leaders}명${leaders ? '' : ', 명단 탭에서 지정'})</span></label>` : ''}
+    </div>
+    <div class="att-head"><h2>출석 ${present.length}명 <span class="muted">/ 전체 ${c.students.length}명</span></h2>
+      ${c.absent.length ? `<button class="link" data-action="all-present">모두 출석으로</button>` : ''}</div>
+    <p class="hint">결석하거나 이미 조가 정해진 사람은 이름을 눌러 빼세요.</p>
+    <div class="chips">${sortedStudents(c).map(s => {
+      const off = c.absent.includes(s.name);
+      return `<button class="chip ${off ? 'off' : ''}" aria-pressed="${!off}" data-action="toggle-absent" data-name="${esc(s.name)}">${esc(s.name)}${mode.roles && s.role === 'leader' ? '<i class="tag">리더</i>' : ''}</button>`;
+    }).join('')}</div>
+    <div class="run-row">
+      <button class="primary" data-action="run" ${present.length < 2 ? 'disabled' : ''}>조 편성</button>
+      <span class="muted">${present.length >= 2 ? `${sizes.length}개 조 (${describeSizes(sizes)})` : '출석 인원이 2명 이상이어야 합니다'}</span>
+    </div>
+  </section>
+  ${ui.result ? viewResult(c) : ''}`;
+}
+
+function viewResult(c) {
+  const r = ui.result, info = pairInfo(c);
+  const roleOf = n => (c.students.find(s => s.name === n) || {}).role;
+  let summary = r.repeats ? `이전에 같은 조였던 쌍 ${r.repeats}개 (가능한 한 줄인 결과)` : '이전 조와 겹치는 쌍 없음';
+  if (r.roleIssue) summary += ', 리더 수가 조 수와 맞지 않아 일부 조는 리더 배분이 고르지 않음';
+  return `<section class="panel result">
+    <div class="result-head">
+      <div><h2>${esc(resultTitle(r))} 편성 결과</h2><p class="hint" style="margin:0">${r.teams.length}개 조, ${summary}</p></div>
+      <div class="actions">
+        <button data-action="run">다시 섞기</button>
+        <button data-action="copy-result">결과 복사</button>
+        <button class="primary" data-action="save-result" ${r.saved ? 'disabled' : ''}>${r.saved ? '이력에 저장됨' : '이 결과로 확정'}</button>
+      </div>
+    </div>
+    <ol class="teams">${r.teams.map((t, i) => {
+      const reps = [];
+      eachPair(t, (a, b) => { const p = info.get(pairKey(a, b)); if (p) reps.push(`${a} + ${b} (${[...new Set(p)].join(', ')})`); });
+      return `<li class="team ${reps.length ? 'warn' : ''}">
+        <span class="no">${pad(i + 1)}</span>
+        <div class="members">${t.map(n => `<span>${esc(n)}${r.useRoles && roleOf(n) === 'leader' ? '<i class="tag">리더</i>' : ''}</span>`).join('')}</div>
+        ${reps.length ? `<p class="rep">이전에 같은 조: ${esc(reps.join(', '))}</p>` : ''}
+      </li>`;
+    }).join('')}</ol>
+  </section>`;
+}
+
+function viewRoster(c) {
+  const list = sortedStudents(c);
+  const leaders = list.filter(s => s.role === 'leader').length;
+  return `<div class="cols stack">
+    <section class="panel">
+      <h2>명단 붙여넣기</h2>
+      <p class="hint">쉼표, 공백, 줄바꿈 어떤 걸로 구분해도 이름으로 인식합니다. 엑셀에서 열 하나를 복사해 붙여넣어도 됩니다.</p>
+      <textarea id="rosterInput" data-preview="rosterPreview" placeholder="김경민, 김민선 김연미&#10;남다경"></textarea>
+      <p class="hint" id="rosterPreview"></p>
+      <div class="btn-row">
+        <button class="primary" data-action="roster-add">명단에 추가</button>
+        <button class="btn" data-action="roster-replace">명단 전체 교체</button>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>리더 지정 (관통용)</h2>
+      <p class="hint">리더 이름을 붙여넣으면 그 사람들은 리더, 나머지는 모두 팔로워가 됩니다. 아래 표에서 한 명씩 바꿀 수도 있습니다.</p>
+      <textarea id="leaderInput" data-preview="leaderPreview" placeholder="문수정, 박나현, 박영진 ..."></textarea>
+      <p class="hint" id="leaderPreview"></p>
+      <div class="btn-row"><button class="primary" data-action="set-leaders">리더로 지정</button>
+      <button class="btn" data-action="clear-roles">역할 모두 지우기</button></div>
+    </section>
+  </div>
+  <section class="panel">
+    <h2>현재 명단 ${list.length}명 <span class="muted">(리더 ${leaders}명)</span></h2>
+    ${list.length ? `<table class="roster"><tbody>${list.map(s => `<tr>
+      <td>${esc(s.name)}</td>
+      <td><span class="seg" role="group" aria-label="${esc(s.name)} 역할">
+        ${[['leader', '리더'], ['follower', '팔로워'], [null, '없음']].map(([v, l]) => `<button class="${s.role === v ? 'on' : ''}" data-action="set-role" data-name="${esc(s.name)}" data-role="${v || ''}">${l}</button>`).join('')}
+      </span></td>
+      <td><button class="x" title="명단에서 삭제" aria-label="${esc(s.name)} 삭제" data-action="remove-student" data-name="${esc(s.name)}">×</button></td>
+    </tr>`).join('')}</tbody></table>` : `<p class="hint">아직 아무도 없습니다. 위에 이름을 붙여넣어 주세요.</p>`}
+  </section>`;
+}
+
+function viewHistory(c) {
+  const rounds = c.history.slice().reverse();
+  return `<section class="panel">
+    <h2>예전 이력 가져오기</h2>
+    <p class="hint">한 줄에 한 조씩 이름을 적으세요. <b>// 자바</b>처럼 //로 시작하는 줄은 프로젝트명으로 인식합니다.
+    기존 자바 코드의 <b>new Pair("박준섭","김경민"),</b> 줄들을 주석째 그대로 붙여넣어도 됩니다.</p>
+    <textarea id="historyInput" placeholder="// 자바&#10;박준섭 김경민&#10;윤승환, 이도원, 이승엽&#10;// DB&#10;강현 김지원"></textarea>
+    <div class="btn-row"><button class="primary" data-action="history-import">이력 가져오기</button></div>
+  </section>
+  <section class="panel">
+    <h2>편성 이력 ${c.history.length}회</h2>
+    <p class="hint">여기 있는 조 구성이 다음 편성 때 겹치지 않게 피하는 기준이 됩니다. 3인조는 그 안의 모든 2인 조합을 피합니다.</p>
+    ${rounds.length ? rounds.map(h => `<details class="round">
+      <summary><b>${esc(h.project)}</b><span class="muted">${esc(MODES[h.mode] ? MODES[h.mode].short : '가져온 이력')}, ${esc(h.date)}, ${h.teams.length}개 조</span></summary>
+      <div class="round-body">${h.teams.map((t, i) => `<span>${pad(i + 1)}조 ${esc(t.join(' '))}</span>`).join('')}</div>
+      <div class="round-foot"><button class="danger btn" data-action="history-delete" data-id="${h.id}">이 이력 삭제</button></div>
+    </details>`).join('') : `<p class="hint">아직 저장된 이력이 없습니다. 조 편성 후 "이 결과로 확정"을 누르면 여기에 쌓입니다.</p>`}
+  </section>`;
+}
+
+function viewSettings(c) {
+  return `<section class="panel">
+    <h2>반 이름</h2>
+    <div class="fields"><input type="text" id="classNameInput" value="${esc(c.name)}"></div>
+    <button class="btn" data-action="class-rename">이름 저장</button>
+  </section>
+  <section class="panel">
+    <h2>데이터 저장 방식</h2>
+    <p class="hint">명단과 이력은 지금 쓰는 브라우저 안(localStorage)에 저장됩니다. 서버로 전송되지 않고, 같은 브라우저로 다시 열면 그대로 남아 있습니다.
+    다만 브라우저 데이터를 지우거나 다른 컴퓨터·브라우저에서 열면 보이지 않으니, 이력을 확정한 뒤에는 백업 파일을 내보내 두세요.
+    ${storageOK ? '' : '<br><b>현재 이 환경에서는 브라우저 저장이 막혀 있어 새로고침하면 사라집니다.</b>'}</p>
+    <div class="btn-row">
+      <button class="primary" data-action="export">백업 파일 내보내기</button>
+      <button class="btn" data-action="open-file">백업 파일 불러오기</button>
+    </div>
+  </section>
+  <section class="panel">
+    <h2>반 삭제</h2>
+    <p class="hint">이 반의 명단과 이력이 모두 지워집니다. 다른 반에는 영향이 없습니다.</p>
+    <button class="danger btn" data-action="class-delete">${esc(c.name)} 삭제</button>
+  </section>`;
+}
+
+/* ===================== 동작 ===================== */
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function parseHistoryText(text) {
+  const javaMode = text.includes('"');
+  const rounds = []; let curRound = null;
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    const m = line.match(/^\/\/+\s*(.*)$/);
+    if (m) {
+      if (m[1] && !/[";(){}]/.test(m[1])) { curRound = { project: m[1].trim(), teams: [] }; rounds.push(curRound); }
+      continue;
+    }
+    let names;
+    if (javaMode) names = [...line.matchAll(/"([^"]+)"/g)].map(x => x[1].trim()).filter((n, i, a) => n && a.indexOf(n) === i);
+    else names = parseNames(line);
+    if (names.length < 2) continue;
+    if (!curRound) { curRound = { project: '가져온 이력', teams: [] }; rounds.push(curRound); }
+    curRound.teams.push(names);
+  }
+  return rounds.filter(r => r.teams.length);
+}
+
+function download(filename, text) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+  a.download = filename; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+}
+
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch (e) {
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand('copy'); } catch (_) {}
+    ta.remove(); return ok;
+  }
+}
+
+const fileInput = document.createElement('input');
+fileInput.type = 'file'; fileInput.accept = '.json,application/json';
+fileInput.addEventListener('change', () => {
+  const f = fileInput.files[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!data || !Array.isArray(data.classes)) throw new Error('형식 오류');
+      if (db.classes.length && !confirm('지금 브라우저에 있는 모든 반 데이터를 백업 파일 내용으로 바꿉니다. 계속할까요?')) return;
+      db = { classes: data.classes, currentId: data.currentId || (data.classes[0] && data.classes[0].id) || null };
+      db.classes.forEach(c => { c.absent = c.absent || []; c.history = c.history || []; c.students = c.students || []; });
+      ui.result = null; save(); render(); toast(`반 ${db.classes.length}개를 불러왔습니다`);
+    } catch (e) { toast('백업 파일을 읽지 못했습니다. 이 앱에서 내보낸 .json 파일인지 확인하세요.'); }
+    fileInput.value = '';
+  };
+  reader.readAsText(f);
+});
+
+async function act(action, d) {
+  const c = cur();
+  switch (action) {
+    case 'go': ui.tab = d.tab; break;
+    case 'create-class': {
+      const names = parseNames($('#newClassNames').value);
+      newClass($('#newClassName').value.trim(), names);
+      ui.tab = names.length ? 'assign' : 'roster';
+      toast(`반을 만들었습니다 (${names.length}명)`); break;
+    }
+    case 'class-new': {
+      const name = prompt('새 반 이름을 입력하세요', '');
+      if (name === null) return;
+      newClass(name.trim(), []); ui.tab = 'roster'; toast('새 반을 만들었습니다. 명단을 붙여넣어 주세요.'); break;
+    }
+    case 'class-rename': c.name = $('#classNameInput').value.trim() || c.name; save(); toast('반 이름을 저장했습니다'); break;
+    case 'class-delete':
+      if (!confirm(`${c.name}의 명단과 이력을 모두 삭제할까요?`)) return;
+      db.classes = db.classes.filter(x => x !== c);
+      db.currentId = db.classes[0] ? db.classes[0].id : null; ui.result = null; ui.tab = 'assign'; save(); break;
+    case 'export':
+      download(`조편성-백업-${today()}.json`, JSON.stringify(db, null, 2)); toast('백업 파일을 내보냈습니다'); return;
+    case 'open-file': fileInput.click(); return;
+
+    case 'set-mode': ui.mode = d.mode; break;
+    case 'toggle-absent': {
+      const i = c.absent.indexOf(d.name);
+      if (i >= 0) c.absent.splice(i, 1); else c.absent.push(d.name);
+      save(); break;
+    }
+    case 'all-present': c.absent = []; save(); break;
+    case 'run': run(); break;
+    case 'copy-result': toast(await copyText(resultText(ui.result)) ? '결과를 복사했습니다' : '복사하지 못했습니다'); return;
+    case 'save-result': {
+      const r = ui.result; if (!r || r.saved) return;
+      c.history.push({ id: uid(), date: r.date, project: r.project, mode: r.mode, teams: r.teams.map(t => t.slice()) });
+      r.saved = true; save(); toast('이력에 저장했습니다. 다음 편성부터 이 조합을 피합니다.'); break;
+    }
+
+    case 'roster-add': case 'roster-replace': {
+      const names = parseNames($('#rosterInput').value);
+      if (!names.length) { toast('인식된 이름이 없습니다'); return; }
+      if (action === 'roster-replace') {
+        if (c.students.length && !confirm(`명단 ${c.students.length}명을 새 이름 ${names.length}명으로 바꿉니다. 이력은 그대로 남습니다.`)) return;
+        const old = new Map(c.students.map(s => [s.name, s.role]));
+        c.students = names.map(n => ({ name: n, role: old.get(n) || null }));
+        c.absent = c.absent.filter(n => names.includes(n));
+        toast(`명단을 ${names.length}명으로 교체했습니다`);
+      } else {
+        const have = new Set(c.students.map(s => s.name));
+        const added = names.filter(n => !have.has(n));
+        added.forEach(n => c.students.push({ name: n, role: null }));
+        toast(`${added.length}명 추가${names.length - added.length ? `, ${names.length - added.length}명은 이미 있음` : ''}`);
+      }
+      ui.result = null; save(); break;
+    }
+    case 'set-leaders': {
+      const names = parseNames($('#leaderInput').value);
+      if (!names.length) { toast('인식된 이름이 없습니다'); return; }
+      const unknown = names.filter(n => !c.students.some(s => s.name === n));
+      c.students.forEach(s => s.role = names.includes(s.name) ? 'leader' : 'follower');
+      save();
+      toast(unknown.length ? `명단에 없는 이름은 건너뜀: ${unknown.join(', ')}` : `리더 ${names.length}명, 나머지는 팔로워로 지정했습니다`);
+      break;
+    }
+    case 'clear-roles': c.students.forEach(s => s.role = null); save(); break;
+    case 'set-role': { const s = c.students.find(x => x.name === d.name); if (s) s.role = d.role || null; save(); break; }
+    case 'remove-student':
+      c.students = c.students.filter(s => s.name !== d.name);
+      c.absent = c.absent.filter(n => n !== d.name); ui.result = null; save(); break;
+
+    case 'history-import': {
+      const rounds = parseHistoryText($('#historyInput').value);
+      if (!rounds.length) { toast('가져올 조를 찾지 못했습니다. 한 줄에 이름 2명 이상을 적어 주세요.'); return; }
+      const roster = new Set(c.students.map(s => s.name));
+      const unknown = [...new Set(rounds.flatMap(r => r.teams.flat()).filter(n => !roster.has(n)))];
+      const teamCount = rounds.reduce((x, r) => x + r.teams.length, 0);
+      let msg = `${rounds.length}개 프로젝트, ${teamCount}개 조를 가져옵니다.`;
+      if (unknown.length) msg += `\n\n현재 명단에 없는 이름이 있습니다(오타이거나 다른 반일 수 있음):\n${unknown.join(', ')}\n\n그대로 가져올까요? 취소하고 고친 뒤 다시 가져와도 됩니다.`;
+      if (!confirm(msg)) return;
+      rounds.forEach(r => c.history.push({ id: uid(), date: today(), project: r.project, mode: 'import', teams: r.teams }));
+      save(); toast('이력을 가져왔습니다'); break;
+    }
+    case 'history-delete':
+      if (!confirm('이 이력을 삭제할까요? 다음 편성 때 이 조합을 더 이상 피하지 않습니다.')) return;
+      c.history = c.history.filter(h => h.id !== d.id); save(); break;
+  }
+  render();
+}
+
+document.addEventListener('click', e => {
+  const tab = e.target.closest('#tabs button');
+  if (tab) { ui.tab = tab.dataset.tab; render(); return; }
+  const b = e.target.closest('[data-action]');
+  if (b && !b.disabled) act(b.dataset.action, b.dataset);
+});
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.id === 'projectInput') ui.project = t.value;
+  if (t.dataset.preview) {
+    const names = parseNames(t.value);
+    const out = document.getElementById(t.dataset.preview);
+    if (out) out.textContent = names.length ? `인식된 이름 ${names.length}명: ${names.join(', ')}` : '';
+  }
+});
+document.addEventListener('change', e => {
+  if (e.target.id === 'useRoles') ui.useRoles = e.target.checked;
+  if (e.target.id === 'classSelect') { db.currentId = e.target.value; ui.result = null; save(); render(); }
+});
+
+render();
+</script>
+</body>
+</html>
